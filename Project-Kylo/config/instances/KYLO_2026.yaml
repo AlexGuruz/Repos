@@ -1,0 +1,10 @@
+version: 1
+
+instance:
+  id: KYLO_2026
+  # No company_key - processes all companies from base config
+
+year_workbooks_active: ["2026"]
+
+# Companies inherit from kylo.config.yaml (NUGZ, EMPIRE, PUFFIN, JGD)
+# Do NOT override sheets.companies here - let it inherit from base config

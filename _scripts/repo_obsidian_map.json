@@ -1,0 +1,50 @@
+{
+  "version": "1.1",
+  "vault_path": "E:\\Repos\\Ai\\Obsidian\\Brain",
+  "repos_root": "E:\\Repos",
+  "debounce_seconds": 2,
+  "defaults": {
+    "create_subfolder_notes": true,
+    "note_naming": "mirror",
+    "ignore_patterns": [".git", "node_modules", "__pycache__", ".venv", "vendor", "dist", "build", "WinPython64", "site-packages", ".pytest_cache", ".egg-info", ".cursor"],
+    "on_folder_delete": "keep"
+  },
+  "mappings": [
+    {
+      "repo_path": "E:\\Repos\\Gigatt Transport LLC",
+      "obsidian_project": "20_projects/Gigatt Transport LLC",
+      "obsidian_note": "20_projects/Gigatt Transport LLC.md",
+      "project_name": "Gigatt Transport LLC"
+    },
+    {
+      "repo_path": "E:\\Repos\\cog-allocation-system",
+      "obsidian_project": "20_projects/cog-allocation-system",
+      "obsidian_note": "20_projects/cog-allocation-system.md",
+      "project_name": "cog-allocation-system"
+    },
+    {
+      "repo_path": "E:\\Repos\\Project-Kylo",
+      "obsidian_project": "20_projects/Project-Kylo",
+      "obsidian_note": "20_projects/Project-Kylo.md",
+      "project_name": "Project-Kylo"
+    },
+    {
+      "repo_path": "E:\\Repos\\Growflow",
+      "obsidian_project": "20_projects/Growflow",
+      "obsidian_note": "20_projects/Growflow.md",
+      "project_name": "Growflow"
+    },
+    {
+      "repo_path": "E:\\Repos\\Exzact Stat Ai business",
+      "obsidian_project": "20_projects/Exzact Stat Ai business",
+      "obsidian_note": "20_projects/Exzact Stat Ai business.md",
+      "project_name": "Exzact Stat Ai business"
+    },
+    {
+      "repo_path": "E:\\Repos\\PettyCash_Migration_Package",
+      "obsidian_project": "20_projects/PettyCash_Migration_Package",
+      "obsidian_note": "20_projects/PettyCash_Migration_Package.md",
+      "project_name": "PettyCash_Migration_Package"
+    }
+  ]
+}

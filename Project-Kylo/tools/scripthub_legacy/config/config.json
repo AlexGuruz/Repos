@@ -1,0 +1,19 @@
+{
+  "service_account": "../../.secrets/service_account.json",
+  "kylo_id": "1ZxzOvP14M7syKuZ3EoqaHJUkZoOEcMpgk5adHP9p2no",
+  "kylo_tab": "Kylo_Config",
+  "kylo_clean_col": 11,
+  "kylo_company_col": 12,
+  "kylo_active_col": null,
+  "bank_id": "10RC11WsFtlgIUEdq3cpOqBs6hVpZOyPCLkjEnfho7Wk",
+  "bank_tab": "BANK",
+  "bank_company_col": 2,
+  "bank_source_col": 3,
+  "bank_txn_key_col": 8,
+  "bank_provenance_col": null,
+  "clean_sheet_id": "1ZxzOvP14M7syKuZ3EoqaHJUkZoOEcMpgk5adHP9p2no",
+  "clean_tab": "CLEAN TRANSACTIONS",
+  "clean_source_col": 3,
+  "clean_company_col": 2,
+  "rows_read_limit": 10000
+}

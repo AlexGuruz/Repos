@@ -1,0 +1,96 @@
+{
+  "sheets": {
+    "PETTY CASH": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "BALANCE": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "S"
+      }
+    },
+    "PAYROLL": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Z"
+      }
+    },
+    "INCOME": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "O"
+      }
+    },
+    "JGD": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "X"
+      }
+    },
+    "ALLOCATED": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "L"
+      }
+    },
+    "CONSIGNMENT": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "NUGZ C.O.G.": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "V"
+      }
+    },
+    "NUGZ EXPENSES": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Y"
+      }
+    },
+    "PUFFIN C.O.G.": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "V"
+      }
+    },
+    "PUFFIN EXPENSES": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "V"
+      }
+    },
+    "710 EMPIRE C.O.G.": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "O"
+      }
+    },
+    "710 EMPIRE EXPENSES": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "M"
+      }
+    },
+    "COMMISSION": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Q"
+      }
+    },
+    "CC Payments": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "CC Status": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "CC Debt": {
+      "header_rows": 19,
+      "columns": {}
+    }
+  }
+}

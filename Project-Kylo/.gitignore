@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.cache/
+
+# Environments
+.env
+.env.*
+venv/
+.venv/
+
+# OS/IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Coverage/Reports
+.coverage
+coverage.xml
+htmlcov/
+
+# Project secrets
+secrets/
+*.xlsx
+.kylo/
+project_kylo.egg-info/
+archive/
+tools/logs/
+*.log
+
+# Node/npm (if present)
+node_modules/
+package-lock.json
+

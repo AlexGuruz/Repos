@@ -1,0 +1,103 @@
+{
+  "system": {
+    "name": "Petty Cash Sorter - Final Comprehensive",
+    "version": "2.0.0",
+    "environment": "production"
+  },
+  "google_sheets": {
+    "petty_cash_url": "https://docs.google.com/spreadsheets/d/1DLYt2r34zASzALv6crQ9GOysdr8sLHL0Bor-5nW5QCU",
+    "financials_spreadsheet_url": "https://docs.google.com/spreadsheets/d/1DLYt2r34zASzALv6crQ9GOysdr8sLHL0Bor-5nW5QCU",
+    "petty_cash_worksheet": "PETTY CASH",
+    "service_account_file": "config/service_account.json",
+    "scopes": [
+      "https://spreadsheets.google.com/feeds",
+      "https://www.googleapis.com/auth/drive"
+    ]
+  },
+  "database": {
+    "path": "petty_cash.db",
+    "backup_enabled": true,
+    "backup_interval_hours": 24
+  },
+  "processing": {
+    "batch_size": 500,
+    "min_confidence": 5,
+    "max_confidence": 10,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 5,
+    "max_retry_delay_seconds": 60
+  },
+  "ai_matching": {
+    "confidence_threshold": 0.75,
+    "min_threshold": 0.5,
+    "max_threshold": 0.95,
+    "learning_rate": 0.05,
+    "max_suggestions": 5
+  },
+  "api_rate_limiting": {
+    "enabled": true,
+    "requests_per_minute": 30,
+    "burst_limit": 5,
+    "cooldown_period_seconds": 120,
+    "batch_find_coordinates": {
+      "requests_per_minute": 15,
+      "burst_limit": 3,
+      "cooldown_period_seconds": 180
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "log_level": "INFO",
+    "performance_monitoring": true,
+    "memory_monitoring": true,
+    "real_time_dashboard": {
+      "enabled": true,
+      "port": 5000,
+      "host": "localhost"
+    }
+  },
+  "files": {
+    "jgd_truth_file": "JGD Truth Current.xlsx",
+    "layout_map_cache": "config/layout_map_cache.json",
+    "audit_trail": "logs/audit_trail.json",
+    "failed_transactions": "logs/failed_transactions.json",
+    "source_variations": "config/source_variations.json"
+  },
+  "directories": {
+    "logs": "logs",
+    "data": "data",
+    "reports": "reports",
+    "config": "config",
+    "cache": "cache"
+  },
+  "filing_system": {
+    "enabled": true,
+    "base_path": "data/processed_transactions",
+    "batch_size": 50,
+    "csv_retention_days": 365,
+    "auto_cleanup": true,
+    "cleanup_interval_hours": 24
+  },
+  "sheets_to_skip": [
+    "PETTY CASH",
+    "Petty Cash KEY",
+    "EXPANSION CHECKLIST",
+    "Balance and Misc",
+    "SHIFT LOG",
+    "TIM",
+    "Copy of TIM",
+    "Info"
+  ],
+  "column_mapping": {
+    "initials": 0,
+    "date": 1,
+    "company": 2,
+    "source": 3,
+    "amount": 18
+  },
+  "layout_mapping": {
+    "header_row": 19,
+    "date_column": "A",
+    "exclude_sheets": ["COMMISSION"]
+  }
+} 

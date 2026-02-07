@@ -1,0 +1,66 @@
+{
+  "sheets": {
+    "PETTY CASH": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "BALANCE": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "PAYROLL": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Z"
+      }
+    },
+    "INCOME": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "O"
+      }
+    },
+    "ALLOCATED": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "L"
+      }
+    },
+    "CONSIGNMENT": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "PUFFIN C.O.G.": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "V"
+      }
+    },
+    "PUFFIN EXPENSES": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "V"
+      }
+    },
+    "COMMISSION": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Q"
+      }
+    },
+    "(A) CANNABIS DIST.": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "(B) CANNABIS DIST.": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "NON CANNABIS": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "AE"
+      }
+    }
+  }
+}

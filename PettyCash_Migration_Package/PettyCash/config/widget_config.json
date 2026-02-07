@@ -1,0 +1,6 @@
+{
+  "header_interval_hours": 12,
+  "petty_cash_interval_minutes": 720,
+  "header_enabled": true,
+  "petty_cash_enabled": true
+}

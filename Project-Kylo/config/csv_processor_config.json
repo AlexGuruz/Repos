@@ -1,0 +1,64 @@
+{
+  "petty_cash": {
+    "sheet_name": "PETTY CASH",
+    "start_row": 5,
+    "header_rows": 4,
+    "columns": {
+      "initials": {
+        "index": 1,
+        "name": "Employee Initials",
+        "required": true
+      },
+      "date": {
+        "index": 0,
+        "name": "Transaction Date",
+        "required": true,
+        "format": ["%m/%d/%Y", "%Y-%m-%d", "%m/%d/%y"]
+      },
+      "company": {
+        "index": 2,
+        "name": "Company Identifier",
+        "required": true
+      },
+      "description": {
+        "index": 3,
+        "name": "Transaction Description",
+        "required": true
+      },
+      "amount": {
+        "index": 4,
+        "name": "Transaction Amount",
+        "required": true,
+        "currency": "USD"
+      }
+    },
+    "validation": {
+      "min_columns": 19,
+      "skip_empty_rows": true,
+      "skip_header_rows": true
+    },
+    "data_processing": {
+      "amount_to_cents": true,
+      "generate_hashes": true,
+      "deduplication": true
+    }
+  },
+  "companies": {
+    "NUGZ": {
+      "id": "NUGZ",
+      "display_name": "Nugz"
+    },
+    "710 EMPIRE": {
+      "id": "710 EMPIRE", 
+      "display_name": "710 Empire"
+    },
+    "PUFFIN PURE": {
+      "id": "PUFFIN PURE",
+      "display_name": "Puffin Pure"
+    },
+    "JGD": {
+      "id": "JGD",
+      "display_name": "JGD"
+    }
+  }
+}

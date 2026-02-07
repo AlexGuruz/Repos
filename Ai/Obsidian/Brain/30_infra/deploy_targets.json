@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "updated": "2026-02-03T20:30:00Z",
+  "targets": [
+    {
+      "name": "oldrig-core-redis",
+      "type": "docker-stack",
+      "host": "oldrig",
+      "path": "C:\\worker\\docker\\stacks\\core",
+      "description": "Core Redis stack on oldrig"
+    },
+    {
+      "name": "oldrig-telemetry",
+      "type": "scheduled-task",
+      "host": "oldrig",
+      "task": "Worker-Telemetry",
+      "description": "Telemetry scheduled task on oldrig"
+    },
+    {
+      "name": "oldrig-agents-runner",
+      "type": "scheduled-task",
+      "host": "oldrig",
+      "task": "Worker-Agents",
+      "description": "Agents runner scheduled task on oldrig"
+    },
+    {
+      "name": "oldrig-worker-agents",
+      "type": "scheduled-task",
+      "host": "oldrig",
+      "task": "Worker-Agents",
+      "description": "Worker agents scheduled task on oldrig"
+    },
+    {
+      "name": "oldrig-worker-watchdog",
+      "type": "scheduled-task",
+      "host": "oldrig",
+      "task": "Worker-Watchdog",
+      "description": "Worker watchdog scheduled task on oldrig"
+    },
+    {
+      "name": "oldrig-worker-reboot",
+      "type": "scheduled-task",
+      "host": "oldrig",
+      "task": "Worker-Reboot",
+      "description": "Worker reboot scheduled task on oldrig (runs as SYSTEM)"
+    }
+  ]
+}

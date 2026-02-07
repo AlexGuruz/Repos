@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-07-12T21:20:41.864174",
+  "jgd_truth_file": "JGDTruth.xlsx",
+  "jgd_financials_file": "2025 JGD FINANCIALS (3).xlsx",
+  "structure_analysis": {
+    "jgd_truth_sheets": [],
+    "jgd_financials_sheets": [],
+    "petty_cash_structure": {},
+    "target_sheets_structure": {}
+  }
+}

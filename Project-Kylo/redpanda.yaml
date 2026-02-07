@@ -1,0 +1,40 @@
+redpanda:
+  data_directory: /var/lib/redpanda/data
+  node_id: 0
+  rpc_server:
+    address: 0.0.0.0
+    port: 33145
+  kafka_api:
+    - address: 0.0.0.0
+      port: 9092
+  advertised_kafka_api:
+    - address: kylo-redpanda
+      port: 9092
+  admin:
+    - address: 0.0.0.0
+      port: 9644
+  seed_server:
+    - host:
+        address: 127.0.0.1
+        port: 33145
+
+pandaproxy: {}
+schema_registry: {}
+
+rpk:
+  coredump_dir: /var/lib/redpanda/coredump
+  enable_memory_locking: false
+  overprovisioned: true
+  tune_aio_events: true
+  tune_clocksource: true
+  tune_cpu: true
+  tune_disk_irq: true
+  tune_disk_nomerges: true
+  tune_disk_scheduler: true
+  tune_disk_write_cache: true
+  tune_fstrim: false
+  tune_network: true
+  tune_swappiness: true
+  tune_transparent_hugepages: false
+  well_known_io: vendor:vm:storage
+

@@ -1,0 +1,39 @@
+Files Copied from ScriptHub DO NOT DELETE to Kylo
+===================================================
+
+Migration Date: 2026-01-27
+Source: D:\ScriptHub\DO NOT DELETE\
+Destination: D:\Project-Kylo\tools\scripthub\do_not_delete\
+
+SCRIPTS (11 files):
+- scripts/sync_bank.py
+- scripts/sync_company_ids.py
+- scripts/dynamic_columns_jgdtruth.py
+- scripts/run_both_syncs.py
+- scripts/server.py
+- scripts/rule_loader_jgdtruth.py
+- scripts/clear_provenance.py
+- scripts/diag_cols.py
+- scripts/set_validation.py
+- scripts/gui_scheduler.py
+- scripts/runner_sync_bank.pyw (PATH FIXED)
+
+SOURCE FILES (2 files):
+- src/gsheets.py
+- src/rules.py
+
+CONFIG FILES (1 file):
+- config/config.json
+
+NEW FILES CREATED (4 files):
+- README.md
+- run.ps1 (wrapper script)
+- smoke_test.ps1 (verification script)
+- MIGRATION_SUMMARY.md
+
+PATH REWRITES:
+- scripts/runner_sync_bank.pyw: Fixed hardcoded D:\ScriptHub\utils path to use relative resolution
+
+MISSING DEPENDENCIES (Must be provided):
+- config/service_account.json (Google credentials - copy from ScriptHub or provide separately)
+- JGD Truth Current.xlsx (optional - for rule_loader, can be specified via --file)

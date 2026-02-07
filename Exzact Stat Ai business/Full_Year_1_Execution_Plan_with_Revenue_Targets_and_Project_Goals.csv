@@ -1,0 +1,22 @@
+Task,Start Date,End Date,Duration (weeks),Monthly Revenue Target ($),Project Goal / Notes
+Server Room & Dev Workstation Setup,2025-08-15,2025-08-29,2,1500,"Goal: Set up hardware and networking to run AI locally without cloud costs. Includes climate control, racks, and UPS."
+Backend MVP (OCR + AI + JSON Output),2025-08-22,2025-09-19,4,1500,Goal: Build initial AI pipeline for invoice → OCR → JSON extraction. Runs on local GPU.
+Mobile App MVP (React Native),2025-08-22,2025-09-26,5,1500,Goal: Build first cross-platform mobile app for document uploads and status tracking.
+Desktop App MVP (Electron),2025-08-22,2025-09-26,5,1500,Goal: Create desktop version with drag-and-drop uploads and document status.
+Client Intake System (Drive/Dropbox),2025-08-29,2025-09-19,3,1500,Goal: Set up shared folder intake system before portal is live.
+Initial Sales Outreach (Warm Network),2025-09-12,2025-11-07,8,3000,Goal: Sign first paying clients from personal/business connections to validate service.
+App Store/Google Play Submission,2025-09-19,2025-09-26,1,3000,Goal: Submit apps for review to make platform public and scalable.
+App Launch (iOS/Android/Windows/Mac),2025-09-26,2025-10-03,1,6000,Goal: Public release of apps; start onboarding self-service clients.
+Partner Program Setup (White-label),2025-10-17,2025-11-14,4,9000,Goal: Launch reseller program targeting accountants/bookkeepers.
+Multi-tenant Backend,2025-10-17,2025-11-28,6,9000,Goal: Enable multiple clients/partners to share same infrastructure securely.
+Cannabis Compliance Feature,2025-10-24,2025-12-05,6,12000,Goal: Add compliance-specific document processing for cannabis vertical.
+API for Partners,2025-11-07,2025-12-05,4,15000,Goal: Allow partners to integrate uploads directly from their systems.
+Mobile Camera OCR,2025-11-28,2025-12-26,4,18000,Goal: Let users scan receipts and invoices instantly via mobile camera.
+Push Notifications,2025-11-28,2025-12-19,3,18000,Goal: Notify clients instantly when documents are processed or errors occur.
+Basic Analytics Dashboard,2025-12-05,2026-01-02,4,20000,Goal: Give clients insights into processing volume and trends.
+Freemium Tier Setup,2025-12-12,2026-01-02,3,20000,Goal: Add free plan to funnel self-serve users into paid tiers.
+App Install Ads Campaign,2025-12-19,2026-01-30,6,21000,Goal: Drive mobile downloads via targeted ads to niche audiences.
+QuickBooks/Xero Integration,2026-01-02,2026-02-13,6,22000,Goal: Automatically sync processed data with accounting software.
+Advanced Search & Filters,2026-01-09,2026-02-13,5,23000,Goal: Let clients search historical documents with filters.
+Multi-language OCR,2026-01-16,2026-02-27,6,23000,Goal: Expand market reach to non-English speaking clients.
+Year-End Growth Push & Acquisition Prep,2026-01-23,2026-02-20,4,25000,"Goal: Hit $250k+ ARR, package platform/data for potential acquirers."

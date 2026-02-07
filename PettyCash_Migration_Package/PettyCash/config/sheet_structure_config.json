@@ -1,0 +1,45 @@
+{
+  "sheet_structure": {
+    "header_row": 19,
+    "date_column": "A",
+    "date_column_index": 1
+  },
+  "target_sheets": {
+    "enabled": [
+      "INCOME",
+      "NUGZ C.O.G.",
+      "NUGZ EXPENSES", 
+      "PUFFIN C.O.G.",
+      "PUFFIN EXPENSES",
+      "710 EMPIRE C.O.G.",
+      "710 EMPIRE EXPENSES",
+      "PAYROLL",
+      "(A) CANNABIS DIST.",
+      "(B) CANNABIS DIST.",
+      "NON CANNABIS"
+    ],
+    "ignored": [
+      "PETTY CASH",
+      "Petty Cash KEY", 
+      "EXPANSION CHECKLIST",
+      "Balance and Misc",
+      "SHIFT LOG",
+      "TIM",
+      "Copy of TIM",
+      "Info",
+      "JGD",
+      "CONSIGNMENT",
+      "CC Debt",
+      "CC Payments", 
+      "CC Status",
+      "ALLOCATED",
+      "EQUIPMENT UPGRADES",
+      "BALANCE"
+    ]
+  },
+  "layout_mapping": {
+    "max_rows_to_scan": 50,
+    "header_indicators": ["REGISTER", "WHOLESALE", "SQUARE", "WALMART", "CANNABIS", "DIST", "PAYROLL", "EXPENSE", "COST"],
+    "date_formats": ["%B-%y", "%m/%d/%Y", "%Y-%m-%d"]
+  }
+} 

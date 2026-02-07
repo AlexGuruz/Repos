@@ -1,0 +1,4 @@
+{
+  "entity1": "postgresql://postgres:postgres@localhost:5432/app_entity1",
+  "entity2": "postgresql://postgres:postgres@localhost:5432/app_entity2"
+}

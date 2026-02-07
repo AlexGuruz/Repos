@@ -1,0 +1,23 @@
+version: 1
+
+sheets:
+  companies:
+    - key: PUFFIN
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+
+rules:
+  management_workbook_url: https://docs.google.com/spreadsheets/d/1VA76RvF5Q6gmgIrAbLby1zQltUNEpdf-fvW8qSLw5wU/edit
+
+year_workbooks:
+  "2025":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+  "2026":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+
+year_workbooks_active: ["2025", "2026"]
+

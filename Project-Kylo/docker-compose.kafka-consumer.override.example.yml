@@ -1,0 +1,14 @@
+# Copy to docker-compose.kafka-consumer.override.yml to use project-local secrets
+# On a fresh rig, this lets you use .secrets/ instead of D:\REMODEL\secrets
+#
+# cp docker-compose.kafka-consumer.override.example.yml docker-compose.kafka-consumer.override.yml
+#
+# Then add your service_account.json to .secrets/
+
+services:
+  kafka-consumer-txns:
+    volumes:
+      - ./.secrets:/secrets:ro
+  kafka-consumer-promote:
+    volumes:
+      - ./.secrets:/secrets:ro

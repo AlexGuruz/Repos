@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.pyc
+
+# Large runtimes / installers (optional: remove lines to include them)
+WinPython64/
+Git/
+
+# Archives and logs
+*.zip
+*.log
+syncthing_sync_log.txt
+
+# Archive and embedded repos (add back later if needed)
+_archive/
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Sensitive / generated
+.secrets/
+**/service_account.json
+config/service_account.json
+**/Discord Bot Token*
+**/*Token*.FdEzDO
+
+# Syncthing (if used on this tree)
+.stfolder/
+.stversions/
+
+# Monorepo: ignore nested .git so one repo tracks all content
+**/.git
+
+# Obsidian app (exe, dll, resources) - track only Brain vault
+Ai/Obsidian/*
+!Ai/Obsidian/Brain/
+
+# Obsidian session / cache
+Ai/Obsidian/Brain/.obsidian/workspace.json
+Ai/Obsidian/Brain/.obsidian/graph.json
+
+# Build artifacts
+node_modules/
+dist/
+build/

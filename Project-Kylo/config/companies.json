@@ -1,0 +1,116 @@
+{
+  "companies": [
+    {
+      "company_id": "NUGZ",
+      "display_name": "Nugz",
+      "workbook": "https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE/edit?gid=82037223#gid=82037223",
+      "sheet_aliases": {
+        "PETTY CASH": "PETTY CASH",
+        "BALANCE": "BALANCE",
+        "PAYROLL": "PAYROLL",
+        "INCOME": "INCOME",
+        "JGD": "JGD",
+        "ALLOCATED": "ALLOCATED",
+        "CONSIGNMENT": "CONSIGNMENT",
+        "NUGZ C.O.G.": "NUGZ C.O.G.",
+        "NUGZ EXPENSES": "NUGZ EXPENSES",
+        "PUFFIN C.O.G.": "PUFFIN C.O.G.",
+        "PUFFIN EXPENSES": "PUFFIN EXPENSES",
+        "710 EMPIRE C.O.G.": "710 EMPIRE C.O.G.",
+        "710 EMPIRE EXPENSES": "710 EMPIRE EXPENSES",
+        "COMMISSION": "COMMISSION",
+        "CC Payments": "CC Payments",
+        "CC Status": "CC Status",
+        "CC Debt": "CC Debt"
+      },
+      "layout_ref": "layout/jgd-2025.json",
+      "rules_namespace": "nugz"
+    },
+    {
+      "company_id": "710 EMPIRE",
+      "display_name": "710 Empire",
+      "workbook": "https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE/edit?gid=82037223#gid=82037223",
+      "sheet_aliases": {
+        "PETTY CASH": "PETTY CASH",
+        "BALANCE": "BALANCE",
+        "PAYROLL": "PAYROLL",
+        "INCOME": "INCOME",
+        "JGD": "JGD",
+        "ALLOCATED": "ALLOCATED",
+        "CONSIGNMENT": "CONSIGNMENT",
+        "NUGZ C.O.G.": "NUGZ C.O.G.",
+        "NUGZ EXPENSES": "NUGZ EXPENSES",
+        "PUFFIN C.O.G.": "PUFFIN C.O.G.",
+        "PUFFIN EXPENSES": "PUFFIN EXPENSES",
+        "710 EMPIRE C.O.G.": "710 EMPIRE C.O.G.",
+        "710 EMPIRE EXPENSES": "710 EMPIRE EXPENSES",
+        "COMMISSION": "COMMISSION",
+        "CC Payments": "CC Payments",
+        "CC Status": "CC Status",
+        "CC Debt": "CC Debt"
+      },
+      "layout_ref": "layout/jgd-2025.json",
+      "rules_namespace": "710"
+    },
+    {
+      "company_id": "PUFFIN PURE",
+      "display_name": "Puffin Pure",
+      "workbook": "https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE/edit?gid=82037223#gid=82037223",
+      "sheet_aliases": {
+        "PETTY CASH": "PETTY CASH",
+        "BALANCE": "BALANCE",
+        "PAYROLL": "PAYROLL",
+        "INCOME": "INCOME",
+        "JGD": "JGD",
+        "ALLOCATED": "ALLOCATED",
+        "CONSIGNMENT": "CONSIGNMENT",
+        "NUGZ C.O.G.": "NUGZ C.O.G.",
+        "NUGZ EXPENSES": "NUGZ EXPENSES",
+        "PUFFIN C.O.G.": "PUFFIN C.O.G.",
+        "PUFFIN EXPENSES": "PUFFIN EXPENSES",
+        "710 EMPIRE C.O.G.": "710 EMPIRE C.O.G.",
+        "710 EMPIRE EXPENSES": "710 EMPIRE EXPENSES",
+        "COMMISSION": "COMMISSION",
+        "CC Payments": "CC Payments",
+        "CC Status": "CC Status",
+        "CC Debt": "CC Debt"
+      },
+      "layout_ref": "layout/jgd-2025.json",
+      "rules_namespace": "puffin"
+    },
+    {
+      "company_id": "JGD",
+      "display_name": "JGD",
+      "workbook": "https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE/edit?gid=82037223#gid=82037223",
+      "sheet_aliases": {
+        "PETTY CASH": "PETTY CASH",
+        "BALANCE": "BALANCE",
+        "PAYROLL": "PAYROLL",
+        "INCOME": "INCOME",
+        "JGD": "JGD",
+        "ALLOCATED": "ALLOCATED",
+        "CONSIGNMENT": "CONSIGNMENT",
+        "NUGZ C.O.G.": "NUGZ C.O.G.",
+        "NUGZ EXPENSES": "NUGZ EXPENSES",
+        "PUFFIN C.O.G.": "PUFFIN C.O.G.",
+        "PUFFIN EXPENSES": "PUFFIN EXPENSES",
+        "710 EMPIRE C.O.G.": "710 EMPIRE C.O.G.",
+        "710 EMPIRE EXPENSES": "710 EMPIRE EXPENSES",
+        "COMMISSION": "COMMISSION",
+        "CC Payments": "CC Payments",
+        "CC Status": "CC Status",
+        "CC Debt": "CC Debt"
+      },
+      "layout_ref": "layout/jgd-2025.json",
+      "rules_namespace": "jgd"
+    }
+  ],
+  "active_sources": ["sheets"],
+  "target_workbooks": ["NUGZ", "710", "PUFFIN", "JGD"],
+  "intake": {
+    "workbook": "https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE/edit?gid=82037223#gid=82037223",
+    "input_sheet_cash": "PETTY CASH"
+  }
+}
+
+

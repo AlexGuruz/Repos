@@ -1,0 +1,117 @@
+{
+  "name": "Ingest → Publish (Kafka)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "txns.ingest",
+        "options": {}
+      },
+      "id": "webhook_ingest",
+      "name": "Webhook: Ingest",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [-380, 0]
+    },
+    {
+      "parameters": {
+        "functionCode": "const transactions = $json.transactions || [];\nconst now = new Date().toISOString();\nconst batch_id = $json.batch_id || Math.random().toString(36).substring(2);\nconst ingest_batch_id = $json.ingest_batch_id || Date.now();\n\n// Group by company_id\nconst byCompany = {};\nfor (const txn of transactions) {\n  const cid = txn.company_id;\n  if (!byCompany[cid]) {\n    byCompany[cid] = [];\n  }\n  byCompany[cid].push(txn);\n}\n\nconst out = [];\nfor (const [company_id, txns] of Object.entries(byCompany)) {\n  out.push({\n    json: {\n      company_id,\n      transactions: txns,\n      batch_id,\n      ingest_batch_id,\n      created_at: now\n    }\n  });\n}\n\nreturn out;"
+      },
+      "id": "fn_group_by_company",
+      "name": "Group by Company",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [-160, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT company_id, db_dsn_rw, db_schema, spreadsheet_id, tab_pending, tab_active FROM control.company_config WHERE company_id = $1",
+        "additionalFields": {
+          "queryReplacement": "={{ $json.company_id }}"
+        }
+      },
+      "id": "pg_lookup_company_config",
+      "name": "Lookup Company Config",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "credentials": {
+        "postgres": "Kylo Postgres RW"
+      },
+      "position": [80, 0]
+    },
+    {
+      "parameters": {
+        "functionCode": "const config = $json[0];\nconst company_data = $('Group by Company').first().json;\n\nif (!config) {\n  throw new Error(`No config found for company ${company_data.company_id}`);\n}\n\nconst routing = {\n  db_dsn_rw: config.db_dsn_rw,\n  db_schema: config.db_schema,\n  spreadsheet_id: config.spreadsheet_id,\n  tab_pending: config.tab_pending,\n  tab_active: config.tab_active\n};\n\n// Compute deterministic signature for dedupe\nconst txn_signatures = company_data.transactions.map(t => \n  `${t.id}|${t.date}|${t.amount}|${t.description}`\n).sort();\nconst slice_signature = require('crypto').createHash('md5')\n  .update(company_data.company_id + '|' + txn_signatures.join('|'))\n  .digest('hex');\n\nconst message = {\n  event_type: 'TXNS_BATCH',\n  version: 1,\n  batch_id: company_data.batch_id,\n  company_id: company_data.company_id,\n  ingest_batch_id: company_data.ingest_batch_id,\n  routing,\n  slice_signature,\n  created_at: company_data.created_at,\n  meta: {\n    producer: 'n8n@ingest',\n    txn_count: company_data.transactions.length\n  }\n};\n\nreturn [{\n  json: {\n    key: company_data.company_id,\n    message\n  }\n}];"
+      },
+      "id": "fn_build_message",
+      "name": "Build Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [320, 0]
+    },
+    {
+      "parameters": {
+        "topic": "txns.company.batches",
+        "useKey": true,
+        "key": "={{ $json.key }}",
+        "value": "={{ $json.message }}"
+      },
+      "id": "kafka_produce_txns",
+      "name": "Kafka: Produce Txns",
+      "type": "n8n-nodes-base.kafka",
+      "typeVersion": 1,
+      "credentials": {
+        "kafka": "Redpanda Dev"
+      },
+      "position": [560, 0]
+    }
+  ],
+  "connections": {
+    "Webhook: Ingest": {
+      "main": [
+        [
+          {
+            "node": "Group by Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group by Company": {
+      "main": [
+        [
+          {
+            "node": "Lookup Company Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Company Config": {
+      "main": [
+        [
+          {
+            "node": "Build Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Message": {
+      "main": [
+        [
+          {
+            "node": "Kafka: Produce Txns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false
+}

@@ -1,0 +1,2 @@
+source_path,dest_path,reason,confidence,action,notes
+"D:\Kylo-Simplified","D:\_archive\2026-01-27\kylo_old_versions\Kylo-Simplified","Likely older Kylo version (score 4, git repo)",0.85,move,"Archive entire repo as atomic unit; no deletes"

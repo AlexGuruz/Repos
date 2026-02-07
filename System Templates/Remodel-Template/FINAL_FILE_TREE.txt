@@ -1,0 +1,86 @@
+﻿Folder PATH listing for volume WorkShop
+Volume serial number is C077-4021
+D:.
+|   .gitignore
+|   pytest.ini
+|   requirements.txt
+|   .env.example
+|   README.md
+|   TEMPLATE_CLEANUP_LOG.md
+|   file_tree.txt
+|   FINAL_FILE_TREE.txt
+|   
++---src
+|   \---yourapp
+|       |   __init__.py
+|       |   
+|       +---config
+|       |       __init__.py
+|       |       flags.py
+|       |       connection_manager.py
+|       |       schema_resolver.py
+|       |       sql_preprocessor.py
+|       |       
+|       +---db
+|       |       __init__.py
+|       |       
+|       +---workers
+|       |       __init__.py
+|       |       
+|       \---common
+|               __init__.py
+|               normalize.py
+|               telemetry.py
+|               
++---tests
+|   |   __init__.py
+|   |   conftest.py
+|   |   
+|   +---unit
+|   |   |   __init__.py
+|   |   |   test_normalize.py
+|   |   |   
+|   |   \---__pycache__
+|   |           __init__.cpython-312.pyc
+|   |           test_normalize.cpython-312-pytest-8.3.5.pyc
+|   |           
+|   +---config
+|   |       __init__.py
+|   |       test_schema_resolver.py
+|   |       
+|   \---__pycache__
+|           __init__.cpython-312.pyc
+|           conftest.cpython-312-pytest-8.3.5.pyc
+|           
++---docker
+|       docker-compose.yml
+|       docker-compose.kafka.yml
+|       
++---scripts
+|       README.md
+|       
++---docs
+|       ARCHITECTURE.md
+|       
++---archive
+|       README.md
+|       
++---.github
+|   \---workflows
+|           ci.yml
+|           
++---config
+|       example.companies.json
+|       example.dsn_map.json
+|       
+\---.pytest_cache
+    |   README.md
+    |   .gitignore
+    |   CACHEDIR.TAG
+    |   
+    \---v
+        \---cache
+                nodeids
+                lastfailed
+                stepwise
+                

@@ -1,0 +1,231 @@
+{
+  "name": "Kylo — Batch Mover Orchestration",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "kylo/move-batch",
+        "options": {
+          "responseData": "json",
+          "responseCode": 200,
+          "responseMode": "lastNode",
+          "responsePropertyName": "dashboard"
+        }
+      },
+      "id": "Webhook_Trigger",
+      "name": "Webhook (batch trigger)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "webhookId": "kylo-move-batch",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{$env.N8N_MOVER_URL}}/move-batch",
+        "options": {
+          "timeout": 900000
+        },
+        "allowUnauthorizedCerts": false,
+        "sendBody": true,
+        "jsonParameters": true,
+        "authentication": "none",
+        "requestMethod": "POST",
+        "jsonBody": "={\"ingest_batch_id\": {{$json.body.ingest_batch_id}}}"
+      },
+      "id": "HTTP_MoverCall",
+      "name": "HTTP → Mover (one call per batch)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [520, 200],
+      "continueOnFail": false
+    },
+    {
+      "parameters": {
+        "functionCode": "const res = $json; const batch_id = res.ingest_batch_id; const items = []; (res.results || []).forEach(r => { const event_key = 'feed.' + r.company_id + '.' + batch_id; items.push({ json: { company_id: r.company_id, batch_id, event_key, inserted: r.inserted, updated: r.updated, enqueued: r.enqueued, advanced_to_batch: r.advanced_to_batch || null }}); }); return items.length ? items : [{ json: { company_id: null, batch_id, event_key: null, inserted: 0, updated: 0, enqueued: 0, advanced_to_batch: null }}];"
+      },
+      "id": "Function_ExpandResults",
+      "name": "Function → expand mover results",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [780, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE control.outbox_events\nSET delivered_at = now()\nWHERE event_key = {{$json[\"event_key\"]}}\n  AND delivered_at IS NULL;"
+      },
+      "id": "PG_FlipOutbox",
+      "name": "Postgres → outbox flip (idempotent)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1040, 140],
+      "credentials": {
+        "postgres": "Kylo Global (ro+outbox)"
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT t.source_stream_id, COUNT(*) AS rows\nFROM core.transactions_unified t\nWHERE t.ingest_batch_id = {{$json[\"batch_id\"]}}\nGROUP BY 1\nORDER BY 1;"
+      },
+      "id": "PG_Metric_IngestByStream",
+      "name": "Postgres → metric: ingest by stream",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1040, 280],
+      "credentials": {
+        "postgres": "Kylo Global (ro+outbox)"
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT company_id, last_batch_id FROM control.company_feeds ORDER BY company_id;"
+      },
+      "id": "PG_Metric_Watermarks",
+      "name": "Postgres → metric: company watermarks",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1280, 280],
+      "credentials": {
+        "postgres": "Kylo Global (ro+outbox)"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const byStream = items[0].json.rows || items[0].json || []; return [{json: {byStream}}];"
+      },
+      "id": "Function_NormalizeByStream",
+      "name": "Function → normalize by-stream",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1280, 140]
+    },
+    {
+      "parameters": {
+        "functionCode": "const batch_id = $items(\"Function → expand mover results\", 0, 0).at(0).json.batch_id; const results = $items(\"Function → expand mover results\").map(i => i.json); const byStream = $items(\"Function → normalize by-stream\").at(0).json.byStream; const watermarks = $items(\"Postgres → metric: company watermarks\").map(i => i.json); return [{ json: { dashboard: { batch_id, results, byStream, watermarks } } }];"
+      },
+      "id": "Function_AssembleDashboard",
+      "name": "Function → assemble dashboard payload",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1520, 210]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "Webhook_Reply",
+      "name": "Webhook Reply (JSON dashboard)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1760, 210]
+    }
+  ],
+  "connections": {
+    "Webhook (batch trigger)": {
+      "main": [
+        [
+          {
+            "node": "HTTP → Mover (one call per batch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP → Mover (one call per batch)": {
+      "main": [
+        [
+          {
+            "node": "Function → expand mover results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function → expand mover results": {
+      "main": [
+        [
+          {
+            "node": "Postgres → outbox flip (idempotent)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Postgres → metric: ingest by stream",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres → metric: ingest by stream": {
+      "main": [
+        [
+          {
+            "node": "Function → normalize by-stream",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function → normalize by-stream": {
+      "main": [
+        [
+          {
+            "node": "Postgres → metric: company watermarks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres → metric: company watermarks": {
+      "main": [
+        [
+          {
+            "node": "Function → assemble dashboard payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function → assemble dashboard payload": {
+      "main": [
+        [
+          {
+            "node": "Webhook Reply (JSON dashboard)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "staticData": {},
+  "meta": {
+    "instanceId": "kylo-n8n"
+  },
+  "tags": [
+    {
+      "name": "kylo"
+    },
+    {
+      "name": "mover"
+    }
+  ]
+}
+
+

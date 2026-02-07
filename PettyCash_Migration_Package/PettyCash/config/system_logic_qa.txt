@@ -1,0 +1,519 @@
+PETTY CASH SORTER - SYSTEM LOGIC Q&A
+====================================
+
+This file contains questions about the system logic and workflow. 
+Please answer each question with your exact specifications.
+This will be used to build the system with ironclad logic.
+
+GENERAL SYSTEM QUESTIONS:
+------------------------
+
+Q1: What is the main purpose of this system?
+A1: to sort transaction from PETTY CASH tab sheet
+
+Q2: What are the two main spreadsheets involved?
+A2: 
+
+Q2a: What is the exact URL for the spreadsheet containing transactions?
+A2a:2025 Jgd Financials sheet= https://docs.google.com/spreadsheets/d/1DLYt2r34zASzALv6crQ9GOysdr8sLHL0Bor-5nW5QCU/edit
+    
+Q2b: What is the exact URL for the JGD Truth spreadsheet containing rules?
+A2b: JGDTruth sheet= https://docs.google.com/spreadsheets/d/1VA76RvF5Q6gmgIrAbLby1zQltUNEpdf-fvW8qSLw5wU/edit
+
+Q2c: Are there any other spreadsheets or URLs the system needs to access?
+A2c: not as of now, we will be adding other transaction sheets later
+
+
+
+WORKFLOW BREAKDOWN - SPECIFIC STEPS:
+------------------------------------
+
+Q3a: Step 1 - What should the system do first when it starts?
+A3a: [ANSWER: Take complete snapshot of all sheets (PETTY CASH, JGD Truth, and all target sheets)] including tab sheets used for targeting
+
+Q3b: Step 2 - What should the system do after taking the snapshot?
+A3b: [ANSWER: Load JGD Truth rules for each company (NUGZ, JGD, PUFFIN)]
+
+Q3c: Step 3 - What should the system do after loading rules?
+A3c: [ANSWER: Read all transactions from PETTY CASH sheet using correct column mapping] it should then sort each transactions by its source and file them into folders by each dont you think? 
+
+Q3d: Step 4 - What should the system do for each transaction?
+A3d: [ANSWER: Parse amount and date, find matching rule in JGD Truth, locate target cell in target sheet]
+
+Q3e: Step 5 - What should the system do after finding target cells?
+A3e: [ANSWER: Batch update target cells with transaction amounts, add to processed hashes]
+
+Q3f: Step 6 - What should the system do after processing all transactions?
+A3f: [ANSWER: Save processed hashes, provide summary report]
+
+Q3g: What should happen if any step fails?
+A3g: [ANSWER: Log error, continue with next transaction, don't stop entire process]
+
+Q3h: Should the system process transactions one by one or in batches?
+A3h: [ANSWER: Process in batches for efficiency, but handle each transaction individually for error handling]
+
+PETTY CASH SHEET STRUCTURE:
+---------------------------
+
+Q4: What is the exact name of the worksheet containing transactions?
+A4: [ANSWER: PETTY CASH]
+
+Q5: In which row are the headers located?
+A5: [ANSWER: Row 4 (index 3)]
+
+Q6: In which row does the actual transaction data start?
+A6: [ANSWER: Row 5 (index 4)]
+
+Q7: What are the exact column letters for:
+    - Date: [ANSWER: Column B]
+    - Company: [ANSWER: Column C] 
+    - Source: [ANSWER: Column D]
+    - Amount: [ANSWER: Column S]
+
+Q8: What are the corresponding column indices (0-based) for:
+    - Date: [ANSWER: 1]
+    - Company: [ANSWER: 2]
+    - Source: [ANSWER: 4] 
+    - Amount: [ANSWER: 18]
+
+JGD TRUTH STRUCTURE:
+--------------------
+
+Q9: What is the purpose of the JGD Truth spreadsheet?
+A9: [ANSWER: Contains rules mapping sources to target sheets and headers]
+
+Q10: What are the column letters in JGD Truth for:
+     - Source: [ANSWER: Column A]
+     - Target Sheet: [ANSWER: Column B]
+     - Target Header: [ANSWER: Column C]
+
+Q11: In which row does the JGD Truth data start?
+A11: [ANSWER: Row 2 (index 1)]
+
+TARGET SHEETS STRUCTURE:
+------------------------
+
+Q12: What are the names of all target sheets that receive transactions?
+A12: [ANSWER: (A) CANNABIS DIST., (B) CANNABIS DIST., ALLOCATED, INCOME, JGD, NON CANNABIS, NUGZ C.O.G., NUGZ EXPENSES, PAYROLL, PUFFIN C.O.G., PUFFIN EXPENSES]
+
+Q12a: Are the target sheets in the same spreadsheet as the transactions or a different one?
+A12a: [ANSWER: Same spreadsheet as transactions]
+
+Q12b: If target sheets are in a different spreadsheet, what is the exact URL?
+A12b: [ANSWER: N/A - same spreadsheet]
+
+Q12c: Are there any specific sheet IDs or gid parameters needed for any of the URLs?
+A12c: [ANSWER: No - use sheet names to access tabs]
+
+Q13: In which row are the headers located in target sheets?
+A13: [ANSWER: Row 19 (index 20)]
+
+Q14: In which row does the data start in target sheets?
+A14: [ANSWER: Row 20 (index 21)]
+
+Q15: In which column are the dates located in target sheets?
+A15: [ANSWER: Column A (index 0)]
+
+DATA FORMATS:
+-------------
+
+Q16: What amount formats should be treated as $0.00?
+A16: [ANSWER: "$-", "", "0", "0.00", "$0", "$0.00", empty cells, null values]
+
+Q17: What amount formats are valid and should be processed?
+A17: [ANSWER: negatives amounts =  $ (15.00), positive amounts=   $ 20.00, amounts that show "$-" = $0]
+
+Q18: How should negative amounts be handled? (e.g., "$ (500.00)")
+A18: [ANSWER: maintain the format at the point of inputting into target cells other than that i do not care]
+
+Q19: What date formats are acceptable in the input?
+A19: [ANSWER: 12/30/24 or 4/29/2025]
+
+Q20: What date format should be used when looking up target cells?
+A20: [ANSWER: 12/30/24 or 4/29/2025]
+
+WORKFLOW LOGIC:
+---------------
+
+Q21: Should the system take a complete snapshot of all sheets first?
+A21: [ANSWER: YES - Take complete snapshot of all sheets (PETTY CASH, JGD Truth, and all target sheets) upfront to minimize API calls and enable batch processing]
+
+Q22: Should the system process transactions in batches or individually?
+A22: [ANSWER: BATCHES - Group transactions by target sheet and process in batches to reduce API calls from 8000+ to ~10]
+
+Q23: What should happen if a source has no matching rule in JGD Truth?
+A23: [ANSWER: Automatically add new source to JGD Truth with default target sheet/header, then process the transaction]
+
+Q24: What should happen if a target cell cannot be found?
+A24: [ANSWER: Log warning, skip transaction, continue processing other transactions - don't stop entire process]
+
+Q25: What should happen if an amount cannot be parsed?
+A25: [ANSWER: Log warning, use $0.00 as default, continue processing - don't stop entire process]
+
+ERROR HANDLING:
+---------------
+
+Q26: Should the system skip transactions with missing rules or add them to JGD Truth?
+A26: [ANSWER: ADD THEM - Automatically add new sources to JGD Truth with default target sheet/header, then process the transaction]
+
+Q27: Should the system log warnings for skipped transactions?
+A27: [ANSWER: YES - Log all warnings and errors with detailed information for debugging and tracking]
+
+Q28: Should the system continue processing if some transactions fail?
+A28: [ANSWER: YES - Continue processing other transactions, don't stop entire process on individual failures]
+
+PERFORMANCE:
+------------
+
+Q29: Should the system use individual API calls or batch updates?
+A29: [ANSWER: BATCH UPDATES - Use Google Sheets batch update API to reduce calls from 8000+ to ~10 per run]
+
+Q30: What batch size should be used for processing?
+A30: [ANSWER: 100 transactions per batch, with adaptive sizing based on API quota and performance]
+
+Q31: Should the system use rate limiting?
+A31: [ANSWER: YES - Use adaptive rate limiting to handle API quotas, with exponential backoff on quota errors]
+
+VALIDATION:
+-----------
+
+Q32: What fields are required for a valid transaction?
+A32: [ANSWER: Date, Company, Source, Amount - all must be present and non-empty]
+
+Q33: Should empty rows be skipped?
+A33: [ANSWER: YES - Skip rows where all required fields (Date, Company, Source, Amount) are empty]
+
+Q34: Should the system validate dates before processing?
+A34: [ANSWER: YES - Validate date format (12/30/24 or 4/29/2025) and reasonable range (not future dates beyond current year)]
+
+Q35: Should the system validate amounts before processing?
+A35: [ANSWER: YES - Validate amount format and reasonable range (not $999,999,999 or other extreme values)]
+
+LOGGING:
+--------
+
+Q36: What level of logging is preferred? (DEBUG, INFO, WARNING, ERROR)
+A36: [ANSWER: INFO level with detailed progress tracking, WARNING for issues, ERROR for failures]
+
+Q37: Should the system log successful transactions?
+A37: [ANSWER: YES - Log all successful transactions with details (source, amount, target cell) for audit trail]
+
+Q38: Should the system log skipped transactions?
+A38: [ANSWER: YES - Log all skipped transactions with reason (missing rule, invalid data, etc.) for debugging]
+
+CONFIGURATION:
+--------------
+
+Q39: Should all these settings be in a configuration file?
+A39: [ANSWER: YES - Store all settings in config/system_logic_qa.txt and config files for easy modification]
+
+Q40: Should the configuration be editable by you without touching code?
+A40: [ANSWER: YES - All settings should be in human-readable config files, no code changes needed]
+
+Q41: Should there be a way to validate the configuration before running?
+A41: [ANSWER: YES - Validate all URLs, sheet names, and settings before starting processing]
+
+ADDITIONAL QUESTIONS:
+---------------------
+
+Q42: Are there any special cases or edge cases I should know about?
+A42: [ANSWER: Handle duplicate transactions, missing dates in target sheets, invalid amount formats, network timeouts, API quota errors]
+
+Q43: Are there any business rules that override the technical logic?
+A43: [ANSWER: None - technical optimization takes priority, maintain data integrity and audit trail]
+
+Q44: Should the system handle comments or hyperlinks?
+A44: [ANSWER: YES - Preserve existing comments and hyperlinks, log new ones for manual addition]
+
+Q45: Should the system merge amounts in the same target cell or overwrite?
+A45: [ANSWER: MERGE - Add new amounts to existing values in target cells, don't overwrite]
+
+Q46: Should the system track which transactions have been processed?
+A46: [ANSWER: YES - Use hash-based tracking to prevent duplicate processing and enable resume capability]
+
+Q47: Should the system be able to reprocess all transactions from scratch?
+A47: [ANSWER: YES - Clear processed hashes to allow full reprocessing when needed]
+
+Q48: Are there any specific error messages or warnings you want to see?
+A48: [ANSWER: Clear progress indicators, API quota warnings, processing statistics, success/failure counts]
+
+Q49: Should the system have a dry-run mode to test without making changes?
+A49: [ANSWER: YES - Dry-run mode to validate processing without making actual changes to sheets]
+
+Q50: Any other requirements or specifications I should know about?
+A50: [ANSWER: Live progress monitoring, comprehensive error handling, performance optimization, user-friendly output]
+
+TARGET CELL FINDING LOGIC:
+--------------------------
+
+Q51: How exactly should the system find target cells? (Step by step process)
+A51: [ANSWER: 1) Take snapshot of target sheet, 2) Find header row (Row 19), 3) Locate target header column, 4) Find date row in Column A, 5) Return (row, col) coordinates for target cell]
+
+Q52: When looking for a date in a target sheet, what format should the system use?
+A52: [ANSWER: Normalize to 12/30/24 format for consistent lookup, handle both 2-digit and 4-digit years]
+
+Q53: Should the system search for exact date matches or month/year matches?
+A53: [ANSWER: EXACT DATE MATCHES - Find the specific date row, don't use month/year grouping]
+
+Q54: If a date is not found in a target sheet, what should happen?
+A54: [ANSWER: Log warning, skip transaction, continue processing - don't create new rows automatically]
+
+Q55: Should the system create new rows in target sheets if dates don't exist?
+A55: [ANSWER: NO - Skip transactions with missing dates, log warnings for manual review]
+
+Q56: How should the system handle multiple transactions for the same date/header combination?
+A56: [ANSWER: MERGE AMOUNTS - Add all amounts for same date/header combination into single target cell]
+
+Q57: Should the system add amounts together or overwrite existing values?
+A57: [ANSWER: ADD TOGETHER - Sum all amounts for the same target cell, preserve existing values]
+
+JGD TRUTH RULE MANAGEMENT:
+--------------------------
+
+Q58: How should the system add new unique sources to JGD Truth?
+A58: [ANSWER: Automatically add to appropriate company tab (NUGZ/JGD/PUFFIN) with default target sheet and header]
+
+Q59: Should new sources be added automatically or require manual approval?
+A59: [ANSWER: AUTOMATIC - Add new sources immediately to avoid processing delays]
+
+Q60: What should be the default target sheet for new sources?
+A60: [ANSWER: Use company-specific default: NUGZ EXPENSES for NUGZ, JGD for JGD, PUFFIN EXPENSES for PUFFIN]
+
+Q61: What should be the default target header for new sources?
+A61: [ANSWER: Use "MISC" as default header for new sources, can be updated manually later]
+
+Q62: Should the system create new JGD Truth rules or just log missing sources?
+A62: [ANSWER: CREATE RULES - Automatically add new sources to JGD Truth with default mappings]
+
+Q63: How should the system handle sources that don't match any existing rules?
+A63: [ANSWER: Create new rule automatically, then process the transaction with the new rule]
+
+Q64: Should the system use partial matching for source names? (e.g., "WALMART" matches "WALMART SUPPLIES")
+A64: [ANSWER: NO - Use exact matching only to avoid incorrect rule applications]
+
+DATA REFERENCE AND LOOKUP:
+---------------------------
+
+Q65: How should the system reference existing data in target sheets?
+A65: [ANSWER: Use snapshot data for all lookups, avoid additional API calls during processing]
+
+Q66: Should the system read existing values before updating them?
+A66: [ANSWER: YES - Read current values from snapshot, add new amounts to existing values]
+
+Q67: How should the system handle cells that already have values?
+A67: [ANSWER: Parse existing amount, add new amount, format result properly (negative amounts in parentheses)]
+
+Q68: Should the system validate that target headers exist before processing?
+A68: [ANSWER: YES - Validate all target headers exist in snapshot before starting processing]
+
+Q69: What should happen if a target header doesn't exist in a target sheet?
+A69: [ANSWER: Log error, skip transaction, continue processing - don't create new headers automatically]
+
+Q70: Should the system create missing headers or skip the transaction?
+A70: [ANSWER: SKIP TRANSACTION - Log error and continue, don't modify sheet structure automatically]
+
+SNAPSHOT AND CACHING:
+---------------------
+
+Q71: What data should be included in the snapshot?
+A71: [ANSWER: All sheet data, headers, dates, existing values, comments, hyperlinks - complete sheet state]
+
+Q72: Should the snapshot include all sheets or only specific ones?
+A72: [ANSWER: ALL SHEETS - PETTY CASH, JGD Truth (all company tabs), and all target sheets]
+
+Q73: How should the system handle snapshot failures?
+A73: [ANSWER: Log error, retry up to 3 times with exponential backoff, fail gracefully if all retries fail]
+
+Q74: Should the system retry failed snapshots?
+A74: [ANSWER: YES - Retry up to 3 times with increasing delays (1s, 2s, 4s)]
+
+Q75: How long should snapshot data be considered valid?
+A75: [ANSWER: Single run only - take fresh snapshot at start of each processing run]
+
+BATCH PROCESSING DETAILS:
+-------------------------
+
+Q76: What exactly should be batched? (Updates, reads, or both?)
+A76: [ANSWER: BATCH UPDATES - Group all updates for each target sheet into single API call]
+
+Q77: Should the system batch by sheet, by transaction, or by cell?
+A77: [ANSWER: BATCH BY SHEET - Group all updates for each target sheet into one batch update call]
+
+Q78: How should the system handle batch failures?
+A78: [ANSWER: Log error, retry batch with exponential backoff, continue with other sheets if batch fails]
+
+Q79: Should failed batches be retried individually?
+A79: [ANSWER: YES - Retry failed batches up to 3 times before moving to next sheet]
+
+Q80: What should be the maximum batch size?
+A80: [ANSWER: 1000 cells per batch update, adjust based on API quota and performance]
+
+ERROR RECOVERY:
+---------------
+
+Q81: Should the system save progress and resume from where it left off?
+A81: [ANSWER: YES - Use hash-based tracking to resume from last successful transaction]
+
+Q82: How should the system handle API quota errors?
+A82: [ANSWER: Implement adaptive rate limiting, exponential backoff, wait and retry automatically]
+
+Q83: Should the system wait and retry or skip to the next transaction?
+A83: [ANSWER: WAIT AND RETRY - Use exponential backoff for quota errors, don't skip transactions]
+
+Q84: How should the system handle network timeouts?
+A84: [ANSWER: Retry up to 3 times with increasing delays, log error and continue if all retries fail]
+
+Q85: Should the system have a maximum retry count?
+A85: [ANSWER: YES - Maximum 3 retries for any operation, then log error and continue]
+
+VALIDATION AND SANITY CHECKS:
+-----------------------------
+
+Q86: What sanity checks should the system perform before processing?
+A86: [ANSWER: Validate URLs, check sheet existence, verify headers, validate date formats, check amount ranges]
+
+Q87: Should the system validate that all required sheets exist?
+A87: [ANSWER: YES - Validate all sheets exist before starting processing]
+
+Q88: Should the system check for duplicate transactions?
+A88: [ANSWER: YES - Use hash-based duplicate detection to prevent reprocessing same transactions]
+
+Q89: Should the system validate that amounts are reasonable? (e.g., not $999,999,999)
+A89: [ANSWER: YES - Validate amounts are within reasonable range (not extreme values)]
+
+Q90: Should the system validate that dates are within expected ranges?
+A90: [ANSWER: YES - Validate dates are not in future beyond current year]
+
+MONITORING AND REPORTING:
+-------------------------
+
+Q91: What summary information should the system provide at the end?
+A91: [ANSWER: Total transactions processed, successful updates, skipped transactions, errors, processing time, API calls made]
+
+Q92: Should the system show progress during processing?
+A92: [ANSWER: YES - Show live progress with transaction counts, current sheet, and completion percentage]
+
+Q93: Should the system provide detailed error reports?
+A93: [ANSWER: YES - Detailed error logs with transaction details, error reasons, and suggested actions]
+
+Q94: Should the system log performance metrics?
+A94: [ANSWER: YES - Log processing time, API call counts, memory usage, and performance statistics]
+
+Q95: Should the system provide a summary of what was processed vs skipped?
+A95: [ANSWER: YES - Clear summary showing processed count, skipped count, and reasons for skips]
+
+URL AND ACCESS CONFIGURATION:
+-----------------------------
+
+Q96: What are the exact URLs for each component of the system?
+A96: [ANSWER: 2025 Jgd Financials: https://docs.google.com/spreadsheets/d/1DLYt2r34zASzALv6crQ9GOysdr8sLHL0Bor-5nW5QCU/edit, JGD Truth: https://docs.google.com/spreadsheets/d/1VA76RvF5Q6gmgIrAbLby1zQltUNEpdf-fvW8qSLw5wU/edit]
+
+Q97: Are there any authentication requirements or service account files needed?
+A97: [ANSWER: YES - Google Sheets API service account JSON file required for authentication]
+
+Q98: Should the system validate that all URLs are accessible before starting?
+A98: [ANSWER: YES - Validate all URLs and authentication before starting processing]
+
+Q99: What should happen if any of the URLs are not accessible?
+A99: [ANSWER: Log error, stop processing, provide clear error message about access issues]
+
+Q100: Are there any rate limits or access restrictions the system should be aware of?
+A100: [ANSWER: YES - Google Sheets API has quotas, implement adaptive rate limiting and exponential backoff]
+
+CRITICAL MISSING AREAS (Ollama Review):
+----------------------------------------
+
+Q101: What validation rules should be applied to ensure data integrity?
+A101: [ANSWER: Validate all input data formats, check for data consistency, ensure proper amount calculations, verify target cell coordinates]
+
+Q102: How will the system handle errors that occur during processing, such as network timeouts or API quota errors?
+A102: [ANSWER: Implement comprehensive error handling with retries, exponential backoff, graceful degradation, and detailed error logging]
+
+Q103: What security measures should be implemented to ensure data access and authorization?
+A103: [ANSWER: Use service account authentication, validate API permissions, secure storage of credentials, audit trail for all operations]
+
+Q104: How will the system optimize performance for large datasets or high-volume processing?
+A104: [ANSWER: Use snapshot-based processing, batch updates, multi-level indexing, memory optimization, and parallel processing where possible]
+
+Q105: What audit trails and logging features should be implemented to track changes, errors, and system activity?
+A105: [ANSWER: Comprehensive logging of all operations, transaction tracking, error details, performance metrics, and audit trail for compliance]
+
+EDGE CASES AND SCENARIOS:
+-------------------------
+
+Q106: What should happen if a spreadsheet is empty or contains only blank rows?
+A106: [ANSWER: Log warning, skip processing, provide clear message about empty data]
+
+Q107: How will the system handle invalid data, such as non-numeric amounts or invalid dates?
+A107: [ANSWER: Log warning, skip invalid transactions, continue processing valid ones, provide summary of invalid data]
+
+Q108: How will the system handle duplicate transactions with different headers or amounts?
+A108: [ANSWER: Use hash-based duplicate detection, skip exact duplicates, process different amounts as separate transactions]
+
+Q109: What should happen if the system encounters corrupted or malformed data?
+A109: [ANSWER: Log error with details, skip corrupted transactions, continue processing valid ones]
+
+Q110: How should the system handle transactions with missing required fields?
+A110: [ANSWER: Log warning, skip transactions with missing required fields, continue processing complete transactions]
+
+TECHNICAL IMPLEMENTATION DETAILS:
+---------------------------------
+
+Q111: What specific APIs should be integrated to interact with external systems?
+A111: [ANSWER: Google Sheets API v4 for all sheet operations, with batch update capabilities]
+
+Q112: How will authentication and authorization be handled for API access?
+A112: [ANSWER: Service account JSON file with appropriate Google Sheets API permissions]
+
+Q113: What data formats (e.g., CSV, JSON) should be supported, and how will they be converted?
+A113: [ANSWER: Google Sheets API native format, JSON for configuration and logging, no CSV conversion needed]
+
+Q114: Should the system support data export or backup functionality?
+A114: [ANSWER: YES - Export processing logs, error reports, and transaction summaries for backup and analysis]
+
+Q115: What should be the system's behavior when Google Sheets API is unavailable?
+A115: [ANSWER: Implement retry logic with exponential backoff, graceful degradation, and clear error reporting]
+
+BUSINESS LOGIC ENHANCEMENTS:
+----------------------------
+
+Q116: What specific steps should occur during transaction processing validation?
+A116: [ANSWER: Validate data format, check required fields, verify date ranges, validate amount formats, check for duplicates]
+
+Q117: How will the system apply JGD Truth rules to determine target cell relevance?
+A117: [ANSWER: Match source to JGD Truth rules, find target sheet and header, locate date row, return target cell coordinates]
+
+Q118: What updates should be made to target sheets after a transaction has been processed?
+A118: [ANSWER: Add transaction amount to existing cell value, preserve formatting, maintain audit trail]
+
+Q119: Should the system support transaction reversal or correction capabilities?
+A119: [ANSWER: YES - Support manual correction by clearing processed hashes and reprocessing specific transactions]
+
+Q120: How should the system handle end-of-month or end-of-year processing?
+A120: [ANSWER: No special handling needed - process all transactions normally regardless of date]
+
+PERFORMANCE AND SCALABILITY:
+----------------------------
+
+Q121: What is the expected volume of transactions the system should handle?
+A121: [ANSWER: 1000-2000 transactions per run, scalable to handle larger volumes with batch processing]
+
+Q122: Should the system support parallel processing of multiple transactions?
+A122: [ANSWER: NO - Sequential processing to maintain data integrity and avoid race conditions]
+
+Q123: What memory and storage requirements should the system have?
+A123: [ANSWER: Unlimited storage space available, optimize for memory efficiency with snapshot compression]
+
+Q124: Should the system implement any caching mechanisms for frequently accessed data?
+A124: [ANSWER: YES - Cache snapshot data, target cell coordinates, and JGD Truth rules for performance]
+
+Q125: What should be the maximum processing time for a single transaction?
+A125: [ANSWER: Target under 1 second per transaction, with batch processing reducing overall time significantly]
+
+====================================
+INSTRUCTIONS:
+1. Answer each question with your exact specifications
+2. Be as specific as possible
+3. If you're unsure about a question, say "UNSURE - NEED TO CHECK"
+4. This file will be used to build the system with your exact requirements
+5. You can edit this file anytime to update specifications 

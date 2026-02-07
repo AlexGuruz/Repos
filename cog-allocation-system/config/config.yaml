@@ -1,0 +1,39 @@
+# COG Allocation System - Configuration
+# Restored from COMMAND_REFERENCE.md + Drive folder from user
+
+google_drive:
+  # Folder to watch for new sales CSV files
+  # https://drive.google.com/drive/folders/1b1XgCjqlcS7UeGeL7oucH92xeuIwxKrP
+  watch_folder_id: "1b1XgCjqlcS7UeGeL7oucH92xeuIwxKrP"
+  check_interval_minutes: 5
+
+google_sheets:
+  # Device-wide creds: D:\_config\ or GOOGLE_APPLICATION_CREDENTIALS (override with service_account_path if needed)
+  # service_account_path: "config/service_account.json"
+
+  # Write target 1: COG_RAW_DAILY
+  cog_raw_daily:
+    spreadsheet_id: "1GizTKLceyoVVOVAIDrODebYbCK4hRhD5Q9jZ-s0qgIs"
+    sheet: "COG_RAW_DAILY"
+    columns: ["Date", "Brand", "Category", "Units", "COG"]
+    url: "https://docs.google.com/spreadsheets/d/1GizTKLceyoVVOVAIDrODebYbCK4hRhD5Q9jZ-s0qgIs/edit#gid=1481637753"
+
+  # Write target 2: POS_Export
+  pos_export:
+    spreadsheet_id: "1Pesnh1XQFTKPfagXgCchJQdw0te7m4L1YJAVtOPmyUs"
+    sheet: "POS_Export"
+    columns: ["Date", "Product Name", "ProductCategory", "Brand", "NetPrice", "COGS"]
+    url: "https://docs.google.com/spreadsheets/d/1Pesnh1XQFTKPfagXgCchJQdw0te7m4L1YJAVtOPmyUs/edit#gid=0"
+
+  # Legacy / other (Kylo DROP DOWN HELPER, NUGZ COG, etc.)
+  spreadsheet_id: "1ZxzOvP14M7syKuZ3EoqaHJUkZoOEcMpgk5adHP9p2no"
+  drop_down_helper_sheet: "DROP DOWN HELPER"
+  cog_sheets:
+    nugz: "NUGZ COG"
+    puffin: "PUFFIN COG"
+    empire: "EMPIRE COG"
+
+paths:
+  csv_dump: "data/csv_dump"
+  state: "data/state"
+  logs: "data/logs"

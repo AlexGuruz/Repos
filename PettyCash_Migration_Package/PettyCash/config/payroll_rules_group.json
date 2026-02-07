@@ -1,0 +1,106 @@
+[
+  {
+    "source": "PAYROLL PAYROLL",
+    "target_sheet": "PAYROLL",
+    "target_header": "JASON N.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JASON N."
+  },
+  {
+    "source": "PAYROLL 26444",
+    "target_sheet": "PAYROLL",
+    "target_header": "JOHNNY S.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JOHNNY S."
+  },
+  {
+    "source": "PAYROLL 26871",
+    "target_sheet": "PAYROLL",
+    "target_header": "JENNIFER W.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JENNIFER W."
+  },
+  {
+    "source": "PAYROLL 31971",
+    "target_sheet": "PAYROLL",
+    "target_header": "JENNIFER W.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JENNIFER W."
+  },
+  {
+    "source": "PAYROLL 32040",
+    "target_sheet": "PAYROLL",
+    "target_header": "JOHNNY S.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JOHNNY S."
+  },
+  {
+    "source": "PAYROLL 32092",
+    "target_sheet": "PAYROLL",
+    "target_header": "JOHNNY S.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JOHNNY S."
+  },
+  {
+    "source": "PAYROLL 34210",
+    "target_sheet": "PAYROLL",
+    "target_header": "ZACHARY W.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee ZACHARY W."
+  },
+  {
+    "source": "PAYROLL 35851",
+    "target_sheet": "PAYROLL",
+    "target_header": "ALLISON W.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee ALLISON W."
+  },
+  {
+    "source": "PAYROLL 36777",
+    "target_sheet": "PAYROLL",
+    "target_header": "JASMYN S.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JASMYN S."
+  },
+  {
+    "source": "PAYROLL 36809",
+    "target_sheet": "PAYROLL",
+    "target_header": "JAYLEN S.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee JAYLEN S."
+  },
+  {
+    "source": "PAYROLL 37432",
+    "target_sheet": "PAYROLL",
+    "target_header": "ZACHARY W.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee ZACHARY W."
+  },
+  {
+    "source": "PAYROLL 37766",
+    "target_sheet": "PAYROLL",
+    "target_header": "KAIT S.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee KAIT S."
+  },
+  {
+    "source": "PAYROLL 38183",
+    "target_sheet": "PAYROLL",
+    "target_header": "ALLISON W.",
+    "confidence_threshold": 10.0,
+    "rule_type": "payroll_group",
+    "description": "Standardized payroll rule for employee ALLISON W."
+  }
+]

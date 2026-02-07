@@ -1,0 +1,19 @@
+{
+  "service_account": "config/service_account.json",
+  "kylo_id": "https://docs.google.com/spreadsheets/d/1ZxzOvP14M7syKuZ3EoqaHJUkZoOEcMpgk5adHP9p2no",
+  "bank_id": "https://docs.google.com/spreadsheets/d/1ZxzOvP14M7syKuZ3EoqaHJUkZoOEcMpgk5adHP9p2no",
+  "kylo_tab": "Kylo_Config",
+  "bank_tab": "CLEAN TRANSACTIONS",
+
+  "kylo_clean_col": 11,
+  "kylo_company_col": 12,
+  "kylo_active_col": 13,
+
+  "bank_company_col": 2,
+  "bank_source_col": 3,
+
+  "rows_read_limit": 3000,
+
+  "bank_validation_range": "'Kylo_Config'!M2:M",
+  "webhook_secret": "KYLO_LOCAL_DEV_8001"
+}

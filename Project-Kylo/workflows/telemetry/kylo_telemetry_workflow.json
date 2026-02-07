@@ -1,0 +1,162 @@
+{
+  "name": "Kylo Telemetry Visualizer",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "kylo-telemetry",
+        "options": { "responseCode": 200, "responseMode": "lastNode" }
+      },
+      "id": "Webhook_telemetry",
+      "name": "Webhook: Kylo Telemetry",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 3,
+      "position": [ -400, 0 ],
+      "webhookId": "kylo-telemetry"
+    },
+    {
+      "parameters": {
+        "propertyName": "event_type",
+        "dataType": "string",
+        "rules": {
+          "values": [
+            { "value1": "importer", "operation": "equals" },
+            { "value1": "mover", "operation": "equals" },
+            { "value1": "poster", "operation": "equals" }
+          ]
+        }
+      },
+      "id": "Switch_event_type",
+      "name": "Switch by event_type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [ -150, 0 ]
+    },
+    {
+      "parameters": {
+        "propertyName": "payload.company_id",
+        "dataType": "string",
+        "rules": { "values": [ { "value1": "*", "operation": "contains" } ] }
+      },
+      "id": "Switch_company",
+      "name": "Group by company_id",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [ 100, 0 ]
+    },
+    {
+      "parameters": { "mode": "passThrough" },
+      "id": "IF_importer_lane",
+      "name": "Lane: Importer",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [ 350, -200 ]
+    },
+    {
+      "parameters": { "mode": "passThrough" },
+      "id": "IF_mover_lane",
+      "name": "Lane: Mover",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [ 350, 0 ]
+    },
+    {
+      "parameters": { "mode": "passThrough" },
+      "id": "IF_poster_lane",
+      "name": "Lane: Poster",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [ 350, 200 ]
+    },
+    {
+      "parameters": {
+        "options": { "responseCode": 200 }
+      },
+      "id": "Display_importer",
+      "name": "UI: Importer Events",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [ 650, -200 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst step = e.step;\nconst cid = e.payload?.company_id;\nconst info = {trace:e.trace_id, step, cid, payload:e.payload};\nreturn [{json: info}];"
+      },
+      "id": "Code_mover_router",
+      "name": "Code: Mover Router",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [ 550, 0 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst node = e.step === 'upsert_started' ? 'PG: upsert' : (e.step === 'rows_enqueued' ? 'PG: enqueue' : (e.step === 'watermark_advanced' ? 'PG: watermark' : e.step));\nreturn [{json: {...e, node}}];"
+      },
+      "id": "Code_mover_db_nodes",
+      "name": "Code: DB Node Label",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [ 750, 0 ]
+    },
+    {
+      "parameters": {
+        "options": { "responseCode": 200 }
+      },
+      "id": "Display_mover",
+      "name": "UI: Mover & DB",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [ 950, 0 ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst label = e.step === 'batch_update_built' ? 'Sheets: build' : (e.step === 'batch_update_sent' ? 'Sheets: send' : e.step);\nreturn [{json: {...e, label}}];"
+      },
+      "id": "Code_poster_nodes",
+      "name": "Code: Sheets Node Label",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [ 550, 200 ]
+    },
+    {
+      "parameters": {
+        "options": { "responseCode": 200 }
+      },
+      "id": "Display_poster",
+      "name": "UI: Sheets Events",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [ 750, 200 ]
+    }
+  ],
+  "connections": {
+    "Webhook: Kylo Telemetry": {
+      "main": [ [ { "node": "Switch by event_type", "type": "main", "index": 0 } ] ]
+    },
+    "Switch by event_type": {
+      "main": [
+        [ { "node": "Group by company_id", "type": "main", "index": 0 } ],
+        [ { "node": "Group by company_id", "type": "main", "index": 0 } ],
+        [ { "node": "Group by company_id", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Group by company_id": {
+      "main": [
+        [ { "node": "Lane: Importer", "type": "main", "index": 0 } ],
+        [ { "node": "Lane: Mover", "type": "main", "index": 0 } ],
+        [ { "node": "Lane: Poster", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Lane: Importer": { "main": [ [ { "node": "UI: Importer Events", "type": "main", "index": 0 } ] ] },
+    "Lane: Mover":     { "main": [ [ { "node": "Code: Mover Router", "type": "main", "index": 0 } ] ] },
+    "Code: Mover Router": { "main": [ [ { "node": "Code: DB Node Label", "type": "main", "index": 0 } ] ] },
+    "Code: DB Node Label": { "main": [ [ { "node": "UI: Mover & DB", "type": "main", "index": 0 } ] ] },
+    "Lane: Poster":    { "main": [ [ { "node": "Code: Sheets Node Label", "type": "main", "index": 0 } ] ] },
+    "Code: Sheets Node Label": { "main": [ [ { "node": "UI: Sheets Events", "type": "main", "index": 0 } ] ] }
+  },
+  "pinData": {},
+  "meta": { "workflowId": "kylo-telemetry-visualizer" },
+  "active": true,
+  "settings": { "timezone": "America/Chicago" }
+}
+
+

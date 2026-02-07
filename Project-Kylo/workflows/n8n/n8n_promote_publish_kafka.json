@@ -1,0 +1,89 @@
+{
+  "name": "Promote Rules → Publish (Kafka)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "Manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-380, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT company_id, db_dsn_rw, db_schema, spreadsheet_id, tab_pending, tab_active FROM control.company_config ORDER BY company_id"
+      },
+      "id": "PG_ListCompanies",
+      "name": "ListCompanies",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "credentials": {
+        "postgres": "Kylo Postgres RW"
+      },
+      "position": [-160, 0]
+    },
+    {
+      "parameters": {
+        "functionCode": "const now = new Date().toISOString();\nconst out = [];\nfor (const row of $json) {\n  const msg = {\n    event_type: 'PROMOTE_RULES',\n    version: 1,\n    company_id: row.company_id,\n    routing: {\n      db_dsn_rw: row.db_dsn_rw,\n      db_schema: row.db_schema,\n      spreadsheet_id: row.spreadsheet_id,\n      tab_pending: row.tab_pending,\n      tab_active: row.tab_active\n    },\n    created_at: now,\n    meta: {\n      producer: 'n8n@promote'\n    }\n  };\n  out.push({\n    json: {\n      key: row.company_id,\n      message: msg\n    }\n  });\n}\nreturn out;"
+      },
+      "id": "Fn_BuildPromoteMsgs",
+      "name": "BuildPromoteMsgs",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [80, 0]
+    },
+    {
+      "parameters": {
+        "topic": "rules.promote.requests",
+        "useKey": true,
+        "key": "={{ $json.key }}",
+        "value": "={{ $json.message }}"
+      },
+      "id": "Kafka_Produce_Promote",
+      "name": "Kafka Produce Promote",
+      "type": "n8n-nodes-base.kafka",
+      "typeVersion": 1,
+      "credentials": {
+        "kafka": "Redpanda Dev"
+      },
+      "position": [320, 0]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "ListCompanies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ListCompanies": {
+      "main": [
+        [
+          {
+            "node": "BuildPromoteMsgs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BuildPromoteMsgs": {
+      "main": [
+        [
+          {
+            "node": "Kafka Produce Promote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false
+}

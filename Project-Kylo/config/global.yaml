@@ -1,0 +1,59 @@
+version: 1
+
+runtime:
+  dry_run: false
+  log_level: INFO
+  timezone: America/Chicago
+
+google:
+  # Use .secrets in repo root for fresh rig; set KYLO_SECRETS_DIR env to override
+  service_account_json_path: D:\REMODEL\secrets\service_account.json
+
+database:
+  global_dsn: postgresql://postgres:kylo@localhost:5433/kylo_global
+  per_company: false
+  company_dsns: {}
+
+posting:
+  sheets:
+    apply: true
+  mark_posted: true  # Enable marking rows as posted and writing notes
+
+sheets:
+  companies:
+    - key: NUGZ
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+    - key: EMPIRE
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+    - key: PUFFIN
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+    - key: JGD
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+
+# Year-specific workbook URLs for intake and output.
+# Each watcher instance (KYLO_2025, KYLO_2026) uses active_years to filter to its year.
+year_workbooks:
+  "2025":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+  "2026":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+
+rules:
+  source: jgdtruth
+  xlsx_path: null
+  promote_on_load: false
+  management_workbook_url: null

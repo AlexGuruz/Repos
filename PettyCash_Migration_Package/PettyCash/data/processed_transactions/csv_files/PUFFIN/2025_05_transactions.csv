@@ -1,0 +1,10 @@
+transaction_id,row_number,date,initials,source,company,amount,status,matched_source,target_sheet,target_header,confidence,processing_notes,filed_date
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,low_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-20 20:13:55
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 14:07:07
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 15:13:33
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 15:52:08
+1297,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 16:20:56
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 17:32:33
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 18:16:32
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 18:29:08
+8f1a4028a44b,1350,05/11/25,JJN2,HOME DEPOT,PUFFIN,-81.93,high_confidence,HOME DEPOT,PUFFIN C.O.G.,HARDWARE,1.0,Matched to 'HOME DEPOT' with confidence 1.0,2025-07-21 19:47:23

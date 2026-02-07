@@ -1,0 +1,95 @@
+{
+  "description": "Batch Range Configuration for Petty Cash Sorter",
+  "instructions": [
+    "Fill in the 'batch_range' for each sheet where you want to use batch updates",
+    "Leave 'batch_range' as null to use individual cell updates",
+    "Format: 'A1:Z100' (start cell to end cell)",
+    "The range should cover all cells that might be updated by petty cash transactions"
+  ],
+  "sheets": {
+    "(A) CANNABIS DIST.": {
+      "batch_range": "B20:Z386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ"
+      ]
+    },
+    "(B) CANNABIS DIST.": {
+      "batch_range": "B20:Z386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ",
+        "PUFFIN"
+      ]
+    },
+    "ALLOCATED": {
+      "batch_range": "C20:K386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ"
+      ]
+    },
+    "INCOME": {
+      "batch_range": "B20:O386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ"
+      ]
+    },
+    "JGD": {
+      "batch_range": "G20:Q386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ"
+      ]
+    },
+    "NON CANNABIS": {
+      "batch_range": "B20:AD386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ"
+      ]
+    },
+    "NUGZ C.O.G.": {
+      "batch_range": "E20:U386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ",
+        "PUFFIN"
+      ]
+    },
+    "NUGZ EXPENSES": {
+      "batch_range": "B20:U386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ",
+        "PUFFIN"
+      ]
+    },
+    "PAYROLL": {
+      "batch_range": "B20:T386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ",
+        "JGD",
+        "PUFFIN"
+      ]
+    },
+    "PUFFIN C.O.G.": {
+      "batch_range": "C20:U386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ",
+        "PUFFIN"
+      ]
+    },
+    "PUFFIN EXPENSES": {
+      "batch_range": "B20:U386",
+      "description": "Target sheet for petty cash transactions",
+      "companies": [
+        "NUGZ",
+        "PUFFIN"
+      ]
+    }
+  }
+}

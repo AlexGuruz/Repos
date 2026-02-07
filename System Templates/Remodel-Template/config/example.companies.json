@@ -1,0 +1,16 @@
+{
+  "entities": [
+    {
+      "entity_id": "entity1",
+      "display_name": "Entity One",
+      "description": "Example entity configuration"
+    },
+    {
+      "entity_id": "entity2",
+      "display_name": "Entity Two",
+      "description": "Another example entity"
+    }
+  ],
+  "active_sources": ["source1", "source2"],
+  "targets": ["entity1", "entity2"]
+}

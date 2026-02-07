@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Company Pipeline Config",
+  "type": "object",
+  "properties": {
+    "company_id": { "type": "string" },
+    "display_name": { "type": "string" },
+    "workbook": { "type": "string", "description": "Google Sheets workbook URL or ID" },
+    "sheet_aliases": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Map of logical sheet names to actual sheet titles"
+    },
+    "layout_ref": { "type": "string" },
+    "rules_namespace": { "type": "string" },
+    "flush": {
+      "type": "object",
+      "properties": {
+        "max_rows": { "type": "integer", "default": 200 },
+        "max_seconds": { "type": "integer", "default": 5 }
+      },
+      "required": ["max_rows", "max_seconds"]
+    }
+  },
+  "required": ["company_id", "workbook", "sheet_aliases", "layout_ref", "rules_namespace", "flush"]
+}
+
+

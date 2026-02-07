@@ -1,0 +1,171 @@
+{
+  "name": "Kylo Telemetry Simple",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kylo-telemetry",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "kylo-telemetry"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event_type }}",
+              "operation": "equals",
+              "value2": "mover"
+            }
+          ]
+        }
+      },
+      "id": "if_mover",
+      "name": "If Mover",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event_type }}",
+              "operation": "equals",
+              "value2": "importer"
+            }
+          ]
+        }
+      },
+      "id": "if_importer",
+      "name": "If Importer",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event_type }}",
+              "operation": "equals",
+              "value2": "poster"
+            }
+          ]
+        }
+      },
+      "id": "if_poster",
+      "name": "If Poster",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { trace_id: $json.trace_id, event_type: $json.event_type, step: $json.step, company_id: $json.payload.company_id } }}",
+        "options": {}
+      },
+      "id": "respond_mover",
+      "name": "Respond Mover",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { trace_id: $json.trace_id, event_type: $json.event_type, step: $json.step, company_id: $json.payload.company_id } }}",
+        "options": {}
+      },
+      "id": "respond_importer",
+      "name": "Respond Importer",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { trace_id: $json.trace_id, event_type: $json.event_type, step: $json.step, company_id: $json.payload.company_id } }}",
+        "options": {}
+      },
+      "id": "respond_poster",
+      "name": "Respond Poster",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If Mover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Mover": {
+      "main": [
+        [
+          {
+            "node": "Respond Mover",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Importer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Importer": {
+      "main": [
+        [
+          {
+            "node": "Respond Importer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Poster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Poster": {
+      "main": [
+        [
+          {
+            "node": "Respond Poster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}

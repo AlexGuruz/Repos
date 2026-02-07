@@ -1,0 +1,175 @@
+{
+  "name": "Kylo Master – Ingest → Mover → Dashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "kylo/master-run",
+        "options": {
+          "responseData": "allEntries",
+          "responseCode": 200,
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "Webhook_Trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const body = $json;\nconst batchId = body.ingest_batch_id ? Number(body.ingest_batch_id) : null;\nreturn [{ batch_id: batchId, companies: body.companies || null, source: body.source_stream_id || 'n8n' }];"
+      },
+      "id": "Extract_Batch",
+      "name": "Extract Batch",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO control.ingest_batches(source, started_at) VALUES ($1, now()) RETURNING batch_id;",
+        "additionalFields": {
+          "queryParams": "={{[$json.source]}}"
+        }
+      },
+      "id": "Create_Batch",
+      "name": "Create Batch (if missing)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Kylo Global (ro+outbox)"
+        }
+      },
+      "position": [720, 440]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Choose existing or created batch_id\nconst existing = $json.batch_id;\nconst created = ($items(\"Create Batch (if missing)\", 0, 0).json || {}).batch_id;\nreturn [{ batch_id: existing || created }];"
+      },
+      "id": "Pick_Batch",
+      "name": "Pick Batch",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [980, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.N8N_MOVER_URL || 'http://localhost:8080'}}/webhook/kylo/move-batch",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\"ingest_batch_id\": $json.batch_id, \"companies\": $items(\"Extract Batch\", 0, 0).json.companies}"
+      },
+      "id": "Mover_HTTP",
+      "name": "Mover HTTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT company_id, last_batch_id FROM control.company_feeds ORDER BY company_id;"
+      },
+      "id": "Watermarks_SQL",
+      "name": "Watermarks SQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Kylo Global (ro+outbox)"
+        }
+      },
+      "position": [1500, 180]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT source_stream_id, COUNT(*) AS count FROM core.transactions_unified WHERE ingest_batch_id = $1 GROUP BY source_stream_id ORDER BY 1;",
+        "additionalFields": {
+          "queryParams": "={{[$json.batch_id]}}"
+        }
+      },
+      "id": "ByStream_SQL",
+      "name": "ByStream SQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Kylo Global (ro+outbox)"
+        }
+      },
+      "position": [1500, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT topic, COUNT(*) AS count FROM control.outbox_events WHERE (payload->>'ingest_batch_id')::bigint = $1 GROUP BY topic ORDER BY topic;",
+        "additionalFields": {
+          "queryParams": "={{[$json.batch_id]}}"
+        }
+      },
+      "id": "Outbox_SQL",
+      "name": "Outbox SQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Kylo Global (ro+outbox)"
+        }
+      },
+      "position": [1500, 420]
+    },
+    {
+      "parameters": {
+        "functionCode": "const batch_id = $items(\"Pick Batch\", 0, 0).json.batch_id;\nconst mover = $items(\"Mover HTTP\", 0, 0).json;\nconst watermarks = $items(\"Watermarks SQL\").map(i => i.json);\nconst byStream = $items(\"ByStream SQL\").map(i => i.json);\nconst outbox = $items(\"Outbox SQL\").map(i => i.json);\nreturn [{ dashboard: { batch_id, results: mover.results || [], errors: mover.errors || [], watermarks, byStream, outbox } }];"
+      },
+      "id": "Assemble_Dashboard",
+      "name": "Assemble Dashboard",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1760, 300]
+    }
+  ],
+  "connections": {
+    "Extract Batch": {
+      "main": [ [ { "node": "Create Batch (if missing)", "type": "main", "index": 0 } ] ]
+    },
+    "Webhook Trigger": {
+      "main": [ [ { "node": "Extract Batch", "type": "main", "index": 0 } ] ]
+    },
+    "Create Batch (if missing)": {
+      "main": [ [ { "node": "Pick Batch", "type": "main", "index": 0 } ] ]
+    },
+    "Pick Batch": {
+      "main": [ [ { "node": "Mover HTTP", "type": "main", "index": 0 }, { "node": "ByStream SQL", "type": "main", "index": 0 }, { "node": "Outbox SQL", "type": "main", "index": 0 }, { "node": "Watermarks SQL", "type": "main", "index": 0 } ] ]
+    },
+    "Mover HTTP": {
+      "main": [ [ { "node": "Assemble Dashboard", "type": "main", "index": 0 } ] ]
+    },
+    "ByStream SQL": {
+      "main": [ [ { "node": "Assemble Dashboard", "type": "main", "index": 0 } ] ]
+    },
+    "Outbox SQL": {
+      "main": [ [ { "node": "Assemble Dashboard", "type": "main", "index": 0 } ] ]
+    },
+    "Watermarks SQL": {
+      "main": [ [ { "node": "Assemble Dashboard", "type": "main", "index": 0 } ] ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {}
+}
+
+

@@ -1,0 +1,25 @@
+# Growflow configuration example
+# Copy to config.yaml and fill in values
+
+growflow:
+  # API base URL (adjust for GrowFlow production/sandbox)
+  base_url: https://api.growflow.com
+  api_key: YOUR_API_KEY
+
+# Google Sheets (if syncing to expense sheets)
+google:
+  # Service account path (or use GOOGLE_APPLICATION_CREDENTIALS)
+  service_account_path: config/service_account.json
+  # NUGZ EXPENSES spreadsheet (Grow Flow is column 10)
+  spreadsheet_id: YOUR_SPREADSHEET_ID
+
+# Sync options
+sync:
+  # How often to check for updates (minutes)
+  interval_minutes: 60
+
+# COG allocation - sales CSV destination
+# Drive folder watched by cog-allocation-system drive_watcher
+google_drive:
+  sales_csv_folder_id: "1b1XgCjqlcS7UeGeL7oucH92xeuIwxKrP"
+  # https://drive.google.com/drive/folders/1b1XgCjqlcS7UeGeL7oucH92xeuIwxKrP

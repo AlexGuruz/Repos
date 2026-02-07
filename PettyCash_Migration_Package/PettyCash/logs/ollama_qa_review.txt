@@ -1,0 +1,46 @@
+OLLAMA REVIEW OF SYSTEM LOGIC Q&A
+========================================
+
+After analyzing the Q&A file, I have identified several areas that are critical for building a complete system, which are missing or could be more specific and detailed. Here are my suggestions:
+
+**Critical Missing Questions:**
+
+1. **Data Validation:** What validation rules should be applied to ensure data integrity? For example, how will the system validate that amounts are within expected ranges or that dates are valid?
+2. **Error Handling:** How will the system handle errors that occur during processing, such as network timeouts or API quota errors? Should there be a retry mechanism or error reporting features?
+3. **Security and Access Control:** What security measures should be implemented to ensure data access and authorization? Are there any specific authentication requirements or service account files needed?
+4. **Performance Optimization:** How will the system optimize performance for large datasets or high-volume processing? Should there be mechanisms for caching, batch processing, or parallelization?
+5. **Audit Trails and Logging:** What audit trails and logging features should be implemented to track changes, errors, and system activity?
+
+**Specificity and Detail:**
+
+1. **Target Cell Finding Logic:** How will the system determine which target cells are relevant to a given transaction? Should there be rules for handling multiple transactions with the same date/header combination?
+2. **JGD Truth Rule Management:** What specific rules should be implemented in JGD Truth, such as partial matching for source names or exact matches?
+3. **Data Reference and Lookup:** How will the system reference existing data in target sheets? Should there be mechanisms for validating that target headers exist before processing?
+
+**Edge Cases and Scenarios:**
+
+1. **Empty Spreadsheets:** What should happen if a spreadsheet is empty or contains only blank rows?
+2. **Invalid Data:** How will the system handle invalid data, such as non-numeric amounts or invalid dates?
+3. **Duplicate Transactions:** How will the system handle duplicate transactions with different headers or amounts?
+
+**Technical Implementation Details:**
+
+1. **API Integration:** What APIs should be integrated to interact with external systems, and how will authentication and authorization be handled?
+2. **Database Schema:** What database schema should be used to store data, and how will it be optimized for performance?
+3. **Data Formats:** Which data formats (e.g., CSV, JSON) should be supported, and how will they be converted between formats?
+
+**Business Logic and Workflow Steps:**
+
+1. **Transaction Processing:** What specific steps should occur during transaction processing, such as validating amounts or checking for duplicate transactions?
+2. **JGD Truth Rule Application:** How will the system apply JGD Truth rules to determine which target cells are relevant to a given transaction?
+3. **Target Sheet Updates:** What updates should be made to target sheets after a transaction has been processed?
+
+To address these areas, I suggest adding the following questions:
+
+1. Q101: What validation rules should be applied to ensure data integrity?
+2. Q102: How will the system handle errors that occur during processing, such as network timeouts or API quota errors?
+3. Q103: What security measures should be implemented to ensure data access and authorization?
+4. Q104: How will the system optimize performance for large datasets or high-volume processing?
+5. Q105: What audit trails and logging features should be implemented to track changes, errors, and system activity?
+
+These questions can help provide more clarity on specific implementation details, technical requirements, and business logic, ensuring a comprehensive understanding of the Petty Cash Sorter system's architecture.

@@ -1,0 +1,8 @@
+data/csv_dump/*.csv
+data/state/*.json
+data/logs/*.log
+config/service_account.json
+*.pyc
+__pycache__/
+.venv/
+venv/

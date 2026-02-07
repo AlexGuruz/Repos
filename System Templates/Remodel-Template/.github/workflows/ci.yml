@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then echo "PG ready"; exit 0; fi; sleep 2; done; exit 1
+
+      - name: Create test DBs
+        run: |
+          createdb -h localhost -U postgres app_global || true
+          createdb -h localhost -U postgres app_entity_a || true
+          createdb -h localhost -U postgres app_entity_b || true
+        env:
+          PGPASSWORD: postgres
+
+      - name: Run unit tests
+        run: pytest -m "not integration" -q
+
+      - name: Run integration tests
+        run: pytest -m "integration" -q
+        env:
+          APP_GLOBAL_DSN: postgresql://postgres:postgres@localhost:5432/app_global
+          APP_ENTITY_A_DSN: postgresql://postgres:postgres@localhost:5432/app_entity_a
+          APP_ENTITY_B_DSN: postgresql://postgres:postgres@localhost:5432/app_entity_b

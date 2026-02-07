@@ -1,0 +1,107 @@
+{
+  "name": "Kylo — Brands Mapper (multi-tab, header-aware)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "kylo/brands-map",
+        "options": {
+          "responseData": "json",
+          "responseCode": 200,
+          "responseMode": "lastNode",
+          "responsePropertyName": "result"
+        }
+      },
+      "id": "Webhook_Trigger",
+      "name": "Webhook (brands mapping)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "webhookId": "kylo-brands-map",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "functionCode": "// Expect body: { spreadsheetId, mappings:[{readRange, outputRange, hasHeader=true, brandColumnIndex:1, brandHeaderName:'Brand'}] }\nconst body = $json.body || {};\nconst spreadsheetId = body.spreadsheetId;\nconst mappings = Array.isArray(body.mappings) ? body.mappings : [];\nconst items = mappings.map(m => ({ json: { spreadsheetId, mapping: { readRange: m.readRange, outputRange: m.outputRange, hasHeader: m.hasHeader !== false, brandColumnIndex: m.brandColumnIndex || null, brandHeaderName: m.brandHeaderName || null } } }));\nreturn items.length ? items : [{ json: { spreadsheetId, mapping: { readRange: null, outputRange: null, hasHeader: true, brandColumnIndex: 1, brandHeaderName: null } } }];"
+      },
+      "id": "Function_ExpandMappings",
+      "name": "Function → expand mappings",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [480, 200]
+    },
+    {
+      "parameters": {
+        "operation": "getMany",
+        "sheetId": "={{$json.spreadsheetId}}",
+        "range": "={{$json.mapping.readRange}}",
+        "options": { "rawData": true }
+      },
+      "id": "GS_Read",
+      "name": "Google Sheets → Read",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [760, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Pull mapping for the same item index\nconst idx = $itemIndex;\nconst mapItem = $items(\"Function → expand mappings\").at(idx).json;\nconst mapping = mapItem.mapping || {};\nconst spreadsheetId = mapItem.spreadsheetId;\n// Read values from GS_Read\nconst values = ($json && $json.data && Array.isArray($json.data.values)) ? $json.data.values : [];\n// Determine brand column index (1-based provided or by header name)\nlet brandIndex1 = null;\nif (typeof mapping.brandColumnIndex === 'number' && mapping.brandColumnIndex > 0) {\n  brandIndex1 = mapping.brandColumnIndex;\n} else if (mapping.brandHeaderName && values.length) {\n  const headerRow = values[0] || [];\n  const pos = headerRow.findIndex(h => String(h || '').trim().toLowerCase() === String(mapping.brandHeaderName || '').trim().toLowerCase());\n  brandIndex1 = pos >= 0 ? pos + 1 : 1;\n} else {\n  brandIndex1 = 1;\n}\nconst colIdx0 = Math.max(0, brandIndex1 - 1);\nconst rows = mapping.hasHeader ? values.slice(1) : values;\nconst set = new Set();\nfor (const r of rows) {\n  const brand = (r && r[colIdx0] != null) ? String(r[colIdx0]).trim() : '';\n  if (brand) set.add(brand);\n}\nconst brands = Array.from(set).sort((a,b)=> a.localeCompare(b));\nconst brands2d = brands.map(b => [b]);\nreturn [{ json: { spreadsheetId, mapping, brandColumnIndexResolved: brandIndex1, count: brands.length, brands, brands2d } }];"
+      },
+      "id": "Function_UniqueSort",
+      "name": "Function → unique + sort per mapping",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1040, 200]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "sheetId": "={{$json.spreadsheetId}}",
+        "range": "={{$json.mapping.outputRange}}",
+        "key": "=",
+        "valueInputMode": "RAW",
+        "options": {},
+        "values": "={{$json.brands2d}}"
+      },
+      "id": "GS_Write",
+      "name": "Google Sheets → Write brands",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1320, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Aggregate a summary across all items\nconst all = $items(\"Function → unique + sort per mapping\").map(i => i.json);\nreturn [{ json: { result: { ok: true, results: all.map(r => ({ outputRange: r.mapping.outputRange, brandColumnIndexResolved: r.brandColumnIndexResolved, count: r.count })) } } }];"
+      },
+      "id": "Function_Assemble",
+      "name": "Function → assemble result",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1580, 200]
+    },
+    {
+      "parameters": {
+        "options": { "responseCode": 200 }
+      },
+      "id": "Webhook_Reply",
+      "name": "Webhook Reply (JSON)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1820, 200]
+    }
+  ],
+  "connections": {
+    "Webhook (brands mapping)": { "main": [[{ "node": "Function → expand mappings", "type": "main", "index": 0 }]] },
+    "Function → expand mappings": { "main": [[{ "node": "Google Sheets → Read", "type": "main", "index": 0 }]] },
+    "Google Sheets → Read": { "main": [[{ "node": "Function → unique + sort per mapping", "type": "main", "index": 0 }]] },
+    "Function → unique + sort per mapping": { "main": [[{ "node": "Google Sheets → Write brands", "type": "main", "index": 0 }]] },
+    "Google Sheets → Write brands": { "main": [[{ "node": "Function → assemble result", "type": "main", "index": 0 }]] },
+    "Function → assemble result": { "main": [[{ "node": "Webhook Reply (JSON)", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "instanceId": "kylo-n8n" },
+  "tags": [{ "name": "kylo" }, { "name": "sheets" }]
+}
+
+

@@ -1,0 +1,295 @@
+{
+  "name": "Kylo Telemetry Visualizer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kylo-telemetry",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "kylo-telemetry"
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst timestamp = new Date(e.ts * 1000).toISOString();\nconst trace_short = e.trace_id.split('-').slice(-2).join('-');\nconst info = {\n  timestamp: timestamp,\n  trace_short: trace_short,\n  event_type: e.event_type,\n  step: e.step,\n  company_id: e.payload?.company_id || 'unknown',\n  batch_size: e.payload?.batch_size || 0,\n  enqueued: e.payload?.enqueued || 0,\n  lane: e.event_type,\n  raw: e\n};\nreturn [{json: info}];"
+      },
+      "id": "code_event_logger",
+      "name": "Code: Event Logger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event_type }}",
+              "operation": "equals",
+              "value2": "importer"
+            }
+          ]
+        }
+      },
+      "id": "if_importer",
+      "name": "If Importer",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event_type }}",
+              "operation": "equals",
+              "value2": "mover"
+            }
+          ]
+        }
+      },
+      "id": "if_mover",
+      "name": "If Mover",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event_type }}",
+              "operation": "equals",
+              "value2": "poster"
+            }
+          ]
+        }
+      },
+      "id": "if_poster",
+      "name": "If Poster",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst step = e.step;\nconst cid = e.payload?.company_id;\nconst label = step === 'file_loaded' ? '📥 File: Loaded' : \n               step === 'rules_promoted' ? '📋 Rules: Promoted' : \n               step === 'active_updated' ? '✅ Active: Updated' : \n               step === 'validation_started' ? '🔍 Validation: Started' :\n               step === 'validation_completed' ? '🔍 Validation: Completed' :\n               step === 'duplicates_found' ? '⚠️ Duplicates: Found' : step;\nconst info = {\n  trace: e.trace_short,\n  step: label,\n  cid: cid,\n  rules_count: e.payload?.rules_count || 0,\n  rows_processed: e.payload?.rows_processed || 0,\n  duplicates_skipped: e.payload?.duplicates_skipped || 0,\n  version: e.payload?.version || 0,\n  payload: e.payload,\n  lane: 'importer',\n  timestamp: e.timestamp\n};\nreturn [{json: info}];"
+      },
+      "id": "code_importer_processor",
+      "name": "Code: Importer Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst step = e.step;\nconst cid = e.payload?.company_id;\nconst batch_size = e.payload?.batch_size || 0;\nconst enqueued = e.payload?.enqueued || 0;\nconst inserted = e.payload?.inserted || 0;\nconst updated = e.payload?.updated || 0;\nconst node = step === 'upsert_started' ? '🔄 PG: Upsert Started' : \n              step === 'rows_enqueued' ? '📦 PG: Rows Enqueued' : \n              step === 'watermark_advanced' ? '🏷️ PG: Watermark Advanced' : \n              step === 'batch_fetched' ? '📥 Batch: Fetched' :\n              step === 'company_processing_started' ? '🏢 Company: Processing Started' :\n              step === 'company_processing_completed' ? '🏢 Company: Processing Completed' :\n              step === 'transaction_processed' ? '💳 Transaction: Processed' : step;\nconst info = {\n  trace: e.trace_short,\n  step: node,\n  cid: cid,\n  batch_size: batch_size,\n  enqueued: enqueued,\n  inserted: inserted,\n  updated: updated,\n  batch_id: e.payload?.batch_id || 0,\n  watermark_updated: e.payload?.watermark_updated || false,\n  payload: e.payload,\n  lane: 'mover',\n  timestamp: e.timestamp\n};\nreturn [{json: info}];"
+      },
+      "id": "code_mover_processor",
+      "name": "Code: Mover Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst step = e.step;\nconst cid = e.payload?.company_id;\nconst updates_count = e.payload?.updates_count || 0;\nconst response_time = e.payload?.response_time_ms || 0;\nconst label = step === 'batch_update_built' ? '📊 Sheets: Batch Built' : \n               step === 'batch_update_sent' ? '📤 Sheets: Batch Sent' : \n               step === 'sheets_connected' ? '🔗 Sheets: Connected' :\n               step === 'projection_calculated' ? '🧮 Projection: Calculated' :\n               step === 'cells_updated' ? '📝 Cells: Updated' :\n               step === 'sheets_response_received' ? '📨 Sheets: Response Received' : step;\nconst info = {\n  trace: e.trace_short,\n  step: label,\n  cid: cid,\n  updates_count: updates_count,\n  response_time_ms: response_time,\n  batch_id: e.payload?.batch_id || '',\n  success: e.payload?.success || false,\n  sheets_updated: e.payload?.sheets_updated || [],\n  payload: e.payload,\n  lane: 'poster',\n  timestamp: e.timestamp\n};\nreturn [{json: info}];"
+      },
+      "id": "code_poster_processor",
+      "name": "Code: Poster Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { trace_id: $json.trace, event_type: 'importer', step: $json.step, company_id: $json.cid, rules_count: $json.rules_count, rows_processed: $json.rows_processed, duplicates_skipped: $json.duplicates_skipped, version: $json.version, lane: $json.lane, timestamp: $json.timestamp, message: 'Importer event processed' } }}",
+        "options": {}
+      },
+      "id": "respond_importer",
+      "name": "Respond Importer",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { trace_id: $json.trace, event_type: 'mover', step: $json.step, company_id: $json.cid, batch_size: $json.batch_size, enqueued: $json.enqueued, inserted: $json.inserted, updated: $json.updated, batch_id: $json.batch_id, watermark_updated: $json.watermark_updated, lane: $json.lane, timestamp: $json.timestamp, message: 'Mover event processed' } }}",
+        "options": {}
+      },
+      "id": "respond_mover",
+      "name": "Respond Mover",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { trace_id: $json.trace, event_type: 'poster', step: $json.step, company_id: $json.cid, updates_count: $json.updates_count, response_time_ms: $json.response_time_ms, batch_id: $json.batch_id, success: $json.success, sheets_updated: $json.sheets_updated, lane: $json.lane, timestamp: $json.timestamp, message: 'Poster event processed' } }}",
+        "options": {}
+      },
+      "id": "respond_poster",
+      "name": "Respond Poster",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = $json;\nconst workflow_summary = {\n  total_events: 1,\n  last_event: {\n    timestamp: e.timestamp,\n    event_type: e.event_type,\n    company_id: e.company_id,\n    step: e.step,\n    trace_short: e.trace_short\n  },\n  system_status: 'active',\n  message: `Event logged: ${e.event_type} - ${e.step} for ${e.company_id}`\n};\nreturn [{json: workflow_summary}];"
+      },
+      "id": "code_workflow_summary",
+      "name": "Code: Workflow Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { message: 'Event logged', summary: $json, timestamp: $json.last_event.timestamp } }}",
+        "options": {}
+      },
+      "id": "respond_summary",
+      "name": "Respond Summary",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code: Event Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Event Logger": {
+      "main": [
+        [
+          {
+            "node": "If Importer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Importer": {
+      "main": [
+        [
+          {
+            "node": "Code: Importer Processor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Mover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Mover": {
+      "main": [
+        [
+          {
+            "node": "Code: Mover Processor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Poster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Poster": {
+      "main": [
+        [
+          {
+            "node": "Code: Poster Processor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Workflow Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Importer Processor": {
+      "main": [
+        [
+          {
+            "node": "Respond Importer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Mover Processor": {
+      "main": [
+        [
+          {
+            "node": "Respond Mover",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Poster Processor": {
+      "main": [
+        [
+          {
+            "node": "Respond Poster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Workflow Summary": {
+      "main": [
+        [
+          {
+            "node": "Respond Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}

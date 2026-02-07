@@ -1,0 +1,10 @@
+{
+  "operation": "transactions_preprocessed",
+  "completed": 2,
+  "total": 5,
+  "timestamp": 1752968353.8628983,
+  "context": {
+    "step": "preprocessing"
+  },
+  "retry_count": 0
+}

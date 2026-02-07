@@ -1,0 +1,10 @@
+# Use project-local .secrets/ for fresh rig (no D:\REMODEL\secrets)
+# Add service_account.json to .secrets/ for Google Sheets access
+
+services:
+  kafka-consumer-txns:
+    volumes:
+      - ./.secrets:/secrets:ro
+  kafka-consumer-promote:
+    volumes:
+      - ./.secrets:/secrets:ro

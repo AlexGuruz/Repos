@@ -1,0 +1,95 @@
+{
+  "name": "Kylo — Batch Mover (Cron Polling)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "hours": 0, "minutes": 5 }
+          ]
+        }
+      },
+      "id": "Cron_Trigger",
+      "name": "Cron (every 5m)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [200, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT (payload->>'ingest_batch_id')::bigint AS ingest_batch_id\nFROM control.outbox_events\nWHERE topic='company.feed.updated' AND delivered_at IS NULL\nORDER BY 1 LIMIT 10;"
+      },
+      "id": "PG_SelectPendingBatches",
+      "name": "Postgres → select pending batches",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [480, 200],
+      "credentials": {
+        "postgres": "Kylo Global (ro+outbox)"
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{$env.N8N_MOVER_URL}}/move-batch",
+        "options": { "timeout": 900000 },
+        "allowUnauthorizedCerts": false,
+        "sendBody": true,
+        "jsonParameters": true,
+        "authentication": "none",
+        "requestMethod": "POST",
+        "jsonBody": "={\"ingest_batch_id\": {{$json.ingest_batch_id}}}"
+      },
+      "id": "HTTP_MoverCall",
+      "name": "HTTP → Mover (per pending batch)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [760, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE control.outbox_events\nSET delivered_at = now()\nWHERE topic='company.feed.updated'\n  AND (payload->>'ingest_batch_id')::bigint = {{$json[\"ingest_batch_id\"]}}\n  AND delivered_at IS NULL;"
+      },
+      "id": "PG_MarkDelivered",
+      "name": "Postgres → mark delivered (by batch)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1040, 200],
+      "credentials": {
+        "postgres": "Kylo Global (ro+outbox)"
+      },
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Cron (every 5m)": {
+      "main": [
+        [
+          { "node": "Postgres → select pending batches", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Postgres → select pending batches": {
+      "main": [
+        [
+          { "node": "HTTP → Mover (per pending batch)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "HTTP → Mover (per pending batch)": {
+      "main": [
+        [
+          { "node": "Postgres → mark delivered (by batch)", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "instanceId": "kylo-n8n" },
+  "tags": [ { "name": "kylo" }, { "name": "mover" } ]
+}
+
+

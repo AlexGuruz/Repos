@@ -1,0 +1,1373 @@
+{
+  "JGD": {
+    "ATM DEPOSIT": {
+      "row": 19,
+      "col": 2,
+      "sheet": "JGD"
+    },
+    "RETURN FEE": {
+      "row": 19,
+      "col": 3,
+      "sheet": "JGD"
+    },
+    "ATM LOAD": {
+      "row": 19,
+      "col": 7,
+      "sheet": "JGD"
+    },
+    "CLOVER": {
+      "row": 19,
+      "col": 8,
+      "sheet": "JGD"
+    },
+    "SERVICE FEE": {
+      "row": 19,
+      "col": 9,
+      "sheet": "JGD"
+    },
+    "UTILITIES": {
+      "row": 19,
+      "col": 10,
+      "sheet": "JGD"
+    },
+    "PAYROLL": {
+      "row": 19,
+      "col": 11,
+      "sheet": "JGD"
+    },
+    "SWIFT FINANCIAL": {
+      "row": 19,
+      "col": 12,
+      "sheet": "JGD"
+    },
+    "AT&T (JASON)": {
+      "row": 19,
+      "col": 13,
+      "sheet": "JGD"
+    },
+    "AT&T (GREG)": {
+      "row": 19,
+      "col": 14,
+      "sheet": "JGD"
+    },
+    "MICROSOFT": {
+      "row": 19,
+      "col": 15,
+      "sheet": "JGD"
+    },
+    "TAXES": {
+      "row": 19,
+      "col": 16,
+      "sheet": "JGD"
+    },
+    "GROK AI": {
+      "row": 19,
+      "col": 17,
+      "sheet": "JGD"
+    },
+    "INCOME": {
+      "row": 19,
+      "col": 18,
+      "sheet": "JGD"
+    },
+    "EXPENSE": {
+      "row": 19,
+      "col": 19,
+      "sheet": "JGD"
+    },
+    "TOTAL": {
+      "row": 19,
+      "col": 20,
+      "sheet": "JGD"
+    }
+  },
+  "ALLOCATED": {
+    "INT.": {
+      "row": 19,
+      "col": 2,
+      "sheet": "ALLOCATED"
+    },
+    "MELVIN": {
+      "row": 19,
+      "col": 3,
+      "sheet": "ALLOCATED"
+    },
+    "SIGNAGE": {
+      "row": 19,
+      "col": 4,
+      "sheet": "ALLOCATED"
+    },
+    "TREES": {
+      "row": 19,
+      "col": 5,
+      "sheet": "ALLOCATED"
+    },
+    "JW": {
+      "row": 19,
+      "col": 6,
+      "sheet": "ALLOCATED"
+    },
+    "BIFFLE": {
+      "row": 19,
+      "col": 7,
+      "sheet": "ALLOCATED"
+    }
+  },
+  "BALANCE": {
+    "INCOME": {
+      "row": 19,
+      "col": 2,
+      "sheet": "BALANCE"
+    },
+    "JGD": {
+      "row": 19,
+      "col": 3,
+      "sheet": "BALANCE"
+    },
+    "NUGZ C.O.G.": {
+      "row": 19,
+      "col": 4,
+      "sheet": "BALANCE"
+    },
+    "NUGZ EXPENSES": {
+      "row": 19,
+      "col": 5,
+      "sheet": "BALANCE"
+    },
+    "PUFFIN C.O.G.": {
+      "row": 19,
+      "col": 7,
+      "sheet": "BALANCE"
+    },
+    "PUFFIN EXPENSES": {
+      "row": 19,
+      "col": 8,
+      "sheet": "BALANCE"
+    },
+    "710 C.O.G.": {
+      "row": 19,
+      "col": 10,
+      "sheet": "BALANCE"
+    },
+    "710 EXPENSES": {
+      "row": 19,
+      "col": 11,
+      "sheet": "BALANCE"
+    },
+    "COMMISION": {
+      "row": 19,
+      "col": 13,
+      "sheet": "BALANCE"
+    },
+    "CC PAYMENTS": {
+      "row": 19,
+      "col": 15,
+      "sheet": "BALANCE"
+    },
+    "DAILY TOTAL": {
+      "row": 19,
+      "col": 16,
+      "sheet": "BALANCE"
+    },
+    "PETTIE CASH": {
+      "row": 19,
+      "col": 18,
+      "sheet": "BALANCE"
+    },
+    "BANK ACCT": {
+      "row": 19,
+      "col": 19,
+      "sheet": "BALANCE"
+    },
+    "TOTAL": {
+      "row": 19,
+      "col": 20,
+      "sheet": "BALANCE"
+    }
+  },
+  "INCOME": {
+    "JGD INCOME": {
+      "row": 19,
+      "col": 2,
+      "sheet": "INCOME"
+    },
+    "( N) CASH SALES": {
+      "row": 19,
+      "col": 3,
+      "sheet": "INCOME"
+    },
+    "(N) OTHER SALES": {
+      "row": 19,
+      "col": 4,
+      "sheet": "INCOME"
+    },
+    "SQUARE": {
+      "row": 19,
+      "col": 5,
+      "sheet": "INCOME"
+    },
+    "SQUARE FEE 2.6+.10": {
+      "row": 19,
+      "col": 6,
+      "sheet": "INCOME"
+    },
+    "VENMO": {
+      "row": 19,
+      "col": 7,
+      "sheet": "INCOME"
+    },
+    "OTHER TIPS": {
+      "row": 19,
+      "col": 8,
+      "sheet": "INCOME"
+    },
+    "(N) WHOLESALE": {
+      "row": 19,
+      "col": 9,
+      "sheet": "INCOME"
+    },
+    "REGISTERS": {
+      "row": 19,
+      "col": 10,
+      "sheet": "INCOME"
+    },
+    "STONED PROJECT": {
+      "row": 19,
+      "col": 11,
+      "sheet": "INCOME"
+    },
+    "(P) SALES": {
+      "row": 19,
+      "col": 12,
+      "sheet": "INCOME"
+    },
+    "(710) SALES": {
+      "row": 19,
+      "col": 13,
+      "sheet": "INCOME"
+    },
+    "INVESTMENT": {
+      "row": 19,
+      "col": 14,
+      "sheet": "INCOME"
+    },
+    "INTEREST": {
+      "row": 19,
+      "col": 15,
+      "sheet": "INCOME"
+    },
+    "Running total": {
+      "row": 19,
+      "col": 16,
+      "sheet": "INCOME"
+    }
+  },
+  "CONSIGNMENT": {
+    "INT.": {
+      "row": 19,
+      "col": 2,
+      "sheet": "CONSIGNMENT"
+    },
+    "HIGH VOLTAGE": {
+      "row": 19,
+      "col": 3,
+      "sheet": "CONSIGNMENT"
+    },
+    "CITY LIMITS": {
+      "row": 19,
+      "col": 4,
+      "sheet": "CONSIGNMENT"
+    },
+    "ALLTIME RESALE": {
+      "row": 19,
+      "col": 5,
+      "sheet": "CONSIGNMENT"
+    },
+    "DOC FERGUSON": {
+      "row": 19,
+      "col": 6,
+      "sheet": "CONSIGNMENT"
+    },
+    "WATERCOLOR LABS": {
+      "row": 19,
+      "col": 7,
+      "sheet": "CONSIGNMENT"
+    }
+  },
+  "NUGZ C.O.G.": {
+    "(MJ) PRODUCTS": {
+      "row": 19,
+      "col": 2,
+      "sheet": "NUGZ C.O.G."
+    },
+    "(NON-MJ) PROD.": {
+      "row": 19,
+      "col": 3,
+      "sheet": "NUGZ C.O.G."
+    },
+    "NUGZ PAYROLL": {
+      "row": 19,
+      "col": 4,
+      "sheet": "NUGZ C.O.G."
+    },
+    "FIRE SAFETY": {
+      "row": 19,
+      "col": 5,
+      "sheet": "NUGZ C.O.G."
+    },
+    "AMAZON": {
+      "row": 19,
+      "col": 6,
+      "sheet": "NUGZ C.O.G."
+    },
+    "WALMART": {
+      "row": 19,
+      "col": 7,
+      "sheet": "NUGZ C.O.G."
+    },
+    "HARDWARE": {
+      "row": 19,
+      "col": 8,
+      "sheet": "NUGZ C.O.G."
+    },
+    "SAMS": {
+      "row": 19,
+      "col": 9,
+      "sheet": "NUGZ C.O.G."
+    },
+    "OMMA": {
+      "row": 19,
+      "col": 10,
+      "sheet": "NUGZ C.O.G."
+    },
+    "OBNDD": {
+      "row": 19,
+      "col": 11,
+      "sheet": "NUGZ C.O.G."
+    },
+    "FUEL": {
+      "row": 19,
+      "col": 12,
+      "sheet": "NUGZ C.O.G."
+    },
+    "FACEBOOK (MP)": {
+      "row": 19,
+      "col": 13,
+      "sheet": "NUGZ C.O.G."
+    },
+    "PARKING METER": {
+      "row": 19,
+      "col": 14,
+      "sheet": "NUGZ C.O.G."
+    },
+    "MISC.": {
+      "row": 19,
+      "col": 15,
+      "sheet": "NUGZ C.O.G."
+    },
+    "HEALTH DEPARTMENT": {
+      "row": 19,
+      "col": 16,
+      "sheet": "NUGZ C.O.G."
+    },
+    "METRC TAGS": {
+      "row": 19,
+      "col": 17,
+      "sheet": "NUGZ C.O.G."
+    },
+    "TESTING": {
+      "row": 19,
+      "col": 18,
+      "sheet": "NUGZ C.O.G."
+    },
+    "SALES TAX": {
+      "row": 19,
+      "col": 19,
+      "sheet": "NUGZ C.O.G."
+    },
+    "ESTIMATED TAX": {
+      "row": 19,
+      "col": 20,
+      "sheet": "NUGZ C.O.G."
+    },
+    "MJ TAX": {
+      "row": 19,
+      "col": 21,
+      "sheet": "NUGZ C.O.G."
+    },
+    "Total": {
+      "row": 19,
+      "col": 22,
+      "sheet": "NUGZ C.O.G."
+    }
+  },
+  "NUGZ EXPENSES": {
+    "RENT": {
+      "row": 19,
+      "col": 2,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "FARMERS INS.": {
+      "row": 19,
+      "col": 3,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "UTILITIES": {
+      "row": 19,
+      "col": 4,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "ADT": {
+      "row": 19,
+      "col": 5,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "INTERNET": {
+      "row": 19,
+      "col": 6,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "SQUARE": {
+      "row": 19,
+      "col": 7,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "METRC FEE": {
+      "row": 19,
+      "col": 8,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "POS SYSTEM(BLEUM)": {
+      "row": 19,
+      "col": 9,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "LEAFLY": {
+      "row": 19,
+      "col": 10,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "MOMENTUM": {
+      "row": 19,
+      "col": 11,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "CANVA": {
+      "row": 19,
+      "col": 12,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "SPOTIFY": {
+      "row": 19,
+      "col": 13,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "PLATE PAY": {
+      "row": 19,
+      "col": 14,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "(MJ) WASTE": {
+      "row": 19,
+      "col": 15,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "YOUTUBE": {
+      "row": 19,
+      "col": 16,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "OFFICE SUPPLIES": {
+      "row": 19,
+      "col": 17,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "LANDLINE": {
+      "row": 19,
+      "col": 18,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "WEBSITE": {
+      "row": 19,
+      "col": 19,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "FEES": {
+      "row": 19,
+      "col": 20,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "ALLOCATED": {
+      "row": 19,
+      "col": 21,
+      "sheet": "NUGZ EXPENSES"
+    },
+    "Total": {
+      "row": 19,
+      "col": 22,
+      "sheet": "NUGZ EXPENSES"
+    }
+  },
+  "PUFFIN C.O.G.": {
+    "PUFFIN PAYROLL": {
+      "row": 19,
+      "col": 2,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "AMAZON": {
+      "row": 19,
+      "col": 3,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "BAGS": {
+      "row": 19,
+      "col": 4,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "NUTRIENTS": {
+      "row": 19,
+      "col": 5,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "SOIL": {
+      "row": 19,
+      "col": 6,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "FUEL": {
+      "row": 19,
+      "col": 7,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "GROW SUPPLY": {
+      "row": 19,
+      "col": 8,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "TESTING": {
+      "row": 19,
+      "col": 9,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "HARDWARE": {
+      "row": 19,
+      "col": 10,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "EQUIPMENT": {
+      "row": 19,
+      "col": 11,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "MAINTENANCE": {
+      "row": 19,
+      "col": 12,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "MISC.": {
+      "row": 19,
+      "col": 13,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "OFFICE": {
+      "row": 19,
+      "col": 14,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "PARTS": {
+      "row": 19,
+      "col": 15,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "TRACTOR": {
+      "row": 19,
+      "col": 16,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "WALMART": {
+      "row": 19,
+      "col": 17,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "METRC TAGS": {
+      "row": 19,
+      "col": 18,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "OMMA": {
+      "row": 19,
+      "col": 19,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "OBNDD": {
+      "row": 19,
+      "col": 20,
+      "sheet": "PUFFIN C.O.G."
+    },
+    "Total": {
+      "row": 19,
+      "col": 22,
+      "sheet": "PUFFIN C.O.G."
+    }
+  },
+  "PUFFIN EXPENSES": {
+    "MORTGAGE": {
+      "row": 19,
+      "col": 2,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "PROPERTY INS.": {
+      "row": 19,
+      "col": 3,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "ELECTRIC": {
+      "row": 19,
+      "col": 4,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "INTERNET": {
+      "row": 19,
+      "col": 5,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "OPTIMUM": {
+      "row": 19,
+      "col": 6,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "RO STYSTEM": {
+      "row": 19,
+      "col": 7,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "WASTE DISP.": {
+      "row": 19,
+      "col": 8,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "LINDE Co2": {
+      "row": 19,
+      "col": 9,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "LEGAL": {
+      "row": 19,
+      "col": 10,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "QUICK BOOKS": {
+      "row": 19,
+      "col": 11,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "AT&T": {
+      "row": 19,
+      "col": 12,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "TESLA": {
+      "row": 19,
+      "col": 13,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "SUPERCHARGER": {
+      "row": 19,
+      "col": 14,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "TRACTOR": {
+      "row": 19,
+      "col": 15,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "EGOV.COM": {
+      "row": 19,
+      "col": 16,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "ALLOCATED TREES": {
+      "row": 19,
+      "col": 17,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "ALLOCATED MELVIN": {
+      "row": 19,
+      "col": 18,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "METRC FEE": {
+      "row": 19,
+      "col": 19,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "(MJ) WASTE": {
+      "row": 19,
+      "col": 20,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "TAXES": {
+      "row": 19,
+      "col": 21,
+      "sheet": "PUFFIN EXPENSES"
+    },
+    "Total": {
+      "row": 19,
+      "col": 22,
+      "sheet": "PUFFIN EXPENSES"
+    }
+  },
+  "710 EMPIRE C.O.G.": {
+    "710 PAYROLL": {
+      "row": 19,
+      "col": 2,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "AMAZON": {
+      "row": 19,
+      "col": 3,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "CREST": {
+      "row": 19,
+      "col": 4,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "DISTILLATE": {
+      "row": 19,
+      "col": 5,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "SAMS": {
+      "row": 19,
+      "col": 6,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "WALMART": {
+      "row": 19,
+      "col": 7,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "WEBSTAURANT": {
+      "row": 19,
+      "col": 8,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "MISC.": {
+      "row": 19,
+      "col": 9,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "METRC FEE": {
+      "row": 19,
+      "col": 10,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "OMMA": {
+      "row": 19,
+      "col": 11,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "OBNDD": {
+      "row": 19,
+      "col": 12,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "EQUIPMENT": {
+      "row": 19,
+      "col": 13,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "HEALTH DEPARTMENT": {
+      "row": 19,
+      "col": 14,
+      "sheet": "710 EMPIRE C.O.G."
+    },
+    "Total": {
+      "row": 19,
+      "col": 15,
+      "sheet": "710 EMPIRE C.O.G."
+    }
+  },
+  "710 EMPIRE EXPENSES": {
+    "RENT": {
+      "row": 19,
+      "col": 2,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "PROPERTY INS.": {
+      "row": 19,
+      "col": 3,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "ELECTRIC": {
+      "row": 19,
+      "col": 4,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "INTERNET": {
+      "row": 19,
+      "col": 5,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "WASTE DISP.": {
+      "row": 19,
+      "col": 6,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "LEGAL": {
+      "row": 19,
+      "col": 7,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "METRC TAGS": {
+      "row": 19,
+      "col": 8,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "TESTING": {
+      "row": 19,
+      "col": 9,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "ADOBE": {
+      "row": 19,
+      "col": 10,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "(MJ) WASTE": {
+      "row": 19,
+      "col": 11,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "EPSON": {
+      "row": 19,
+      "col": 12,
+      "sheet": "710 EMPIRE EXPENSES"
+    },
+    "Total": {
+      "row": 19,
+      "col": 13,
+      "sheet": "710 EMPIRE EXPENSES"
+    }
+  },
+  "PAYROLL": {
+    "GREG W.": {
+      "row": 19,
+      "col": 26,
+      "sheet": "PAYROLL"
+    },
+    "JASON N.": {
+      "row": 19,
+      "col": 27,
+      "sheet": "PAYROLL"
+    },
+    "JENNIFER W.": {
+      "row": 19,
+      "col": 4,
+      "sheet": "PAYROLL"
+    },
+    "JAYLEN S.": {
+      "row": 19,
+      "col": 5,
+      "sheet": "PAYROLL"
+    },
+    "JASMYN S.": {
+      "row": 19,
+      "col": 6,
+      "sheet": "PAYROLL"
+    },
+    "JOHNNY S.": {
+      "row": 19,
+      "col": 7,
+      "sheet": "PAYROLL"
+    },
+    "ZACHARY W.": {
+      "row": 19,
+      "col": 8,
+      "sheet": "PAYROLL"
+    },
+    "KAIT S.": {
+      "row": 19,
+      "col": 9,
+      "sheet": "PAYROLL"
+    },
+    "ALLISON W.": {
+      "row": 19,
+      "col": 10,
+      "sheet": "PAYROLL"
+    },
+    "JASON II": {
+      "row": 19,
+      "col": 13,
+      "sheet": "PAYROLL"
+    },
+    "JIMMY G.": {
+      "row": 19,
+      "col": 14,
+      "sheet": "PAYROLL"
+    },
+    "AUSTIN H.": {
+      "row": 19,
+      "col": 15,
+      "sheet": "PAYROLL"
+    },
+    "MYRA N.": {
+      "row": 19,
+      "col": 16,
+      "sheet": "PAYROLL"
+    },
+    "CHAD H.": {
+      "row": 19,
+      "col": 18,
+      "sheet": "PAYROLL"
+    },
+    "????": {
+      "row": 19,
+      "col": 19,
+      "sheet": "PAYROLL"
+    },
+    "NUGZ": {
+      "row": 19,
+      "col": 21,
+      "sheet": "PAYROLL"
+    },
+    "PUFFIN": {
+      "row": 19,
+      "col": 22,
+      "sheet": "PAYROLL"
+    },
+    "710 EMPIRE": {
+      "row": 19,
+      "col": 23,
+      "sheet": "PAYROLL"
+    },
+    "TOTAL": {
+      "row": 19,
+      "col": 24,
+      "sheet": "PAYROLL"
+    },
+    "DAVID B.": {
+      "row": 19,
+      "col": 28,
+      "sheet": "PAYROLL"
+    }
+  },
+  "CC Debt": {
+    "DISCOVER": {
+      "row": 19,
+      "col": 2,
+      "sheet": "CC Debt"
+    },
+    "CITIBANK": {
+      "row": 19,
+      "col": 3,
+      "sheet": "CC Debt"
+    },
+    "CAPITAL ONE": {
+      "row": 19,
+      "col": 4,
+      "sheet": "CC Debt"
+    }
+  },
+  "CC Payments": {
+    "DISCOVER": {
+      "row": 19,
+      "col": 2,
+      "sheet": "CC Payments"
+    },
+    "CITIBANK": {
+      "row": 19,
+      "col": 3,
+      "sheet": "CC Payments"
+    },
+    "CAPITAL ONE": {
+      "row": 19,
+      "col": 4,
+      "sheet": "CC Payments"
+    },
+    "TOTAL PAYMENTS": {
+      "row": 19,
+      "col": 11,
+      "sheet": "CC Payments"
+    }
+  },
+  "CC Status": {
+    "DISCOVER": {
+      "row": 19,
+      "col": 2,
+      "sheet": "CC Status"
+    },
+    "CITIBANK": {
+      "row": 19,
+      "col": 3,
+      "sheet": "CC Status"
+    },
+    "CAPITAL ONE": {
+      "row": 19,
+      "col": 4,
+      "sheet": "CC Status"
+    },
+    "ADDED DEBT": {
+      "row": 19,
+      "col": 11,
+      "sheet": "CC Status"
+    }
+  },
+  "(A) CANNABIS DIST.": {
+    "710 EMPIRE": {
+      "row": 19,
+      "col": 2,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "ARGENT VENTURES": {
+      "row": 19,
+      "col": 3,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "BIG COUNTRY": {
+      "row": 19,
+      "col": 4,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "BORO": {
+      "row": 19,
+      "col": 5,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "CARTEL": {
+      "row": 19,
+      "col": 6,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "CITY LIMITS": {
+      "row": 19,
+      "col": 7,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "CROSSFIELD COL.": {
+      "row": 19,
+      "col": 8,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "CURE INJOY": {
+      "row": 19,
+      "col": 9,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "DOC FERGUSON": {
+      "row": 19,
+      "col": 10,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "EASY STREET": {
+      "row": 19,
+      "col": 11,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "FAITH O528": {
+      "row": 19,
+      "col": 12,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "GALAXY FARMS": {
+      "row": 19,
+      "col": 13,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "GLADIATOR": {
+      "row": 19,
+      "col": 14,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "GRAY CLOUD": {
+      "row": 19,
+      "col": 15,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "HIGH GUYS": {
+      "row": 19,
+      "col": 16,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "HIGH VOLTAGE": {
+      "row": 19,
+      "col": 17,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "MELANIA 0224": {
+      "row": 19,
+      "col": 18,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "MOLECULAR": {
+      "row": 19,
+      "col": 19,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "SUB TOTAL": {
+      "row": 19,
+      "col": 27,
+      "sheet": "(A) CANNABIS DIST."
+    },
+    "GRAND TOTAL": {
+      "row": 19,
+      "col": 28,
+      "sheet": "(A) CANNABIS DIST."
+    }
+  },
+  "(B) CANNABIS DIST.": {
+    "OKIE BOTANICAL": {
+      "row": 19,
+      "col": 2,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "OKIE EXPRESS": {
+      "row": 19,
+      "col": 3,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "OKLAHOMA DREAMIN": {
+      "row": 19,
+      "col": 4,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "PARAGON XTR.": {
+      "row": 19,
+      "col": 5,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "PHARMICATED": {
+      "row": 19,
+      "col": 6,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "PLATINUM FARMS": {
+      "row": 19,
+      "col": 7,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "PUFFIN PURE": {
+      "row": 19,
+      "col": 8,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "RED HEALTH": {
+      "row": 19,
+      "col": 9,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "SAP XTRACTS": {
+      "row": 19,
+      "col": 10,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "SMOKIES": {
+      "row": 19,
+      "col": 11,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "STASH HOUSE": {
+      "row": 19,
+      "col": 12,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "SUNDAY": {
+      "row": 19,
+      "col": 13,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "TRIBE": {
+      "row": 19,
+      "col": 14,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "VERY GOOD GROWS": {
+      "row": 19,
+      "col": 15,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "WATERCOLOR LABS": {
+      "row": 19,
+      "col": 16,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "XEN XTRACTS": {
+      "row": 19,
+      "col": 17,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "ZEN CANNABIS": {
+      "row": 19,
+      "col": 18,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "WALLY'S GREEN PATCH": {
+      "row": 19,
+      "col": 19,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "SUB TOTAL": {
+      "row": 19,
+      "col": 22,
+      "sheet": "(B) CANNABIS DIST."
+    },
+    "GRAND TOTAL": {
+      "row": 19,
+      "col": 23,
+      "sheet": "(B) CANNABIS DIST."
+    }
+  },
+  "NON CANNABIS": {
+    "ALL TIME RESALE": {
+      "row": 19,
+      "col": 2,
+      "sheet": "NON CANNABIS"
+    },
+    "Sooner Wholesale": {
+      "row": 19,
+      "col": 3,
+      "sheet": "NON CANNABIS"
+    },
+    "420 MY WAY": {
+      "row": 19,
+      "col": 4,
+      "sheet": "NON CANNABIS"
+    },
+    "COLORADO CURES": {
+      "row": 19,
+      "col": 5,
+      "sheet": "NON CANNABIS"
+    },
+    "BUDDIES DIST.": {
+      "row": 19,
+      "col": 6,
+      "sheet": "NON CANNABIS"
+    },
+    "C-STORE": {
+      "row": 19,
+      "col": 7,
+      "sheet": "NON CANNABIS"
+    },
+    "TRIFECTA": {
+      "row": 19,
+      "col": 8,
+      "sheet": "NON CANNABIS"
+    },
+    "GREEN GRUFF": {
+      "row": 19,
+      "col": 9,
+      "sheet": "NON CANNABIS"
+    },
+    "INCOGNITO": {
+      "row": 19,
+      "col": 10,
+      "sheet": "NON CANNABIS"
+    },
+    "OKC NOVELTY": {
+      "row": 19,
+      "col": 11,
+      "sheet": "NON CANNABIS"
+    },
+    "LA VAPOR": {
+      "row": 19,
+      "col": 12,
+      "sheet": "NON CANNABIS"
+    },
+    "PERFECT VAPE": {
+      "row": 19,
+      "col": 13,
+      "sheet": "NON CANNABIS"
+    },
+    "MIDWEST GOODS": {
+      "row": 19,
+      "col": 14,
+      "sheet": "NON CANNABIS"
+    },
+    "MEDUSA DIS.": {
+      "row": 19,
+      "col": 15,
+      "sheet": "NON CANNABIS"
+    },
+    "LOOKAH": {
+      "row": 19,
+      "col": 16,
+      "sheet": "NON CANNABIS"
+    },
+    "OKIE SOAP SHOP": {
+      "row": 19,
+      "col": 17,
+      "sheet": "NON CANNABIS"
+    },
+    "STONE GENIE": {
+      "row": 19,
+      "col": 18,
+      "sheet": "NON CANNABIS"
+    },
+    "WHITE RINO": {
+      "row": 19,
+      "col": 19,
+      "sheet": "NON CANNABIS"
+    },
+    "WHOMPIT": {
+      "row": 19,
+      "col": 20,
+      "sheet": "NON CANNABIS"
+    },
+    "MJ WHOLESALE": {
+      "row": 19,
+      "col": 21,
+      "sheet": "NON CANNABIS"
+    },
+    "UNS WHSL": {
+      "row": 19,
+      "col": 22,
+      "sheet": "NON CANNABIS"
+    },
+    "THC TOTAL HERBAL": {
+      "row": 19,
+      "col": 23,
+      "sheet": "NON CANNABIS"
+    },
+    "RAW": {
+      "row": 19,
+      "col": 24,
+      "sheet": "NON CANNABIS"
+    },
+    "BLAZY SUSAN": {
+      "row": 19,
+      "col": 25,
+      "sheet": "NON CANNABIS"
+    },
+    "WILD HEMP": {
+      "row": 19,
+      "col": 26,
+      "sheet": "NON CANNABIS"
+    },
+    "OPMS KRATOM": {
+      "row": 19,
+      "col": 27,
+      "sheet": "NON CANNABIS"
+    },
+    "DEMAND VAPE": {
+      "row": 19,
+      "col": 28,
+      "sheet": "NON CANNABIS"
+    },
+    "UNISHOW INC": {
+      "row": 19,
+      "col": 29,
+      "sheet": "NON CANNABIS"
+    },
+    "PUFFCO": {
+      "row": 19,
+      "col": 30,
+      "sheet": "NON CANNABIS"
+    },
+    "Total": {
+      "row": 19,
+      "col": 31,
+      "sheet": "NON CANNABIS"
+    }
+  }
+}

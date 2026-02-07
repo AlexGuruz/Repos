@@ -1,0 +1,67 @@
+BATCH RANGE CONFIGURATION - FILL IN THE RANGES BELOW
+============================================================
+
+INSTRUCTIONS:
+- Fill in the range for each sheet where you want batch updates
+- Format: A1:Z100 (start cell to end cell)
+- Leave blank to use individual cell updates
+- The range should cover all cells that might be updated
+
+SHEET NAMES AND RANGES:
+----------------------------------------
+
+ 1. (A) CANNABIS DIST.
+    Companies: NUGZ
+    Batch Range: _______B20:Z386__________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 2. (B) CANNABIS DIST.
+    Companies: NUGZ, PUFFIN
+    Batch Range: _______B20:Z386__________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 3. ALLOCATED
+    Companies: NUGZ
+    Batch Range: ___C20:K386______________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 4. INCOME
+    Companies: NUGZ
+    Batch Range: _______B20:O386__________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 5. JGD
+    Companies: NUGZ
+    Batch Range: ______G20:Q386___________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 6. NON CANNABIS
+    Companies: NUGZ
+    Batch Range: ______B20:AD386___________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 7. NUGZ C.O.G.
+    Companies: NUGZ, PUFFIN
+    Batch Range: _______E20:U386__________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 8. NUGZ EXPENSES
+    Companies: NUGZ, PUFFIN
+    Batch Range: _______B20:U386__________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+ 9. PAYROLL
+    Companies: NUGZ, JGD, PUFFIN
+    Batch Range: ________B20:T386_________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+10. PUFFIN C.O.G.
+    Companies: NUGZ, PUFFIN
+    Batch Range: _______C20:U386__________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+
+11. PUFFIN EXPENSES
+    Companies: NUGZ, PUFFIN
+    Batch Range: ______B20:U386___________ (e.g., A1:Z100)
+    Description: Target sheet for petty cash transactions
+

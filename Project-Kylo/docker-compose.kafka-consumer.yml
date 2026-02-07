@@ -1,0 +1,45 @@
+services:
+  kafka-consumer-txns:
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka-consumer
+    container_name: kylo-kafka-consumer-txns
+    networks:
+      - remodel_default
+    environment:
+      - KAFKA_BROKERS=kylo-redpanda:9092
+      - KAFKA_TOPIC_TXNS=txns.company.batches
+      - KAFKA_GROUP_TXNS=kylo-workers-txns
+      - KAFKA_CLIENT_ID=kylo-consumer-txns
+      - KYLO_SHEETS_POST=0
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/service_account.json
+    volumes:
+      - D:\REMODEL\secrets:/secrets:ro
+    # Note: depends_on removed - services are in different compose files
+    # Ensure kylo-redpanda and kylo-pg are running before starting consumers
+    restart: unless-stopped
+
+  kafka-consumer-promote:
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka-consumer
+    container_name: kylo-kafka-consumer-promote
+    networks:
+      - remodel_default
+    environment:
+      - KAFKA_BROKERS=kylo-redpanda:9092
+      - KAFKA_TOPIC_PROMOTE=rules.promote.batches
+      - KAFKA_GROUP_PROMOTE=kylo-workers-promote
+      - KAFKA_CLIENT_ID=kylo-consumer-promote
+      - KYLO_PROMOTER_PRUNE_APPROVED=1
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/service_account.json
+    volumes:
+      - D:\REMODEL\secrets:/secrets:ro
+    # Note: depends_on removed - services are in different compose files
+    # Ensure kylo-redpanda and kylo-pg are running before starting consumers
+    restart: unless-stopped
+    command: ["python", "-c", "import asyncio; from services.bus.kafka_consumer_promote import main; asyncio.run(main())"]
+
+networks:
+  remodel_default:
+    external: true

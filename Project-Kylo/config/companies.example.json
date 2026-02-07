@@ -1,0 +1,16 @@
+{
+  "companies": [
+    {
+      "company_id": "acme",
+      "display_name": "Acme Inc",
+      "workbook": "https://docs.google.com/spreadsheets/d/<WORKBOOK_ID>",
+      "sheet_aliases": { "cash": "Cash", "bank": "Bank" },
+      "layout_ref": "layout/acme-2025.json",
+      "rules_namespace": "acme"
+    }
+  ],
+  "active_sources": ["sheets", "csv_downloader"],
+  "target_workbooks": ["acme"]
+}
+
+

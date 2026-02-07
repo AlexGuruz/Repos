@@ -1,0 +1,45 @@
+source_path,dest_path,reason,confidence,action,notes
+D:\Project-Kylo\scripts\auto_start_kylo_simple.ps1,D:\Project-Kylo\scripts\active\auto_start_kylo_simple.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\auto_start_kylo.ps1,D:\Project-Kylo\scripts\active\auto_start_kylo.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\setup_auto_start.ps1,D:\Project-Kylo\scripts\active\setup_auto_start.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_hub.ps1,D:\Project-Kylo\scripts\active\start_hub.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_kafka_consumers.ps1,D:\Project-Kylo\scripts\active\start_kafka_consumers.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_kafka_consumers.sh,D:\Project-Kylo\scripts\active\start_kafka_consumers.sh,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_watchers_by_year.ps1,D:\Project-Kylo\scripts\active\start_watchers_by_year.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_kylo_with_monitoring.ps1,D:\Project-Kylo\scripts\active\start_kylo_with_monitoring.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\stop_all_services.ps1,D:\Project-Kylo\scripts\active\stop_all_services.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\stop_hub.ps1,D:\Project-Kylo\scripts\active\stop_hub.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\restart_all_services.ps1,D:\Project-Kylo\scripts\active\restart_all_services.ps1,Active operational script,0.85,move,Root-level script - verify external references
+D:\Project-Kylo\scripts\smart_restart.ps1,D:\Project-Kylo\scripts\active\smart_restart.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kafka_topics.ps1,D:\Project-Kylo\scripts\active\kafka_topics.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kafka_topics.sh,D:\Project-Kylo\scripts\active\kafka_topics.sh,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kill_python_processes.ps1,D:\Project-Kylo\scripts\active\kill_python_processes.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kylo_monitor_gui.ps1,D:\Project-Kylo\scripts\active\kylo_monitor_gui.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\show_watcher_logs.ps1,D:\Project-Kylo\scripts\active\show_watcher_logs.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\system_monitor.ps1,D:\Project-Kylo\scripts\active\system_monitor.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\setup_system_monitor.ps1,D:\Project-Kylo\scripts\active\setup_system_monitor.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\gui_helpers\LogViewer.ps1,D:\Project-Kylo\scripts\active\gui_helpers\LogViewer.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\ServiceControls.ps1,D:\Project-Kylo\scripts\active\gui_helpers\ServiceControls.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\SystemMonitor.ps1,D:\Project-Kylo\scripts\active\gui_helpers\SystemMonitor.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\TaskManager.ps1,D:\Project-Kylo\scripts\active\gui_helpers\TaskManager.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\Theme.ps1,D:\Project-Kylo\scripts\active\gui_helpers\Theme.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\config\config.json,D:\Project-Kylo\scripts\active\config\config.json,Script configuration,0.90,move,Consolidate script configs
+D:\Project-Kylo\scripts\config\layout_map.json,D:\Project-Kylo\scripts\active\config\layout_map.json,Script configuration,0.90,move,Consolidate script configs
+D:\Project-Kylo\scripts\config\service_account.json,D:\Project-Kylo\scripts\active\config\service_account.json,Script configuration,0.90,move,Consolidate script configs
+D:\Project-Kylo\scripts\sync_state.json,D:\Project-Kylo\scripts\active\sync_state.json,Script state file,0.85,skip,May be runtime state - verify
+D:\Project-Kylo\start_all_services.ps1,D:\Project-Kylo\scripts\active\start_all_services.ps1,Root-level entry point,0.75,archive_only,May be referenced externally - archive first
+D:\Project-Kylo\start_all_services_with_logs.ps1,D:\Project-Kylo\scripts\active\start_all_services_with_logs.ps1,Root-level entry point,0.75,archive_only,May be referenced externally - archive first
+D:\Project-Kylo\start_with_logs_simple.ps1,D:\Project-Kylo\scripts\active\start_with_logs_simple.ps1,Root-level entry point,0.75,archive_only,May be referenced externally - archive first
+D:\Project-Kylo\restart_all_services.ps1,D:\Project-Kylo\scripts\active\restart_all_services.ps1,Root-level entry point,0.75,archive_only,May be referenced externally - archive first
+D:\Project-Kylo\data\*.json,D:\Project-Kylo\data\raw\*.json,Raw data files,0.70,archive_only,Need to verify if raw data or runtime state
+D:\Project-Kylo\data\*.csv,D:\Project-Kylo\data\raw\*.csv,Raw data files,0.70,archive_only,Need to verify if raw data or runtime state
+D:\Project-Kylo\archive\*,D:\Project-Kylo\_archive\2026-01-27\archive\*,Existing archive,0.85,copy,Preserve existing archive structure
+D:\Project-Kylo\.git\*,D:\Project-Kylo\.git\*,Git repository metadata,1.00,skip,NEVER MOVE - atomic unit
+D:\Project-Kylo\.github\*,D:\Project-Kylo\.github\*,CI/CD configuration,1.00,skip,NEVER MOVE - CI/CD configs
+D:\Project-Kylo\.venv\*,D:\Project-Kylo\.venv\*,Virtual environment,1.00,skip,NEVER MOVE - should be recreated
+D:\Project-Kylo\project_kylo.egg-info\*,D:\Project-Kylo\project_kylo.egg-info\*,Build artifacts,1.00,skip,NEVER MOVE - auto-generated
+D:\Project-Kylo\**\__pycache__\*,D:\Project-Kylo\**\__pycache__\*,Python cache,1.00,skip,NEVER MOVE - auto-generated
+D:\Project-Kylo\**\*.pyc,D:\Project-Kylo\**\*.pyc,Python bytecode,1.00,skip,NEVER MOVE - auto-generated
+D:\Project-Kylo\kylo-dashboard\node_modules\*,D:\Project-Kylo\kylo-dashboard\node_modules\*,Node modules,1.00,skip,NEVER MOVE - should be reinstalled
+D:\Project-Kylo\db\tmp_rules\*,D:\Project-Kylo\db\tmp_rules\*,Temporary rules,0.50,skip,May be actively used - manual review
+D:\Project-Kylo\syncthing_monitor\.env,D:\Project-Kylo\syncthing_monitor\.env,Secrets file,0.30,skip,Contains secrets - manual review required

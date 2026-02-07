@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "project-kylo"
+version = "0.0.0"
+description = "Kylo watcher + hub supervisor"
+requires-python = ">=3.11"
+
+[project.scripts]
+kylo = "kylo.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+# Namespace packages are used throughout this repo (many dirs omit __init__.py).
+where = ["."]
+namespaces = true
+include = ["kylo*","services*","config*"]
+

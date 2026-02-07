@@ -1,0 +1,8 @@
+version: 1
+
+instance:
+  id: JGD_2026
+  company_key: JGD
+
+year_workbooks_active: ["2026"]
+

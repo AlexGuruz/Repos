@@ -1,0 +1,9 @@
+{
+  "operation": "test_operation",
+  "completed_items": 50,
+  "total_items": 100,
+  "timestamp": "2025-07-19T21:48:43.994368",
+  "context": {
+    "context": "test"
+  }
+}

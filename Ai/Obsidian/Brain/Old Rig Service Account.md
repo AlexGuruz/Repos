@@ -1,0 +1,1 @@
+$env:GOOGLE_APPLICATION_CREDENTIALS = "C:\worker\secrets\gcp\sa.json"

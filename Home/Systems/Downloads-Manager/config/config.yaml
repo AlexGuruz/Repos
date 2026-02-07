@@ -1,0 +1,11 @@
+# Downloads-Manager config
+# Paths can use %USERPROFILE% (expanded at runtime)
+
+watch_folder: "%USERPROFILE%\\Downloads"
+destination_root: "%USERPROFILE%\\OrganizedDownloads"
+stable_seconds: 3
+
+# Optional: override or add rules (extension -> subfolder under destination_root)
+# rules_override:
+#   exe: PreRecycleBin
+#   msi: PreRecycleBin

@@ -1,0 +1,26 @@
+version: 1
+
+sheets:
+  companies:
+    - key: JGD
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+
+# Rules master (JGDTruth) Google Sheet URL
+rules:
+  management_workbook_url: https://docs.google.com/spreadsheets/d/1VA76RvF5Q6gmgIrAbLby1zQltUNEpdf-fvW8qSLw5wU/edit
+
+# Year-based workbook routing for this company (string year keys).
+year_workbooks:
+  "2025":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+  "2026":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+
+# Default active years for this company (can be overridden by instance + env var KYLO_ACTIVE_YEARS)
+year_workbooks_active: ["2025", "2026"]
+

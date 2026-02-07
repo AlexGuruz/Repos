@@ -1,0 +1,9 @@
+{
+  "header_interval_hours": 12,
+  "petty_cash_interval_minutes": 5,
+  "ai_observation_interval_seconds": 30,
+  "header_enabled": true,
+  "petty_cash_enabled": true,
+  "ai_observer_enabled": true,
+  "ollama_model": "llama3.2"
+}

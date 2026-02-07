@@ -1,0 +1,130 @@
+{
+  "name": "Kylo — Brands List (Google Sheets)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "kylo/brands-list",
+        "options": {
+          "responseData": "json",
+          "responseCode": 200,
+          "responseMode": "lastNode",
+          "responsePropertyName": "result"
+        }
+      },
+      "id": "Webhook_Trigger",
+      "name": "Webhook (brands params)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 200],
+      "webhookId": "kylo-brands-list",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "getMany",
+        "sheetId": "={{$json.body.spreadsheetId}}",
+        "range": "={{$json.body.readRange}}",
+        "options": {
+          "rawData": true
+        }
+      },
+      "id": "GS_Read",
+      "name": "Google Sheets → Read products",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [520, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Expect GS_Read rawData output: first item has .json.data.values (2D array)\n// Input params via webhook body: { brandColumnIndex: 2 } (1-based), optional header row\nconst body = $items(\"Webhook (brands params)\")[0].json.body || {};\nconst brandColIndex1 = Number(body.brandColumnIndex || 1); // 1-based\nconst header = body.hasHeader === undefined ? true : !!body.hasHeader;\n\n// Try to get values either from first item json.data.values or items as arrays\nlet values = [];\nconst raw = $items(\"Google Sheets → Read products\");\nif (raw.length && raw[0].json && raw[0].json.data && Array.isArray(raw[0].json.data.values)) {\n  values = raw[0].json.data.values;\n} else {\n  // Fallback: treat each item.json as a row object; collect by column index if present\n  values = raw.map(i => Object.values(i.json));\n}\n\n// Drop header if present\nconst rows = header ? values.slice(1) : values;\nconst colIdx0 = Math.max(0, brandColIndex1 - 1);\nconst set = new Set();\nfor (const r of rows) {\n  const brand = (r && r[colIdx0] != null) ? String(r[colIdx0]).trim() : '';\n  if (brand) set.add(brand);\n}\nconst brands = Array.from(set).sort((a,b)=> a.localeCompare(b));\n// Prepare 2D array for write back\nconst brands2d = brands.map(b => [b]);\nreturn [{ json: { brands, brands2d } }];"
+      },
+      "id": "Function_UniqueSort",
+      "name": "Function → unique + sort",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [780, 200]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "sheetId": "={{$json.body.spreadsheetId}}",
+        "range": "={{$json.body.outputRange}}",
+        "key": "=",
+        "valueInputMode": "RAW",
+        "options": {},
+        "values": "={{$items(\"Function → unique + sort\")[0].json.brands2d}}"
+      },
+      "id": "GS_Write",
+      "name": "Google Sheets → Write brands",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1040, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "const params = $items(\"Webhook (brands params)\")[0].json.body || {};\nconst count = $items(\"Function → unique + sort\")[0].json.brands.length;\nreturn [{ json: { result: { ok: true, spreadsheetId: params.spreadsheetId, readRange: params.readRange, outputRange: params.outputRange, brandColumnIndex: params.brandColumnIndex || 1, count } } }];"
+      },
+      "id": "Function_Result",
+      "name": "Function → assemble result",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1280, 200]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "Webhook_Reply",
+      "name": "Webhook Reply (JSON)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1520, 200]
+    }
+  ],
+  "connections": {
+    "Webhook (brands params)": {
+      "main": [
+        [
+          { "node": "Google Sheets → Read products", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Google Sheets → Read products": {
+      "main": [
+        [
+          { "node": "Function → unique + sort", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Function → unique + sort": {
+      "main": [
+        [
+          { "node": "Google Sheets → Write brands", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Google Sheets → Write brands": {
+      "main": [
+        [
+          { "node": "Function → assemble result", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Function → assemble result": {
+      "main": [
+        [
+          { "node": "Webhook Reply (JSON)", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "instanceId": "kylo-n8n" },
+  "tags": [{ "name": "kylo" }, { "name": "sheets" }]
+}
+
+

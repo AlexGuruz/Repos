@@ -1,0 +1,15 @@
+# Minimal isolated env for remodel scaffold
+python-dotenv>=1.0.1
+pydantic>=2.6
+pytest>=8.2
+google-api-python-client>=2.137.0
+google-auth>=2.35.0
+google-auth-httplib2>=0.2.0
+psycopg2-binary>=2.9.9
+fastapi>=0.112.0
+uvicorn>=0.30.0
+
+# Config loader
+pyyaml>=6.0
+
+

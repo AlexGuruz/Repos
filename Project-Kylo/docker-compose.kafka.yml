@@ -1,0 +1,41 @@
+services:
+  redpanda:
+    image: redpandadata/redpanda:v24.2.7
+    container_name: kylo-redpanda
+    command: [ 
+      "redpanda","start",
+      "--mode=dev-container",
+      "--overprovisioned",
+      "--smp=1",
+      "--memory=512M",
+      "--reserve-memory=0M",
+      "--node-id=0",
+      "--check=false",
+      "--kafka-addr", "0.0.0.0:9092",
+      "--advertise-kafka-addr", "kylo-redpanda:9092"
+    ]
+    environment:
+      - REDPANDA_ADVERTISE_KAFKA_ADDRESS=kylo-redpanda:9092
+    ports: [ "9092:9092", "19092:19092", "9644:9644" ]
+    networks:
+      - remodel_default
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9644/v1/status/ready" ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  console:
+    image: redpandadata/console:v2.6.0
+    container_name: kylo-redpanda-console
+    networks:
+      - remodel_default
+    environment:
+      - KAFKA_BROKERS=kylo-redpanda:9092
+      - KAFKA_TLS_ENABLED=false
+      - SERVER_LISTEN_ADDRESS=0.0.0.0:8080
+    depends_on: { redpanda: { condition: service_healthy } }
+    ports: [ "8080:8080" ]
+
+networks:
+  remodel_default:
+    external: true

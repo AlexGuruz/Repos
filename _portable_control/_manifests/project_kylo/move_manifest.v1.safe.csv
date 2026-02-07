@@ -1,0 +1,31 @@
+source_path,dest_path,reason,confidence,action,notes
+D:\Project-Kylo\scripts\auto_start_kylo_simple.ps1,D:\Project-Kylo\scripts\active\auto_start_kylo_simple.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\auto_start_kylo.ps1,D:\Project-Kylo\scripts\active\auto_start_kylo.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\setup_auto_start.ps1,D:\Project-Kylo\scripts\active\setup_auto_start.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_hub.ps1,D:\Project-Kylo\scripts\active\start_hub.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_kafka_consumers.ps1,D:\Project-Kylo\scripts\active\start_kafka_consumers.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_kafka_consumers.sh,D:\Project-Kylo\scripts\active\start_kafka_consumers.sh,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_watchers_by_year.ps1,D:\Project-Kylo\scripts\active\start_watchers_by_year.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\start_kylo_with_monitoring.ps1,D:\Project-Kylo\scripts\active\start_kylo_with_monitoring.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\stop_all_services.ps1,D:\Project-Kylo\scripts\active\stop_all_services.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\stop_hub.ps1,D:\Project-Kylo\scripts\active\stop_hub.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\smart_restart.ps1,D:\Project-Kylo\scripts\active\smart_restart.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kafka_topics.ps1,D:\Project-Kylo\scripts\active\kafka_topics.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kafka_topics.sh,D:\Project-Kylo\scripts\active\kafka_topics.sh,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kill_python_processes.ps1,D:\Project-Kylo\scripts\active\kill_python_processes.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\kylo_monitor_gui.ps1,D:\Project-Kylo\scripts\active\kylo_monitor_gui.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\show_watcher_logs.ps1,D:\Project-Kylo\scripts\active\show_watcher_logs.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\system_monitor.ps1,D:\Project-Kylo\scripts\active\system_monitor.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\setup_system_monitor.ps1,D:\Project-Kylo\scripts\active\setup_system_monitor.ps1,Active operational script,0.90,move,Consolidate active scripts
+D:\Project-Kylo\scripts\gui_helpers\LogViewer.ps1,D:\Project-Kylo\scripts\active\gui_helpers\LogViewer.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\ServiceControls.ps1,D:\Project-Kylo\scripts\active\gui_helpers\ServiceControls.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\SystemMonitor.ps1,D:\Project-Kylo\scripts\active\gui_helpers\SystemMonitor.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\TaskManager.ps1,D:\Project-Kylo\scripts\active\gui_helpers\TaskManager.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\gui_helpers\Theme.ps1,D:\Project-Kylo\scripts\active\gui_helpers\Theme.ps1,Active GUI helper script,0.90,move,Consolidate GUI helpers
+D:\Project-Kylo\scripts\config\config.json,D:\Project-Kylo\scripts\active\config\config.json,Script configuration,0.90,move,Consolidate script configs
+D:\Project-Kylo\scripts\config\layout_map.json,D:\Project-Kylo\scripts\active\config\layout_map.json,Script configuration,0.90,move,Consolidate script configs
+D:\Project-Kylo\scripts\config\service_account.json,D:\Project-Kylo\scripts\active\config\service_account.json,Script configuration,0.90,move,Consolidate script configs
+D:\Project-Kylo\start_all_services.ps1,D:\Project-Kylo\_archive\2026-01-27\root_scripts\start_all_services.ps1,Root-level script archive,0.90,copy,Archive root scripts before moving
+D:\Project-Kylo\restart_all_services.ps1,D:\Project-Kylo\_archive\2026-01-27\root_scripts\restart_all_services.ps1,Root-level script archive,0.90,copy,Archive root scripts before moving
+D:\Project-Kylo\start_all_services_with_logs.ps1,D:\Project-Kylo\_archive\2026-01-27\root_scripts\start_all_services_with_logs.ps1,Root-level script archive,0.90,copy,Archive root scripts before moving
+D:\Project-Kylo\start_with_logs_simple.ps1,D:\Project-Kylo\_archive\2026-01-27\root_scripts\start_with_logs_simple.ps1,Root-level script archive,0.90,copy,Archive root scripts before moving

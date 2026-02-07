@@ -1,0 +1,469 @@
+version: 1
+
+runtime:
+  dry_run: false
+  log_level: INFO
+  timezone: America/Chicago
+
+google:
+  service_account_json_path: D:\REMODEL\secrets\service_account.json
+
+sheets:
+  companies:
+    - key: NUGZ
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+    - key: EMPIRE
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+    - key: PUFFIN
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+    - key: JGD
+      workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+      tabs:
+        intake: "PETTY CASH"
+        output: "CLEAN TRANSACTIONS"
+
+# Year-based workbook routing (string year keys so dotted config lookup works).
+# If present, posting/intake tools can route transactions by the transaction year:
+# - 2025 -> old workbook
+# - 2026 -> new workbook
+year_workbooks:
+  "2025":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+  "2026":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+
+# Active year filter for watcher/poster (simple toggle).
+# If set, Kylo will ONLY read/post those years from year_workbooks.
+# You can override this at runtime with env var: KYLO_ACTIVE_YEARS=2026 or KYLO_ACTIVE_YEARS=2025,2026
+#
+# IMPORTANT:
+# If you uncheck Column F ("posted") in a prior-year intake workbook to force a re-run,
+# that year MUST be active here (or via KYLO_ACTIVE_YEARS) or the watcher will not see the change.
+year_workbooks_active: ["2025", "2026"]
+
+rules:
+  source: xlsx
+  xlsx_path: Rules.xlsx
+  promote_on_load: true
+  # Rules master (JGDTruth) Google Sheet URL
+  management_workbook_url: https://docs.google.com/spreadsheets/d/1VA76RvF5Q6gmgIrAbLby1zQltUNEpdf-fvW8qSLw5wU/edit
+
+intake:
+  method: csv_from_sheet
+  company_default: NUGZ
+  sheet_name: "PETTY CASH"
+  workbook_url: https://docs.google.com/spreadsheets/d/1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE
+  csv_processor:
+    header_rows: 1
+    start_row: 20
+    columns:
+      date: B
+      description: D
+      amount: E
+      company_hint: C
+    date_formats: ["%m/%d/%Y", "%Y-%m-%d", "%m-%d-%Y", "%m/%d/%y", "%m-%d-%y"]
+
+routing:
+  mover:
+    batch_size: 500
+    max_retries: 3
+    backoff_seconds: 0.2
+
+database:
+  global_dsn: postgresql://postgres:kylo@localhost:5433/kylo_global
+  per_company: false
+  company_dsns: {}
+
+posting:
+  sheets:
+    apply: true
+  append_transactions: false
+
+intake_static_dates:
+  header_row: 19
+  first_row: 20
+  # Optional: extend the provided dates list forward through Dec 31 of this year at runtime.
+  # This avoids having to commit a massive list for 2026+ while preserving stable row mapping.
+  generate_through_year: 2026
+  # Ordered M/D/YY strings; truncated here for brevity – populate as needed
+  dates:
+    - 12/31/24
+    - 1/1/25
+    - 1/2/25
+    - 1/3/25
+    - 1/4/25
+    - 1/5/25
+    - 1/6/25
+    - 1/7/25
+    - 1/8/25
+    - 1/9/25
+    - 1/10/25
+    - 1/11/25
+    - 1/12/25
+    - 1/13/25
+    - 1/14/25
+    - 1/15/25
+    - 1/16/25
+    - 1/17/25
+    - 1/18/25
+    - 1/19/25
+    - 1/20/25
+    - 1/21/25
+    - 1/22/25
+    - 1/23/25
+    - 1/24/25
+    - 1/25/25
+    - 1/26/25
+    - 1/27/25
+    - 1/28/25
+    - 1/29/25
+    - 1/30/25
+    - 1/31/25
+    - 2/1/25
+    - 2/2/25
+    - 2/3/25
+    - 2/4/25
+    - 2/5/25
+    - 2/6/25
+    - 2/7/25
+    - 2/8/25
+    - 2/9/25
+    - 2/10/25
+    - 2/11/25
+    - 2/12/25
+    - 2/13/25
+    - 2/14/25
+    - 2/15/25
+    - 2/16/25
+    - 2/17/25
+    - 2/18/25
+    - 2/19/25
+    - 2/20/25
+    - 2/21/25
+    - 2/22/25
+    - 2/23/25
+    - 2/24/25
+    - 2/25/25
+    - 2/26/25
+    - 2/27/25
+    - 2/28/25
+    - 3/1/25
+    - 3/2/25
+    - 3/3/25
+    - 3/4/25
+    - 3/5/25
+    - 3/6/25
+    - 3/7/25
+    - 3/8/25
+    - 3/9/25
+    - 3/10/25
+    - 3/11/25
+    - 3/12/25
+    - 3/13/25
+    - 3/14/25
+    - 3/15/25
+    - 3/16/25
+    - 3/17/25
+    - 3/18/25
+    - 3/19/25
+    - 3/20/25
+    - 3/21/25
+    - 3/22/25
+    - 3/23/25
+    - 3/24/25
+    - 3/25/25
+    - 3/26/25
+    - 3/27/25
+    - 3/28/25
+    - 3/29/25
+    - 3/30/25
+    - 3/31/25
+    - 4/1/25
+    - 4/2/25
+    - 4/3/25
+    - 4/4/25
+    - 4/5/25
+    - 4/6/25
+    - 4/7/25
+    - 4/8/25
+    - 4/9/25
+    - 4/10/25
+    - 4/11/25
+    - 4/12/25
+    - 4/13/25
+    - 4/14/25
+    - 4/15/25
+    - 4/16/25
+    - 4/17/25
+    - 4/18/25
+    - 4/19/25
+    - 4/20/25
+    - 4/21/25
+    - 4/22/25
+    - 4/23/25
+    - 4/24/25
+    - 4/25/25
+    - 4/26/25
+    - 4/27/25
+    - 4/28/25
+    - 4/29/25
+    - 4/30/25
+    - 5/1/25
+    - 5/2/25
+    - 5/3/25
+    - 5/4/25
+    - 5/5/25
+    - 5/6/25
+    - 5/7/25
+    - 5/8/25
+    - 5/9/25
+    - 5/10/25
+    - 5/11/25
+    - 5/12/25
+    - 5/13/25
+    - 5/14/25
+    - 5/15/25
+    - 5/16/25
+    - 5/17/25
+    - 5/18/25
+    - 5/19/25
+    - 5/20/25
+    - 5/21/25
+    - 5/22/25
+    - 5/23/25
+    - 5/24/25
+    - 5/25/25
+    - 5/26/25
+    - 5/27/25
+    - 5/28/25
+    - 5/29/25
+    - 5/30/25
+    - 5/31/25
+    - 6/1/25
+    - 6/2/25
+    - 6/3/25
+    - 6/4/25
+    - 6/5/25
+    - 6/6/25
+    - 6/7/25
+    - 6/8/25
+    - 6/9/25
+    - 6/10/25
+    - 6/11/25
+    - 6/12/25
+    - 6/13/25
+    - 6/14/25
+    - 6/15/25
+    - 6/16/25
+    - 6/17/25
+    - 6/18/25
+    - 6/19/25
+    - 6/20/25
+    - 6/21/25
+    - 6/22/25
+    - 6/23/25
+    - 6/24/25
+    - 6/25/25
+    - 6/26/25
+    - 6/27/25
+    - 6/28/25
+    - 6/29/25
+    - 6/30/25
+    - 7/1/25
+    - 7/2/25
+    - 7/3/25
+    - 7/4/25
+    - 7/5/25
+    - 7/6/25
+    - 7/7/25
+    - 7/8/25
+    - 7/9/25
+    - 7/10/25
+    - 7/11/25
+    - 7/12/25
+    - 7/13/25
+    - 7/14/25
+    - 7/15/25
+    - 7/16/25
+    - 7/17/25
+    - 7/18/25
+    - 7/19/25
+    - 7/20/25
+    - 7/21/25
+    - 7/22/25
+    - 7/23/25
+    - 7/24/25
+    - 7/25/25
+    - 7/26/25
+    - 7/27/25
+    - 7/28/25
+    - 7/29/25
+    - 7/30/25
+    - 7/31/25
+    - 8/1/25
+    - 8/2/25
+    - 8/3/25
+    - 8/4/25
+    - 8/5/25
+    - 8/6/25
+    - 8/7/25
+    - 8/8/25
+    - 8/9/25
+    - 8/10/25
+    - 8/11/25
+    - 8/12/25
+    - 8/13/25
+    - 8/14/25
+    - 8/15/25
+    - 8/16/25
+    - 8/17/25
+    - 8/18/25
+    - 8/19/25
+    - 8/20/25
+    - 8/21/25
+    - 8/22/25
+    - 8/23/25
+    - 8/24/25
+    - 8/25/25
+    - 8/26/25
+    - 8/27/25
+    - 8/28/25
+    - 8/29/25
+    - 8/30/25
+    - 8/31/25
+    - 9/1/25
+    - 9/2/25
+    - 9/3/25
+    - 9/4/25
+    - 9/5/25
+    - 9/6/25
+    - 9/7/25
+    - 9/8/25
+    - 9/9/25
+    - 9/10/25
+    - 9/11/25
+    - 9/12/25
+    - 9/13/25
+    - 9/14/25
+    - 9/15/25
+    - 9/16/25
+    - 9/17/25
+    - 9/18/25
+    - 9/19/25
+    - 9/20/25
+    - 9/21/25
+    - 9/22/25
+    - 9/23/25
+    - 9/24/25
+    - 9/25/25
+    - 9/26/25
+    - 9/27/25
+    - 9/28/25
+    - 9/29/25
+    - 9/30/25
+    - 10/1/25
+    - 10/2/25
+    - 10/3/25
+    - 10/4/25
+    - 10/5/25
+    - 10/6/25
+    - 10/7/25
+    - 10/8/25
+    - 10/9/25
+    - 10/10/25
+    - 10/11/25
+    - 10/12/25
+    - 10/13/25
+    - 10/14/25
+    - 10/15/25
+    - 10/16/25
+    - 10/17/25
+    - 10/18/25
+    - 10/19/25
+    - 10/20/25
+    - 10/21/25
+    - 10/22/25
+    - 10/23/25
+    - 10/24/25
+    - 10/25/25
+    - 10/26/25
+    - 10/27/25
+    - 10/28/25
+    - 10/29/25
+    - 10/30/25
+    - 10/31/25
+    - 11/1/25
+    - 11/2/25
+    - 11/3/25
+    - 11/4/25
+    - 11/5/25
+    - 11/6/25
+    - 11/7/25
+    - 11/8/25
+    - 11/9/25
+    - 11/10/25
+    - 11/11/25
+    - 11/12/25
+    - 11/13/25
+    - 11/14/25
+    - 11/15/25
+    - 11/16/25
+    - 11/17/25
+    - 11/18/25
+    - 11/19/25
+    - 11/20/25
+    - 11/21/25
+    - 11/22/25
+    - 11/23/25
+    - 11/24/25
+    - 11/25/25
+    - 11/26/25
+    - 11/27/25
+    - 11/28/25
+    - 11/29/25
+    - 11/30/25
+    - 12/1/25
+    - 12/2/25
+    - 12/3/25
+    - 12/4/25
+    - 12/5/25
+    - 12/6/25
+    - 12/7/25
+    - 12/8/25
+    - 12/9/25
+    - 12/10/25
+    - 12/11/25
+    - 12/12/25
+    - 12/13/25
+    - 12/14/25
+    - 12/15/25
+    - 12/16/25
+    - 12/17/25
+    - 12/18/25
+    - 12/19/25
+    - 12/20/25
+    - 12/21/25
+    - 12/22/25
+    - 12/23/25
+    - 12/24/25
+    - 12/25/25
+    - 12/26/25
+    - 12/27/25
+    - 12/28/25
+    - 12/29/25
+    - 12/30/25
+    - 12/31/25
+    - 1/1/26
+
+

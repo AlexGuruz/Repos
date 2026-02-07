@@ -1,0 +1,61 @@
+{
+  "sheets": {
+    "TRANSACTIONS": {
+      "header_rows": 1,
+      "columns": {}
+    },
+    "BALANCE": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "K"
+      }
+      "BANK": {
+      "header_rows": 1,
+      "columns": {
+        "Amount": "K"
+      }
+    },
+    "PAYROLL": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Z"
+      }
+    },
+    "INCOME": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "O"
+      }
+    },
+    "ALLOCATED": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "L"
+      }
+    },
+    "CONSIGNMENT": {
+      "header_rows": 19,
+      "columns": {}
+    },
+    "NUGZ COG": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "V"
+      }
+    },
+    "NUGZ EXPENSES": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Y"
+      }
+    },
+    "COMMISSION": {
+      "header_rows": 19,
+      "columns": {
+        "Amount": "Q"
+      }
+    },
+    "CANNABIS DIST": {
+      "header_rows": 19,
+      "columns": {}
+    },

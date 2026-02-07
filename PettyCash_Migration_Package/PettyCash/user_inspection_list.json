@@ -1,0 +1,447 @@
+{
+  "summary": {
+    "total_transactions": 1959,
+    "processed_transactions": 1959,
+    "unmatched_count": 29,
+    "low_confidence_count": 34,
+    "success_rate": "96.8%"
+  },
+  "unmatched_transactions": [
+    {
+      "source": "2025 STARTING",
+      "company": "JGD",
+      "amount": 3762.48,
+      "date": "01/01/25",
+      "frequency": 1
+    },
+    {
+      "source": "CHANGE",
+      "company": "NUGZ",
+      "amount": 5.76,
+      "date": "04/16/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZEN WITHDRAW",
+      "company": "JGD",
+      "amount": -450.0,
+      "date": "06/12/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 13.0,
+      "date": "03/28/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 31.0,
+      "date": "02/27/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 220.0,
+      "date": "03/09/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 300.0,
+      "date": "02/14/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 3000.0,
+      "date": "04/04/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 3600.0,
+      "date": "05/15/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 6500.0,
+      "date": "04/16/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 7602.0,
+      "date": "04/10/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 8000.0,
+      "date": "02/05/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 9000.0,
+      "date": "03/19/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 9000.0,
+      "date": "05/20/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 9400.0,
+      "date": "05/08/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 12021.0,
+      "date": "02/19/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "JGD",
+      "amount": 15000.0,
+      "date": "01/21/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "NUGZ",
+      "amount": 400.5,
+      "date": "02/04/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "NUGZ",
+      "amount": 2500.0,
+      "date": "05/02/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "NUGZ",
+      "amount": 4000.0,
+      "date": "03/30/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "NUGZ",
+      "amount": 5000.0,
+      "date": "03/11/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "NUGZ",
+      "amount": 6000.0,
+      "date": "04/24/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "NUGZ",
+      "amount": 9000.0,
+      "date": "03/06/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAW",
+      "company": "NUGZ",
+      "amount": 9500.0,
+      "date": "04/21/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAWAL",
+      "company": "JGD",
+      "amount": -2820.0,
+      "date": "07/06/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAWAL",
+      "company": "JGD",
+      "amount": -1000.0,
+      "date": "06/04/25",
+      "frequency": 1
+    },
+    {
+      "source": "CITIZENS WITHDRAWAL",
+      "company": "JGD",
+      "amount": 3027.0,
+      "date": "06/04/25",
+      "frequency": 1
+    },
+    {
+      "source": "HIGH CEDAR PUMP",
+      "company": "JGD",
+      "amount": -140.0,
+      "date": "07/11/25",
+      "frequency": 1
+    },
+    {
+      "source": "SWIFT",
+      "company": "JGD",
+      "amount": -20.99,
+      "date": "07/11/25",
+      "frequency": 1
+    }
+  ],
+  "low_confidence_transactions": [
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 20.0,
+      "date": "02/10/25",
+      "frequency": 2
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -30.0,
+      "date": "01/23/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -20.0,
+      "date": "01/08/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -20.0,
+      "date": "01/21/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -20.0,
+      "date": "05/01/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -12.0,
+      "date": "05/09/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -10.0,
+      "date": "03/19/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -8.0,
+      "date": "01/29/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -5.0,
+      "date": "01/03/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -4.9,
+      "date": "01/10/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -2.0,
+      "date": "04/03/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -1.5,
+      "date": "02/12/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -1.0,
+      "date": "04/10/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -1.0,
+      "date": "04/16/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -0.05,
+      "date": "01/11/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": -0.04,
+      "date": "01/22/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 0.2,
+      "date": "02/01/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 0.25,
+      "date": "04/18/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 1.0,
+      "date": "01/16/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 1.0,
+      "date": "01/22/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 1.0,
+      "date": "03/02/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 1.0,
+      "date": "07/11/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 2.0,
+      "date": "02/02/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 2.78,
+      "date": "03/06/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 4.0,
+      "date": "01/16/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 9.5,
+      "date": "01/20/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 10.0,
+      "date": "05/17/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 10.0,
+      "date": "06/30/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 16.0,
+      "date": "01/13/25",
+      "frequency": 1
+    },
+    {
+      "source": "BANK RECONCILE",
+      "company": "NUGZ",
+      "amount": 25.0,
+      "date": "04/12/25",
+      "frequency": 1
+    },
+    {
+      "source": "FROM BANK",
+      "company": "JGD",
+      "amount": 9808.0,
+      "date": "07/21/25",
+      "frequency": 1
+    },
+    {
+      "source": "PARKING FEE",
+      "company": "NUGZ",
+      "amount": -1.0,
+      "date": "06/03/25",
+      "frequency": 1
+    },
+    {
+      "source": "TO BANK",
+      "company": "JGD",
+      "amount": -350.0,
+      "date": "07/21/25",
+      "frequency": 1
+    }
+  ]
+}

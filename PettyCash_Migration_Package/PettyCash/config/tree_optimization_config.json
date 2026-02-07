@@ -1,0 +1,88 @@
+{
+  "tree_optimization": {
+    "description": "Configuration for tree-based data structure optimizations based on Ollama's recommendations",
+    "version": "1.0",
+    "optimizations": {
+      "hash_table_indexing": {
+        "enabled": true,
+        "description": "Use hash tables instead of dictionary-based lookups for O(1) performance",
+        "benefits": [
+          "O(1) target cell lookups",
+          "Reduced memory usage",
+          "Faster batch processing"
+        ]
+      },
+      "lazy_loading": {
+        "enabled": true,
+        "description": "Implement lazy loading for target cell lookups to reduce initial memory footprint",
+        "benefits": [
+          "Lower initial memory usage",
+          "Faster startup time",
+          "Better memory efficiency"
+        ]
+      },
+      "compression": {
+        "enabled": true,
+        "description": "Use compression techniques for memory-efficient storage",
+        "benefits": [
+          "Reduced memory footprint",
+          "Better cache performance",
+          "Improved scalability"
+        ]
+      },
+      "batch_optimization": {
+        "enabled": true,
+        "description": "Sort transactions by target sheet and date before batch creation",
+        "benefits": [
+          "More efficient batch creation",
+          "Better API quota usage",
+          "Faster processing"
+        ]
+      }
+    },
+    "performance_targets": {
+      "target_cell_lookup_time": "< 1ms",
+      "memory_usage_reduction": "30-50%",
+      "api_call_reduction": "99%+ (from 8000+ to ~10)",
+      "processing_speed_improvement": "80-85% faster"
+    },
+    "memory_management": {
+      "max_cache_size": "unlimited",
+      "compression_ratio": "0.7",
+      "cleanup_interval": "never",
+      "lazy_loading_threshold": 1000
+    },
+    "error_handling": {
+      "max_retries": 3,
+      "exponential_backoff": true,
+      "graceful_degradation": true,
+      "continue_on_errors": true
+    },
+    "logging": {
+      "level": "INFO",
+      "tree_operations": true,
+      "performance_metrics": true,
+      "memory_usage": true
+    }
+  },
+  "implementation_notes": {
+    "ollama_recommendations": [
+      "Use hash tables or tree-based structures instead of dictionary-based approach",
+      "Implement lazy loading for target cell lookups",
+      "Consider compression techniques for memory-efficient storage",
+      "Sort transactions by target sheet and date before batch creation"
+    ],
+    "business_logic_preservation": [
+      "All Q&A logic remains unchanged",
+      "Same workflow steps and validation rules",
+      "Identical results with better performance",
+      "Backward compatibility maintained"
+    ],
+    "key_improvements": [
+      "O(1) lookup time for target cells",
+      "Memory-efficient data structures",
+      "Faster batch processing",
+      "Better error recovery"
+    ]
+  }
+} 

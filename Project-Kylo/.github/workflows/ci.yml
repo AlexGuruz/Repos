@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: kylo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scaffold/requirements.txt
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then echo "PG ready"; exit 0; fi; sleep 2; done; exit 1
+
+      - name: Create test DBs
+        run: |
+          createdb -h localhost -U postgres kylo_global
+          createdb -h localhost -U postgres kylo_company_a
+          createdb -h localhost -U postgres kylo_company_b
+        env:
+          PGPASSWORD: kylo
+
+      - name: Apply DDLs (global/company)
+        run: |
+          psql -h localhost -U postgres -d kylo_global -f db/ddl/0002_core_intake_control.sql
+          psql -h localhost -U postgres -d kylo_global -f db/ddl/0003_helpers.sql
+          psql -h localhost -U postgres -d kylo_global -f db/ddl/0004_control_rules_version.sql
+          psql -h localhost -U postgres -d kylo_global -f db/ddl/0005_control_mover_runs.sql
+          psql -h localhost -U postgres -d kylo_company_a -f db/ddl/company_0001_app.sql
+          psql -h localhost -U postgres -d kylo_company_b -f db/ddl/company_0001_app.sql
+        env:
+          PGPASSWORD: kylo
+
+      - name: Run tests (unit)
+        run: pytest -q scaffold/tests/sheets/test_poster.py
+
+      - name: Run integration (mover snapshot)
+        run: pytest -q scaffold/tests/mover/test_rules_snapshot.py -m integration
+        env:
+          DOCKER_BUILDKIT: 1
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONHASHSEED: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+      - name: Install dependencies
+        run: pip install -r scaffold/requirements.txt
+      - name: Unit tests
+        run: pytest -m "not integration" -q
+      - name: Integration tests
+        run: pytest -m "integration" -q
+      - name: Upload artifacts (pytest cache and logs)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-artifacts
+          path: |
+            .pytest_cache
+            **/test-results/*.xml
+            **/*.log
+
+

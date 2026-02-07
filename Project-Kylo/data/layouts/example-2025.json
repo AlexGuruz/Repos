@@ -1,0 +1,8 @@
+{
+  "sheets": {
+    "Cash": { "header_rows": 2, "columns": { "Date": "A", "Amount": "D" } },
+    "Bank": { "header_rows": 2, "columns": { "Date": "A", "Amount": "E" } }
+  }
+}
+
+

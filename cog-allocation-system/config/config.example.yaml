@@ -1,0 +1,19 @@
+# Copy to config.yaml and fill in values
+
+google_drive:
+  watch_folder_id: "1b1XgCjqlcS7UeGeL7oucH92xeuIwxKrP"
+  check_interval_minutes: 5
+
+google_sheets:
+  service_account_path: "config/service_account.json"
+  spreadsheet_id: "YOUR_SPREADSHEET_ID"
+  drop_down_helper_sheet: "DROP DOWN HELPER"
+  cog_sheets:
+    nugz: "NUGZ COG"
+    puffin: "PUFFIN COG"
+    empire: "EMPIRE COG"
+
+paths:
+  csv_dump: "data/csv_dump"
+  state: "data/state"
+  logs: "data/logs"

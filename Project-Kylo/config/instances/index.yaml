@@ -1,0 +1,10 @@
+instances:
+  - id: JGD_2025
+    company_key: JGD
+    years: "2025"
+    enabled: true
+  - id: JGD_2026
+    company_key: JGD
+    years: "2026"
+    enabled: true
+
