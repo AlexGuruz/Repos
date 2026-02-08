@@ -37,3 +37,9 @@ paths:
   csv_dump: "data/csv_dump"
   state: "data/state"
   logs: "data/logs"
+  # Optional: copy certain CSVs to paths outside C: immediately after download.
+  # Keys: exact filename (e.g. "OrderItems.csv") or "_all" for every new CSV.
+  # Values: list of paths (dir = copy file there with same name; path = full destination file).
+  # copy_rules:
+  #   "OrderItems.csv": ["D:/intake/OrderItems.csv", "E:/backup/sales/"]
+  #   "_all": ["D:/drive_dump/"]

@@ -2,10 +2,11 @@
 """
 Drive Watcher - monitors Google Drive folder for new sales CSV files.
 Downloads new files to csv_dump, then runs extract_unique_brands and calculate_daily_cog.
-Config: config/config.yaml (watch_folder_id)
+Config: config/config.yaml (watch_folder_id, paths.copy_rules for copying to paths outside C:).
 """
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 import time
@@ -83,6 +84,52 @@ def save_state(state_path: Path, state: dict):
         json.dump(state, f, indent=2)
 
 
+def copy_to_configured_paths(source_path: Path, filename: str) -> list:
+    """
+    If config has paths.copy_rules for this filename (or _all), copy the file to each path.
+    Paths can be full file paths or directories (same filename). Returns list of paths written.
+    """
+    written = []
+    cfg = load_config()
+    rules = (cfg.get("paths") or {}).get("copy_rules")
+    if not rules or not isinstance(rules, dict):
+        return written
+    targets = []
+    if "_all" in rules:
+        val = rules["_all"]
+        if isinstance(val, list):
+            targets.extend(val)
+        elif isinstance(val, str) and val.strip():
+            targets.append(val.strip())
+    if filename in rules:
+        val = rules[filename]
+        if isinstance(val, list):
+            targets.extend(val)
+        elif isinstance(val, str) and val.strip():
+            targets.append(val.strip())
+    for raw in targets:
+        raw = raw.strip()
+        if not raw:
+            continue
+        is_dir = raw.endswith("/") or raw.endswith("\\")
+        dest = Path(raw.rstrip("/\\"))
+        if not dest.is_absolute():
+            dest = (Path(__file__).parent.parent) / dest
+        try:
+            if not is_dir and dest.suffix and dest.suffix.lower() == ".csv":
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source_path, dest)
+                written.append(str(dest))
+            else:
+                dest.mkdir(parents=True, exist_ok=True)
+                out = dest / filename
+                shutil.copy2(source_path, out)
+                written.append(str(out))
+        except Exception as e:
+            print(f"[drive_watcher] Failed to copy {filename} to {raw}: {e}")
+    return written
+
+
 def run_once():
     """Check Drive once, download new CSVs, run COG pipeline."""
     if not HAS_GOOGLE:
@@ -124,6 +171,10 @@ def run_once():
             download_file(service, fid, dest)
             new_files.append(dest)
             processed.add(fid)
+            # Copy to configured paths outside C: if paths.copy_rules is set
+            copied = copy_to_configured_paths(dest, name)
+            for p in copied:
+                print(f"[drive_watcher] Copied to {p}")
         except Exception as e:
             print(f"[drive_watcher] Failed to download {name}: {e}")
 
