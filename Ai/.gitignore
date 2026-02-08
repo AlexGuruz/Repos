@@ -1,0 +1,7 @@
+# Obsidian app (exe, dll, resources) - track only Brain vault
+Obsidian/*
+!Obsidian/Brain/
+
+# Obsidian session / cache
+Obsidian/Brain/.obsidian/workspace.json
+Obsidian/Brain/.obsidian/graph.json
