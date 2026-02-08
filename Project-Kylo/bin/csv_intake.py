@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import sys
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import psycopg2
 
@@ -48,13 +48,53 @@ def create_db_connection(db_url: str):
         sys.exit(1)
 
 
+def _copy_csv_to_configured_paths(csv_content: str, company_key: Optional[str] = None) -> List[str]:
+    """
+    If config has intake.csv_copy_paths for this company (or _default), write csv_content
+    to each path. Paths can be on any drive (e.g. D:, E:). Returns list of paths written.
+    """
+    written: List[str] = []
+    try:
+        cfg = load_config()
+        raw = cfg.get("intake.csv_copy_paths")
+        if not raw:
+            return written
+        paths: List[str] = []
+        if isinstance(raw, list):
+            paths = [p for p in raw if isinstance(p, str) and p.strip()]
+        elif isinstance(raw, dict):
+            key = (company_key or "").strip().upper() or "_default"
+            val = raw.get(key) or raw.get("_default")
+            if isinstance(val, str):
+                paths = [val] if val.strip() else []
+            elif isinstance(val, list):
+                paths = [p for p in val if isinstance(p, str) and p.strip()]
+        for path in paths:
+            path = path.strip()
+            if not path:
+                continue
+            try:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(csv_content)
+                written.append(path)
+                print(f"Copied CSV to {path}")
+            except Exception as e:
+                print(f"Warning: failed to copy CSV to {path}: {e}", file=sys.stderr)
+        return written
+    except Exception as e:
+        print(f"Warning: could not resolve csv_copy_paths: {e}", file=sys.stderr)
+        return written
+
+
 def process_csv_intake(
     spreadsheet_id: str,
     service_account_path: str,
     db_url: str,
     header_rows: int = 19,
     force_process: bool = False,
-    dry_run: bool = False
+    dry_run: bool = False,
+    company_key: Optional[str] = None,
 ) -> Dict:
     """
     Process CSV intake with comprehensive deduplication
@@ -66,6 +106,7 @@ def process_csv_intake(
         header_rows: Number of header rows to skip
         force_process: Force processing even if file already processed
         dry_run: Don't actually store data, just validate
+        company_key: Optional company key (e.g. NUGZ, JGD) for intake.csv_copy_paths routing
     
     Returns:
         Dictionary with processing results
@@ -98,6 +139,11 @@ def process_csv_intake(
                 "total_lines": metadata['total_lines'],
                 "non_empty_lines": metadata['non_empty_lines']
             })
+            
+            # Copy to configured paths (e.g. D:, E:) if intake.csv_copy_paths is set
+            copy_paths = _copy_csv_to_configured_paths(csv_content, company_key=company_key)
+            if copy_paths:
+                emit("csv_intake", "csv_copied", {"paths": copy_paths})
             
             # 2. Parse transactions
             print("Parsing CSV transactions...")
@@ -221,29 +267,6 @@ def process_csv_intake(
                 })
                 
                 return result
-def run_intake_for_company(company: str, *, dry_run: bool = True, force_process: bool = False, header_rows: Optional[int] = None) -> Dict:
-    """Resolve spreadsheetId, service account, and DB DSN from unified config and run intake.
-
-    Returns processing result dict.
-    """
-    cfg = load_config()
-    # Resolve company workbook url
-    companies = (cfg.get("sheets.companies") or [])
-    url = None
-    for it in companies:
-        key = (it.get("key") or "").strip().upper()
-        if key == company.strip().upper() or (key == "710" and company.strip().upper() == "710"):
-            url = it.get("workbook_url")
-            break
-    if not url:
-        raise RuntimeError(f"Workbook URL not found for company {company}")
-    spreadsheet_id = _extract_spreadsheet_id(url)
-    sa = cfg.get("google.service_account_json_path") or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "secrets/service_account.json")
-    db_url = cfg.get("database.global_dsn") or os.environ.get("KYLO_GLOBAL_DSN")
-    if header_rows is None:
-        header_rows = int((cfg.get("intake.csv_processor.header_rows") or 19))
-    return process_csv_intake(spreadsheet_id, sa, db_url, header_rows=header_rows, force_process=force_process, dry_run=dry_run)
-                
             finally:
                 db_conn.close()
                 
@@ -253,6 +276,36 @@ def run_intake_for_company(company: str, *, dry_run: bool = True, force_process:
                 "spreadsheet_id": spreadsheet_id
             })
             raise
+
+
+def run_intake_for_company(company: str, *, dry_run: bool = True, force_process: bool = False, header_rows: Optional[int] = None) -> Dict:
+    """Resolve spreadsheetId, service account, and DB DSN from unified config and run intake.
+
+    Returns processing result dict.
+    """
+    cfg = load_config()
+    # Resolve company workbook url
+    companies = (cfg.get("sheets.companies") or [])
+    url = None
+    resolved_key: Optional[str] = None
+    for it in companies:
+        key = (it.get("key") or "").strip().upper()
+        if key == company.strip().upper() or (key == "710" and company.strip().upper() == "710"):
+            url = it.get("workbook_url")
+            resolved_key = key
+            break
+    if not url:
+        raise RuntimeError(f"Workbook URL not found for company {company}")
+    spreadsheet_id = _extract_spreadsheet_id(url)
+    sa = cfg.get("google.service_account_json_path") or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "secrets/service_account.json")
+    db_url = cfg.get("database.global_dsn") or os.environ.get("KYLO_GLOBAL_DSN")
+    if header_rows is None:
+        header_rows = int((cfg.get("intake.csv_processor.header_rows") or 19))
+    return process_csv_intake(
+        spreadsheet_id, sa, db_url,
+        header_rows=header_rows, force_process=force_process, dry_run=dry_run,
+        company_key=resolved_key,
+    )
 
 
 def show_stats(db_url: str, days: int = 7):

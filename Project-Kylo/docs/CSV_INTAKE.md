@@ -98,6 +98,19 @@ ON intake.raw_transactions(source_file_fingerprint, row_index_0based);
 
 ## Configuration
 
+### **Copy CSV to paths outside C:**
+In `config/global.yaml` (or layered YAML), you can set `intake.csv_copy_paths` so that certain intakes immediately write the downloaded CSV to specific files (e.g. on D: or E:). Keys are company keys (`NUGZ`, `JGD`, `EMPIRE`, `PUFFIN`); `_default` applies when running without `--company`. Parent directories are created if needed.
+
+```yaml
+intake:
+  csv_copy_paths:
+    NUGZ: ["D:/intake/nugz.csv", "E:/backup/nugz.csv"]
+    JGD: ["E:/data/jgd_intake.csv"]
+    _default: ["D:/intake/petty_cash.csv"]
+```
+
+Copy happens right after download and validation, before parsing and DB storage.
+
 ### **CSV Intake Configuration**
 ```json
 {

@@ -52,6 +52,15 @@ year_workbooks:
     intake_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
     output_workbook_url: https://docs.google.com/spreadsheets/d/1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
 
+# Optional: copy downloaded CSV to paths outside C: (e.g. D:, E:) immediately after download.
+# Keys are company keys (NUGZ, JGD, EMPIRE, PUFFIN); _default applies when --company is not used.
+# Paths are written after each successful download; parent dirs are created if needed.
+# intake:
+#   csv_copy_paths:
+#     NUGZ: ["D:/intake/nugz.csv", "E:/backup/nugz.csv"]
+#     JGD: ["E:/data/jgd_intake.csv"]
+#     _default: ["D:/intake/petty_cash.csv"]
+
 rules:
   source: jgdtruth
   xlsx_path: null
