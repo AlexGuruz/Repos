@@ -10,16 +10,12 @@
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:pack": "electron-builder"
   },
-  "keywords": [
-    "kylo",
-    "dashboard",
-    "electron"
-  ],
+  "keywords": ["kylo", "dashboard", "electron"],
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "chart.js": "^4.4.1",
     "chokidar": "^3.5.3",
+    "chart.js": "^4.4.1",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0"
@@ -39,18 +35,6 @@
       "target": "nsis",
       "icon": "build/icon.ico"
     }
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react-swc": "^4.3.0",
-    "autoprefixer": "^10.4.27",
-    "concurrently": "^9.2.1",
-    "electron": "^41.0.2",
-    "postcss": "^8.5.8",
-    "tailwindcss": "^3.4.19",
-    "typescript": "^5.9.3",
-    "vite": "^8.0.0",
-    "wait-on": "^9.0.4"
   }
 }
+
