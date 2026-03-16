@@ -7,9 +7,5 @@ import { setupElectronMock } from "./electron-mock";
 // Setup mock Electron API for browser development
 setupElectronMock();
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+ReactDOM.createRoot(document.getElementById("root")!).render(<App />);
 
