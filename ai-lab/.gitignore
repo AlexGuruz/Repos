@@ -5,6 +5,10 @@
 secrets/
 *.key
 
+# Gmail OAuth (email_sorter/gmail_portable; use GOOGLE_CREDENTIALS_FILE / GOOGLE_TOKEN_FILE or local files — never commit)
+email_sorter/gmail_portable/credentials.json
+email_sorter/gmail_portable/token.json
+
 # Logs and temp
 *.log
 logs/*.log
