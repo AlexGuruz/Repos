@@ -1,0 +1,15 @@
+canonical:
+  permits: "Permits"
+  loads: "LOADS"
+  mydot: "MYDOT"
+  progressive_insurance: "PROGRESSIVE COMMERCIAL INSURANCE"
+  driver_parent: "Driver Credentials / Documents"
+  needs_review: "Needs Review"
+
+# For categories that don't have a dedicated canonical label in the user spec,
+# we route them to the safest existing label(s).
+category_label_fallbacks:
+  bank_statement: "Needs Review"
+  uncategorized: "Needs Review"
+  needs_review: "Needs Review"
+

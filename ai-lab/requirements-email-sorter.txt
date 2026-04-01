@@ -1,0 +1,10 @@
+# Minimal deps for email_sorter Gmail backfill/apply on a worker machine.
+# Install: pip install -r requirements-email-sorter.txt
+# OAuth: set GOOGLE_CREDENTIALS_FILE / GOOGLE_TOKEN_FILE, or place credentials.json + token.json in
+# email_sorter/gmail_portable/ (bundled adapter; see email_sorter/backfill.py).
+# Full agent checkout: Ai/Email-Inbox-Agent---Doo-Made/requirements.txt (merge as needed).
+
+pyyaml>=6.0
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.2.0

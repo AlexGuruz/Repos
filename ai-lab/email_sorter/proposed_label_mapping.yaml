@@ -1,0 +1,82 @@
+generated_at: '2026-03-19T05:53:06.045827+00:00'
+clusters:
+  cluster_001:
+    cluster_name: MYDOT Notifications
+    count: 1
+    suggested_label: MYDOT
+    confidence: 0.85
+    rationale:
+    - mydot_signals
+    approved_label: Needs Review
+  cluster_002:
+    cluster_name: MYDOT Notifications
+    count: 1
+    suggested_label: MYDOT
+    confidence: 0.85
+    rationale:
+    - mydot_signals
+    approved_label: MYDOT
+  cluster_003:
+    cluster_name: General Inbox Cluster
+    count: 1
+    suggested_label: Needs Review
+    confidence: 0.5
+    rationale:
+    - default_uncertain
+    approved_label: Needs Review
+  cluster_004:
+    cluster_name: Permit Documents
+    count: 1
+    suggested_label: Permits
+    confidence: 0.9
+    rationale:
+    - permit_signals
+    approved_label: Permits
+  cluster_005:
+    cluster_name: Permit Documents
+    count: 1
+    suggested_label: Permits
+    confidence: 0.9
+    rationale:
+    - permit_signals
+    approved_label: Permits
+  cluster_006:
+    cluster_name: Permit Documents
+    count: 1
+    suggested_label: Permits
+    confidence: 0.9
+    rationale:
+    - permit_signals
+    approved_label: Permits
+  cluster_007:
+    cluster_name: Permit Documents
+    count: 1
+    suggested_label: Permits
+    confidence: 0.9
+    rationale:
+    - permit_signals
+    approved_label: Permits
+  cluster_008:
+    cluster_name: Permit Documents
+    count: 1
+    suggested_label: Permits
+    confidence: 0.9
+    rationale:
+    - permit_signals
+    approved_label: Permits
+  cluster_009:
+    cluster_name: Permit Documents
+    count: 1
+    suggested_label: Permits
+    confidence: 0.9
+    rationale:
+    - permit_signals
+    approved_label: Permits
+  cluster_010:
+    cluster_name: Permit Documents
+    count: 1
+    suggested_label: Permits
+    confidence: 0.9
+    rationale:
+    - permit_signals
+    approved_label: Permits

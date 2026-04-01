@@ -1,0 +1,36 @@
+# Secrets and env
+.env
+.env.*
+.secrets/
+secrets/
+*.key
+
+# Logs and temp
+*.log
+logs/*.log
+.cache/
+__pycache__/
+*.pyc
+
+# Generated and large data
+*.csv
+*.parquet
+*.xlsx
+*.zip
+*.bin
+data/
+rag_ingest/*.bin
+
+# Virtual env
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Build
+build/
+dist/
+*.egg-info/

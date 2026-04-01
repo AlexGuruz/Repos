@@ -1,0 +1,71 @@
+generated_at: '2026-03-19T05:53:49.869812+00:00'
+rules_additions:
+  permits:
+    subject_keywords:
+    - alert
+    - angie
+    - car
+    - com
+    - johnson
+    - load
+    - packet
+    - pevo
+    - pilot
+    - pilotcarloads
+    - set
+    - starvin
+    - swift
+    - usa
+    - wcs
+    - wcspermits
+    body_keywords:
+    - alert
+    - angie
+    - car
+    - com
+    - johnson
+    - load
+    - packet
+    - pevo
+    - pilot
+    - pilotcarloads
+    - set
+    - starvin
+    - swift
+    - usa
+    - wcs
+    - wcspermits
+    attachment_filename_keywords: []
+  driver_document:
+    subject_keywords: []
+    body_keywords: []
+    attachment_filename_keywords: []
+  mydot:
+    subject_keywords:
+    - cameron
+    - crossing
+    - dotd
+    - ferry
+    - information
+    - out
+    - parish
+    - service
+    body_keywords:
+    - cameron
+    - crossing
+    - dotd
+    - ferry
+    - information
+    - out
+    - parish
+    - service
+    attachment_filename_keywords: []
+  progressive_insurance:
+    subject_keywords: []
+    body_keywords: []
+    attachment_filename_keywords: []
+skipped_clusters:
+- cluster_id: cluster_001
+  reason: needs_review_approved
+- cluster_id: cluster_003
+  reason: needs_review_approved

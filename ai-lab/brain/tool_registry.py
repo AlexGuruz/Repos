@@ -1,0 +1,103 @@
+"""
+Tool metadata registry (Guru §24.14).
+
+Single source of truth per tool: name, description, args, side_effects, approval_required, risk_level, output_shape.
+Improves proposal generation, approval messaging, and routing consistency.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+# Default in-code registry; can be overridden by ops/registry/tools.yaml
+_DEFAULT_TOOLS: list[dict[str, Any]] = [
+    {
+        "name": "repo_search",
+        "description": "Search repositories for files or content matching a query.",
+        "args": {"query": "string"},
+        "side_effects": "read_only",
+        "approval_required": False,
+        "risk_level": "low",
+        "output_shape": "list of matches with path and snippet",
+    },
+    {
+        "name": "scan_repo",
+        "description": "Run repo_cartographer on a repo (worker SSH) and persist summary.",
+        "args": {"repo_name": "string"},
+        "side_effects": "writes summaries/repos/",
+        "approval_required": False,
+        "risk_level": "low",
+        "output_shape": "scan summary path and status",
+    },
+    {
+        "name": "run_script",
+        "description": "Execute a script from the registry by name with optional args.",
+        "args": {"script_name": "string", "args": "object"},
+        "side_effects": "executes script; may write files or call APIs",
+        "approval_required": True,
+        "risk_level": "medium",
+        "output_shape": "stdout, stderr, success",
+    },
+    {
+        "name": "set_process_priority",
+        "description": "Change process priority or CPU affinity (approval-gated).",
+        "args": {"pid": "int", "priority": "optional"},
+        "side_effects": "modifies process scheduling",
+        "approval_required": True,
+        "risk_level": "medium",
+        "output_shape": "success or error",
+    },
+    {
+        "name": "n8n_trigger",
+        "description": "Trigger an n8n workflow by name or webhook URL.",
+        "args": {"workflow": "string", "payload": "optional"},
+        "side_effects": "triggers remote workflow; may run jobs or call APIs",
+        "approval_required": True,
+        "risk_level": "medium",
+        "output_shape": "response status and body",
+    },
+    {
+        "name": "worker_n8n_trigger",
+        "description": "Trigger an n8n workflow on the worker via tunnel.",
+        "args": {"workflow": "string", "payload": "optional"},
+        "side_effects": "triggers worker n8n workflow",
+        "approval_required": True,
+        "risk_level": "medium",
+        "output_shape": "response status and body",
+    },
+]
+
+
+def _get_ops_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def load_tool_registry() -> list[dict[str, Any]]:
+    """Load tool metadata from ops/registry/tools.yaml if present; else return default list."""
+    path = _get_ops_root() / "ops" / "registry" / "tools.yaml"
+    if not path.exists():
+        return list(_DEFAULT_TOOLS)
+    try:
+        import yaml
+        with open(path, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict) and "tools" in data:
+            return data["tools"]
+        return list(_DEFAULT_TOOLS)
+    except Exception:
+        return list(_DEFAULT_TOOLS)
+
+
+def get_tool_metadata(tool_name: str) -> dict[str, Any] | None:
+    """Return metadata for a tool by name, or None if not in registry."""
+    for t in load_tool_registry():
+        if t.get("name") == tool_name:
+            return dict(t)
+    return None
+
+
+def list_tool_names() -> list[str]:
+    """Return all registered tool names."""
+    return [t.get("name", "") for t in load_tool_registry() if t.get("name")]

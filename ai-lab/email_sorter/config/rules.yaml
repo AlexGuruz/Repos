@@ -1,0 +1,127 @@
+# Deterministic, auditable classification rules for the email sorter.
+#
+# These run in order of `priority_order` (first match wins).
+#
+# MYDOT (LA DOT incident / road status) must win over generic "load"/"route" body text.
+#
+# **Permits:** Do not classify from subject/body/filename alone — real permits are decided
+# by AI + optional worker document intel (PDF/image text or vision). `permit_signals` below
+# is kept for learning proposals / future hints only; it is NOT in `priority_order`.
+
+priority_order:
+  - mydot
+  # PilotCarLoads operational load alerts → Gmail label LOADS (not permit PDFs).
+  - loads
+  - progressive_insurance
+  - driver_document
+  - existing_obvious_business_labels
+  - needs_review
+
+# Not used for deterministic routing (permits = AI/worker from attachment content).
+# Retained for EMAIL_SORTER_ENABLE_LEARNING_LOOP keyword proposals.
+permit_signals:
+  sender_domains: []
+  subject_keywords: []
+  body_keywords: []
+  attachment_filename_keywords: []
+
+load_signals:
+  sender_emails:
+    - "team@pilotcarloads.com"
+  sender_domains:
+    - "pilotcarloads.com"
+  subject_keywords: []
+  body_keywords: []
+  attachment_filename_keywords: []
+
+driver_document_signals:
+  subject_keywords:
+    - "driver"
+    - "cdl"
+    - "license"
+    - "credential"
+    - "credentials"
+  body_keywords:
+    - "driver credential"
+    - "cdl"
+    - "license"
+    - "qualification"
+    - "mvr"
+  attachment_filename_keywords:
+    - "cdl"
+    - "license"
+    - "credential"
+    - "credentials"
+    - "qualification"
+
+mydot_signals:
+  # Official Louisiana DOT MyDOTD traffic / incident notices (never treat as permits).
+  sender_emails:
+    - "mydotd@info.la.gov"
+  sender_domains: []
+  subject_keywords:
+    - "mydot"
+    - "my dot"
+    - "road or lane status"
+    - "ferry information"
+    - "ferry"
+    - "dotd"
+    - "parish"
+    - "cameron"
+    - "crossing"
+    - "service"
+  body_keywords:
+    - "mydot"
+    - "dot portal"
+    - "ferry"
+    - "dotd"
+    - "parish"
+    - "cameron"
+    - "crossing"
+    - "service"
+  attachment_filename_keywords:
+    - "mydot"
+    - "dot"
+
+progressive_insurance_signals:
+  sender_domains:
+    - "e.progressive.com"
+    - "progressive.com"
+  subject_keywords:
+    - "progressive"
+    - "insurance"
+    - "commercial"
+  body_keywords:
+    - "progressive"
+    - "insurance"
+    - "policy"
+    - "premium"
+  attachment_filename_keywords:
+    - "progressive"
+    - "insurance"
+    - "policy"
+
+existing_obvious_business_label_signals:
+  # In Phase 1 we keep this conservative: bank statements are routed to Needs Review
+  # (via labels.yaml fallback) rather than auto-filing into a dedicated label.
+  bank_statement_signals:
+    subject_keywords:
+      - "bank statement"
+      - "statement"
+      - "balance"
+      - "minimum payment"
+    body_keywords:
+      - "bank statement"
+      - "account statement"
+      - "routing number"
+      - "balance"
+    attachment_filename_keywords:
+      - "statement"
+      - "bank"
+
+  # If a message appears to already be explicitly categorized by an existing Gmail label,
+  # deterministic matching can use that label text as evidence.
+  # (Optional; keep empty until you identify real folder/label names you want to trust.)
+  trusted_existing_label_keywords:
+    - ""
+

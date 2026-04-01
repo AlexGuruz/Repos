@@ -1,0 +1,6 @@
+high: 0.90
+medium: 0.72
+
+# Only create new driver child labels when driver confidence is extremely high.
+driver_create: 0.94
+
