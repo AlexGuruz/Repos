@@ -1,0 +1,43 @@
+# Denied actions — never allowed, regardless of tier or allowlist
+# Ref: GLOBAL_POLICY.md §3
+
+deny_always:
+  - ssh_config_edit
+  - firewall_change
+  - secret_file_read
+  - secret_file_write
+  - unrestricted_shell
+  - sudo_without_approved_wrapper
+  - direct_root_login
+  - modify_governance_repo_without_approval
+  - bypass_wrapper
+  - disable_logging
+  - delete_action_logs
+  - modify_approval_records
+  - broad_sudo
+  - chmod_system_binaries
+  - modify_systemd_units_direct
+  - kernel_or_boot_change
+
+# Paths (glob or prefix) that must not be read or written by agents
+# except via explicit approved wrapper (e.g. root-owned collector writing sanitized output)
+denied_paths:
+  - "/etc/ssh/"
+  - "/etc/firewall"
+  - "**/.env"
+  - "**/secrets/"
+  - "**/.secrets/"
+  - "**/*.pem"
+  - "**/*.key"
+  - "/etc/sudoers"
+  - "/etc/shadow"
+  - "C:/Windows/System32/"
+  # Add lab-specific secret roots as needed
+
+# Denied even with approval (require policy change in governance repo first)
+denied_even_with_approval:
+  - ssh_config_edit
+  - firewall_change
+  - secret_file_read
+  - secret_file_write
+  - unrestricted_shell

@@ -1,0 +1,5 @@
+{
+  "version": "1.0",
+  "repos": [],
+  "notes": "List repos to index, allowlist, or govern. Example entry: { \"repo_id\": \"ai-lab\", \"path\": \"E:/Repos/ai-lab\", \"include\": [\"*.md\", \"*.yaml\"], \"exclude\": [\"node_modules\", \".git\"] }"
+}

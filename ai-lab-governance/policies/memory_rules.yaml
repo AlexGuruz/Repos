@@ -1,0 +1,33 @@
+# Memory write rules — when and how behavioral memory can be updated
+# Ref: GLOBAL_POLICY.md §6; AI_LAB_GOAL_AND_PHILOSOPHY.md §10.4
+
+# Raw feedback is not permanent memory
+raw_feedback_is_not_permanent: true
+
+# Repeated confirmed preferences become candidate memory (min confirmations)
+min_confirmations_for_candidate: 2
+explicit_remember_signal: true
+
+# Permanent memory promotion requires:
+permanent_memory_requires:
+  - explicit_scope
+  - reversibility_info
+  - log_entry
+  - no_silent_promotion
+
+# Business definitions (e.g. "sales", "today") require user confirmation before broad use
+business_definitions_require_confirmation: true
+
+# Trust changes always go through approval layer
+trust_changes_require_approval: true
+
+# Categories of behavioral memory
+categories:
+  - preference
+  - workflow
+  - business_semantics
+  - trust
+  - outcome
+
+# No agent-driven trust expansion without approval
+trust_expansion_approval_required: true

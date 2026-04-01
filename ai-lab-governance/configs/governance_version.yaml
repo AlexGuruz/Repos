@@ -1,0 +1,10 @@
+# Governance version — both main rig and worker rig must match.
+# Used by bootstrap/verify_governance.py to detect drift.
+
+governance_version: "0.1.0"
+schema_version: "1.0"
+min_wrapper_version: "0.1.0"
+
+# Optional: pin to a specific git ref for strict reproducibility
+# git_ref: "v0.1.0"
+# git_commit: "abc123..."

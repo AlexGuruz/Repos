@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PilotCar Loads Map</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <header class="sidebar-header">
+        <h1>PilotCar Loads</h1>
+        <div class="filters">
+          <label>Time</label>
+          <select id="timeFilter">
+            <option value="1">Last 24h</option>
+            <option value="2">Last 2 days</option>
+            <option value="5">Last 5 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="45">Last 45 days</option>
+            <option value="60">Last 60 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="180">Last 6 months</option>
+            <option value="365">Last 1 year</option>
+            <option value="all">All</option>
+          </select>
+          <label>Route type</label>
+          <select id="routeTypeFilter">
+            <option value="all">All types</option>
+            <option value="Lead">Lead</option>
+            <option value="Chase">Chase</option>
+            <option value="High Pole">High Pole</option>
+            <option value="Survey">Survey</option>
+            <option value="Flagger">Flagger</option>
+          </select>
+        </div>
+        <div class="sidebar-status">
+          <span id="lastUpdated" class="last-updated" aria-live="polite">—</span>
+          <button type="button" id="refreshBtn" class="refresh-btn" title="Fetch latest routes now">Refresh</button>
+        </div>
+      </header>
+      <div id="routeFocusSummary" class="route-focus-summary" style="display: none;" aria-live="polite"></div>
+      <div id="routeCards" class="route-cards"></div>
+    </aside>
+    <main id="mapContainer">
+      <div id="mapToolbar" class="map-toolbar">
+        <button type="button" id="zoneToggle" class="toolbar-btn" aria-pressed="false">Zone filter</button>
+        <div id="zoneControls" class="zone-controls" style="display: none;">
+          <label for="zoneRadius">Radius (mi)</label>
+          <select id="zoneRadius">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="75">75</option>
+            <option value="100">100</option>
+            <option value="150">150</option>
+            <option value="200">200</option>
+          </select>
+          <span class="zone-hint">Click map to set center</span>
+          <button type="button" id="zoneClear" class="toolbar-btn toolbar-btn-secondary">Clear zone</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

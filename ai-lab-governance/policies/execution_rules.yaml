@@ -1,0 +1,31 @@
+# Execution rules — how scripts and commands may be run
+# Ref: GLOBAL_POLICY.md; wrappers read this
+
+# All state-changing execution must go through approved wrappers
+direct_shell_for_state_change: false
+
+# Wrappers that are allowed to perform execution
+approved_wrappers:
+  - run_approved.py
+  - safe_exec.py
+
+# Before any script run:
+pre_execution_checks:
+  - tool_registry_lookup
+  - approval_tier_check
+  - allowlist_check
+  - denied_actions_check
+  - path_not_in_denied_paths
+
+# After any script run:
+post_execution_required:
+  - log_action
+
+# Tool registry path (relative to governance root)
+tool_registry_path: "registry/tool_registry.json"
+
+# If script not in registry: require approval to run (or to add to registry)
+unregistered_script_requires_approval: true
+
+# Max execution time (seconds) for a single approved run — optional
+# max_execution_seconds: 300

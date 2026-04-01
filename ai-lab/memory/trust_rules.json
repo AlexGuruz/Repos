@@ -1,0 +1,17 @@
+[
+  {
+    "scope": "path_pattern",
+    "path_pattern": "docs/**",
+    "approval_required": false
+  },
+  {
+    "scope": "path_pattern",
+    "path_pattern": "docs_source/**",
+    "approval_required": false
+  },
+  {
+    "scope": "path_pattern",
+    "path_pattern": "**",
+    "approval_required": true
+  }
+]

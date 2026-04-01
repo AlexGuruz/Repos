@@ -1,0 +1,11 @@
+{
+  "google_api_key": "YOUR_GOOGLE_MAPS_API_KEY",
+  "google_api_key_path": "",
+  "imap_credentials_path": "",
+  "poll_interval_sec": 120,
+  "imap_host": "imap.gmail.com",
+  "imap_port": 993,
+  "imap_user": "",
+  "imap_password": "",
+  "imap_folder": "INBOX"
+}

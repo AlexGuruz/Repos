@@ -1,0 +1,27 @@
+# Connector registry (PDR Phase 3). Defines allowed actions and approval requirements per connector.
+# Used by automation planner and secret broker for scope enforcement.
+
+gmail:
+  auth: oauth
+  allowed: [read, label]
+  approval_required: [send, delete]
+
+drive:
+  auth: oauth
+  allowed: [read, list]
+  approval_required: [write, delete]
+
+sheets:
+  auth: oauth
+  allowed: [read]
+  approval_required: [write, append]
+
+calendar:
+  auth: oauth
+  allowed: [read]
+  approval_required: [create, update, delete]
+
+twilio:
+  auth: api_key
+  allowed: []
+  approval_required: [send]

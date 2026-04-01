@@ -1,0 +1,238 @@
+# Category rules: description pattern -> category, subcategory
+# First match wins; patterns are matched case-insensitive.
+# Order: more specific patterns first (code sorts by pattern length desc).
+# For income (amount > 0) only income rules apply; for expense (amount < 0) labor, inventory, overhead apply.
+
+income:
+  - pattern: "REG 1 DEPOSIT"
+    subcategory: register_deposit
+  - pattern: "REG 2 DEPOSIT"
+    subcategory: register_deposit
+  - pattern: "REG 3 DEPOSIT"
+    subcategory: register_deposit
+  - pattern: "SQUARE"
+    subcategory: square
+  - pattern: "CASH DEPOSIT"
+    subcategory: cash_deposit
+  - pattern: "DEPOSIT"
+    subcategory: deposit
+
+labor:
+  - pattern: "SQUARE TIPS"
+    subcategory: tips
+  - pattern: "GREG PAY"
+    subcategory: payroll
+  - pattern: "JEN PAY"
+    subcategory: payroll
+  - pattern: "PAYROLL"
+    subcategory: payroll
+  - pattern: "PAY ROLL"
+    subcategory: payroll
+  - pattern: "SQUARE PAYROLL"
+    subcategory: payroll
+  - pattern: "941"
+    subcategory: payroll_tax
+  - pattern: "TAX DEPOSIT"
+    subcategory: payroll_tax
+  - pattern: "WAGE"
+    subcategory: wages
+  - pattern: "SALARY"
+    subcategory: salary
+  - pattern: "ADP"
+    subcategory: payroll
+  - pattern: "PAYCHEX"
+    subcategory: payroll
+  - pattern: "DIRECT DEPOSIT"
+    subcategory: payroll
+
+inventory:
+  - pattern: " ORDER"
+    subcategory: orders
+  - pattern: "PURCHASE ORDER"
+    subcategory: orders
+  - pattern: "INVENTORY"
+    subcategory: inventory
+  - pattern: "SUPPLIER"
+    subcategory: supplier
+  - pattern: "VENDOR"
+    subcategory: vendor
+
+overhead:
+  # Lab/testing (specific patterns before generic; TRANSPARENT LABS already excluded from rent)
+  - pattern: "TRANSPARENT LABS"
+    subcategory: lab_testing
+    fixed: false
+  - pattern: "LABS TESTING"
+    subcategory: lab_testing
+    fixed: false
+  - pattern: "GATEWAY LABS"
+    subcategory: lab_testing
+    fixed: false
+  - pattern: "BASELINE LABS"
+    subcategory: lab_testing
+    fixed: false
+  - pattern: "PURE LABS"
+    subcategory: lab_testing
+    fixed: false
+  # Rent / property
+  - pattern: "MAC REALTY"
+    subcategory: rent
+    fixed: true
+  - pattern: "RENT"
+    subcategory: rent
+    fixed: true
+  - pattern: "LEASE"
+    subcategory: rent
+    fixed: true
+  - pattern: "PROPERTY PAYMENT"
+    subcategory: rent
+    fixed: true
+  # Licensing → compliance (before generic LICENSE)
+  - pattern: "NUGZ LICENSING"
+    subcategory: compliance
+    fixed: true
+  - pattern: "LICENSING"
+    subcategory: compliance
+    fixed: true
+  # Tax subcategory
+  - pattern: "PROPERTY TAXES"
+    subcategory: tax
+    fixed: true
+  - pattern: "PUFFIN PURE TAXES"
+    subcategory: tax
+    fixed: true
+  # Loan payments
+  - pattern: "SWIFT FINANCIAL"
+    subcategory: loan
+    fixed: true
+  - pattern: "SWIFT"
+    subcategory: loan
+    fixed: true
+  # Credit card
+  - pattern: "USAA"
+    subcategory: credit_card
+    fixed: false
+  # ATM load = operational cash movement, not a fee
+  - pattern: "ATM LOAD"
+    subcategory: transfer
+    fixed: false
+  # Negative REG x DEPOSIT = money out (register movement)
+  - pattern: "REG 1 DEPOSIT"
+    subcategory: transfer
+    fixed: false
+  - pattern: "REG 2 DEPOSIT"
+    subcategory: transfer
+    fixed: false
+  - pattern: "REG 3 DEPOSIT"
+    subcategory: transfer
+    fixed: false
+  # Utilities (building)
+  - pattern: "UTILITIES"
+    subcategory: utilities
+    fixed: false
+  - pattern: "OG&E"
+    subcategory: utilities
+    fixed: false
+  - pattern: "ELECTRIC"
+    subcategory: utilities
+    fixed: false
+  - pattern: "WATER"
+    subcategory: utilities
+    fixed: false
+  - pattern: "GAS"
+    subcategory: utilities
+    fixed: false
+  - pattern: "AT&T"
+    subcategory: utilities
+    fixed: false
+  # Fuel / vehicle (separate from building utilities)
+  - pattern: "TESLA SUPER CHARGER"
+    subcategory: fuel
+    fixed: false
+  - pattern: "TESLA CHARGE"
+    subcategory: fuel
+    fixed: false
+  - pattern: "QUICK STOP GAS"
+    subcategory: fuel
+    fixed: false
+  - pattern: "CONOCO GAS"
+    subcategory: fuel
+    fixed: false
+  - pattern: "RACETRACK GAS"
+    subcategory: fuel
+    fixed: false
+  - pattern: "MURPHY GAS"
+    subcategory: fuel
+    fixed: false
+  - pattern: "FUEL"
+    subcategory: fuel
+    fixed: false
+  - pattern: "STONED PROJECTS"
+    subcategory: subscriptions
+    fixed: true
+  - pattern: "SUBSCRIPTION"
+    subcategory: subscriptions
+    fixed: true
+  - pattern: "INSURANCE"
+    subcategory: insurance
+    fixed: true
+  - pattern: "FARMERS INS"
+    subcategory: insurance
+    fixed: true
+  - pattern: "OMMA LICENSE"
+    subcategory: compliance
+    fixed: true
+  - pattern: "OMMA"
+    subcategory: compliance
+    fixed: true
+  - pattern: "LICENSE"
+    subcategory: compliance
+    fixed: true
+  - pattern: "COMPLIANCE"
+    subcategory: compliance
+    fixed: true
+  - pattern: "ESTIMATED SALES TAX"
+    subcategory: compliance
+    fixed: false
+  - pattern: "SALES TAX"
+    subcategory: compliance
+    fixed: false
+  - pattern: "MJ TAX"
+    subcategory: compliance
+    fixed: false
+  - pattern: "TAXES ("
+    subcategory: compliance
+    fixed: false
+  - pattern: "BANK FEE"
+    subcategory: bank_fees
+    fixed: false
+  - pattern: "SERVICE CHARGE"
+    subcategory: bank_fees
+    fixed: false
+  - pattern: "ATM "
+    subcategory: bank_fees
+    fixed: false
+  - pattern: "TRANSFER"
+    subcategory: transfer
+    fixed: false
+  - pattern: "WITHDRAW"
+    subcategory: transfer
+    fixed: false
+  - pattern: "TO BANK"
+    subcategory: transfer
+    fixed: false
+  - pattern: "REG 1 BANK"
+    subcategory: transfer
+    fixed: false
+  - pattern: "REG 2 BANK"
+    subcategory: transfer
+    fixed: false
+  - pattern: "REG 3 BANK"
+    subcategory: transfer
+    fixed: false
+  - pattern: "CITI CARD"
+    subcategory: credit_card
+    fixed: false
+  - pattern: "CAPITAL ONE"
+    subcategory: credit_card
+    fixed: false

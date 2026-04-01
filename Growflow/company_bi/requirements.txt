@@ -1,0 +1,5 @@
+# Company BI pipeline (run from Growflow repo root: python -m company_bi.run_pipeline)
+# Growflow repo already has google-api-python-client, etc.
+PyYAML>=6.0
+# Optional: for DB labor source (core.transactions_unified). Omit if using Sheets-only.
+psycopg2-binary>=2.9

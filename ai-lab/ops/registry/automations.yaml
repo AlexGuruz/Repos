@@ -1,0 +1,22 @@
+# Automation registry (Guru §23 Phase 4). ROI-first automations.
+
+automations:
+  repo-docs:
+    description: Scan repos, update docs/summaries, flag missing runbooks
+    status: planned
+    approval_required: false
+
+  file-lineage:
+    description: Classify and map files; log lineage; flag orphans
+    status: planned
+    approval_required: false
+
+  health-monitor:
+    description: Service status, disk, log growth, failed jobs, daily summary
+    status: planned
+    approval_required: false
+
+  receipt-bill-intake:
+    description: Pull bills/receipts, classify, extract, budget-ready records
+    status: planned
+    approval_required: true

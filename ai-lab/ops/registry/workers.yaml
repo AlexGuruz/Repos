@@ -1,0 +1,47 @@
+# Worker registry (Guru §23 Phase 4, §26 Worker Service Integration). Formal profile per worker.
+
+workers:
+  main-brain:
+    host: local
+    purpose: Orchestrator, chat, repo scan, hardware snapshot, evidence fusion
+    capabilities: [repo_scan, repo_search, hardware_snapshot, grounded_answer]
+    watches: []
+    services: [command-center]
+    health: ok
+
+  worker-rig-01:
+    name: worker-rig-01
+    host: ""  # Set via WORKER_SSH_HOST; used for SSH and tunnel target
+    ssh_user: worker
+    purpose: Autonomous worker for Worker Assistant, n8n workflows, and Ollama inference
+    status: active
+    capabilities: [repo_indexing, log_summarization, scheduled_scripts]
+    watches: []
+    roles: [remote_execution, worker_assistant, n8n, ollama]
+    services: [worker_assistant, n8n, ollama]
+    health: unknown
+    docs_path: C:\\worker\\docs\\MAIN_RIG_ORCHESTRATION.md
+    validation_script: C:\\worker\\scripts\\validate_autonomous.ps1
+    stop_file: C:\\worker\\agents\\STOP
+    service_definitions:
+      worker_assistant:
+        protocol: http
+        remote_port: 8765
+        local_tunnel_port: 8765
+        env_var: WORKER_ASSISTANT_URL
+        base_url: http://127.0.0.1:8765
+        health_path: /health
+      n8n:
+        protocol: http
+        remote_port: 5678
+        local_tunnel_port: 5678
+        env_var: WORKER_N8N_URL
+        base_url: http://127.0.0.1:5678
+        health_path: /
+      ollama:
+        protocol: http
+        remote_port: 11434
+        local_tunnel_port: 11434
+        env_var: OLLAMA_HOST
+        base_url: http://127.0.0.1:11434
+        health_path: /api/tags

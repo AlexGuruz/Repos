@@ -1,0 +1,44 @@
+# Repo classes — how to treat repos for allowlisting and approval
+# Used by wrappers and supervisor to decide default tier and allowed actions
+
+repo_classes:
+  # High trust: docs, summaries, internal reports
+  docs_internal:
+    default_tier: T3
+    allowlistable: [file_edit, file_create]
+    denied: [script_execution, service_restart, config_change]
+
+  # Tooling: scripts, small utilities, read-only business queries
+  tooling_internal:
+    default_tier: T2
+    allowlistable: [script_execution]
+    only_registered_tools: true
+    denied: [service_restart, trust_change]
+
+  # Config / secrets — never allowlist writes
+  config_secrets:
+    default_tier: T0
+    allowlistable: []
+    denied: [file_edit, file_create, file_delete, script_execution]
+
+  # Production / finance — always T2 minimum
+  production_finance:
+    default_tier: T2
+    allowlistable: []
+    denied: [file_edit, file_create, script_execution, config_change]
+    approval_required_for_all: true
+
+  # Default for unknown repos
+  default:
+    default_tier: T2
+    allowlistable: []
+    denied: []
+
+# Map path prefixes or repo names to class (first match wins)
+path_to_class:
+  # - path: "E:/Repos/docs"
+  #   class: docs_internal
+  # - path: "E:/Repos/ai-lab/tools"
+  #   class: tooling_internal
+  # - path: "/opt/ai/secrets"
+  #   class: config_secrets

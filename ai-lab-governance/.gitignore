@@ -1,0 +1,23 @@
+# Local logs (optional: commit structure, ignore contents)
+logs/actions/*.jsonl
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Keep directory structure; ignore heavy or sensitive approval payloads if desired
+# approvals/proposals/*.json
+# approvals/approved/*.json

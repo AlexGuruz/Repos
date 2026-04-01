@@ -1,0 +1,42 @@
+[
+  {
+    "tool_name": "rules_sheet_apps_script",
+    "path": "scripts/RulesSheetAppsScript.js",
+    "purpose": "Google Apps Script for Rules sheet: dropdowns from MAP tab (Target Sheet, Target Header)",
+    "inputs": [],
+    "outputs": [],
+    "auth": null,
+    "status": "working",
+    "repo": "Greg-Kylo"
+  },
+  {
+    "tool_name": "growflow_sales_today",
+    "path": "integrations/growflow/sales_today.py",
+    "purpose": "Fetch today's sales summary from GrowFlow API",
+    "inputs": ["date", "location_id"],
+    "outputs": ["gross_sales", "net_sales", "order_count"],
+    "auth": "GROWFLOW_API_KEY",
+    "status": "working",
+    "repo": "Greg-Kylo"
+  },
+  {
+    "tool_name": "repo_full_rebuild_gate_a",
+    "path": "scripts/repo_full_rebuild_gate_a.py",
+    "purpose": "Gate A approval execution: force full rebuild in worker staging then promote.",
+    "inputs": ["repo_id", "gate", "expected_policy_hash", "expected_embedding_model_id", "expected_index_schema_version"],
+    "outputs": [],
+    "auth": null,
+    "status": "working",
+    "repo": "ai-lab"
+  },
+  {
+    "tool_name": "repo_policy_migration_gate_c",
+    "path": "scripts/repo_policy_migration_gate_c.py",
+    "purpose": "Gate C approval execution: force full rebuild for policy/schema migration then promote.",
+    "inputs": ["repo_id", "gate", "expected_policy_hash", "expected_embedding_model_id", "expected_index_schema_version"],
+    "outputs": [],
+    "auth": null,
+    "status": "working",
+    "repo": "ai-lab"
+  }
+]

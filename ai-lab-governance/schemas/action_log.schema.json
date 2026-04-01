@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ActionLog",
+  "description": "Log entry for every meaningful AI action",
+  "type": "object",
+  "required": ["action_id", "timestamp", "agent", "action", "result"],
+  "properties": {
+    "action_id": { "type": "string", "pattern": "^ACT-[0-9]{8}-[0-9]{4}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "machine": { "type": "string" },
+    "agent": { "type": "string" },
+    "user_request_id": { "type": "string" },
+    "action": { "type": "string" },
+    "target_repo": { "type": "string" },
+    "target_path": { "type": "string" },
+    "approval_tier": { "type": "string" },
+    "wrapper_used": { "type": "string" },
+    "result": { "type": "string" },
+    "rollback_reference": { "type": "string" }
+  }
+}

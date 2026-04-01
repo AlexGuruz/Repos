@@ -1,0 +1,4 @@
+# Test dependencies for command-center backend. Install with:
+#   pip install -r requirements.txt -r requirements-dev.txt
+-r requirements.txt
+pytest>=7.0.0

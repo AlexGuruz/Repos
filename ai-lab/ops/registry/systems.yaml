@@ -1,0 +1,46 @@
+# Systems registry (Guru §23 Phase 4). One canonical list of important systems.
+# Each app has: name, purpose, repo, docs, logs, runbook, services, workers, secrets.
+
+systems:
+  ai-lab:
+    type: app
+    purpose: Command center and local assistant; grounded reasoning, repo scan, hardware observability
+    repo: ai-lab
+    docs: ops/docs/systems/ai-lab.md
+    logs: ops/logs/assistant
+    runbook: ops/runbooks/apps/ai-lab.md
+    services: []
+    workers: [main-brain]
+    secrets: []
+
+  kylo:
+    type: app
+    purpose: Finance and operations automation
+    repo: Greg-Kylo
+    docs: ops/docs/systems/kylo.md
+    logs: ops/logs/assistant
+    runbook: ops/runbooks/apps/kylo.md
+    services: [postgres, redis, worker-queue]
+    workers: [main-brain, worker-rig-01]
+    secrets: [kylo_db_url, kylo_api_key]
+
+  geomapper:
+    type: app
+    purpose: Geo mapping and document ingestion
+    repo: geomapper app
+    docs: ops/docs/systems/geomapper.md
+    logs: ops/logs/assistant
+    runbook: ops/runbooks/apps/geomapper.md
+    services: []
+    workers: [main-brain]
+    secrets: []
+
+  company_bi:
+    type: data
+    purpose: Business BI — sales, inventory, expenses, payroll (GrowFlow + Sheets). Summary fed to local AI for inference.
+    repo: Growflow
+    docs: E:/Repos/Growflow/company_bi/docs/BI_BUSINESS_SUMMARY.md
+    evidence_path: E:/Repos/Growflow/company_bi/docs/BI_BUSINESS_SUMMARY.md
+    refresh: "Run company_bi pipeline then update BI_BUSINESS_SUMMARY.md; or set COMPANY_BI_SUMMARY_PATH to snapshot path."
+    workers: [main-brain]
+    secrets: []

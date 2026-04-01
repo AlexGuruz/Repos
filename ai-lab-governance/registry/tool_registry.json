@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "tools": {
+    "example_growflow_sales_today": {
+      "script": "growflow_query.py",
+      "description": "Return sales totals for today (example; register real path when promoted)",
+      "inputs": ["date"],
+      "output": ["gross", "net", "voided"],
+      "scope": "read_only",
+      "repo_path": ""
+    }
+  },
+  "notes": "Add official tools here when promoted from temporary. Agents must look up this registry before creating or running scripts."
+}

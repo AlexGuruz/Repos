@@ -1,0 +1,161 @@
+[
+  {
+    "id": "PROP-20250314-a1b2c3",
+    "trigger": "T1",
+    "severity": "WARN",
+    "confidence": "HIGH",
+    "review_required": false,
+    "title": "Remove docs for deleted function `route_intent`",
+    "summary": "`route_intent` was removed from `backend/services/supervisor_bridge.py` in commit a1b2c3d. Existing documentation in the API reference and module README still describe this function and will mislead developers.",
+    "source_commit": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "source_file": "backend/services/supervisor_bridge.py",
+    "source_author": "SG",
+    "source_timestamp": "2025-03-14T09:14:02Z",
+    "doc_targets": [
+      {
+        "path": "docs/api-reference.md",
+        "section": "## route_intent",
+        "line_range": [142, 171]
+      },
+      {
+        "path": "backend/services/README.md",
+        "section": "### supervisor_bridge",
+        "line_range": [33, 45]
+      }
+    ],
+    "proposed_diff": "--- a/docs/api-reference.md\n+++ b/docs/api-reference.md\n@@ -140,32 +140,0 @@\n-## route_intent\n-\n-Routes an intent from the UI through the supervisor bridge.\n-...",
+    "needs_human_draft": false,
+    "draft_hints": null,
+    "batch": false,
+    "batch_files": null,
+    "drift_score": 4.0,
+    "status": "pending",
+    "created_at": "2025-03-14T09:15:00Z",
+    "decision": null,
+    "escalated": false,
+    "resurface_count": 0
+  },
+
+  {
+    "id": "PROP-20250314-d4e5f6",
+    "trigger": "T2",
+    "severity": "WARN",
+    "confidence": "HIGH",
+    "review_required": false,
+    "title": "Update signature docs for `classify_transactions`",
+    "summary": "`classify_transactions` in `kylo/classify_transactions.py` gained a new required parameter `dry_run: bool` in commit d4e5f6. Documentation and usage examples still show the old two-argument signature and will cause runtime errors if followed.",
+    "source_commit": "d4e5f6a7b8c9d4e5f6a7b8c9d4e5f6a7b8c9d4e5",
+    "source_file": "kylo/classify_transactions.py",
+    "source_author": "SG",
+    "source_timestamp": "2025-03-14T08:44:00Z",
+    "doc_targets": [
+      {
+        "path": "kylo/README.md",
+        "section": "### classify_transactions",
+        "line_range": [88, 102]
+      }
+    ],
+    "proposed_diff": "--- a/kylo/README.md\n+++ b/kylo/README.md\n@@ -90,7 +90,7 @@\n-classify_transactions(rows, config)\n+classify_transactions(rows, config, dry_run=False)\n \n Parameters\n ----------\n rows   : list[dict]  Raw transaction rows\n config : dict        Classification rule config\n+dry_run: bool        If True, log actions but write nothing (default False)",
+    "needs_human_draft": false,
+    "draft_hints": null,
+    "batch": false,
+    "batch_files": null,
+    "drift_score": 2.0,
+    "status": "pending",
+    "created_at": "2025-03-14T09:16:00Z",
+    "decision": null,
+    "escalated": false,
+    "resurface_count": 0
+  },
+
+  {
+    "id": "PROP-20250314-g7h8i9",
+    "trigger": "T3",
+    "severity": "WARN",
+    "confidence": "HIGH",
+    "review_required": false,
+    "title": "Update 6 path references after gigatt-transport backend rename",
+    "summary": "`gigatt-transport/backend/api/dispatch.py` was renamed to `gigatt-transport/backend/api/router.py` in commit g7h8i9. Six documentation files contain the old path as string literals, import examples, or hyperlinks.",
+    "source_commit": "g7h8i9a0b1c2g7h8i9a0b1c2g7h8i9a0b1c2g7h8",
+    "source_file": "gigatt-transport/backend/api/dispatch.py",
+    "source_author": "SG",
+    "source_timestamp": "2025-03-14T08:10:00Z",
+    "doc_targets": [
+      {
+        "path": "gigatt-transport/README.md",
+        "section": "## API routes",
+        "line_range": [55, 60]
+      },
+      {
+        "path": "docs/architecture.md",
+        "section": "### Dispatch layer",
+        "line_range": [201, 204]
+      }
+    ],
+    "proposed_diff": "--- a/gigatt-transport/README.md\n+++ b/gigatt-transport/README.md\n@@ -56,3 +56,3 @@\n-Entry point: `backend/api/dispatch.py`\n+Entry point: `backend/api/router.py`",
+    "needs_human_draft": false,
+    "draft_hints": null,
+    "batch": true,
+    "batch_files": [
+      "docs/runbook.md",
+      "docs/deployment.md",
+      "gigatt-transport/backend/README.md",
+      "apps/orchestrator/README.md"
+    ],
+    "drift_score": 2.0,
+    "status": "approved",
+    "created_at": "2025-03-14T08:20:00Z",
+    "decision": {
+      "resolved_at": "2025-03-14T09:01:00Z",
+      "resolved_by": "SG",
+      "rationale": "Path rename confirmed. All 6 references need updating.",
+      "defer_until": null,
+      "applied_commit": "x9y8z7w6v5x9y8z7w6v5x9y8z7w6v5x9y8z7w6v5"
+    },
+    "escalated": false,
+    "resurface_count": 0
+  },
+
+  {
+    "id": "PROP-20250314-j1k2l3",
+    "trigger": "T4",
+    "severity": "CRITICAL",
+    "confidence": "HIGH",
+    "review_required": false,
+    "title": "Config key `WORKER_TUNNEL_URL` renamed — update deployment docs",
+    "summary": "`WORKER_TUNNEL_URL` was renamed to `WORKER_API_URL` in `backend/.env.example` in commit j1k2l3. The old key name is documented in the deployment runbook and README. Fresh deployments following the old docs will fail to connect to the worker.",
+    "source_commit": "j1k2l3m4n5j1k2l3m4n5j1k2l3m4n5j1k2l3m4n5",
+    "source_file": "backend/.env.example",
+    "source_author": "SG",
+    "source_timestamp": "2025-03-14T07:55:00Z",
+    "doc_targets": [
+      {
+        "path": "README.md",
+        "section": "## Environment",
+        "line_range": [41, 48]
+      },
+      {
+        "path": "docs/deployment-runbook.md",
+        "section": "### Worker tunnel setup",
+        "line_range": [112, 119]
+      }
+    ],
+    "proposed_diff": "--- a/README.md\n+++ b/README.md\n@@ -43,3 +43,3 @@\n-WORKER_TUNNEL_URL=http://127.0.0.1:8765\n+WORKER_API_URL=http://127.0.0.1:8765\n \n # SSH tunnel must be open: ssh -L 8765:localhost:8765 worker-rig",
+    "needs_human_draft": false,
+    "draft_hints": null,
+    "batch": false,
+    "batch_files": null,
+    "drift_score": 6.0,
+    "status": "deferred",
+    "created_at": "2025-03-14T08:00:00Z",
+    "decision": {
+      "resolved_at": "2025-03-14T08:05:00Z",
+      "resolved_by": "SG",
+      "rationale": "Rename not finalised yet — still deciding the new key name. Defer 48 hours.",
+      "defer_until": "2025-03-16T08:00:00Z",
+      "applied_commit": null
+    },
+    "escalated": false,
+    "resurface_count": 0
+  }
+]

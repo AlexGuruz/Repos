@@ -1,0 +1,19 @@
+# One folder name per line = one GitHub repo (each pushed separately).
+# Repo name on GitHub = folder name with spaces -> hyphens. Set -GitHubOrg in script or leave blank for your user.
+# Comment with # or remove a line to skip. Do not add (root) - we push subfolders only.
+# activepieces
+awesome-n8n-templates
+BMAD-METHOD
+Project-Kylo
+PettyCash_Migration_Package
+Growflow
+cog-allocation-system
+Worker
+Exzact Stat Ai business
+Gigatt Transport LLC
+Home
+Greg-Kylo
+PilotCarMap
+ai-lab
+ai-lab-governance
+geomapper app

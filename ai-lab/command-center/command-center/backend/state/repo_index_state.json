@@ -1,0 +1,28 @@
+{
+  "ai-lab": {
+    "repo_id": "ai-lab",
+    "dirty": true,
+    "dirty_generation": 98031665,
+    "dirty_since": 1774030574.3961985,
+    "debounce_until": 1774451025.648284,
+    "rerun_requested": true,
+    "staging_build_inflight": false,
+    "active_version": null,
+    "staging_version": null,
+    "last_build_id": null,
+    "active_embedding_model_id_used": null,
+    "active_embedding_model_revision_used": null,
+    "active_policy_hash_used": null,
+    "active_index_schema_version_used": null,
+    "active_collection_layout_version_used": null,
+    "last_files_indexed_active": null,
+    "last_staging_ok_at": null,
+    "last_promoted_ok_at": null,
+    "last_error": "missing_required_metadata:embedding_model_id_used,missing_required_metadata:embedding_model_revision_used,missing_required_metadata:policy_hash_used",
+    "incremental_failure_count": 1,
+    "pending_approval_id": "approval-1",
+    "blocked_reason": "pending_gate_A",
+    "force_full_rebuild_once": false,
+    "dirty_event_count": 78505301
+  }
+}

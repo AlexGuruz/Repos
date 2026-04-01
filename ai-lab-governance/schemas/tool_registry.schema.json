@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ToolRegistry",
+  "description": "Registry of official tools; agents must look up before creating or running scripts",
+  "type": "object",
+  "required": ["version", "tools"],
+  "properties": {
+    "version": { "type": "string" },
+    "tools": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["script", "description"],
+        "properties": {
+          "script": { "type": "string" },
+          "description": { "type": "string" },
+          "inputs": { "type": "array", "items": { "type": "string" } },
+          "output": { "type": "array", "items": { "type": "string" } },
+          "scope": { "enum": ["read_only", "state_change"] },
+          "repo_path": { "type": "string" }
+        }
+      }
+    }
+  }
+}

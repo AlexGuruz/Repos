@@ -1,0 +1,33 @@
+# Approval tiers — what requires approval vs allowlisted autonomy
+# Ref: GLOBAL_POLICY.md §2; AI_LAB_GOAL_AND_PHILOSOPHY.md §5
+
+# T0 = read-only, T1 = draft only, T2 = approval required, T3 = allowlisted, T4 = managed free rein
+
+approval_required:
+  - file_edit
+  - file_create
+  - file_delete
+  - script_execution
+  - service_restart
+  - repo_commit
+  - branch_create
+  - dependency_install
+  - config_change
+  - scheduled_task_change
+  - registry_update
+  - memory_promotion
+  - trust_change
+
+# Actions that may be elevated to allowlist (T3) per repo/folder in allowlists.yaml
+allowlistable_actions:
+  - file_edit
+  - file_create
+  - script_execution
+  - config_change
+  - registry_update
+
+# Default tier when not in allowlist
+default_tier: T2
+
+# T4 is only for explicitly documented narrow scopes (e.g. specific runbook step)
+# Do not grant T4 without updating this file and GLOBAL_POLICY.md

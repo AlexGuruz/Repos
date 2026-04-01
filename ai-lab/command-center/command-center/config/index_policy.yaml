@@ -1,0 +1,35 @@
+embedding_model_id: bge-small-en-v1.5
+embedding_model_revision: "2026-03-01"
+embedding_dimensions: 384
+
+chunking_strategy: hybrid_code_docs_v1
+chunk_size: 1200
+chunk_overlap: 150
+
+file_type_rules:
+  include_extensions:
+    - .py
+    - .ts
+    - .tsx
+    - .js
+    - .jsx
+    - .md
+    - .yaml
+    - .yml
+    - .json
+  ignore_paths:
+    - .git/
+    - node_modules/
+    - .next/
+    - dist/
+    - build/
+    - __pycache__/
+
+metadata_schema_version: 1
+index_schema_version: 3
+collection_layout_version: 1
+chunk_identity_version: 1
+parser_version: 1
+
+rerank_strategy: none
+

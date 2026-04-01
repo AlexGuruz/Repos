@@ -1,0 +1,5 @@
+{
+  "version": "1.0",
+  "agents": [],
+  "notes": "Optional: agent IDs, roles, endpoints for supervisor routing. Example: { \"agent_id\": \"script-librarian\", \"role\": \"tool_inventory\", \"endpoint\": \"http://worker:8001\" }"
+}

@@ -1,0 +1,67 @@
+# Company BI — data source IDs and output
+# Edit sheet IDs if workbooks change.
+
+# Financial transaction sources (income/expense)
+transactions:
+  2024:
+    spreadsheet_id: "1D0VcDbzstF-W8hvbg256ooxpc18zCF2qlb1KvWehF2A"
+    tabs: ["Petty Cash"]
+  2025:
+    spreadsheet_id: "1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE"
+    tabs: ["Transactions", "Bank"]
+  2026:
+    spreadsheet_id: "1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE"  # from Project-Kylo year_workbooks
+    tabs: ["Transactions", "Bank"]
+
+# GrowFlow: use env GROWFLOW_CREDENTIALS_PATH or default path
+growflow:
+  credentials_env: "GROWFLOW_CREDENTIALS_PATH"
+  default_credentials_path: "E:/secrets/gcp/growflowapi.txt"
+  # Sales window (months back from today)
+  sales_months_back: 24
+  # Packages window for inventory (months back)
+  packages_months_back: 24
+
+# Google Sheets API (for transactions + optional BI output)
+sheets:
+  service_account_env: "GOOGLE_APPLICATION_CREDENTIALS"
+  default_service_account_path: "E:/secrets/gcp/sa.json"
+  # Optional: write BI output to this spreadsheet (create tabs per report)
+  output_spreadsheet_id: "13Wm3UdCdvzw6lpYUDIs-J2UOiRO42oNxE8wKzVyCqRA"
+  output_tab_prefix: "BI "
+
+# Labor: primary = DB petty-cash payroll; then Kylo PAYROLL tab; then transaction inference.
+labor:
+  # database_dsn: "postgresql://user:pass@host:port/kylo_global"
+  # Or leave unset to use env KYLO_GLOBAL_DSN or payroll_sheet / transaction inference.
+
+# Kylo PAYROLL tab (per-year): row 19 = each person's name (one per column); col A from row 20 = date paid; cols B,C,... = amount per person.
+payroll_sheet:
+  2025:
+    spreadsheet_id: "1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE"
+    tab: "PAYROLL"
+    header_row: 19   # 1-based; row 19 = names, data from row 20
+    date_column: 0   # A = date paid
+  2026:
+    spreadsheet_id: "1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE"
+    tab: "PAYROLL"
+    header_row: 19
+    date_column: 0
+
+# Database for GrowFlow inventory/sales ingestion (optional).
+# If set, scripts/ingest_growflow_to_db.py writes order items here for easier queries and analytics.
+# - SQLite (default): set path, e.g. "company_bi/db/growflow.db" or absolute path.
+# - Postgres: set dsn, e.g. "postgresql://user:pass@host:5432/dbname". Run db/001_growflow_order_items_pg.sql once.
+database:
+  # path: "company_bi/db/growflow.db"
+  # dsn: "postgresql://localhost/growflow"
+
+# Anomaly thresholds
+anomaly:
+  reconciliation_diff_dollars: 500
+  expense_mom_pct: 25
+  expense_mom_dollars: 500
+  sales_drop_pct: 15
+  margin_red_threshold_pct: 0
+  margin_yellow_threshold_pct: 5
+  labor_pressure_pct: 30

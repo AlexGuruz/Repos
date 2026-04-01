@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DocSync Decision Log Entry",
+  "description": "Written once per proposal decision (approve/reject/defer). Append-only.",
+  "type": "object",
+  "required": [
+    "log_id", "proposal_id", "decision",
+    "resolved_at", "resolved_by"
+  ],
+  "properties": {
+    "log_id": {
+      "type": "string",
+      "pattern": "^DL-\\d{8}-[a-f0-9]{6}$",
+      "description": "Unique log entry ID: DL-{yyyymmdd}-{6-char-hex}"
+    },
+    "proposal_id": {
+      "type": "string",
+      "description": "PROP-* ID of the proposal this entry resolves"
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["approved", "rejected", "deferred"]
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_by": {
+      "type": "string",
+      "description": "Agent ID or human identifier who made the decision"
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Free-text reason. Required for rejected and deferred. Optional for approved."
+    },
+    "defer_until": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Required when decision=deferred"
+    },
+    "applied_commit": {
+      "type": ["string", "null"],
+      "description": "Git SHA of the commit that applied the doc change. Required when decision=approved."
+    },
+    "proposal_snapshot": {
+      "type": "object",
+      "description": "Frozen copy of the proposal at decision time for audit purposes"
+    }
+  },
+  "additionalProperties": false
+}

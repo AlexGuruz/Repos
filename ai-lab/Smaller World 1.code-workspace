@@ -1,0 +1,46 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ai-lab-governance"
+		},
+		{
+			"path": "../awesome-n8n-templates"
+		},
+		{
+			"path": "../cog-allocation-system"
+		},
+		{
+			"path": "../geomapper app"
+		},
+		{
+			"path": "../Gigatt Transport LLC"
+		},
+		{
+			"path": "../Greg-Kylo"
+		},
+		{
+			"path": "../Growflow"
+		},
+		{
+			"path": "../scripts"
+		},
+		{
+			"path": "../venv"
+		},
+		{
+			"path": "../Worker"
+		},
+		{
+			"path": "../../renovate"
+		},
+		{
+			"path": "../../secrets"
+		}
+	],
+	"settings": {
+		"powershell.cwd": "ai-lab"
+	}
+}

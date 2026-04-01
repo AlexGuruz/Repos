@@ -14,8 +14,15 @@ Git/
 *.log
 syncthing_sync_log.txt
 
+# Runtime / telemetry logs (can grow to multi-GB; not for GitHub)
+ai-lab/logs/
+**/command_center/*.jsonl
+
 # Archive and embedded repos (add back later if needed)
 _archive/
+
+# Large one-off migration dumps (multi-GB)
+PettyCash_Migration_Package/
 
 # IDE / OS
 .vscode/
@@ -48,3 +55,50 @@ Ai/Obsidian/Brain/.obsidian/graph.json
 node_modules/
 dist/
 build/
+
+# --- Monorepo hygiene: media, DBs, secrets (keep scripts & source) ---
+
+# Video / large media (was bloating pushes; keep scripts next to these dirs)
+*.mp4
+*.mkv
+*.webm
+*.mov
+*.m4v
+*.avi
+*.wmv
+*.mpeg
+
+# Local / dev databases
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+*.mdb
+
+# Business / generated PDFs (invoices, etc.)
+**/reports/invoices/*.pdf
+scripts/invoices/*.pdf
+
+# API keys & OAuth material
+.env
+.env.*
+!.env.example
+**/credentials.json
+**/token.json
+**/client_secret*.json
+**/google-service-account*.json
+*.pem
+*.p12
+*.pfx
+
+# Heavy nested checkouts under ai-lab (separate clones / models)
+ai-lab/Ai/
+
+# Standalone repos with their own .git (avoid empty 160000 gitlinks in clones)
+# Geomapper app: clone https://github.com/AlexGuruz/gigatt-geomapper.git (or submodule later).
+geomapper app/
+Greg-Kylo/
+
+# Claude Code worktree mirror (thousands of duplicate files)
+Growflow/.claude/

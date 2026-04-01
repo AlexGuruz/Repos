@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ApprovalRequest",
+  "description": "Request for approval of a state-changing action",
+  "type": "object",
+  "required": ["request_id", "action_type", "timestamp", "agent", "target"],
+  "properties": {
+    "request_id": { "type": "string", "pattern": "^APR-[0-9]{8}-[0-9]{4}$" },
+    "action_type": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "agent": { "type": "string" },
+    "machine": { "type": "string" },
+    "target": { "type": "string" },
+    "reason": { "type": "string" },
+    "diff_preview": { "type": "string" },
+    "risk_level": { "enum": ["low", "medium", "high", "critical"] },
+    "scope_repo": { "type": "string" },
+    "approval_tier": { "type": "string" },
+    "status": { "enum": ["pending", "approved", "denied"] }
+  }
+}

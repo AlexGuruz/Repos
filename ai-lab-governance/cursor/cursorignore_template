@@ -1,0 +1,22 @@
+# Copy this file to your project root as .cursorignore
+# Governance repo — ignore noise and secrets
+
+*.env
+.env.*
+**/secrets/
+**/.secrets/
+*.pem
+*.key
+**/node_modules/
+**/__pycache__/
+**/.venv/
+**/venv/
+*.pyc
+*.log
+logs/
+*.sqlite
+*.db
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

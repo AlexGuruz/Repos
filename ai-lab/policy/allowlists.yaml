@@ -1,0 +1,16 @@
+# Scripts or paths allowed without approval (within tier). One per line or YAML list.
+scripts: []
+paths: []
+# Guru §24.13: allowlist for early conversational gate (normalized: strip, lower, strip trailing punctuation)
+conversational_openers:
+  - hi
+  - hello
+  - hey
+  - yo
+  - sup
+  - what's up
+  - good morning
+  - good afternoon
+  - good evening
+  - help
+  - what can you do

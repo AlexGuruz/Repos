@@ -1,0 +1,15 @@
+# Autonomy tiers: T0 read-only, T1 draft, T2 approval required, T3 auto scoped, T4 managed
+default_tier: T2
+tiers:
+  T0: read_only
+  T1: draft_only
+  T2: approval_required
+  T3: auto_allowed_scoped
+  T4: managed_autonomy
+path_rules:
+  - pattern: "docs/**"
+    tier: T3
+  - pattern: "docs_source/**"
+    tier: T3
+  - pattern: "**"
+    tier: T2

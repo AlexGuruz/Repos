@@ -1,0 +1,3 @@
+# Scripts or paths always blocked. One per line or YAML list.
+scripts: []
+paths: []

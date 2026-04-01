@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MemoryEvent",
+  "description": "Structured memory event (preference, workflow, trust, outcome)",
+  "type": "object",
+  "required": ["event_id", "timestamp", "category", "scope"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "category": { "enum": ["preference", "workflow", "business_semantics", "trust", "outcome"] },
+    "scope": { "type": "string" },
+    "reversibility_info": { "type": "string" },
+    "log_entry_id": { "type": "string" },
+    "payload": { "type": "object" }
+  }
+}
