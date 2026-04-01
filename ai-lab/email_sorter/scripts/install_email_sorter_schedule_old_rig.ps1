@@ -2,11 +2,15 @@
 # Runs twice per day during US daytime: default 10:00 and 14:00 LOCAL time on this machine
 # (8-hour business band 09:00–17:00 if you use those defaults — adjust to your TZ).
 #
-# Run elevated:  powershell -ExecutionPolicy Bypass -File .\install_email_sorter_schedule_old_rig.ps1
+# Run elevated from this folder:
+#   powershell -ExecutionPolicy Bypass -File .\install_email_sorter_schedule_old_rig.ps1 -AiLabRoot "C:\Repos\Repos\ai-lab" -EnvFile "C:\secrets\email_sorter_env.ps1"
+# Or full path (from any cwd):
+#   powershell -ExecutionPolicy Bypass -File "C:\Repos\Repos\ai-lab\email_sorter\scripts\install_email_sorter_schedule_old_rig.ps1" -AiLabRoot "C:\Repos\Repos\ai-lab" -EnvFile "C:\secrets\email_sorter_env.ps1"
+# Omit -EnvFile if GOOGLE_* are set inside the runner another way; scheduled tasks do not inherit your interactive $env:.
 #
 param(
     [string]$TaskName = "AiLab-EmailSorter-BackfillApply",
-    [string]$AiLabRoot = "E:\Repos\ai-lab",
+    [string]$AiLabRoot = "C:\Repos\Repos\ai-lab",
     # First run (local clock on old rig)
     [string]$Run1Time = "10:00",
     # Second run (~4h later inside an 8h day band)
