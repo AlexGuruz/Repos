@@ -3,6 +3,7 @@ chat.py — routes the command center chat through the real ai-lab
 orchestrator rather than the local command-center stub bridge.
 """
 import asyncio
+import os
 import time
 from datetime import datetime
 
@@ -45,6 +46,9 @@ async def chat(req: ChatRequest):
     })
     t0 = time.perf_counter()
     try:
+        gov = (settings.ai_lab_governance_root or "").strip()
+        if gov:
+            os.environ["AI_LAB_GOVERNANCE_ROOT"] = gov
         result = await asyncio.to_thread(
             orchestrator_run,
             req.message,

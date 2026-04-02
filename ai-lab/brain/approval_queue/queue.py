@@ -22,6 +22,8 @@ class ApprovalSpec:
     reason: str
     diff_preview: str | None = None
     risk_level: str = "medium"
+    # Optional: lines from system catalog (governance) for grounded review UI
+    catalog_context: str | None = None
 
 
 def _load_pending() -> dict[str, dict]:
@@ -61,6 +63,7 @@ def submit(spec: ApprovalSpec | dict[str, Any]) -> str:
             "reason": spec.reason,
             "diff_preview": spec.diff_preview,
             "risk_level": spec.risk_level,
+            "catalog_context": spec.catalog_context,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
     else:

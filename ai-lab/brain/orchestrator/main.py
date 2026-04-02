@@ -236,6 +236,15 @@ def build_grounded_response(
             f"Answer style: {answer_style}"
         )
 
+    try:
+        from brain.catalog_loader import format_catalog_grounding_for_message
+
+        _cat = format_catalog_grounding_for_message(message)
+        if _cat:
+            evidence_block = _cat + "\n\n" + evidence_block
+    except Exception:
+        pass
+
     proposals_suffix = ""
     if proposals:
         lines: list[str] = []
@@ -818,6 +827,14 @@ def run(
             "If the user asks about the result of a script, scan, report, or artifact: do not answer from general knowledge. "
             "Only use the evidence provided in this conversation (e.g. scan output below). If no evidence was provided, say so plainly and do not invent findings."
         )
+        try:
+            from brain.catalog_loader import format_catalog_grounding_for_message
+
+            _cat_sys = format_catalog_grounding_for_message(message)
+            if _cat_sys:
+                system_content += "\n\n" + _cat_sys
+        except Exception:
+            pass
         if rr_context:
             system_content += "\n\n" + rr_context
         user_content = message + evidence_block
