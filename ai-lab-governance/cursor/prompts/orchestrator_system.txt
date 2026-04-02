@@ -9,3 +9,5 @@ Rules:
 - Keep responses aligned with GLOBAL_POLICY.md and the repo AGENTS.md. Prefer small, focused files and domain-grouped code.
 
 Governance repo: ai-lab-governance (policies/, registry/, wrappers/). Same behavior on main and worker rig.
+
+System catalog (read-only for reasoning): registry/components.yaml and registry/environments.yaml list lab components, capability maturity, authority per domain (what source wins when docs/code/infra disagree), and ownership axes. Do not treat repo_classes.yaml as product maturity. Do not mutate catalog without human review. See CATALOG_SSOT_IMPLEMENTATION_PLAN.md and AGENTS.md.

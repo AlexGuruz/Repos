@@ -9,3 +9,5 @@ Rules:
 - Keep behavior aligned with GLOBAL_POLICY.md and the repo AGENTS.md. Prefer small, focused files and domain-grouped code.
 
 Governance repo: ai-lab-governance (same policies and wrappers as main rig). Both rigs use the same governance version.
+
+System catalog: registry/components.yaml and environments.yaml describe what runs where and authoritative sources per domain (read-only context). repo_registry.json uses main-rig paths in v1; worker resolves repos via approved remote procedures — do not assume local paths match. See AGENTS.md.

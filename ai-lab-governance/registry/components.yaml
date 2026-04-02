@@ -1,0 +1,307 @@
+# System catalog — components (v1 inline evidence only). See CATALOG_SSOT_IMPLEMENTATION_PLAN.md.
+# Semantic note: `lab-core` is a placeholder team id — replace with real identities when you split ownership.
+version: "1.0"
+components:
+  - id: ai-lab
+    display_name: AI Lab workspace
+    primary_repo: ai-lab
+    related_repos:
+      - ai-lab-governance
+    component_type: platform
+    lifecycle_state: partial
+    capabilities:
+      auth: partial
+      api: partial
+      ui: partial
+      observability: unbuilt
+      approvals: built
+      deployment: partial
+      retrieval: na
+      worker_execution: na
+      ingestion: na
+    authority:
+      api_contract:
+        source_kind: code
+        canonical_ref: "repo:ai-lab/README.md@main"
+        precedence: 1
+      runtime_config:
+        source_kind: secret_manager
+        canonical_ref: "see:lab-secrets / env templates in repos"
+        precedence: 1
+      deployment_topology:
+        source_kind: code
+        canonical_ref: "repo:ai-lab@main"
+        precedence: 1
+      operator_procedure:
+        source_kind: runbook
+        canonical_ref: "repo:ai-lab-governance/GLOBAL_POLICY.md@main"
+        precedence: 1
+      implementation_behavior:
+        source_kind: code
+        canonical_ref: "repo:ai-lab@main"
+        precedence: 1
+    code_owner: lab-core
+    deploy_owner: lab-core
+    runtime_owner: main-rig
+    approval_owner: lab-core
+    environments:
+      main-rig:
+        deployed: true
+        notes: Primary checkout
+      worker-rig:
+        deployed: false
+      cloud-hosted:
+        deployed: false
+    evidence:
+      repo_shape_root:
+        type: repo_shape
+        required_for_lifecycle: true
+        spec:
+          repo_id: ai-lab
+          paths:
+            - README.md
+        status: unknown
+        observed_at: null
+    last_verified_at: null
+
+  - id: command-center
+    display_name: Command center (orchestration)
+    primary_repo: command-center
+    component_type: orchestration
+    lifecycle_state: partial
+    capabilities:
+      auth: partial
+      api: partial
+      ui: partial
+      observability: unbuilt
+      approvals: built
+      deployment: partial
+      retrieval: na
+      worker_execution: partial
+      ingestion: na
+    authority:
+      api_contract:
+        source_kind: code
+        canonical_ref: "repo:command-center/backend@main"
+        precedence: 1
+      runtime_config:
+        source_kind: secret_manager
+        canonical_ref: "see:lab-secrets"
+        precedence: 1
+      deployment_topology:
+        source_kind: code
+        canonical_ref: "repo:command-center@main"
+        precedence: 1
+      operator_procedure:
+        source_kind: runbook
+        canonical_ref: "repo:command-center/README.md@main"
+        precedence: 1
+      implementation_behavior:
+        source_kind: code
+        canonical_ref: "repo:command-center@main"
+        precedence: 1
+    code_owner: lab-core
+    deploy_owner: lab-core
+    runtime_owner: main-rig
+    approval_owner: lab-core
+    environments:
+      main-rig:
+        deployed: true
+        notes: Monorepo subtree under ai-lab
+      worker-rig:
+        deployed: false
+      cloud-hosted:
+        deployed: false
+    evidence:
+      repo_shape_readme:
+        type: repo_shape
+        required_for_lifecycle: true
+        spec:
+          repo_id: command-center
+          paths:
+            - README.md
+        status: unknown
+        observed_at: null
+    last_verified_at: null
+
+  - id: geomapper
+    display_name: Geomapper application
+    primary_repo: geomapper
+    component_type: application
+    lifecycle_state: partial
+    capabilities:
+      auth: partial
+      api: partial
+      ui: partial
+      observability: unbuilt
+      approvals: built
+      deployment: partial
+      retrieval: na
+      worker_execution: na
+      ingestion: built
+    authority:
+      api_contract:
+        source_kind: code
+        canonical_ref: "repo:geomapper/backend@main"
+        precedence: 1
+      runtime_config:
+        source_kind: secret_manager
+        canonical_ref: "see:lab-secrets / backend secrets_loader"
+        precedence: 1
+      deployment_topology:
+        source_kind: code
+        canonical_ref: "repo:geomapper@main"
+        precedence: 1
+      operator_procedure:
+        source_kind: runbook
+        canonical_ref: "repo:geomapper/plan.md@main"
+        precedence: 1
+      implementation_behavior:
+        source_kind: code
+        canonical_ref: "repo:geomapper/backend@main"
+        precedence: 1
+    code_owner: lab-core
+    deploy_owner: lab-core
+    runtime_owner: main-rig
+    approval_owner: lab-core
+    environments:
+      main-rig:
+        deployed: true
+        notes: Dev
+      worker-rig:
+        deployed: false
+      cloud-hosted:
+        deployed: false
+    evidence:
+      repo_shape_core:
+        type: repo_shape
+        required_for_lifecycle: true
+        spec:
+          repo_id: geomapper
+          paths:
+            - backend/ingestion.py
+            - plan.md
+        status: unknown
+        observed_at: null
+    last_verified_at: null
+
+  - id: worker
+    display_name: Worker rig runtime
+    primary_repo: worker
+    component_type: worker_runtime
+    lifecycle_state: partial
+    capabilities:
+      auth: partial
+      api: unbuilt
+      ui: unbuilt
+      observability: unbuilt
+      approvals: built
+      deployment: partial
+      retrieval: na
+      worker_execution: partial
+      ingestion: na
+    authority:
+      api_contract:
+        source_kind: code
+        canonical_ref: "repo:worker@main"
+        precedence: 1
+      runtime_config:
+        source_kind: secret_manager
+        canonical_ref: "see:lab-secrets"
+        precedence: 1
+      deployment_topology:
+        source_kind: runbook
+        canonical_ref: "repo:ai-lab-governance/GLOBAL_POLICY.md#cross-machine-ssh-standard"
+        precedence: 1
+      operator_procedure:
+        source_kind: runbook
+        canonical_ref: "repo:ai-lab-governance/AGENTS.md@main"
+        precedence: 1
+      implementation_behavior:
+        source_kind: code
+        canonical_ref: "repo:worker@main"
+        precedence: 1
+    code_owner: lab-core
+    deploy_owner: lab-core
+    runtime_owner: worker-rig
+    approval_owner: lab-core
+    environments:
+      main-rig:
+        deployed: false
+      worker-rig:
+        deployed: true
+        runtime_role: primary
+      cloud-hosted:
+        deployed: false
+    evidence:
+      repo_root_exists:
+        type: repo_shape
+        required_for_lifecycle: false
+        spec:
+          repo_id: worker
+          paths:
+            - .
+        status: unknown
+        observed_at: null
+    last_verified_at: null
+
+  - id: secrets-config-plane
+    display_name: Secrets and config plane (paths only; no secret values here)
+    primary_repo: lab-secrets
+    component_type: config_secrets_plane
+    lifecycle_state: partial
+    capabilities:
+      auth: partial
+      api: na
+      ui: na
+      observability: unbuilt
+      approvals: built
+      deployment: na
+      retrieval: na
+      worker_execution: na
+      ingestion: na
+    authority:
+      api_contract:
+        source_kind: runbook
+        canonical_ref: "repo:ai-lab-governance/GLOBAL_POLICY.md@main"
+        precedence: 1
+      runtime_config:
+        source_kind: secret_manager
+        canonical_ref: "filesystem:lab-secrets (out-of-band)"
+        precedence: 1
+      deployment_topology:
+        source_kind: runbook
+        canonical_ref: "repo:ai-lab-governance/AGENTS.md@main"
+        precedence: 1
+      operator_procedure:
+        source_kind: runbook
+        canonical_ref: "repo:ai-lab-governance/GLOBAL_POLICY.md@main"
+        precedence: 1
+      implementation_behavior:
+        source_kind: runbook
+        canonical_ref: "repo:ai-lab-governance/GLOBAL_POLICY.md@main (procedure; not a single code root)"
+        precedence: 1
+    code_owner: lab-core
+    deploy_owner: lab-core
+    runtime_owner: main-rig
+    approval_owner: lab-core
+    environments:
+      main-rig:
+        deployed: true
+        notes: Canonical checkout path on main rig only (v1)
+      worker-rig:
+        deployed: false
+        notes: Access via approved procedures only
+      cloud-hosted:
+        deployed: false
+    evidence:
+      secrets_dir_marker:
+        type: repo_shape
+        required_for_lifecycle: true
+        spec:
+          repo_id: lab-secrets
+          paths:
+            - gcp/sa.json
+        status: unknown
+        observed_at: null
+    last_verified_at: null

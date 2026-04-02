@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-lab-governance.local/schemas/environment.schema.json",
+  "title": "CatalogEnvironment",
+  "description": "One environment record in registry/environments.yaml",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "display_name",
+    "purpose",
+    "runtime_class",
+    "network_boundary",
+    "data_classes_allowed",
+    "machine_or_account",
+    "promotion_policy"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "display_name": { "type": "string", "minLength": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "runtime_class": {
+      "type": "string",
+      "enum": [
+        "local_main",
+        "local_worker",
+        "local_dev",
+        "cloud_hosted",
+        "ci_only",
+        "hybrid"
+      ]
+    },
+    "network_boundary": { "type": "string", "minLength": 1 },
+    "data_classes_allowed": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "machine_or_account": { "type": "string", "minLength": 1 },
+    "promotion_policy": { "type": "string", "minLength": 1 }
+  }
+}

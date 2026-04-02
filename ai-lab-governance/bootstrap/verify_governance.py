@@ -7,6 +7,7 @@ Run on both main and worker rigs to detect drift.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -25,6 +26,7 @@ def _governance_root() -> Path:
 REQUIRED_FILES = [
     "AGENTS.md",
     "GLOBAL_POLICY.md",
+    "CATALOG_SSOT_IMPLEMENTATION_PLAN.md",
     "configs/governance_version.yaml",
     "cursor/cursor_rules.md",
     "cursor/prompts/orchestrator_system.txt",
@@ -39,10 +41,15 @@ REQUIRED_FILES = [
     "registry/tool_registry.json",
     "registry/repo_registry.json",
     "registry/agent_registry.json",
+    "registry/components.yaml",
+    "registry/environments.yaml",
+    "registry/README_catalog.md",
     "schemas/approval_request.schema.json",
     "schemas/action_log.schema.json",
     "schemas/job.schema.json",
     "schemas/memory_event.schema.json",
+    "schemas/component.schema.json",
+    "schemas/environment.schema.json",
     "wrappers/run_approved.py",
     "wrappers/submit_approval.py",
     "wrappers/log_action.py",
@@ -93,6 +100,18 @@ def main() -> int:
         for f in failed:
             print("FAIL:", f, file=sys.stderr)
         return 2
+
+    # Optional: machine-checkable system catalog (requires PyYAML + jsonschema)
+    if os.environ.get("AI_LAB_VERIFY_CATALOG", "").strip() in ("1", "true", "yes"):
+        catalog_script = root / "scripts" / "verify_catalog.py"
+        if catalog_script.is_file():
+            r = subprocess.run(
+                [sys.executable, str(catalog_script)],
+                cwd=str(root),
+                env=os.environ.copy(),
+            )
+            if r.returncode != 0:
+                return r.returncode
 
     # Optional: hash policy files and compare to expected (for strict drift)
     # if os.environ.get("AI_LAB_VERIFY_HASHES"):

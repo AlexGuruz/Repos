@@ -25,6 +25,10 @@
 
 - Main/worker: `E:\AI\ai-lab-governance\` or `E:\Repos\ai-lab-governance\` (main), `/opt/ai/ai-lab-governance/` (worker). Set `AI_LAB_GOVERNANCE_ROOT` to this path.
 
+## System catalog (lab inventory)
+
+- If this repo is registered in governance `registry/repo_registry.json`, a matching **component** may exist in `registry/components.yaml` (maturity, authority, ownership). Read governance `AGENTS.md` — do not silently edit catalog; it is separate from repo **risk** class in `policies/repo_classes.yaml`.
+
 ## Worker SSH (standard)
 
 - Canonical worker target: `worker@worker-node`

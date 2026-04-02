@@ -21,12 +21,23 @@
 - **GLOBAL_POLICY.md** — Human-readable policy; the “what and why.”
 - **cursor/** — Cursor rules and prompts; bootstrap copies these to Cursor config.
 - **policies/** — approval_tiers, allowlists, denied_actions, memory_rules, repo_classes, execution_rules (YAML).
-- **registry/** — tool_registry.json, repo_registry.json, agent_registry.json.
-- **schemas/** — approval_request, action_log, job, memory_event (JSON Schema).
+- **registry/** — tool_registry.json, repo_registry.json, agent_registry.json, **components.yaml**, **environments.yaml** (system catalog), README_catalog.md (generated summary).
+- **schemas/** — approval_request, action_log, job, memory_event, **component**, **environment**, **catalog_bundle** (catalog JSON Schema).
 - **wrappers/** — run_approved.py, submit_approval.py, log_action.py, read_registry.py, safe_exec.py.
 - **bootstrap/** — setup_main_rig.ps1, setup_worker_rig.ps1/.sh, verify_governance.py.
+- **scripts/** — verify_catalog.py, check_catalog_drift.py, generate_catalog_doc.py (catalog tooling; see System catalog below).
 - **templates/** — repo_AGENTS_template.md, project_init_checklist.md, approval_request_example.json.
 - **configs/** — governance_version.yaml (version both rigs must match).
+
+## System catalog (inventory SSoT)
+
+Governance (policy, tiers, tool registry, repo **risk** classes) is separate from the **system catalog**: what components exist, capability maturity, authority bindings, ownership axes, environments, and inline evidence. Canonical files: `registry/components.yaml`, `registry/environments.yaml`, `registry/repo_registry.json` (main-rig paths only in v1). Specification: `CATALOG_SSOT_IMPLEMENTATION_PLAN.md`.
+
+- **Read path:** Use the catalog for “what exists,” “what is authoritative for domain X,” and “who owns code/deploy/runtime.” Do not conflate with `policies/repo_classes.yaml` (automation risk).
+- **Writes:** Catalog data is high-impact — same approval and PR rules as other governance edits; **no silent or unreviewed mutation** by agents.
+- **Validation:** `pip install -r scripts/requirements-catalog.txt` then `python scripts/verify_catalog.py`. Strict CI-style checks: `CATALOG_STRICT=1`. Optional hook: `AI_LAB_VERIFY_CATALOG=1 python bootstrap/verify_governance.py`. Repo shape drift (main rig): `python scripts/check_catalog_drift.py` (on CI use `CATALOG_SKIP_REPO_SHAPE=1` when paths are Windows-only). Regenerate summary: `python scripts/generate_catalog_doc.py`.
+
+`AI_LAB_CATALOG_ROOT` is not required when the catalog lives in this repo; use `AI_LAB_GOVERNANCE_ROOT` for scripts.
 
 ## Bootstrap and verification
 

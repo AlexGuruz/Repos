@@ -17,6 +17,7 @@ Do not start new repos blank. Use this checklist so Cursor and local AI behave t
 
 - [ ] **Tool registry** — If this repo has official scripts, register them in the lab `registry/tool_registry.json` (or project-specific registry and document in AGENTS.md).
 - [ ] **Reuse first** — AGENTS.md states: use tool registry first; do not create new scripts if an existing one can be reused.
+- [ ] **System catalog** — If the project is a tracked lab component, add or update `repo_id` in governance `registry/repo_registry.json` and a component entry in `registry/components.yaml` (see `CATALOG_SSOT_IMPLEMENTATION_PLAN.md` in ai-lab-governance).
 
 ## 4. Bootstrap (per machine)
 

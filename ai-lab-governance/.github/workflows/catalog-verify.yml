@@ -1,0 +1,28 @@
+# Schema + referential integrity for system catalog (Windows paths in repo_registry are skipped for drift on Linux).
+name: catalog-verify
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install catalog dependencies
+        run: pip install -r scripts/requirements-catalog.txt
+      - name: verify_catalog (strict)
+        run: python scripts/verify_catalog.py
+        env:
+          AI_LAB_GOVERNANCE_ROOT: ${{ github.workspace }}
+          CATALOG_STRICT: "1"
+      - name: check_catalog_drift (skip repo_shape on CI)
+        run: python scripts/check_catalog_drift.py
+        env:
+          AI_LAB_GOVERNANCE_ROOT: ${{ github.workspace }}
+          CATALOG_SKIP_REPO_SHAPE: "1"

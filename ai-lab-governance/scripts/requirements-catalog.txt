@@ -1,0 +1,3 @@
+# Optional deps for catalog validation (scripts/verify_catalog.py, check_catalog_drift.py).
+PyYAML>=6.0.1
+jsonschema>=4.20.0

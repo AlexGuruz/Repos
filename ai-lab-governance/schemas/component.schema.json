@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-lab-governance.local/schemas/component.schema.json",
+  "title": "CatalogComponent",
+  "description": "One component record in registry/components.yaml",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "display_name",
+    "primary_repo",
+    "component_type",
+    "lifecycle_state",
+    "capabilities",
+    "authority",
+    "code_owner",
+    "deploy_owner",
+    "runtime_owner",
+    "environments",
+    "evidence",
+    "last_verified_at"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "display_name": { "type": "string", "minLength": 1 },
+    "primary_repo": { "type": "string", "minLength": 1 },
+    "related_repos": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "component_type": {
+      "type": "string",
+      "enum": [
+        "application",
+        "library",
+        "platform",
+        "infra",
+        "documentation",
+        "worker_runtime",
+        "config_secrets_plane",
+        "orchestration"
+      ]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["planned", "partial", "built", "deprecated"]
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["unbuilt", "partial", "built", "na"]
+      },
+      "minProperties": 1
+    },
+    "authority": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_kind", "canonical_ref", "precedence"],
+        "properties": {
+          "source_kind": {
+            "type": "string",
+            "enum": [
+              "openapi",
+              "code",
+              "terraform",
+              "railway_config",
+              "secret_manager",
+              "runbook",
+              "generated_artifact"
+            ]
+          },
+          "canonical_ref": { "type": "string", "minLength": 1 },
+          "precedence": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "code_owner": { "type": "string", "minLength": 1 },
+    "deploy_owner": { "type": "string", "minLength": 1 },
+    "runtime_owner": { "type": "string", "minLength": 1 },
+    "approval_owner": { "type": "string", "minLength": 1 },
+    "environments": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["deployed"],
+        "properties": {
+          "deployed": { "type": "boolean" },
+          "notes": { "type": "string" },
+          "runtime_role": { "type": "string" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "required_for_lifecycle",
+          "spec",
+          "status",
+          "observed_at"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "artifact_registry",
+              "deployment",
+              "http_health",
+              "pipeline",
+              "repo_shape",
+              "manual_attestation"
+            ]
+          },
+          "required_for_lifecycle": { "type": "boolean" },
+          "spec": { "type": "object" },
+          "last_result": { "type": "object" },
+          "status": {
+            "type": "string",
+            "enum": ["pass", "fail", "unknown", "skipped"]
+          },
+          "observed_at": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "last_verified_at": { "type": ["string", "null"] },
+    "lifecycle_override_reason": { "type": "string", "minLength": 1 }
+  }
+}

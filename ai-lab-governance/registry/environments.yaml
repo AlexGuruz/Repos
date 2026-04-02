@@ -1,0 +1,36 @@
+# Canonical environment inventory (main rig paths for repo_shape; see CATALOG_SSOT_IMPLEMENTATION_PLAN.md §8.4).
+version: "1.0"
+environments:
+  - id: main-rig
+    display_name: Main development rig
+    purpose: Primary workstation; canonical repo_registry paths; catalog validation
+    runtime_class: local_main
+    network_boundary: lab_lan
+    data_classes_allowed:
+      - public
+      - internal
+      - secret_ref_only
+    machine_or_account: Windows main rig; see AGENTS.md / lab runbooks
+    promotion_policy: Human PR + governance tiers; no production promotion from this env alone
+
+  - id: worker-rig
+    display_name: Worker node
+    purpose: Approved remote execution; not a second path column in repo_registry (v1)
+    runtime_class: local_worker
+    network_boundary: lab_lan
+    data_classes_allowed:
+      - public
+      - internal
+    machine_or_account: worker@worker-node per GLOBAL_POLICY.md
+    promotion_policy: Supervisor-approved commands only; SSH per governance policy
+
+  - id: cloud-hosted
+    display_name: Cloud / hosted services
+    purpose: Externally hosted dependencies (APIs, managed DB, etc.)
+    runtime_class: cloud_hosted
+    network_boundary: internet
+    data_classes_allowed:
+      - public
+      - internal
+    machine_or_account: Provider accounts documented outside this repo
+    promotion_policy: Provider consoles + infra-as-code where applicable; human approval for changes
