@@ -34,6 +34,14 @@ function ApprovalCard({ ev }) {
         {' '}via <code className="text-[10px] px-1 py-0.5 rounded" style={{ background: 'rgba(245,158,11,0.1)', color: '#fcd34d' }}>{ev.agent}</code>
         <br />{ev.detail}
       </div>
+      {ev.catalog_context ? (
+        <pre
+          className="text-[10px] font-mono text-amber-100/80 whitespace-pre-wrap break-words rounded p-2 mb-2.5 max-h-40 overflow-y-auto"
+          style={{ background: 'rgba(0,0,0,0.35)', border: '0.5px solid rgba(245,158,11,0.2)' }}
+        >
+          {ev.catalog_context}
+        </pre>
+      ) : null}
       {isPending ? (
         <div className="flex gap-2">
           <button onClick={() => handleResolve('approved')}

@@ -72,6 +72,17 @@ app.include_router(tools.router)
 app.include_router(workers.router)
 
 
+@app.get("/api/llm-status")
+async def llm_status():
+    """
+    Verify command-center chat will use LM Studio: compares LLM_MODEL to GET /v1/models ids.
+    Open in browser while LM Studio server is running.
+    """
+    from brain.llm_client import get_llm_connection_status
+
+    return get_llm_connection_status(settings.llm_base_url, settings.llm_model)
+
+
 @app.get("/api/llm-test")
 async def llm_test():
     """Call LM Studio native /api/v1/chat and return raw response/error for debugging."""

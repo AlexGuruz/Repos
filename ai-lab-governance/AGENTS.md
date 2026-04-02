@@ -42,7 +42,7 @@ Governance (policy, tiers, tool registry, repo **risk** classes) is separate fro
 ## Bootstrap and verification
 
 - **Install rules on this machine:** Run `bootstrap/setup_main_rig.ps1` (Windows) or `bootstrap/setup_worker_rig.sh` (Linux worker).
-- **Verify alignment:** Run `bootstrap/verify_governance.py`. Must pass before treating the rig as governed.
+- **Verify alignment:** Run `bootstrap/verify_governance.py`. Must pass before treating the rig as governed. On the main rig, optional stricter catalog gate: `AI_LAB_VERIFY_CATALOG=1 CATALOG_STRICT=1 python bootstrap/verify_governance.py`.
 
 ## Hard rule
 

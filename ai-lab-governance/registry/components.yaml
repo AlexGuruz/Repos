@@ -14,7 +14,7 @@ components:
       api: partial
       ui: partial
       observability: unbuilt
-      approvals: built
+      approvals: partial
       deployment: partial
       retrieval: na
       worker_execution: na
@@ -74,7 +74,7 @@ components:
       api: partial
       ui: partial
       observability: unbuilt
-      approvals: built
+      approvals: partial
       deployment: partial
       retrieval: na
       worker_execution: partial
@@ -134,7 +134,7 @@ components:
       api: partial
       ui: partial
       observability: unbuilt
-      approvals: built
+      approvals: partial
       deployment: partial
       retrieval: na
       worker_execution: na
@@ -142,7 +142,7 @@ components:
     authority:
       api_contract:
         source_kind: code
-        canonical_ref: "repo:geomapper/backend@main"
+        canonical_ref: "repo:geomapper/backend@main (handlers + plan.md; OpenAPI not yet canonical)"
         precedence: 1
       runtime_config:
         source_kind: secret_manager
@@ -195,7 +195,7 @@ components:
       api: unbuilt
       ui: unbuilt
       observability: unbuilt
-      approvals: built
+      approvals: partial
       deployment: partial
       retrieval: na
       worker_execution: partial
@@ -255,7 +255,7 @@ components:
       api: na
       ui: na
       observability: unbuilt
-      approvals: built
+      approvals: partial
       deployment: na
       retrieval: na
       worker_execution: na

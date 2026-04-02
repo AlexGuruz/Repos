@@ -176,9 +176,12 @@ def _matches_component(msg_lower: str, cid: str, c: dict[str, Any]) -> bool:
             "secrets config",
             "lab-secrets",
             "secret manager",
+            "secrets repo",
         ),
         "command-center": ("command center", "command-center"),
         "ai-lab": ("ai lab", "ai-lab"),
+        "worker": ("worker rig", "worker-rig"),
+        "geomapper": ("geomapper app",),
     }
     for phrase in aliases.get(cid, ()):
         if phrase in msg_lower:
@@ -191,7 +194,18 @@ def matching_components(message: str) -> list[dict[str, Any]]:
     if not d:
         return []
     msg_lower = (message or "").lower()
-    out: list[dict[str, Any]] = []
+    explicit = re.findall(r"@catalog\s+([a-z0-9][a-z0-9-]*)", msg_lower)
+    if explicit:
+        out: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for raw in explicit:
+            c = d["components_by_id"].get(raw)
+            if c and raw not in seen:
+                out.append(c)
+                seen.add(raw)
+        if out:
+            return out
+    out = []
     seen: set[str] = set()
     for cid, c in d["components_by_id"].items():
         if _matches_component(msg_lower, cid, c) and cid not in seen:

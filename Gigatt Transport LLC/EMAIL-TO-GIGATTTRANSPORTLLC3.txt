@@ -1,0 +1,36 @@
+TO: gigatttransport3@gmail.com
+SUBJECT: GIGATT MAP ROUTE - Tom NY Permit 3841749 (search: GIGATT MAP ROUTE)
+
+---
+COPY EVERYTHING BELOW THE LINE INTO THE EMAIL BODY (or forward this file).
+---
+
+THIS IS THE GIGATT MAP ROUTE EMAIL — Sent TO: gigatttransport3@gmail.com. FROM: gigatttransport3@gmail.com. To find it: search your inbox for "GIGATT MAP ROUTE".
+
+---
+
+Tom NY Permit 3841749 – GPS route mapped from BOTH permit columns (Route + To)
+
+This route uses every row from the permit: the Route column (road you’re on) and the To column (instruction/next road). One waypoint per row so the path matches the PDF exactly, including ramps and merges.
+
+• Open this link on your phone or computer for turn-by-turn (tap "Start" for navigation):
+
+https://www.google.com/maps/dir/?api=1&origin=41.97686,-75.74225&destination=43.04834,-78.85371&waypoints=42.0987%2C-75.918%7C42.17745%2C-76.93345%7C42.2562%2C-77.9489%7C42.2552%2C-77.9494%7C42.7959%2C-77.817%7C42.9784%2C-77.9372%7C42.979%2C-77.938%7C43.0028%2C-78.2083%7C43.0065%2C-78.222%7C43.008%2C-78.235%7C42.9858%2C-78.3892%7C42.9006%2C-78.6392%7C42.9634%2C-78.7542%7C42.98018%2C-78.80534%7C42.98015%2C-78.818%7C42.98012%2C-78.83%7C42.9801%2C-78.8512%7C42.988%2C-78.864%7C42.9962%2C-78.8776%7C42.9975%2C-78.879%7C43.0321%2C-78.8845&travelmode=driving
+
+• Permit rows (Route → To) used for waypoints: Origin → I-81 Great Bend | I-81 NW → Merge NY-17 | NY-17 W → I-86 | I-86 W → Exit 30 | I-86 Ramp → NY-19 | NY-19 → NY-19A [GENESEE ST] | NY-19A → NY-39 | NY-39 → NY-246 [CENTER ST] | NY-246 → NY-63 [BIG TREE RD] | NY-63 → BATAVIA STAFFORD TOWNLINE RD | Townline → NY-5 [MAIN RD] | NY-5 → NY-77 [ALLEGHANY RD] | NY-77 → NY-33 [MAIN ST] | NY-33 → NY-78 [TRANSIT RD] | NY-78 → NY-78 Ramp [NY-324] | NY-78 Ramp → NY-324 Ramp | NY-324 Ramp → NY-324 [SHERIDAN DR] | NY-324 → I-290 Ramp | I-290 Ramp → I-290 | I-290 → Exit 3 US-62 | US-62 Ramp → US-62 [NIAGARA FALLS BLVD] | US-62 → NY-425 [ERIE AVE] | NY-425 → 1070 Erie Ave, North Tonawanda 14120
+
+---
+
+HOW TO KNOW IF THIS ROUTE IS ACCURATE (check against your permit PDF)
+
+1. Open the link above on your phone or computer and tap "Start" or "Directions".
+2. Hold your NY DOT permit 3841749 PDF next to the screen.
+3. At each instruction, check: the ROAD you are on (permit "Route" column) and the TURN or next road (permit "To" column) match the permit (e.g. "Turn left onto NY-246 [CENTER ST]", "Merge onto NY-17", "Take Exit 30 toward NY-19").
+4. Expected order: I-81 Great Bend -> Merge NY-17 -> I-86 -> Exit 30 -> NY-19 -> NY-19A [GENESEE ST] -> NY-39 -> NY-246 [CENTER ST] -> NY-63 [BIG TREE RD] -> BATAVIA STAFFORD TOWNLINE RD -> NY-5 [MAIN RD] -> NY-77 [ALLEGHANY RD] -> NY-33 [MAIN ST] -> NY-78 [TRANSIT RD] -> NY-324 [SHERIDAN DR] -> I-290 -> Exit 3 -> US-62 [NIAGARA FALLS BLVD] -> NY-425 [ERIE AVE] -> 1070 Erie Ave North Tonawanda.
+5. If any turn or road name does NOT match the permit, note the place and we can fix that waypoint. When every instruction matches the permit, the route is correct.
+
+Permit total mileage (PDF): 259.40 miles. Google may show a different total; what matters is each turn and road match the permit.
+
+---
+
+• GPX files (same route): Tom-NY-permit-route-EXACT-TRACK.gpx and Tom-NY-permit-route-exact-waypoints.gpx in the Gigatt Transport LLC folder.

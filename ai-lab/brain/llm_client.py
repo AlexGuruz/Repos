@@ -6,15 +6,125 @@ Uses stdlib only so brain has no extra dependencies.
 from __future__ import annotations
 
 import json
+import os
+import time
 import urllib.error
 import urllib.request
+from typing import Any
 from urllib.parse import urlparse
+
+# Shorter default completions = faster average replies in command-center chat.
+_DEFAULT_MAX_OUT: int = 1024
+
+
+def _max_output_cap() -> int:
+    raw = (os.environ.get("LLM_MAX_OUTPUT_TOKENS") or "").strip()
+    if raw.isdigit():
+        return max(256, min(8192, int(raw)))
+    return _DEFAULT_MAX_OUT
+# Avoid a remote /v1/models round-trip on every message (Tailscale/LAN LM Studio host).
+_MODEL_LIST_CACHE: dict[str, tuple[float, list[str]]] = {}
+_CACHE_TTL_MODELS_OK_SEC = 90.0
+_CACHE_TTL_MODELS_EMPTY_SEC = 4.0
 
 
 def _server_base(base_url: str) -> str:
-    """e.g. http://localhost:1234/v1 -> http://localhost:1234"""
+    """e.g. http://host:1234/v1 -> http://host:1234"""
     u = urlparse(base_url.strip().rstrip("/"))
     return f"{u.scheme}://{u.netloc}"
+
+
+def list_openai_model_ids(
+    base_url: str,
+    timeout_sec: float = 5.0,
+    *,
+    use_cache: bool = True,
+) -> list[str]:
+    """GET OpenAI-style /v1/models — LM Studio lists loaded model id(s) here."""
+    key = base_url.strip().rstrip("/")
+    now = time.monotonic()
+    if use_cache and key in _MODEL_LIST_CACHE:
+        ts, cached = _MODEL_LIST_CACHE[key]
+        ttl = _CACHE_TTL_MODELS_EMPTY_SEC if not cached else _CACHE_TTL_MODELS_OK_SEC
+        if now - ts < ttl:
+            return list(cached)
+
+    url = base_url.rstrip("/") + "/models"
+    ids: list[str] = []
+    try:
+        req = urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
+            out = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
+        _MODEL_LIST_CACHE[key] = (now, [])
+        return []
+    if not isinstance(out, dict):
+        _MODEL_LIST_CACHE[key] = (now, [])
+        return []
+    data = out.get("data")
+    if not isinstance(data, list):
+        _MODEL_LIST_CACHE[key] = (now, [])
+        return []
+    for d in data:
+        if isinstance(d, dict) and d.get("id"):
+            ids.append(str(d["id"]))
+    _MODEL_LIST_CACHE[key] = (now, ids)
+    return ids
+
+
+def resolve_model_from_list(ids: list[str], configured: str) -> tuple[str, str]:
+    """
+    Pick the model id LM Studio will see for chat.
+    Prefer exact (case-insensitive) match to LLM_MODEL; else single loaded model; else first loaded.
+    Returns (model_id, human note for diagnostics).
+    """
+    cfg = (configured or "").strip()
+    if not ids:
+        fallback = cfg or "gpt-3.5-turbo"
+        return (fallback, "GET /v1/models failed or returned no models; using LLM_MODEL as-is (server may reject).")
+    cfg_l = cfg.lower()
+    if cfg:
+        for mid in ids:
+            if mid.lower() == cfg_l:
+                return (mid, f"LLM_MODEL matches loaded server id `{mid}`.")
+    if len(ids) == 1:
+        return (ids[0], f"One model loaded (`{ids[0]}`); chat uses it" + (f" (LLM_MODEL `{cfg}` differs from id)" if cfg and ids[0].lower() != cfg_l else "."))
+    return (
+        ids[0],
+        f"LLM_MODEL `{cfg}` not among loaded ids {ids!r}; chat uses `{ids[0]}` — set LLM_MODEL to the exact id you want.",
+    )
+
+
+def get_llm_connection_status(base_url: str, configured_model: str) -> dict[str, Any]:
+    """Diagnostics for command-center: what chat will send to LM Studio."""
+    base = (base_url or "").strip()
+    cfg = (configured_model or "").strip()
+    out: dict[str, Any] = {
+        "llm_base_url": base or None,
+        "llm_model_configured": cfg or None,
+        "openai_server_base": _server_base(base) if base else None,
+        "models_endpoint": (base.rstrip("/") + "/models") if base else None,
+        "models_loaded_ids": [],
+        "resolved_model_id": None,
+        "resolution": "",
+        "chat_uses_resolved_id": True,
+        "hints": [],
+    }
+    if not base:
+        out["resolution"] = "LLM_BASE_URL is empty — orchestrator will not call a local LLM."
+        out["hints"].append("Set LLM_BASE_URL (e.g. http://100.71.161.10:1234/v1) in command-center backend .env")
+        return out
+    ids = list_openai_model_ids(base, timeout_sec=5.0, use_cache=False)
+    out["models_loaded_ids"] = ids
+    resolved, note = resolve_model_from_list(ids, cfg)
+    out["resolved_model_id"] = resolved
+    out["resolution"] = note
+    if not ids:
+        out["hints"].append("Open LM Studio → load your model → Local Server → Start (port 1234).")
+        out["hints"].append(f"Then open {out['models_endpoint']} — you should see JSON with a data[].id.")
+    elif cfg and all(mid.lower() != cfg.lower() for mid in ids):
+        out["hints"].append("Copy the exact id from models_loaded_ids into LLM_MODEL in .env and restart the backend.")
+    return out
 
 
 def _try_lm_studio_native(
@@ -38,14 +148,14 @@ def _try_lm_studio_native(
                 user_content = content if isinstance(content, str) else str(content)
     if not user_content:
         return None
-    # LM Studio native API often expects lowercase model id (e.g. qwen2.5-coder-14b-instruct)
-    model_id = (model or "").strip().lower() or "qwen2.5-coder-14b-instruct"
+    # Use id from /v1/models when possible (see chat_completion); LM Studio matches loaded model by this string.
+    model_id = (model or "").strip() or "gpt-3.5-turbo"
     body = {
         "model": model_id,
         "input": user_content,
         "stream": False,
         "temperature": 0.3,
-        "max_output_tokens": 2048,
+        "max_output_tokens": _max_output_cap(),
     }
     if system_content:
         body["system_prompt"] = system_content
@@ -66,23 +176,6 @@ def _try_lm_studio_native(
         if isinstance(item, dict) and item.get("type") == "message" and item.get("content"):
             parts.append(item["content"].strip() if isinstance(item["content"], str) else str(item["content"]).strip())
     return " ".join(parts).strip() or None
-
-
-def _get_first_model_id(base_url: str, timeout_sec: float = 5.0) -> str | None:
-    """GET /v1/models and return the id of the first model (LM Studio often has one loaded)."""
-    url = base_url.rstrip("/") + "/models"
-    try:
-        req = urllib.request.Request(url, method="GET")
-        with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
-            out = json.loads(resp.read().decode("utf-8"))
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
-        return None
-    if not isinstance(out, dict):
-        return None
-    data = out.get("data")
-    if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
-        return data[0].get("id")
-    return None
 
 
 def _parse_reply(out: dict) -> str | None:
@@ -111,21 +204,23 @@ def chat_completion(
 ) -> str | None:
     """
     POST to base_url/chat/completions (OpenAI-compatible). Returns assistant text or None on failure.
-    base_url should be e.g. http://localhost:1234/v1 (no trailing slash).
+    base_url should be the OpenAI-compatible root, e.g. http://100.71.161.10:1234/v1 (no trailing slash).
     messages: list of {"role": "system"|"user"|"assistant", "content": "..."}.
     """
     if not base_url or not base_url.strip():
         return None
+    ids = list_openai_model_ids(base_url, timeout_sec=min(5.0, timeout_sec))
+    model_eff, _ = resolve_model_from_list(ids, model)
     # Try LM Studio native API first (POST /api/v1/chat) — matches your working curl
-    reply = _try_lm_studio_native(base_url, model, messages, timeout_sec)
+    reply = _try_lm_studio_native(base_url, model_eff, messages, timeout_sec)
     if reply:
         return reply
     # Fallback: OpenAI-compatible POST /v1/chat/completions
     url = base_url.rstrip("/") + "/chat/completions"
     body = {
-        "model": model,
+        "model": model_eff,
         "messages": messages,
-        "max_tokens": 2048,
+        "max_tokens": _max_output_cap(),
         "temperature": 0.3,
         "stream": False,
     }
@@ -144,16 +239,19 @@ def chat_completion(
             return reply
     except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
         pass
-    # Fallback: LM Studio may expose the loaded model under a different id (e.g. with quantization suffix)
-    fallback_id = _get_first_model_id(base_url, timeout_sec=5.0)
-    if fallback_id and fallback_id != model:
-        body["model"] = fallback_id
+    # Retry OpenAI path with each loaded id (model_eff may still not match server expectations)
+    for alt in ids:
+        if alt == model_eff:
+            continue
+        body["model"] = alt
         data = json.dumps(body).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
         try:
             with urllib.request.urlopen(req, timeout=timeout_sec) as resp:
                 out = json.loads(resp.read().decode("utf-8"))
-            return _parse_reply(out)
+            got = _parse_reply(out)
+            if got:
+                return got
         except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
             pass
     return None

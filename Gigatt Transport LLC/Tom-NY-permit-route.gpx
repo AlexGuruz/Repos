@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Gigatt Permit Route" xmlns="http://www.topografix.com/GPX/1/1">
+  <rte>
+    <name>Tom NY Permit 3841749 - Great Bend PA to 1070 Erie Ave North Tonawanda</name>
+    <desc>Turn-by-turn per NY DOT permit. Follow in order for approved route.</desc>
+    <rtept lat="41.9733" lon="-75.7444">
+      <name>1. Origin: I-81 Great Bend, PA</name>
+    </rtept>
+    <rtept lat="42.0987" lon="-75.9180">
+      <name>2. I-81 → Merge onto NY-17 (I-86)</name>
+    </rtept>
+    <rtept lat="42.2562" lon="-77.9489">
+      <name>3. I-86 Exit 30 → Turn right onto NY-19 (Belmont/Wellsville)</name>
+    </rtept>
+    <rtept lat="42.7959" lon="-77.8170">
+      <name>4. NY-19 → Merge onto NY-19A (Genesee St)</name>
+    </rtept>
+    <rtept lat="42.9784" lon="-77.9372">
+      <name>5. NY-19A → Merge onto NY-39 → Turn left NY-246 (Center St)</name>
+    </rtept>
+    <rtept lat="43.0028" lon="-78.2083">
+      <name>6. NY-246 → Turn left NY-63 (Big Tree Rd)</name>
+    </rtept>
+    <rtept lat="43.0080" lon="-78.2350">
+      <name>7. NY-63 → Turn right Batavia Stafford Townline Rd → Turn left NY-5</name>
+    </rtept>
+    <rtept lat="42.9858" lon="-78.3892">
+      <name>8. NY-5 → Turn left NY-77 (Alleghany Rd)</name>
+    </rtept>
+    <rtept lat="42.9006" lon="-78.6392">
+      <name>9. NY-77 → Turn right NY-33 (Main St)</name>
+    </rtept>
+    <rtept lat="42.9634" lon="-78.7542">
+      <name>10. NY-33 → Turn right NY-78 (Transit Rd)</name>
+    </rtept>
+    <rtept lat="42.9845" lon="-78.8010">
+      <name>11. NY-78 → Ramp to NY-324 (Sheridan Dr)</name>
+    </rtept>
+    <rtept lat="42.9801" lon="-78.8512">
+      <name>12. NY-324 → Turn right I-290 Ramp → Merge I-290</name>
+    </rtept>
+    <rtept lat="42.9962" lon="-78.8776">
+      <name>13. I-290 Exit 3 → Turn right US-62 (Niagara Falls Blvd)</name>
+    </rtept>
+    <rtept lat="43.0321" lon="-78.8845">
+      <name>14. US-62 → Turn left NY-425 (Erie Ave)</name>
+    </rtept>
+    <rtept lat="43.0483" lon="-78.8539">
+      <name>15. Destination: 1070 Erie Ave, North Tonawanda NY 14120</name>
+    </rtept>
+  </rte>
+</gpx>

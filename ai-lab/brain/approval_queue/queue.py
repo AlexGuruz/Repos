@@ -15,6 +15,19 @@ _log_dir = _root / "logs" / "approval_logs"
 _pending_path = _log_dir / "pending.json"
 
 
+def _maybe_attach_catalog_context(row: dict[str, Any]) -> None:
+    if row.get("catalog_context") or not row.get("file_path"):
+        return
+    try:
+        from brain.catalog_loader import format_approval_catalog_attachment
+
+        ctx = format_approval_catalog_attachment(str(row["file_path"]))
+        if ctx:
+            row["catalog_context"] = ctx
+    except Exception:
+        pass
+
+
 @dataclass
 class ApprovalSpec:
     file_path: str
@@ -57,7 +70,7 @@ def submit(spec: ApprovalSpec | dict[str, Any]) -> str:
     next_id = len(pending) + 1
     id_ = f"approval-{next_id}"
     if isinstance(spec, ApprovalSpec):
-        pending[id_] = {
+        row = {
             "file_path": spec.file_path,
             "action_type": spec.action_type,
             "reason": spec.reason,
@@ -66,9 +79,12 @@ def submit(spec: ApprovalSpec | dict[str, Any]) -> str:
             "catalog_context": spec.catalog_context,
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
+        _maybe_attach_catalog_context(row)
+        pending[id_] = row
     else:
         spec_dict = dict(spec)
         spec_dict.setdefault("created_at", datetime.now(timezone.utc).isoformat())
+        _maybe_attach_catalog_context(spec_dict)
         pending[id_] = spec_dict
     _save_pending(pending)
     return id_

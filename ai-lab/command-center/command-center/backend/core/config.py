@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from urllib.parse import urlparse
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,9 +18,11 @@ class Settings(BaseSettings):
     nvidia_smi_poll_interval: int = 5
     log_action_path: str = ""
     registry_path: str = ""
-    # Main brain LLM (e.g. LM Studio). Empty = skip model-backed chat.
-    llm_base_url: str = "http://localhost:1234/v1"
+    # Main brain LLM (LM Studio OpenAI-compatible base). Override with LLM_BASE_URL in .env.
+    # Default: Tailscale/LAN host serving LM Studio (must include /v1, not bare :1234).
+    llm_base_url: str = "http://100.71.161.10:1234/v1"
     llm_model: str = "Qwen2.5-Coder-14B-Instruct"
+    llm_max_output_tokens: int = Field(default=1024, ge=256, le=8192)
     # Optional additional repo watcher roots. Use ';' on Windows, ':' on Linux/macOS.
     watch_paths: str = ""
 

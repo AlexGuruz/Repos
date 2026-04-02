@@ -27,6 +27,7 @@ class ApprovalEvent(BaseModel):
     action: str
     detail: str
     repo_class: Optional[str] = None
+    catalog_context: Optional[str] = None
     status: StatusType = "pending"
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 

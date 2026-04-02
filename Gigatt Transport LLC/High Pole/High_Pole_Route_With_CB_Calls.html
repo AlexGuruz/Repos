@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>High Pole — Route & CB Callouts</title>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    @media print {
+      body { margin: 0.75in; font-size: 11pt; }
+      .page-break { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+    }
+    html {
+      font-size: 18px;
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.5;
+      color: #1a1a1a;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 1rem 1.25rem 2rem;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      margin: 0 0 0.6rem 0;
+      border-bottom: 2px solid #333;
+      padding-bottom: 0.35rem;
+    }
+    .overview {
+      background: #e8e8e8;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+    .overview p { margin: 0.4rem 0; }
+    .overview strong { display: inline-block; min-width: 6.5em; }
+    h2 {
+      font-size: 1.3rem;
+      margin: 1.5rem 0 0.6rem 0;
+      color: #222;
+      padding-top: 0.25rem;
+    }
+    .step {
+      margin-bottom: 1.1rem;
+      page-break-inside: avoid;
+      padding: 0.4rem 0;
+    }
+    .direction {
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+      font-size: 1.05rem;
+    }
+    .step .miles { color: #555; font-size: 0.92em; }
+    .seg-mi,
+    .direction .seg-mi {
+      font-weight: 700;
+      color: #cc0000;
+      -webkit-font-smoothing: antialiased;
+    }
+    .cb {
+      color: #0d47a1;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      margin-top: 0.2rem;
+      line-height: 1.4;
+    }
+    .cb::before { content: '('; }
+    .cb::after { content: ')'; }
+    .section-note {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 0.6rem;
+      font-style: italic;
+    }
+    .railroad {
+      margin-top: 1.25rem;
+      padding: 0.75rem 1rem;
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      font-size: 1rem;
+      border-radius: 0 6px 6px 0;
+    }
+    .railroad h3 { margin: 0 0 0.4rem 0; font-size: 1.05rem; }
+    .railroad ul { margin: 0.25rem 0 0 1.25rem; padding: 0; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<h1>ROUTE OVERVIEW</h1>
+<div class="overview">
+  <p><strong>Origin:</strong> Tennessee (I-40 WB at state line)</p>
+  <p><strong>Destination:</strong> Texas (IH20NFR sw)</p>
+  <p><strong>Arkansas segment:</strong> I-40 → I-430 → I-30 → AR-108 → US-71 → AR-32 → AR-41 (state line)</p>
+  <p><strong>Texas segment:</strong> SH0008 AR Line → … → IH20NFR (276.5 mi from AR line)</p>
+  <p><strong>CB channel:</strong> 19</p>
+  <p><strong>Load:</strong> Over-height (high pole). Use caution at all railroad crossings.</p>
+</div>
+
+<h2>ARKANSAS — Turn-by-turn</h2>
+<p class="section-note">Segment mileage (from permit mile markers) in bold red at end of each direction. CB callouts in parentheses below.</p>
+
+<div class="step no-break">
+  <div class="direction">1. Start on I-40 WB at MP Crittenden 284.69(52) (state border of Tennessee). <span class="seg-mi">0.00 mi</span></div>
+  <div class="cb">CB: High pole on I-40 westbound. Lane clear.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">2. Proceed to I-430 SB (in Maumelle at Exit 147). <span class="seg-mi">137.69 mi</span></div>
+  <div class="cb">CB: Coming up on exit. Lane clear; stop at merge; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">3. Restricted bridge — I-430 in Pulaski Co at 9.868(21) (River Mt Rd, RR, Ark River). No other trucks within 1,000 ft; reduce to 5 mph. <span class="seg-mi">2.93 mi</span></div>
+  <div class="cb">CB: Restricted bridge ahead — 5 mph, no trucks within 1000 ft. Cleared the bridge.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">4. Proceed to I-30 WB (in Little Rock at begin I-430). <span class="seg-mi">9.87 mi</span></div>
+  <div class="cb">CB: Merging onto I-30 west. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">5. Restricted bridge — I-40 in Crittenden Co at 283.859(52) (Miss River, RR). No other trucks within 1,000 ft; 5 mph. <span class="seg-mi">0.00 mi</span></div>
+  <div class="cb">CB: Restricted bridge ahead — 5 mph, no trucks within 1000 ft. Cleared the bridge.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">6. Proceed to AR-108 WB (in Texarkana at Exit 7). <span class="seg-mi">131.00 mi</span></div>
+  <div class="cb">CB: Coming up on exit. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">7. Proceed to US-71 NWB (in Ogden at southerly intersection US-71). <span class="seg-mi">25.00 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">8. Proceed to AR-32 WB (in Ashdown at intersection AR-32). <span class="seg-mi">15.00 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">9. Proceed to AR-41 SB (in Wallace at westerly intersection AR-41). <span class="seg-mi">10.00 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">10. Restricted bridge — SH 41 in Little River Co at 9.27(03) (Red River Relief). No other trucks within 1,000 ft; 5 mph. <span class="seg-mi">9.27 mi</span></div>
+  <div class="cb">CB: Restricted bridge ahead — 5 mph, no trucks within 1000 ft. Cleared the bridge.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">11. End on AR-41 at MP Little River 10.89(3) (state border of Texas). <span class="seg-mi">1.62 mi — END AR</span></div>
+  <div class="cb">CB: Cleared state line. High pole entering Texas.</div>
+</div>
+
+<p class="section-note">At every railroad crossing in Arkansas: CB: Railroad crossing ahead — high pole. Cleared the crossing.</p>
+<p class="section-note">Arkansas segment miles: from permit mile markers (I-40 to Exit 147, I-430 bridge 9.868, I-30 to Exit 7, AR-41 MP 10.89/9.27). Steps 7–9 (AR-108, US-71, AR-32) use typical route distances; confirm with permit or map if needed.</p>
+
+<h2 class="page-break">TEXAS — Turn-by-turn (from SH0008 AR Line)</h2>
+<p class="section-note">CB callouts in parentheses under each direction that requires a call.</p>
+
+<div class="step no-break">
+  <div class="direction">1. Origin: SH0008 AR Line. <span class="seg-mi">0.00 mi</span></div>
+  <div class="cb">CB: High pole, loaded route origin. Lane clear.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">2. Turn right onto FM1840 w (East Walters Blvd). <span class="seg-mi">9.10 mi</span></div>
+  <div class="cb">CB: Coming up on turn. Lane clear; stop; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">3. Turn left onto SH98 s. <span class="seg-mi">3.50 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">4. Take US67 Ramp sw; merge onto US67 sw. <span class="seg-mi">6.30 mi</span></div>
+  <div class="cb">CB: Merging onto US67. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">5. Take BU271E Ramp nw; bear right onto BU271E n (North Jefferson Ave). <span class="seg-mi">32.30 mi</span></div>
+  <div class="cb">CB: Bear right coming up. Lane clear; stop; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">6. Turn left onto IH30NFR sw (Lakewood Dr NFR). <span class="seg-mi">0.50 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">7. Take IH30 Ramp sw; continue straight on IH30 w. <span class="seg-mi">0.30 mi</span></div>
+  <div class="cb">CB: Merging onto I-30 west. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">8. DETOUR: Exit 141 toward FM-900/Saltillo Rd — take next entrance after. <span class="seg-mi">21.00 mi</span></div>
+  <div class="cb">CB: Detour coming up. Lane clear; stop when needed; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">9. DETOUR: Exit 127 toward TX-301 Loop/US-67 Bus — take next entrance after SL301. <span class="seg-mi">13.70 mi</span></div>
+  <div class="cb">CB: Detour coming up. Lane clear; stop when needed; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">10. Take Exit 101 toward SH24/FM1737 Commerce/Paris. <span class="seg-mi">24.80 mi</span></div>
+  <div class="cb">CB: Exit coming up. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">11. Bear left onto IH30NFR nw. <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Bear left. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">12. Turn left onto SH24 s. <span class="seg-mi">0.60 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">13. Take IH30 Ramp sw; continue straight on IH30 w (US67). <span class="seg-mi">0.40 mi</span></div>
+  <div class="cb">CB: Merging back onto I-30. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">14. DETOUR: Exit 97 toward Lamar St — take next entrance. <span class="seg-mi">4.30 mi</span></div>
+  <div class="cb">CB: Detour coming up. Lane clear; stop when needed; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">15. Take Exit 93 toward SH34/Wesley St. <span class="seg-mi">3.00 mi</span></div>
+  <div class="cb">CB: Exit coming up. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">16. Continue straight on IH30NFR s. <span class="seg-mi">0.30 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">17. Keep right; take ramp toward SH34 to detour structure. <span class="seg-mi">0.40 mi</span></div>
+  <div class="cb">CB: Keep right, detour. Lane clear; stop when needed; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">18. Turn left onto US67 BUS s (SH34). <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">19. Continue straight on SH34 s (Wesley St). <span class="seg-mi">0.50 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">20. Take IH20 Ramp w; merge onto IH20 w (Ronald Reagan Memorial Hwy). <span class="seg-mi">30.50 mi</span></div>
+  <div class="cb">CB: Merging onto I-20 west. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">21. Take Exit 453A toward TX-360 N. <span class="seg-mi">47.20 mi</span></div>
+  <div class="cb">CB: Exit coming up. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">22. Continue straight on SH360 n (Angus G Wynne Jr Fwy). <span class="seg-mi">0.50 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">23. Take exit toward SH183. <span class="seg-mi">10.60 mi</span></div>
+  <div class="cb">CB: Exit coming up. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">24. Take exit toward SH183 West. <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">25. Merge onto SH183 w (Airport Fwy). <span class="seg-mi">0.70 mi</span></div>
+  <div class="cb">CB: Merging onto 183 west. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">26. Take exit toward FM157/Industrial Blvd. <span class="seg-mi">1.40 mi</span></div>
+  <div class="cb">CB: Exit coming up. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">27. Merge onto SH183NFR w (West Airport Fwy NFR). <span class="seg-mi">0.30 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">28. Turn right onto Murphy Drive nw. <span class="seg-mi">1.30 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">29. Turn left onto SH121WFR sw (Airport Fwy WFR). <span class="seg-mi">0.10 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">30. Take SH121 Ramp sw; merge onto SH121 w. <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Merging onto 121 west. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">31. Take ramp toward SH26/FM1938/Davis Blvd/Colleyville. <span class="seg-mi">4.40 mi</span></div>
+  <div class="cb">CB: Exit coming up. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">32. Continue straight on FM1938 w. <span class="seg-mi">0.50 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">33. Keep left toward SH26/TCC NE Campus/Colleyville. <span class="seg-mi">0.30 mi</span></div>
+  <div class="cb">CB: Keep left. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">34. Merge onto IH820NFR w (Northeast Loop 820 NFR). <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Merging onto 820. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">35. Take IH820 Ramp nw. <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">36. Merge onto IH820 w (Northeast Loop). <span class="seg-mi">0.60 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">37. DETOUR: Exit 18 toward Haltom Rd/Beach St — take next entrance. <span class="seg-mi">3.60 mi</span></div>
+  <div class="cb">CB: Detour coming up. Lane clear; stop when needed; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">38. Take Exit 429A toward US377/Granbury. <span class="seg-mi">18.30 mi</span></div>
+  <div class="cb">CB: Exit coming up. Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">39. Continue straight on IH20SFR se. <span class="seg-mi">0.40 mi</span></div>
+  <div class="cb">CB: Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">40. Keep right toward US377 South. <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Keep right. Lane clear; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">41. Take US377 Ramp s; bear right onto US377 sw (Benbrook Blvd). <span class="seg-mi">0.20 mi</span></div>
+  <div class="cb">CB: Bear right. Lane clear; stop; cleared.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">42. Turn right onto SH171 nw (North Cresson Hwy). <span class="seg-mi">14.50 mi</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn.</div>
+</div>
+
+<div class="step no-break">
+  <div class="direction">43. Turn left onto IH20NFR sw. <span class="seg-mi">17.90 mi — END</span></div>
+  <div class="cb">CB: Lane clear; stop at turn; cleared the turn. End of route.</div>
+</div>
+
+<p class="section-note">At every railroad crossing on the Texas route: CB: Railroad crossing ahead — high pole. Cleared the crossing.</p>
+
+<div class="railroad no-break">
+  <h3>Railroad crossing — emergency / coordination (use CB at each crossing; call if required or emergency)</h3>
+  <ul>
+    <li>Amtrak 800-331-0008</li>
+    <li>BNSF 800-832-5452</li>
+    <li>CSX 800-232-0144</li>
+    <li>Canadian National 800-465-9239</li>
+    <li>Canadian Pacific 800-716-9132</li>
+    <li>Kansas City Southern 800-892-6295</li>
+    <li>Norfolk Southern 800-453-2530</li>
+    <li>Union Pacific 888-877-7267</li>
+  </ul>
+</div>
+
+</body>
+</html>

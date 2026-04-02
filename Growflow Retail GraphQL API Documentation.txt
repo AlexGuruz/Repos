@@ -1,0 +1,162 @@
+﻿Overview
+This is API documentation for partners interested in interfacing with GrowFlow retail via our GraphQL API. Growflow uses Auth0 Client Credentials authentication for its third party data APIs.  
+  
+
+
+
+Essentially there are two steps
+
+1. POST your client ID / client secret to an auth endpoint to retrieve an access token (expires in 1 hour)
+
+2. Use the access token as a Bearer Token with our API to retrieve data.  
+
+
+Samples for both of these types of queries are included in this document, as well as links to Auth0’s documentation for more details and a live GraphQL Playground to explore our data API and documentation.
+Authentication
+Authentication Config
+In order to make api requests to GraphQL, you must first obtain an oAuth2 token via Auth0
+
+
+Auth0 Documentation:
+   * High Level Flow Documentation
+   * Authentication API Documentation
+Sample Retrieve an Access Token
+
+
+curl --request POST \
+ --url 'https://token.growflow.com/oauth/token' \
+ --header 'content-type: application/x-www-form-urlencoded' \
+ --data 'audience=https://growflow.com&grant_type=client_credentials&client_id={yourClientId}&client_secret={yourClientSecret}'
+	
+
+Data
+Test Live Environment
+GrowFlow will provide credentials to access our integrations sandbox environment where you can develop and test against.
+https://retail.growflow.com/c/integrations/login
+(We will provide you with a username and password upon integrator signup…see instructions at the bottom of this document on how to register)
+
+
+Environments
+IMPORTANT  -- Every Growflow Retail organization’s point of sale system lives on it’s own URL following the format: https://retail.growflow.com/c/{clientId}.   For testing and development purposes this document uses an organization called “integrations” and that is the name you should use when developing against our API.
+
+
+In order to integrate with GrowFlow for a production customer you will need to capture the customer organization name as part of the onboarding and setup process and use it in the URL to our graphql server, e.g. https://retail.growflow.com/c/sandicasupply/graphql.
+Live API Docs
+(Note: Docs won’t appear until you put { "authorization": "Bearer <accesstoken>" } into the headers section at the bottom of the graphql playground)
+​​Click here to view example the full example GraphQL Schema (if you do not have access to the api yet, you can use this for reference).
+
+Live Docs are available in the playground, visit this URL in your browser: https://retail.growflow.com/c/integrations/graphql.  Note that the playground is only available for the “integrations” environment, so GET requests to /c/<retail_org>/graphql will return an error.  POST requests to production environments will work as expected.  If you want to test a production environment using the playground you can use the playground hosted at /integrations/ and change the target URL inside the playground tab itself.
+
+
+
+
+Once you have navigated to the above URL, make sure that the URL in the graphQL playground appears as such:
+  
+
+you will need to add the authorization token as a header in JSON format at the bottom the screen like so
+  
+
+Copy and paste the sample menu query shown at the bottom of this document into the left hand side panel of the graphQL playground and hit the play button. Like so:
+  
+
+Sample “Simple” Query Request
+curl -vv -X POST -H "Content-Type: application/json" -H "Authorization: 
+Bearer <ACCESSTOKEN>" -d '{"query":  "{ users { count } }"}' 
+https://retail.growflow.com/c/integrations/graphql
+	Sample Menu Query
+
+
+{
+findMenus(menuKey:"398ad09a-622d-425f-3f8c-2f0446085792") {
+ menuGroups {
+   name
+   products {
+     name
+     inventoryQty
+     sku
+     variants {
+          weight
+       uom
+       price
+     }
+   }
+ }
+ pricesIncludeTax
+}
+}
+	
+
+Sample Preorder Mutation
+
+
+mutation {
+  createPreorder(menuKey: "5a6a6698-2926-44cf-3147-4398d53a29a4", preorder: {
+    preOrderType: Pickup
+    preOrderTotal: 2300
+    customer: {
+      firstName: "Cory"
+      lastName: "Shaw"
+      type: Recreational
+      dob: "2000-04-11T23:55:35.116Z"
+    }
+    orderItems: [
+      {
+        productId: "sRHRALgAg1"
+        qty: 1
+      }
+    ]
+  }) {
+    success
+    order {
+      id
+      orderNumber
+      status
+    }
+  }
+}
+	
+
+
+
+Sample Preorder Status Query
+
+
+{
+preorderStatus(orderId:"G6lxb54AOu") {
+ order {
+   id
+   status
+    orderNumber
+ }
+}
+}
+	
+
+
+
+Example Full GraphQL Schema 
+Once you have API access you should reference the live GraphQL Schema​​ and not this, as it may be out of date.
+
+
+​​Click here to view example GraphQL Schema
+
+
+
+
+
+
+________________
+Next Steps - Register
+If you’re interested in developing against the GrowFlow retail API, please send an email to apipartners@growflow.com with the subject “New Retail GraphQL API partner request” with the following info:
+
+
+Please note that this is a paid service starting at $50/mo
+
+   * Company Name
+   * Company Primary Contact Name
+   * Company Primary Contact Phone Number
+   * Which GrowFlow Retail API schemas you need access to
+   * Which GrowFlow Retail client names you need access to
+
+
+From there a team member will respond to start the application process (typically takes 1-2 business days for setup).

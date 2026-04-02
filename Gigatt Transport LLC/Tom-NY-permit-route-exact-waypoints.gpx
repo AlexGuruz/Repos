@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Gigatt Permit 3841749 EXACT" xmlns="http://www.topografix.com/GPX/1/1">
+  <rte>
+    <name>Tom NY Permit 3841749 - Exact turn-by-turn</name>
+    <rtept lat="41.97686" lon="-75.74225"><name>Origin → I-81; PA; Great Bend</name></rtept>
+    <rtept lat="42.0987" lon="-75.918"><name>I-81 NW → Merge onto NY-17</name></rtept>
+    <rtept lat="42.17745" lon="-76.93345"><name>NY-17 W → Continue straight on I-86</name></rtept>
+    <rtept lat="42.2562" lon="-77.9489"><name>I-86 W → Take Exit 30 toward NY-19/Belmont/Wellsville</name></rtept>
+    <rtept lat="42.2552" lon="-77.9494"><name>I-86 Ramp SW → Turn right onto NY-19</name></rtept>
+    <rtept lat="42.7959" lon="-77.817"><name>NY-19 NW → Merge onto NY-19A [GENESEE ST]</name></rtept>
+    <rtept lat="42.9784" lon="-77.9372"><name>NY-19A NE → Merge onto NY-39</name></rtept>
+    <rtept lat="42.979" lon="-77.938"><name>NY-39 N → Turn left onto NY-246 [CENTER ST]</name></rtept>
+    <rtept lat="43.0028" lon="-78.2083"><name>NY-246 N → Turn left onto NY-63 [BIG TREE RD]</name></rtept>
+    <rtept lat="43.0065" lon="-78.222"><name>NY-63 NW → Turn right onto BATAVIA STAFFORD TOWNLINE RD</name></rtept>
+    <rtept lat="43.008" lon="-78.235"><name>BATAVIA STAFFORD TOWNLINE RD N → Turn left onto NY-5 [MAIN RD]</name></rtept>
+    <rtept lat="42.9858" lon="-78.3892"><name>NY-5 W → Turn left onto NY-77 [ALLEGHANY RD]</name></rtept>
+    <rtept lat="42.9006" lon="-78.6392"><name>NY-77 S → Turn right onto NY-33 [MAIN ST]</name></rtept>
+    <rtept lat="42.9634" lon="-78.7542"><name>NY-33 SW → Turn right onto NY-78 [TRANSIT RD]</name></rtept>
+    <rtept lat="42.98018" lon="-78.80534"><name>NY-78 N → Turn left onto NY-78 Ramp [NY-324]</name></rtept>
+    <rtept lat="42.98015" lon="-78.818"><name>NY-78 Ramp SW → Merge onto NY-324 Ramp</name></rtept>
+    <rtept lat="42.98012" lon="-78.83"><name>NY-324 Ramp S → Turn right onto NY-324 [SHERIDAN DR]</name></rtept>
+    <rtept lat="42.9801" lon="-78.8512"><name>NY-324 W → Turn right onto I-290 Ramp</name></rtept>
+    <rtept lat="42.988" lon="-78.864"><name>I-290 Ramp W → Merge onto I-290</name></rtept>
+    <rtept lat="42.9962" lon="-78.8776"><name>I-290 NW → Take Exit 3 toward US-62/Niagara Falls Blvd</name></rtept>
+    <rtept lat="42.9975" lon="-78.879"><name>US-62 Ramp W → Turn right onto US-62 [NIAGARA FALLS BLVD]</name></rtept>
+    <rtept lat="43.0321" lon="-78.8845"><name>US-62 N → Turn left onto NY-425 [ERIE AVE]</name></rtept>
+    <rtept lat="43.04834" lon="-78.85371"><name>NY-425 SW → Arrive at destination</name></rtept>
+  </rte>
+</gpx>

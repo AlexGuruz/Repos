@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gigatt Transport LLC Invoice Template</title>
+  <style>
+    :root {
+      --text: #1a1a1a;
+      --muted: #666;
+      --line: #d9d9d9;
+      --brand: #0f3b63;
+      --accent: #1e7ccf;
+      --bg: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f2f4f7;
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      padding: 24px;
+    }
+
+    .page {
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0 auto;
+      background: var(--bg);
+      border: 1px solid #e7e7e7;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      padding: 0.6in;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      border-bottom: 2px solid var(--brand);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    .company h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      color: var(--brand);
+      letter-spacing: 0.2px;
+    }
+
+    .company p {
+      margin: 2px 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .logo-wrap {
+      text-align: right;
+    }
+
+    .logo-wrap img {
+      width: 120px;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-bottom: 8px;
+    }
+
+    .invoice-badge {
+      display: inline-block;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .meta-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .meta-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .field {
+      font-size: 13px;
+      margin: 4px 0;
+      line-height: 1.35;
+    }
+
+    .field strong {
+      color: #222;
+      min-width: 110px;
+      display: inline-block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    thead th {
+      background: #f6f9fc;
+      color: var(--brand);
+      border: 1px solid var(--line);
+      text-align: left;
+      padding: 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tbody td {
+      border: 1px solid var(--line);
+      padding: 10px;
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    .num {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .totals {
+      margin-top: 14px;
+      width: 330px;
+      margin-left: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .totals-row:last-child { border-bottom: 0; }
+
+    .totals-row.grand {
+      font-size: 15px;
+      font-weight: 700;
+      background: #f6f9fc;
+      color: var(--brand);
+    }
+
+    .notes {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .notes h3 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--brand);
+      letter-spacing: 0.7px;
+    }
+
+    .notes p {
+      margin: 4px 0;
+      font-size: 13px;
+      color: #333;
+      line-height: 1.35;
+    }
+
+    .footer {
+      position: absolute;
+      left: 0.6in;
+      right: 0.6in;
+      bottom: 0.45in;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page {
+        margin: 0;
+        border: 0;
+        box-shadow: none;
+        width: auto;
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="company">
+        <h1>GIGATT TRANSPORT LLC</h1>
+        <p>[Company Address Line 1]</p>
+        <p>[City, State ZIP]</p>
+        <p>[Phone] | [Email] | [Website]</p>
+      </div>
+      <div class="logo-wrap">
+        <img src="./gigatt-transport/src/logo.svg" alt="Gigatt Transport badge logo" />
+        <span class="invoice-badge">INVOICE</span>
+      </div>
+    </div>
+
+    <div class="meta-grid">
+      <div class="card">
+        <h3>Bill To</h3>
+        <div class="field"><strong>Company:</strong> Opitmus Translog Servies</div>
+        <div class="field"><strong>Address:</strong> 4810 Warehouselane, Laredo TX 78041</div>
+        <div class="field"><strong>Phone:</strong> 956-898-1797</div>
+        <div class="field"><strong>Email:</strong> —</div>
+      </div>
+
+      <div class="card">
+        <h3>Invoice Details</h3>
+        <div class="field"><strong>Invoice #:</strong> —</div>
+        <div class="field"><strong>Invoice Date:</strong> 3/19/26</div>
+        <div class="field"><strong>Route Date:</strong> 3/19/26</div>
+        <div class="field"><strong>Load #:</strong> 24791</div>
+        <div class="field"><strong>Terms:</strong> —</div>
+      </div>
+    </div>
+
+    <div class="meta-grid-3">
+      <div class="card">
+        <h3>Load &amp; Equipment</h3>
+        <div class="field"><strong>Truck #:</strong> 93</div>
+        <div class="field"><strong>Trailer #:</strong> —</div>
+        <div class="field"><strong>Permit #:</strong> —</div>
+        <div class="field"><strong>Route Type:</strong> chase</div>
+      </div>
+      <div class="card">
+        <h3>Driver</h3>
+        <div class="field"><strong>Driver Name:</strong> Cristian</div>
+        <div class="field"><strong>Driver Phone:</strong> 956-413-1228</div>
+      </div>
+      <div class="card">
+        <h3>Broker</h3>
+        <div class="field"><strong>Name:</strong> —</div>
+        <div class="field"><strong>Address:</strong> —</div>
+        <div class="field"><strong>Phone:</strong> —</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 46%;">Description</th>
+          <th style="width: 13%;">Qty (mi)</th>
+          <th style="width: 18%;">Rate/mile</th>
+          <th style="width: 23%;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            Transport services — Load #24791, chase route, Truck #93<br />
+            <span style="color:#666;">342 miles @ $1.70/mile</span>
+          </td>
+          <td class="num">342</td>
+          <td class="num">$1.70</td>
+          <td class="num">$581.40</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="totals-row"><span>Subtotal</span><span>$581.40</span></div>
+      <div class="totals-row"><span>Tax</span><span>$0.00</span></div>
+      <div class="totals-row"><span>Discount</span><span>$0.00</span></div>
+      <div class="totals-row grand"><span>Total Due</span><span>$581.40</span></div>
+    </div>
+
+    <div class="notes">
+      <h3>Notes / Payment Instructions</h3>
+      <p>Please remit payment by due date.</p>
+      <p>Payment Method: [ACH / Check / Wire]</p>
+      <p>Checks payable to: Gigatt Transport LLC</p>
+      <p>Thank you for your business.</p>
+    </div>
+
+    <div class="footer">
+      <span>Gigatt Transport LLC</span>
+      <span>Page 1 of 1</span>
+    </div>
+  </div>
+</body>
+</html>

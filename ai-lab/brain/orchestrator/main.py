@@ -9,7 +9,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Add ai-lab root
@@ -270,7 +270,7 @@ def build_grounded_response(
 
 
 # Defaults from Ai/LOCAL_AI_START_HERE.md (LM Studio)
-_DEFAULT_LLM_BASE_URL = "http://localhost:1234/v1"
+_DEFAULT_LLM_BASE_URL = "http://100.71.161.10:1234/v1"
 _DEFAULT_LLM_MODEL = "Qwen2.5-Coder-14B-Instruct"
 
 
@@ -324,6 +324,48 @@ def run(
         return {"reply": f"Unknown id or usage: approve <id> / deny <id>. Pending: {[p[0] for p in pending]}", "approval_request": None}
     intent, params = classify_intent(message)
     log_event("intent", session_id=session_id, intent=intent, params=params)
+
+    if intent == "enqueue_approval":
+        pending_prop = session_state.get_pending_proposal(session_id)
+        path_str = ""
+        action_type = "manual_enqueue"
+        reason = msg[:500]
+        if pending_prop:
+            pargs = pending_prop.get("args") or {}
+            path_str = (pargs.get("target") or pargs.get("file_path") or "").strip()
+            action_type = str(pending_prop.get("action") or action_type)
+            reason = str(pending_prop.get("description") or pending_prop.get("title") or reason)[:500]
+        if not path_str:
+            default_reg = _root / "registry" / "scripts.json"
+            path_str = str(default_reg if default_reg.is_file() else (_root / "README.md"))
+        spec = ApprovalSpec(
+            file_path=path_str,
+            action_type=action_type,
+            reason=reason or "Approval enqueue from chat",
+        )
+        aid = submit(spec)
+        spec_row: dict | None = None
+        for pid, row in list_pending():
+            if pid == aid:
+                spec_row = row
+                break
+        catalog_ctx = (spec_row or {}).get("catalog_context")
+        apr = {
+            "id": aid,
+            "agent": "orchestrator",
+            "action_type": (spec_row.get("action_type") if spec_row else None) or action_type,
+            "reason": (spec_row.get("reason") if spec_row else None) or reason,
+            "created_at": (spec_row or {}).get("created_at") or datetime.now(timezone.utc).isoformat(),
+            "catalog_context": catalog_ctx,
+        }
+        log_event("approval_enqueued", session_id=session_id, approval_id=aid, file_path=path_str)
+        return {
+            "reply": (
+                f"Queued **{aid}** for `{path_str}`. "
+                f"Say `approve {aid}` or `deny {aid}`, or use the sidebar APR controls."
+            ),
+            "approval_request": apr,
+        }
 
     # PDR Phase 2.75: increment turn and expire stale proposals
     session_state.increment_turn(session_id)
@@ -749,8 +791,9 @@ def run(
         proposals_list = grounded.get("proposals") or []
         answer_style = grounded.get("answer_style", "")
         routing_reason = grounded.get("routing_reason", "") or ""
-        # Hard insufficient_evidence override (Guru §24.13): do not call LLM; return fixed no-evidence reply
-        if answer_style == "insufficient_evidence":
+        # Hard insufficient_evidence override (Guru §24.13): do not call LLM; return fixed no-evidence reply.
+        # Exception: system catalog prepended to evidence_block counts as in-session authoritative evidence.
+        if answer_style == "insufficient_evidence" and "## Lab system catalog" not in (evidence_block or ""):
             log_event("insufficient_evidence_override", session_id=session_id, intent=intent)
             log_event(
                 "turn_trace",
@@ -845,6 +888,15 @@ def run(
         model_reply = chat_completion(base_url, model, messages)
         if model_reply:
             reply = model_reply
+    if reply == fallback:
+        try:
+            from brain.catalog_loader import format_catalog_grounding_for_message
+
+            _fb_cat = format_catalog_grounding_for_message(message)
+            if _fb_cat:
+                reply = f"{_fb_cat}\n\n{reply}"
+        except Exception:
+            pass
     if proposals_suffix and reply != fallback:
         reply = reply + proposals_suffix
 

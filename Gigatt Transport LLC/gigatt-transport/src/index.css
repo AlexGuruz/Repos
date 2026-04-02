@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-bg: #0a0c0f;
+  --color-surface: #111318;
+  --color-surface-2: #181c23;
+  --color-border: #1e2530;
+  --color-accent: #f4a715;
+  --color-accent-dim: #a36f0a;
+  --color-text: #e8eaf0;
+  --color-muted: #6b7280;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --admin-bg: #f4f5f7;
+  --admin-surface: #ffffff;
+  --admin-border: #e2e5ea;
+  --admin-text: #1a1d23;
+  --admin-muted: #6b7280;
+  --admin-accent: #1a3a5c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.display-font { font-family: var(--font-display); letter-spacing: 0.02em; }
+.mono-font { font-family: var(--font-mono); }
+
+.accent-line {
+  display: inline-block;
+  width: 3rem;
+  height: 3px;
+  background-color: var(--color-accent);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.anim-fade-up { animation: fadeUp 0.6s ease forwards; }
+.anim-fade-up-delay-1 { animation: fadeUp 0.6s 0.1s ease both; }
+.anim-fade-up-delay-2 { animation: fadeUp 0.6s 0.2s ease both; }
+.anim-fade-up-delay-3 { animation: fadeUp 0.6s 0.3s ease both; }
+.anim-fade-up-delay-4 { animation: fadeUp 0.6s 0.4s ease both; }
+.anim-fade-up-delay-5 { animation: fadeUp 0.6s 0.5s ease both; }
+
+.field-input {
+  width: 100%;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.625rem 0.875rem;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.field-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(244,167,21,0.12);
+}
+.field-input.error { border-color: var(--color-danger); }
+.field-input::placeholder { color: var(--color-muted); }
+
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin-bottom: 0.4rem;
+}
+.field-error { font-size: 0.78rem; color: var(--color-danger); margin-top: 0.3rem; }
+
+.btn-primary {
+  background-color: var(--color-accent);
+  color: #0a0c0f;
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+.btn-primary:hover:not(:disabled) { background-color: #ffb829; transform: translateY(-1px); }
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.admin-body { font-family: var(--font-body); background-color: var(--admin-bg); color: var(--admin-text); }
+.admin-card { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 8px; }
+
+.admin-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.admin-input:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px rgba(26,58,92,0.1);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.status-new { background: #dbeafe; color: #1d4ed8; }
+.status-review { background: #fef3c7; color: #92400e; }
+.status-booked { background: #d1fae5; color: #065f46; }
+.status-completed { background: #e5e7eb; color: #374151; }
+.status-rejected { background: #fee2e2; color: #991b1b; }

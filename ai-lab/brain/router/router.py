@@ -10,6 +10,8 @@ def classify_intent(message: str) -> tuple[str, dict]:
     Accepts natural phrasing: "growflow sales today", "my sales", "find in repos", "scan repo", etc.
     """
     msg = (message or "").strip().lower()
+    if msg.startswith("queue approval") or msg.startswith("submit approval"):
+        return "enqueue_approval", {}
     if msg.startswith("approve ") or msg.startswith("deny "):
         return "approval", {}
     if msg.rstrip(".!?") in ("do it", "yes", "go ahead", "do that", "approve", "ok", "sure"):

@@ -49,6 +49,7 @@ async def chat(req: ChatRequest):
         gov = (settings.ai_lab_governance_root or "").strip()
         if gov:
             os.environ["AI_LAB_GOVERNANCE_ROOT"] = gov
+        os.environ["LLM_MAX_OUTPUT_TOKENS"] = str(settings.llm_max_output_tokens)
         result = await asyncio.to_thread(
             orchestrator_run,
             req.message,
@@ -76,7 +77,7 @@ async def chat(req: ChatRequest):
     })
 
     if apr_id:
-        await bus.publish("approval", {
+        pub = {
             "id": apr_id,
             "type": "approval",
             "agent": approval_request.get("agent", "orchestrator"),
@@ -84,7 +85,11 @@ async def chat(req: ChatRequest):
             "detail": approval_request.get("reason", ""),
             "status": "pending",
             "timestamp": approval_request.get("created_at", datetime.utcnow().isoformat()),
-        })
+        }
+        cc = approval_request.get("catalog_context")
+        if cc:
+            pub["catalog_context"] = cc
+        await bus.publish("approval", pub)
 
     log_api(
         "chat",

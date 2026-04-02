@@ -19,6 +19,26 @@ from core.models import ApprovalEvent, ActionEvent
 from services.feed_bus import bus
 
 
+def _catalog_attachment_from_payload(payload: dict) -> str | None:
+    try:
+        from core.ai_lab import ensure_ai_lab_root_on_path
+        import os
+
+        ensure_ai_lab_root_on_path()
+        gr = (settings.ai_lab_governance_root or "").strip()
+        if gr:
+            os.environ["AI_LAB_GOVERNANCE_ROOT"] = gr
+        from brain.catalog_loader import format_approval_catalog_attachment
+    except Exception:
+        return None
+    for key in ("file_path", "path", "target", "repo_path", "script_path"):
+        v = payload.get(key)
+        if isinstance(v, str) and v.strip():
+            ctx = format_approval_catalog_attachment(v.strip())
+            return ctx or None
+    return None
+
+
 ALLOWLISTED_READ_OPS = {
     "index_repo", "semantic_search", "chunk_retrieve",
     "retrieve",
@@ -108,8 +128,9 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
             agent=agent, action=op,
             detail=payload.get("detail", str(payload)),
             repo_class="CONTROLLED",
+            catalog_context=_catalog_attachment_from_payload(payload),
         )
-        await bus.publish("approval", apr.model_dump())
+        await bus.publish("approval", apr.model_dump(mode="json"))
         return {"ok": True, "queued": True, "apr_id": apr.id, "status": "pending"}
 
     # Unknown op — reject
