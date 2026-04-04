@@ -60,20 +60,20 @@ Single reference for what the COG watcher uses and feeds. Consolidates Project-K
 
 | What | Where |
 |------|--------|
-| COG system | E:\Repos\cog-allocation-system |
-| COG config | cog-allocation-system/config/config.yaml |
-| COG recreation spec | cog-allocation-system/docs/RECREATION_SPEC.md |
-| Kylo/Bank IDs | Project-Kylo/tools/scripthub_legacy/config/config.json |
-| NUGZ COG layout | Project-Kylo/tools/scripthub_legacy/config/layout_map.json (by_year → 2026 → NUGZ COG) |
-| Systems overview | E:\Repos\docs\SYSTEMS_OVERVIEW.md |
-| Commands | Project-Kylo/COMMAND_REFERENCE.md (COG section) |
+| COG system | `REPOS_ROOT\cog-allocation-system` (this repo) |
+| COG config | `config/config.yaml` |
+| COG recreation spec | `docs/RECREATION_SPEC.md` |
+| Kylo/Bank IDs | `Project-Kylo/tools/scripthub_legacy/config/config.json` (sibling under monorepo root) |
+| NUGZ COG layout | `Project-Kylo/tools/scripthub_legacy/config/layout_map.json` (by_year → 2026 → NUGZ COG) |
+| Systems & repos map | `../../docs/SYSTEMS_AND_REPOS.md` |
+| Commands | `Project-Kylo/COMMAND_REFERENCE.md` (COG section) |
 
 ---
 
 ## Quick Test
 
 ```powershell
-cd E:\Repos\cog-allocation-system
+cd <REPOS_ROOT>\cog-allocation-system
 python scripts/drive_watcher.py --run-once
 ```
 
