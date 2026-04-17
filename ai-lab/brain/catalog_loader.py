@@ -205,6 +205,11 @@ def matching_components(message: str) -> list[dict[str, Any]]:
                 seen.add(raw)
         if out:
             return out
+    tok = msg_lower.strip()
+    if tok == "secrets":
+        c = d["components_by_id"].get("secrets-config-plane")
+        if c:
+            return [c]
     out = []
     seen: set[str] = set()
     for cid, c in d["components_by_id"].items():

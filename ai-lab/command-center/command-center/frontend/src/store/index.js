@@ -15,20 +15,29 @@ export const useEventStore = create((set, get) => ({
 
   addEvent(ev) {
     set(s => {
-      const withoutExisting = s.events.filter(existing => existing.id !== ev.id)
-      const events = [ev, ...withoutExisting].slice(0, 300)
+      const eid = String(ev.id)
+      const withoutExisting = s.events.filter(existing => String(existing.id) !== eid)
+      const status =
+        ev.status != null && ev.status !== ''
+          ? ev.status
+          : ev.type === 'approval'
+            ? 'pending'
+            : 'done'
+      const normalized = { ...ev, status }
+      const events = [normalized, ...withoutExisting].slice(0, 300)
       const pendingCount = events.filter(e => e.type === 'approval' && e.status === 'pending').length
       return { events, pendingCount }
     })
   },
 
   resolveApproval(id, resolution) {
+    const sid = String(id)
     set(s => ({
       events: s.events.map(e =>
-        e.id === id ? { ...e, status: resolution } : e
+        String(e.id) === sid ? { ...e, status: resolution } : e
       ),
       pendingCount: s.events.filter(
-        e => e.type === 'approval' && e.status === 'pending' && e.id !== id
+        e => e.type === 'approval' && e.status === 'pending' && String(e.id) !== sid
       ).length,
     }))
   },
@@ -84,13 +93,79 @@ export const useHardwareStore = create((set) => ({
   },
 }))
 
+function _newChatMsgId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return `m-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
 /* ── Chat store ── */
 export const useChatStore = create((set) => ({
   messages: [
-    { role: 'ai', text: 'Command center online. Main orchestrator connected. Guru settings available in the Guru tab.' }
+    {
+      id: 'welcome',
+      role: 'ai',
+      text: 'Command center online. Main orchestrator connected. Guru settings available in the Guru tab.',
+    },
   ],
+  /** Set by sidebar / window.sendPrompt; ChatPanel consumes and runs stream when idle. */
+  pendingOutboundChat: null,
+  requestChatSubmit(text) {
+    const t = (text || '').trim()
+    if (!t) return
+    set({ pendingOutboundChat: t })
+  },
+  clearPendingOutboundChat() {
+    set({ pendingOutboundChat: null })
+  },
   addMessage(msg) {
-    set(s => ({ messages: [...s.messages, msg] }))
+    const id = msg.id || _newChatMsgId()
+    set(s => ({ messages: [...s.messages, { ...msg, id }] }))
+  },
+  appendAssistantDelta(delta) {
+    set(s => {
+      const m = [...s.messages]
+      for (let i = m.length - 1; i >= 0; i--) {
+        if (m[i].role === 'ai' && m[i].streaming) {
+          m[i] = { ...m[i], text: (m[i].text || '') + delta }
+          return { messages: m }
+        }
+      }
+      return {
+        messages: [
+          ...m,
+          {
+            id: _newChatMsgId(),
+            role: 'ai',
+            text: delta,
+            streaming: true,
+            response_time_ms: null,
+          },
+        ],
+      }
+    })
+  },
+  setAssistantStreamFinal({ text, response_time_ms }) {
+    set(s => {
+      const m = [...s.messages]
+      for (let i = m.length - 1; i >= 0; i--) {
+        if (m[i].role === 'ai' && m[i].streaming) {
+          m[i] = { ...m[i], role: 'ai', text, streaming: false, response_time_ms }
+          return { messages: m }
+        }
+      }
+      return {
+        messages: [
+          ...m,
+          {
+            id: _newChatMsgId(),
+            role: 'ai',
+            text,
+            streaming: false,
+            response_time_ms,
+          },
+        ],
+      }
+    })
   },
 }))
 

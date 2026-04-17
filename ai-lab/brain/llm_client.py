@@ -10,6 +10,7 @@ import os
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from typing import Any
 from urllib.parse import urlparse
 
@@ -178,6 +179,83 @@ def _try_lm_studio_native(
     return " ".join(parts).strip() or None
 
 
+def _openai_chat_completion_stream(
+    base_url: str,
+    model_eff: str,
+    messages: list[dict],
+    timeout_sec: float,
+    on_delta: Callable[[str], None],
+    alt_model_ids: list[str],
+) -> str | None:
+    """POST /v1/chat/completions with stream=true; emit token deltas. Returns full text or None."""
+    import http.client
+
+    url_path = base_url.rstrip("/") + "/chat/completions"
+    u = urlparse(url_path)
+    if not u.hostname:
+        return None
+    port = u.port or (443 if u.scheme == "https" else 80)
+    path = u.path or "/"
+    if u.query:
+        path = f"{path}?{u.query}"
+
+    to_try = [model_eff] + [m for m in alt_model_ids if m != model_eff]
+
+    for mid in to_try:
+        body = json.dumps(
+            {
+                "model": mid,
+                "messages": messages,
+                "stream": True,
+                "max_tokens": _max_output_cap(),
+                "temperature": 0.3,
+            }
+        ).encode("utf-8")
+        headers = {"Content-Type": "application/json", "Accept": "text/event-stream"}
+        try:
+            if u.scheme == "https":
+                conn = http.client.HTTPSConnection(u.hostname, port, timeout=timeout_sec)
+            else:
+                conn = http.client.HTTPConnection(u.hostname, port, timeout=timeout_sec)
+            conn.request("POST", path, body=body, headers=headers)
+            resp = conn.getresponse()
+            if resp.status != 200:
+                conn.close()
+                continue
+            local: list[str] = []
+            while True:
+                raw = resp.readline()
+                if not raw:
+                    break
+                line = raw.decode("utf-8", errors="replace").strip()
+                if not line:
+                    continue
+                if line == "data: [DONE]":
+                    break
+                if not line.startswith("data:"):
+                    continue
+                payload = line[5:].strip()
+                try:
+                    obj = json.loads(payload)
+                except json.JSONDecodeError:
+                    continue
+                choices = obj.get("choices")
+                if not isinstance(choices, list) or not choices:
+                    continue
+                delta = (choices[0] or {}).get("delta") if isinstance(choices[0], dict) else None
+                piece = (delta or {}).get("content") if isinstance(delta, dict) else None
+                if piece:
+                    local.append(piece)
+                    on_delta(piece)
+            conn.close()
+            text = "".join(local).strip()
+            if text:
+                return text
+        except (OSError, json.JSONDecodeError, Exception):
+            continue
+    return None
+
+
 def _parse_reply(out: dict) -> str | None:
     choices = out.get("choices") if isinstance(out, dict) else None
     if not choices or not isinstance(choices, list):
@@ -201,19 +279,30 @@ def chat_completion(
     model: str,
     messages: list[dict],
     timeout_sec: float = 60.0,
+    stream_delta: Callable[[str], None] | None = None,
 ) -> str | None:
     """
     POST to base_url/chat/completions (OpenAI-compatible). Returns assistant text or None on failure.
     base_url should be the OpenAI-compatible root, e.g. http://100.71.161.10:1234/v1 (no trailing slash).
     messages: list of {"role": "system"|"user"|"assistant", "content": "..."}.
+    If stream_delta is set, uses OpenAI streaming when supported; may fall back to one-shot native API
+    (single delta with full text).
     """
     if not base_url or not base_url.strip():
         return None
     ids = list_openai_model_ids(base_url, timeout_sec=min(5.0, timeout_sec))
     model_eff, _ = resolve_model_from_list(ids, model)
+    if stream_delta:
+        streamed = _openai_chat_completion_stream(
+            base_url, model_eff, messages, timeout_sec, stream_delta, ids
+        )
+        if streamed is not None:
+            return streamed
     # Try LM Studio native API first (POST /api/v1/chat) — matches your working curl
     reply = _try_lm_studio_native(base_url, model_eff, messages, timeout_sec)
     if reply:
+        if stream_delta:
+            stream_delta(reply)
         return reply
     # Fallback: OpenAI-compatible POST /v1/chat/completions
     url = base_url.rstrip("/") + "/chat/completions"
@@ -236,6 +325,8 @@ def chat_completion(
             out = json.loads(resp.read().decode("utf-8"))
         reply = _parse_reply(out)
         if reply:
+            if stream_delta:
+                stream_delta(reply)
             return reply
     except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
         pass
@@ -251,6 +342,8 @@ def chat_completion(
                 out = json.loads(resp.read().decode("utf-8"))
             got = _parse_reply(out)
             if got:
+                if stream_delta:
+                    stream_delta(got)
                 return got
         except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
             pass

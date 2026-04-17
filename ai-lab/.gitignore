@@ -4,6 +4,9 @@
 .secrets/
 secrets/
 *.key
+token.calendar.json
+**/token.calendar.json
+config/personal_ops.yaml
 
 # Gmail OAuth (email_sorter/gmail_portable; use GOOGLE_CREDENTIALS_FILE / GOOGLE_TOKEN_FILE or local files — never commit)
 email_sorter/gmail_portable/credentials.json
@@ -29,6 +32,9 @@ rag_ingest/*.bin
 venv/
 .venv/
 env/
+
+# Local worker SSH/tunnel target (office IP or Tailscale hostname)
+scripts/worker_tunnel.local.json
 
 # IDE
 .idea/

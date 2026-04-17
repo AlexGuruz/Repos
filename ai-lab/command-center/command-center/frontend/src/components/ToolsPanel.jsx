@@ -16,12 +16,28 @@ const DM_FILL = { 'op-read': '#185fa5', 'op-rag': '#0f6e56', 'op-write': '#b4530
 export default function ToolsPanel() {
   const [toolCalls, setToolCalls] = useState([])
   const [dataMovement, setDataMovement] = useState([])
+  const [registryMeta, setRegistryMeta] = useState({
+    registeredTools: [],
+    workerReadOps: [],
+    controlledOps: [],
+    registryPath: '',
+    registryCount: 0,
+    note: '',
+  })
 
   const fetchTools = useCallback(() => {
     api.toolsStats()
       .then(res => {
         setToolCalls(res.toolCalls || [])
         setDataMovement(res.dataMovement || [])
+        setRegistryMeta({
+          registeredTools: res.registeredTools || [],
+          workerReadOps: res.workerReadOps || [],
+          controlledOps: res.controlledOps || [],
+          registryPath: res.registryPath || '',
+          registryCount: res.registryCount ?? 0,
+          note: res.note || '',
+        })
       })
       .catch(() => {})
   }, [])
@@ -38,7 +54,40 @@ export default function ToolsPanel() {
 
   return (
     <div className="flex-1 overflow-y-auto p-4">
-      <p className="text-[10px] text-white/35 mb-4">Tool usage from API. Refreshes every {TOOLS_POLL_MS / 1000}s when instrumentation is available.</p>
+      <p className="text-[10px] text-white/35 mb-2">Tool usage from API. Refreshes every {TOOLS_POLL_MS / 1000}s.</p>
+      {registryMeta.note ? (
+        <p className="text-[10px] text-amber-200/40 mb-3 leading-relaxed">{registryMeta.note}</p>
+      ) : null}
+      <div className="text-[10px] text-white/30 font-mono mb-4 break-all">
+        registry: {registryMeta.registryCount} tools
+        {registryMeta.registryPath ? ` · ${registryMeta.registryPath}` : ''}
+      </div>
+      {registryMeta.registeredTools.length > 0 ? (
+        <details className="mb-4 group">
+          <summary className="text-[11px] text-white/45 cursor-pointer select-none mb-2">Registered tool names ({registryMeta.registeredTools.length})</summary>
+          <ul className="text-[10px] font-mono text-white/40 space-y-0.5 max-h-32 overflow-y-auto pl-3 mb-2">
+            {registryMeta.registeredTools.map(t => (
+              <li key={t.tool_name}>{t.tool_name}{t.repo ? ` · ${t.repo}` : ''}</li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+      {(registryMeta.workerReadOps.length > 0 || registryMeta.controlledOps.length > 0) ? (
+        <div className="grid gap-2 mb-4 sm:grid-cols-2">
+          <details>
+            <summary className="text-[11px] text-white/45 cursor-pointer">Worker read ops ({registryMeta.workerReadOps.length})</summary>
+            <pre className="text-[9px] font-mono text-white/35 mt-1 max-h-28 overflow-y-auto whitespace-pre-wrap break-words">
+              {registryMeta.workerReadOps.join('\n')}
+            </pre>
+          </details>
+          <details>
+            <summary className="text-[11px] text-white/45 cursor-pointer">Controlled ops ({registryMeta.controlledOps.length})</summary>
+            <pre className="text-[9px] font-mono text-white/35 mt-1 max-h-28 overflow-y-auto whitespace-pre-wrap break-words">
+              {registryMeta.controlledOps.join('\n')}
+            </pre>
+          </details>
+        </div>
+      ) : null}
       {/* Legend */}
       <div className="flex gap-4 mb-4">
         {AGENTS.map(a => (

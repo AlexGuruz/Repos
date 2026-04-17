@@ -62,7 +62,8 @@ try {
 $backendDir = Join-Path $Root "backend"
 $frontendDir = Join-Path $Root "frontend"
 Write-Host "  [4/4] Starting backend and frontend..." -ForegroundColor Gray
-$backendCmd = "`$env:PYTHONPATH = '$AI_LAB_ROOT'; Set-Location '$backendDir'; & '$venvPython' -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+# Bind loopback only so port 8000 is not shared with stray 0.0.0.0 listeners from other uvicorn runs.
+$backendCmd = "`$env:PYTHONPATH = '$AI_LAB_ROOT'; Set-Location '$backendDir'; & '$venvPython' -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -PassThru | Out-Null
 Start-Sleep -Seconds 1
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$frontendDir'; npm run dev" -PassThru | Out-Null

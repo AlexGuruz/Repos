@@ -3,6 +3,8 @@ Router: classify intent and select agent/tool. Keyword-based with relaxed phrasi
 """
 from __future__ import annotations
 
+import re
+
 
 def classify_intent(message: str) -> tuple[str, dict]:
     """
@@ -26,7 +28,16 @@ def classify_intent(message: str) -> tuple[str, dict]:
             q = msg.split(" for ", 1)[-1].strip()
             return "repo_search", {"query": q or None}
         return "repo_search", {"query": None}
-    if "approve" in msg or "deny" in msg:
+    # Explain a queued approval (sidebar: "Tell me about approval-2 …")
+    if re.search(r"tell me about|what is|explain|describe|summary of", msg):
+        m = re.search(r"\b(approval[-_][\w-]+|apr[-_]?\d+)\b", msg, re.I)
+        if m:
+            ref = m.group(1).replace("_", "-").lower()
+            if ref.startswith("apr-") and not ref.startswith("approval-"):
+                ref = "approval-" + ref.split("-", 1)[-1]
+            return "approval_explain", {"ref": ref}
+    # Standalone approve/deny as words — NOT substring of "approval" (fixed false match on "approval-2")
+    if re.search(r"\bapprove\b", msg) or re.search(r"\bdeny\b", msg):
         return "approval", {}
     if "run" in msg and "script" in msg:
         return "run", {}

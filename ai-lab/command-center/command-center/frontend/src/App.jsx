@@ -23,15 +23,15 @@ export default function App() {
   const tab = useUiStore(s => s.tab)
   const setTab = useUiStore(s => s.setTab)
   const setSelectedMode = useGuruStore(s => s.setSelectedMode)
-  const addMessage = useChatStore(s => s.addMessage)
+  const requestChatSubmit = useChatStore(s => s.requestChatSubmit)
 
   // Connect WebSocket — populates all stores
   useWebSocket()
 
-  // Global sendPrompt so sub-components can inject chat messages
+  // Global sendPrompt so sub-components can inject chat messages (runs orchestrator stream via ChatPanel)
   window.sendPrompt = (text) => {
     setTab('chat')
-    addMessage({ role: 'user', text })
+    requestChatSubmit(text)
   }
 
   window.openGuruMode = (mode) => {
@@ -44,7 +44,7 @@ export default function App() {
       ? `Tell me about ${ev.id}: ${ev.action} — ${ev.detail}`
       : `What happened in ${ev.id}?`
     setTab('chat')
-    addMessage({ role: 'user', text })
+    requestChatSubmit(text)
   }
 
   return (

@@ -3,8 +3,12 @@
 
 growflow:
   # API base URL (adjust for GrowFlow production/sandbox)
-  base_url: https://api.growflow.com
+  base_url: https://api.growflow.app
+  # Optional: IANA timezone for "today" in sales scripts (e.g. America/Chicago). Override with GROWFLOW_SALES_TZ.
+  # sales_timezone: America/Chicago
   api_key: YOUR_API_KEY
+  # If DNS fails (e.g. Cursor sandbox) but you know the API IPv4 from nslookup on VPN:
+  # set env GROWFLOW_CONNECT_IP to that address; TLS still uses the hostname from the URL.
 
 # Google Sheets (if syncing to expense sheets)
 google:

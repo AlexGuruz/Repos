@@ -7,4 +7,4 @@ $venvPython = Join-Path $Root ".venv\Scripts\python.exe"
 $backendDir = Join-Path $Root "backend"
 $env:PYTHONPATH = $AI_LAB_ROOT
 Set-Location $backendDir
-& $venvPython -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+& $venvPython -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload

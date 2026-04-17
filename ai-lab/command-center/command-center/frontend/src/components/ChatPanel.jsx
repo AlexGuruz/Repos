@@ -1,20 +1,92 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useChatStore, useEventStore, useGuruStore, useRepoStore, useUiStore } from '../store'
 import { StatusBadge } from './Primitives'
 import { api } from '../lib/api'
 
+/** Mirrors brain.permanent_allowlist.NEVER_PERMANENT_ACTIONS for button state. */
+const NEVER_PERMANENT_ACTIONS = new Set(['restart_service', 'modify_registry'])
+
+const PAYLOAD_MATCH_KEYS = [
+  'repo_id',
+  'repo_path',
+  'file_path',
+  'path',
+  'target',
+  'script_path',
+  'tool_name',
+  'action_type',
+  'reason',
+]
+
+function buildPermanentMatchFromApprovalEvent(ev) {
+  const m = {}
+  if (ev.payload && typeof ev.payload === 'object') {
+    for (const k of PAYLOAD_MATCH_KEYS) {
+      const v = ev.payload[k]
+      if (v != null && String(v).trim()) {
+        m[k] = typeof v === 'string' ? v : String(v)
+      }
+    }
+  }
+  if (ev.file_path && !m.file_path) {
+    m.file_path = String(ev.file_path).trim()
+  }
+  if (Object.keys(m).length === 0 && ev.detail) {
+    const d = String(ev.detail).trim().slice(0, 240)
+    if (d) m.detail = d
+  }
+  return m
+}
+
 function ApprovalCard({ ev }) {
+  const [busy, setBusy] = useState(false)
+  const [permBusy, setPermBusy] = useState(false)
   const resolve = useEventStore(s => s.resolveApproval)
   const addMsg  = useChatStore(s => s.addMessage)
   const isPending = ev.status === 'pending'
+  const permMatch = buildPermanentMatchFromApprovalEvent(ev)
+  const canPermanent =
+    isPending &&
+    !NEVER_PERMANENT_ACTIONS.has(ev.action) &&
+    Object.keys(permMatch).length > 0
+
+  async function handleAddPermanent() {
+    if (!canPermanent || permBusy) return
+    setPermBusy(true)
+    try {
+      const body =
+        String(ev.id).startsWith('approval-')
+          ? { approval_id: ev.id, note: `from ${ev.id}` }
+          : {
+              action: ev.action,
+              match: permMatch,
+              source_approval_id: ev.id,
+              note: `from ${ev.id}`,
+            }
+      const res = await api.addPermanentApproval(body)
+      const rid = res?.rule?.id || 'rule'
+      addMsg({
+        role: 'ai',
+        text: `Saved permanent approval rule **${rid}** for action \`${ev.action}\`. Similar requests will auto-approve when the payload matches.`,
+      })
+    } catch (e) {
+      addMsg({ role: 'ai', text: `Could not save permanent rule: ${e.message}` })
+    } finally {
+      setPermBusy(false)
+    }
+  }
 
   async function handleResolve(resolution) {
+    if (busy) return
+    setBusy(true)
     try {
       await api.resolveApproval(ev.id, resolution)
       resolve(ev.id, resolution)
       addMsg({ role: 'ai', text: `${ev.id} ${resolution}. ${resolution === 'approved' ? 'Queued via run_approved wrapper.' : 'No state changed.'}` })
     } catch (e) {
       addMsg({ role: 'ai', text: `Error resolving ${ev.id}: ${e.message}` })
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -43,16 +115,36 @@ function ApprovalCard({ ev }) {
         </pre>
       ) : null}
       {isPending ? (
-        <div className="flex gap-2">
-          <button onClick={() => handleResolve('approved')}
-            className="px-3 py-1 text-[11px] rounded transition-colors"
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => handleResolve('approved')} disabled={busy || permBusy}
+            className="px-3 py-1 text-[11px] rounded transition-colors disabled:opacity-40"
             style={{ background: 'rgba(34,197,94,0.1)', border: '0.5px solid rgba(34,197,94,0.3)', color: '#86efac' }}>
-            Approve
+            {busy ? '…' : 'Approve'}
           </button>
-          <button onClick={() => handleResolve('denied')}
-            className="px-3 py-1 text-[11px] rounded transition-colors"
+          <button type="button" onClick={() => handleResolve('denied')} disabled={busy || permBusy}
+            className="px-3 py-1 text-[11px] rounded transition-colors disabled:opacity-40"
             style={{ background: 'rgba(239,68,68,0.08)', border: '0.5px solid rgba(239,68,68,0.25)', color: '#fca5a5' }}>
             Deny
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleAddPermanent()}
+            disabled={!canPermanent || busy || permBusy}
+            title={
+              !canPermanent
+                ? NEVER_PERMANENT_ACTIONS.has(ev.action)
+                  ? 'This action cannot be permanently allowlisted.'
+                  : 'Add file_path / target fields so the rule can be scoped safely.'
+                : 'Future matching requests skip the approval card'
+            }
+            className="px-3 py-1 text-[11px] rounded transition-colors disabled:opacity-40"
+            style={{
+              background: 'rgba(59,130,246,0.1)',
+              border: '0.5px solid rgba(59,130,246,0.35)',
+              color: '#93c5fd',
+            }}
+          >
+            {permBusy ? '…' : 'Always allow (similar)'}
           </button>
         </div>
       ) : (
@@ -104,6 +196,9 @@ function Message({ msg }) {
           }}
         />
         {!isUser && responseTime}
+        {!isUser && msg.streaming ? (
+          <span className="cursor-blink text-white/35 text-[12px] ml-0.5 align-middle" aria-hidden />
+        ) : null}
       </div>
     </div>
   )
@@ -113,6 +208,9 @@ export default function ChatPanel() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const { messages, addMessage } = useChatStore()
+  const pendingOutbound = useChatStore(s => s.pendingOutboundChat)
+  const clearPendingOutbound = useChatStore(s => s.clearPendingOutboundChat)
+  const streamingNow = messages.length > 0 && messages[messages.length - 1].streaming === true
   const { events } = useEventStore()
   const setTab = useUiStore(s => s.setTab)
   const setSelectedMode = useGuruStore(s => s.setSelectedMode)
@@ -121,6 +219,60 @@ export default function ChatPanel() {
   const bottomRef = useRef(null)
   /** Ignore stale chat responses if a newer send started (tabs stay mounted; user can send again quickly). */
   const chatRequestGenRef = useRef(0)
+
+  const streamChatFromUser = useCallback(async (text) => {
+    const prior = useChatStore.getState().messages
+    const history = prior.slice(-10).map(m => ({
+      role: m.role === 'ai' ? 'assistant' : m.role,
+      content: m.text ?? '',
+    }))
+    addMessage({ role: 'user', text })
+    addMessage({ role: 'ai', text: '', streaming: true, response_time_ms: null })
+    const gen = ++chatRequestGenRef.current
+    setLoading(true)
+    try {
+      await api.chatStream(text, history, {
+        onDelta: d => {
+          if (gen !== chatRequestGenRef.current) return
+          useChatStore.getState().appendAssistantDelta(d)
+        },
+        onDone: j => {
+          if (gen !== chatRequestGenRef.current) return
+          const st = useChatStore.getState()
+          if (j.error) {
+            st.setAssistantStreamFinal({
+              text: `Error: ${j.error}`,
+              response_time_ms: j.response_time_ms ?? null,
+            })
+          } else {
+            st.setAssistantStreamFinal({
+              text: j.text ?? '',
+              response_time_ms: j.response_time_ms,
+            })
+          }
+          const lower = text.toLowerCase()
+          if ((lower.includes('scan') && lower.includes('repo')) || (lower.includes('summarize') && lower.includes('repo'))) {
+            api.repoSummaries().then(r => setSummaries(r.summaries || [])).catch(() => {})
+          }
+        },
+        onError: msg => {
+          if (gen !== chatRequestGenRef.current) return
+          useChatStore.getState().setAssistantStreamFinal({ text: `Error: ${msg}`, response_time_ms: null })
+        },
+      })
+    } catch (e) {
+      if (gen !== chatRequestGenRef.current) return
+      useChatStore.getState().setAssistantStreamFinal({ text: `Error: ${e.message}`, response_time_ms: null })
+    } finally {
+      if (gen === chatRequestGenRef.current) setLoading(false)
+    }
+  }, [addMessage, setSummaries])
+
+  useEffect(() => {
+    if (!pendingOutbound || loading) return
+    clearPendingOutbound()
+    void streamChatFromUser(pendingOutbound)
+  }, [pendingOutbound, loading, clearPendingOutbound, streamChatFromUser])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -177,23 +329,7 @@ export default function ChatPanel() {
       return
     }
 
-    addMessage({ role: 'user', text })
-    const gen = ++chatRequestGenRef.current
-    setLoading(true)
-    try {
-      const res = await api.chat(text, messages.slice(-10).map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.text })))
-      if (gen !== chatRequestGenRef.current) return
-      addMessage({ role: 'ai', text: res.text, response_time_ms: res.response_time_ms })
-      const lower = text.toLowerCase()
-      if ((lower.includes('scan') && lower.includes('repo')) || (lower.includes('summarize') && lower.includes('repo'))) {
-        api.repoSummaries().then(r => setSummaries(r.summaries || [])).catch(() => {})
-      }
-    } catch (e) {
-      if (gen !== chatRequestGenRef.current) return
-      addMessage({ role: 'ai', text: `Error: ${e.message}` })
-    } finally {
-      if (gen === chatRequestGenRef.current) setLoading(false)
-    }
+    await streamChatFromUser(text)
   }
 
   // Inject approval cards for pending approvals
@@ -202,11 +338,11 @@ export default function ChatPanel() {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3">
-        {messages.map((msg, i) => <Message key={i} msg={msg} />)}
+        {messages.map((msg, i) => <Message key={msg.id || `i-${i}`} msg={msg} />)}
         {pendingApprovals.slice(0, 2).map(ev => (
           ev.status === 'pending' && <ApprovalCard key={ev.id} ev={ev} />
         ))}
-        {loading && (
+        {loading && !streamingNow && (
           <div className="flex gap-2 items-start">
             <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono bg-white/8 text-white/40 border border-white/10 flex-shrink-0">AI</div>
             <div className="px-3 py-2 text-[12px] rounded-xl border border-white/6 bg-white/4 text-white/40">

@@ -9,7 +9,8 @@ Write-Host ("=" * 59) -ForegroundColor Cyan
 Write-Host ""
 
 $scriptPath = Join-Path $PSScriptRoot "Church\Tools\youtube_to_mp4.py"
-$downloadsPath = Join-Path $PSScriptRoot "Church\Youtube"
+$day = Get-Date -Format "yyyy-MM-dd"
+$downloadsPath = Join-Path $PSScriptRoot "Church\Youtube\$day"
 
 # Check if Python is available
 $pythonCmd = $null
@@ -57,7 +58,7 @@ Write-Host ""
 # Run the Python script
 Write-Host "Starting download..." -ForegroundColor Cyan
 Write-Host ""
-& $pythonCmd $scriptPath
+& $pythonCmd $scriptPath @args
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host ""

@@ -1,7 +1,9 @@
-import yt_dlp
 import sys
+from datetime import date
 from pathlib import Path
 import tempfile
+
+import yt_dlp
 
 def download_youtube_video(url, output_dir=None, quality='720p'):
     """
@@ -52,34 +54,38 @@ def download_youtube_video(url, output_dir=None, quality='720p'):
         traceback.print_exc()
         return None
 
+
 if __name__ == '__main__':
-    urls = [
-        'https://www.youtube.com/watch?v=NoM0AT8fBvs',
-        'https://www.youtube.com/watch?v=skAdCyew2B8'
-    ]
-    
-    # Save to Church/Youtube folder (sibling of Tools)
-    script_dir = Path(__file__).parent  # Church/Tools
-    output_dir = script_dir.parent / 'Youtube'  # Church/Youtube
-    
+    urls = [u for u in sys.argv[1:] if u.strip()]
+    if not urls:
+        print('Usage: python youtube_to_mp4.py <youtube-url> [more-urls...]', file=sys.stderr)
+        sys.exit(1)
+
+    script_dir = Path(__file__).resolve().parent
+    day = date.today().isoformat()
+    output_dir = script_dir.parent / 'Youtube' / day
+
     print('=' * 60)
     print('YouTube to MP4 Converter - 720p')
+    print(f'Date folder: {day}')
     print('=' * 60)
-    
-    downloaded_files = []
+
+    failed = False
     for i, url in enumerate(urls, 1):
         print(f'\n[{i}/{len(urls)}] Processing video...')
         result = download_youtube_video(url, output_dir)
-        if result:
-            downloaded_files.append(result)
-    
+        if not result:
+            failed = True
+
     print('\n' + '=' * 60)
+    if failed:
+        print('Completed with errors.')
+        sys.exit(1)
     print('All downloads completed!')
     print(f'Files saved to: {output_dir}')
-    
-    # List downloaded files
+
     if output_dir.exists():
-        mp4_files = list(output_dir.glob('*.mp4'))
+        mp4_files = sorted(output_dir.glob('*.mp4'))
         if mp4_files:
             print(f'\nDownloaded {len(mp4_files)} file(s):')
             for f in mp4_files:
@@ -89,5 +95,5 @@ if __name__ == '__main__':
             print('\nNo MP4 files found in output directory.')
     else:
         print(f'\nOutput directory does not exist: {output_dir}')
-    
+
     print('=' * 60)

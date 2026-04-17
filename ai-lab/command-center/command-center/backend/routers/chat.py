@@ -3,11 +3,15 @@ chat.py — routes the command center chat through the real ai-lab
 orchestrator rather than the local command-center stub bridge.
 """
 import asyncio
+import json
 import os
+import queue as sync_queue
+import threading
 import time
 from datetime import datetime
 
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from core.ai_lab import ensure_ai_lab_root_on_path
@@ -36,20 +40,68 @@ class ChatResponse(BaseModel):
     response_time_ms: int | None = None
 
 
+def _apply_chat_env():
+    gov = (settings.ai_lab_governance_root or "").strip()
+    if gov:
+        os.environ["AI_LAB_GOVERNANCE_ROOT"] = gov
+    os.environ["LLM_MAX_OUTPUT_TOKENS"] = str(settings.llm_max_output_tokens)
+
+
+async def _publish_chat_side_effects(
+    reply: str,
+    approval_request: dict,
+    duration_ms: int,
+    *,
+    publish_ws_chat: bool = True,
+):
+    apr_id = approval_request.get("id")
+    if publish_ws_chat:
+        await bus.publish(
+            "chat",
+            {
+                "role": "ai",
+                "text": reply,
+                "timestamp": datetime.utcnow().isoformat(),
+                "response_time_ms": duration_ms,
+            },
+        )
+    if apr_id:
+        pub = {
+            "id": apr_id,
+            "type": "approval",
+            "agent": approval_request.get("agent", "orchestrator"),
+            "action": approval_request.get("action_type", "approval"),
+            "detail": approval_request.get("reason", ""),
+            "status": "pending",
+            "timestamp": approval_request.get("created_at", datetime.utcnow().isoformat()),
+        }
+        cc = approval_request.get("catalog_context")
+        if cc:
+            pub["catalog_context"] = cc
+        fp = approval_request.get("file_path")
+        if fp:
+            pub["file_path"] = fp
+        pl = approval_request.get("payload")
+        if isinstance(pl, dict) and pl:
+            pub["payload"] = pl
+        await bus.publish("approval", pub)
+
+
 @router.post("/api/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     log_api("chat", "request", message=req.message, history_size=len(req.history))
-    await bus.publish("feed", {
-        "agent": "user", "op": "sys",
-        "detail": req.message[:80],
-        "timestamp": datetime.utcnow().isoformat(),
-    })
+    await bus.publish(
+        "feed",
+        {
+            "agent": "user",
+            "op": "sys",
+            "detail": req.message[:80],
+            "timestamp": datetime.utcnow().isoformat(),
+        },
+    )
     t0 = time.perf_counter()
     try:
-        gov = (settings.ai_lab_governance_root or "").strip()
-        if gov:
-            os.environ["AI_LAB_GOVERNANCE_ROOT"] = gov
-        os.environ["LLM_MAX_OUTPUT_TOKENS"] = str(settings.llm_max_output_tokens)
+        _apply_chat_env()
         result = await asyncio.to_thread(
             orchestrator_run,
             req.message,
@@ -69,27 +121,7 @@ async def chat(req: ChatRequest):
     if reply.startswith("[Orchestrator] Intent:"):
         log_api("chat", "llm_fallback", message=req.message, reason="orchestrator_fallback", duration_ms=duration_ms)
 
-    await bus.publish("chat", {
-        "role": "ai",
-        "text": reply,
-        "timestamp": datetime.utcnow().isoformat(),
-        "response_time_ms": duration_ms,
-    })
-
-    if apr_id:
-        pub = {
-            "id": apr_id,
-            "type": "approval",
-            "agent": approval_request.get("agent", "orchestrator"),
-            "action": approval_request.get("action_type", "approval"),
-            "detail": approval_request.get("reason", ""),
-            "status": "pending",
-            "timestamp": approval_request.get("created_at", datetime.utcnow().isoformat()),
-        }
-        cc = approval_request.get("catalog_context")
-        if cc:
-            pub["catalog_context"] = cc
-        await bus.publish("approval", pub)
+    await _publish_chat_side_effects(reply, approval_request, duration_ms, publish_ws_chat=True)
 
     log_api(
         "chat",
@@ -103,4 +135,107 @@ async def chat(req: ChatRequest):
         text=reply,
         apr_id=apr_id,
         response_time_ms=duration_ms,
+    )
+
+
+@router.post("/api/chat/stream")
+async def chat_stream(req: ChatRequest):
+    """SSE stream of LLM token deltas + final JSON (avoids duplicate WS chat when UI reads stream)."""
+    log_api("chat", "stream_request", message=req.message, history_size=len(req.history))
+    await bus.publish(
+        "feed",
+        {
+            "agent": "user",
+            "op": "sys",
+            "detail": req.message[:80],
+            "timestamp": datetime.utcnow().isoformat(),
+        },
+    )
+
+    async def event_gen():
+        sq: sync_queue.Queue = sync_queue.Queue()
+        result_h: dict = {}
+        err_h: dict = {}
+
+        def push_delta(t: str) -> None:
+            if t:
+                sq.put(("d", t))
+
+        def worker() -> None:
+            try:
+                _apply_chat_env()
+                result_h["r"] = orchestrator_run(
+                    req.message,
+                    llm_base_url=settings.llm_base_url,
+                    llm_model=settings.llm_model,
+                    session_id=req.session_id,
+                    stream_delta=push_delta,
+                )
+            except Exception as e:
+                err_h["e"] = str(e)
+            finally:
+                sq.put(("x", None))
+
+        t0 = time.perf_counter()
+        th = threading.Thread(target=worker, daemon=True)
+        th.start()
+
+        def _pull():
+            try:
+                return sq.get(timeout=0.35)
+            except sync_queue.Empty:
+                return None
+
+        # Keep the connection warm during long LLM/tool work (proxies idle-timeout, UI liveness).
+        last_hb = time.monotonic()
+        hb_interval_sec = 12.0
+
+        try:
+            while th.is_alive() or not sq.empty():
+                item = await asyncio.to_thread(_pull)
+                if item is None:
+                    if th.is_alive() and (time.monotonic() - last_hb) >= hb_interval_sec:
+                        last_hb = time.monotonic()
+                        yield f"data: {json.dumps({'hb': True})}\n\n"
+                    continue
+                kind, payload = item
+                if kind == "d":
+                    yield f"data: {json.dumps({'delta': payload})}\n\n"
+                elif kind == "x":
+                    break
+        finally:
+            th.join(timeout=300)
+
+        duration_ms = int((time.perf_counter() - t0) * 1000)
+
+        if err_h.get("e"):
+            log_error("chat", "stream_orchestrator_error", message=req.message, error=err_h["e"], duration_ms=duration_ms)
+            yield f"data: {json.dumps({'error': err_h['e'], 'done': True, 'response_time_ms': duration_ms})}\n\n"
+            return
+
+        result = result_h.get("r") or {}
+        reply = result.get("reply", "No reply.")
+        approval_request = result.get("approval_request") or {}
+        apr_id = approval_request.get("id")
+
+        await _publish_chat_side_effects(reply, approval_request, duration_ms, publish_ws_chat=False)
+
+        log_api(
+            "chat",
+            "stream_response",
+            message=req.message,
+            apr_id=apr_id,
+            reply_preview=reply[:200],
+            duration_ms=duration_ms,
+        )
+        yield f"data: {json.dumps({'done': True, 'text': reply, 'apr_id': apr_id, 'response_time_ms': duration_ms})}\n\n"
+
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )

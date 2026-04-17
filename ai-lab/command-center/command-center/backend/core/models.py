@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 from datetime import datetime
 import uuid
 
@@ -28,6 +28,8 @@ class ApprovalEvent(BaseModel):
     detail: str
     repo_class: Optional[str] = None
     catalog_context: Optional[str] = None
+    # Subset of invoke payload for permanent-rule matching and UI.
+    payload: Optional[dict[str, Any]] = None
     status: StatusType = "pending"
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 

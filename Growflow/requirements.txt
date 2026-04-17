@@ -1,6 +1,8 @@
 # Growflow dependencies
-# Add as needed:
+certifi>=2024.0.0
+tzdata>=2024.1  # Windows: IANA zones for zoneinfo (e.g. America/Chicago in config)
 # requests>=2.28.0
+# pytest>=8.0.0   # tests/test_allocate_stock_pool.py
 # gspread>=5.0.0
 # google-auth>=2.0.0
 # pyyaml>=6.0

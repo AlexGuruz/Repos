@@ -1,6 +1,9 @@
 import asyncio
+from datetime import datetime
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
+
 from core.models import ApprovalResolution
 from core.ai_lab import ensure_ai_lab_root_on_path
 from services.feed_bus import bus
@@ -10,9 +13,76 @@ ensure_ai_lab_root_on_path()
 
 from brain.approval_queue.queue import list_pending, resolve  # noqa: E402
 from brain.execution import run as execution_run  # noqa: E402
+from brain.permanent_allowlist import (  # noqa: E402
+    add_rule,
+    brain_spec_match_payload,
+    delete_rule,
+    list_rules,
+)
 from services.repo_index_coordinator import get_coordinator
 
 router = APIRouter()
+
+
+class AddPermanentRuleBody(BaseModel):
+    """action + match, or approval_id to derive from the brain queue row."""
+
+    action: str | None = None
+    match: dict = Field(default_factory=dict)
+    note: str = ""
+    source_approval_id: str | None = None
+    approval_id: str | None = None
+
+
+@router.get("/api/approvals/permanent")
+async def list_permanent_rules():
+    log_api("approvals", "permanent_list", count=len(list_rules()))
+    return {"rules": list_rules()}
+
+
+@router.post("/api/approvals/permanent")
+async def create_permanent_rule(body: AddPermanentRuleBody):
+    action = (body.action or "").strip() or None
+    match = dict(body.match or {})
+    src = (body.source_approval_id or "").strip() or None
+    if body.approval_id and not src:
+        src = body.approval_id.strip()
+    if body.approval_id:
+        aid = body.approval_id.strip()
+        pending = dict(list_pending())
+        spec = pending.get(aid)
+        if not spec:
+            raise HTTPException(status_code=404, detail=f"Approval '{aid}' not in queue.")
+        action = action or (spec.get("action_type") or spec.get("action") or "").strip()
+        base = brain_spec_match_payload(spec)
+        base.update({k: v for k, v in match.items() if v is not None and str(v).strip()})
+        match = base
+    if not action:
+        raise HTTPException(status_code=400, detail="action is required (or pass approval_id).")
+    try:
+        rule = add_rule(action, match, note=body.note or "", source_approval_id=src)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    await bus.publish(
+        "feed",
+        {
+            "agent": "supervisor",
+            "op": "sys",
+            "detail": f"Permanent approval rule {rule['id']}: {action}",
+            "bytes": None,
+            "timestamp": datetime.utcnow().isoformat(),
+        },
+    )
+    log_api("approvals", "permanent_add", rule_id=rule["id"], action=action)
+    return {"ok": True, "rule": rule}
+
+
+@router.delete("/api/approvals/permanent/{rule_id}")
+async def remove_permanent_rule(rule_id: str):
+    if not delete_rule(rule_id):
+        raise HTTPException(status_code=404, detail="Rule not found.")
+    log_api("approvals", "permanent_delete", rule_id=rule_id)
+    return {"ok": True}
 
 
 @router.websocket("/ws/events")
@@ -29,15 +99,24 @@ async def ws_events(ws: WebSocket):
 @router.post("/api/approvals/resolve")
 async def resolve_approval(body: ApprovalResolution):
     log_api("approvals", "resolve_request", approval_id=body.id, resolution=body.resolution)
+    aid = str(body.id).strip()
     pending_lookup = dict(list_pending())
-    apr = pending_lookup.get(body.id)
-    ok = await _resolve_queue(body.id, body.resolution == "approved")
+    apr = pending_lookup.get(aid)
+    ok = await _resolve_queue(aid, body.resolution == "approved")
     if not ok:
-        log_error("approvals", "resolve_missing", approval_id=body.id, resolution=body.resolution)
-        return {"ok": False, "error": f"Approval '{body.id}' not found."}
+        # Supervisor / UI-only APRs (e.g. APR-xxxxx) are not in the brain queue — still clear the sidebar.
+        if aid.upper().startswith("APR-"):
+            await bus.publish(
+                "approval_resolution",
+                {"id": aid, "resolution": body.resolution, "status": body.resolution},
+            )
+            log_api("approvals", "resolve_dismiss_ui", approval_id=aid, resolution=body.resolution)
+            return {"ok": True, "id": aid, "resolution": body.resolution, "dismissed_only": True}
+        log_error("approvals", "resolve_missing", approval_id=aid, resolution=body.resolution)
+        return {"ok": False, "error": f"Approval '{aid}' not found in queue."}
 
     resolution_data = {
-        "id": body.id,
+        "id": aid,
         "resolution": body.resolution,
         "status": body.resolution,
     }
@@ -46,24 +125,24 @@ async def resolve_approval(body: ApprovalResolution):
     # Hub coordinator approvals (Gate A/C for repo index) are resumed by coordinator,
     # not by execution.run(tool_name,...).
     if apr and str(apr.get("agent", "")) == "repo_index_coordinator":
-        await get_coordinator().handle_approval_resolution(body.id, body.resolution, apr)
-        log_api("approvals", "resolve_result", approval_id=body.id, resolution=body.resolution, executed=False, coordinator=True)
-        return {"ok": True, "id": body.id, "resolution": body.resolution}
+        await get_coordinator().handle_approval_resolution(aid, body.resolution, apr)
+        log_api("approvals", "resolve_result", approval_id=aid, resolution=body.resolution, executed=False, coordinator=True)
+        return {"ok": True, "id": aid, "resolution": body.resolution}
 
     if body.resolution == "approved" and apr:
-        result = await _execute_approved(body.id, apr)
-        log_api("approvals", "resolve_result", approval_id=body.id, resolution=body.resolution, executed=True)
+        result = await _execute_approved(aid, apr)
+        log_api("approvals", "resolve_result", approval_id=aid, resolution=body.resolution, executed=True)
         return {"ok": True, **result}
 
-    log_api("approvals", "resolve_result", approval_id=body.id, resolution=body.resolution, executed=False)
-    return {"ok": True, "id": body.id, "resolution": body.resolution}
+    log_api("approvals", "resolve_result", approval_id=aid, resolution=body.resolution, executed=False)
+    return {"ok": True, "id": aid, "resolution": body.resolution}
 
 
 @router.get("/api/approvals")
 async def list_approvals():
     approvals = []
     for apr_id, spec in list_pending():
-        approvals.append({
+        row = {
             "id": apr_id,
             "type": "approval",
             "agent": spec.get("agent", "orchestrator"),
@@ -71,7 +150,14 @@ async def list_approvals():
             "detail": spec.get("reason") or spec.get("detail") or spec.get("file_path", ""),
             "status": "pending",
             "timestamp": spec.get("created_at"),
-        })
+        }
+        if spec.get("catalog_context"):
+            row["catalog_context"] = spec["catalog_context"]
+        fp = spec.get("file_path")
+        if fp:
+            row["file_path"] = fp
+        row["payload"] = brain_spec_match_payload(spec)
+        approvals.append(row)
     log_api("approvals", "list", count=len(approvals))
     return approvals
 

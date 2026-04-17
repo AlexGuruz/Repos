@@ -11,10 +11,14 @@ class Settings(BaseSettings):
     ai_lab_machine: str = "main"
     ai_lab_enforcement: int = 1
     worker_tunnel_url: str = "http://127.0.0.1:8765"
-    # httpx timeouts (seconds) for worker tunnel calls.
-    worker_bridge_timeout_seconds: float = 30.0
+    # Fail fast when the tunnel is down (seconds).
+    worker_connect_timeout_seconds: float = 5.0
+    # httpx read timeout (seconds) for worker tunnel POST/GET (non-index ops).
+    worker_bridge_timeout_seconds: float = 45.0
     # Used for index_repo and promote_repo_index (see supervisor_bridge._WORKER_SLOW_OPS).
     worker_bridge_index_repo_timeout_seconds: float = 900.0
+    # Comma-separated op names forwarded as read-only worker tunnel calls (POST by default; see supervisor_bridge GET set).
+    worker_read_ops_extra: str = ""
     nvidia_smi_poll_interval: int = 5
     log_action_path: str = ""
     registry_path: str = ""

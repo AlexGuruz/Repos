@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -20,6 +21,7 @@ if str(_root) not in sys.path:
 from brain.router.router import classify_intent
 from brain.execution import run as execution_run, RunResult
 from brain.approval_queue.queue import submit, list_pending, resolve, ApprovalSpec
+from brain.permanent_allowlist import find_matching_rule, brain_spec_match_payload
 from brain.ssh_worker import get_worker_ssh_config, run_ssh_command
 from brain.llm_client import chat_completion
 from brain import session_state
@@ -202,6 +204,16 @@ def build_grounded_response(
     proposals = build_proposals(fused)
     answer_style = choose_answer_style(fused)
 
+    _cat = ""
+    try:
+        from brain.catalog_loader import format_catalog_grounding_for_message
+
+        _cat = format_catalog_grounding_for_message(message) or ""
+    except Exception:
+        _cat = ""
+    if _cat and answer_style == "insufficient_evidence":
+        answer_style = "direct_status"
+
     # Structured FusedContext → prompt (PDR Phase 2.75)
     def _format_evidence(items, max_items: int, max_chars_per: int) -> str:
         out: list[str] = []
@@ -236,14 +248,8 @@ def build_grounded_response(
             f"Answer style: {answer_style}"
         )
 
-    try:
-        from brain.catalog_loader import format_catalog_grounding_for_message
-
-        _cat = format_catalog_grounding_for_message(message)
-        if _cat:
-            evidence_block = _cat + "\n\n" + evidence_block
-    except Exception:
-        pass
+    if _cat:
+        evidence_block = _cat + "\n\n" + evidence_block
 
     proposals_suffix = ""
     if proposals:
@@ -279,6 +285,7 @@ def run(
     llm_base_url: str | None = None,
     llm_model: str | None = None,
     session_id: str = "default",
+    stream_delta: Callable[[str], None] | None = None,
 ) -> dict:
     """
     Process user message. Returns {"reply": str, "approval_request": dict|None}.
@@ -338,6 +345,23 @@ def run(
         if not path_str:
             default_reg = _root / "registry" / "scripts.json"
             path_str = str(default_reg if default_reg.is_file() else (_root / "README.md"))
+        perm_probe = brain_spec_match_payload(
+            {"file_path": path_str, "action_type": action_type, "reason": reason}
+        )
+        if find_matching_rule(action_type, perm_probe):
+            log_event(
+                "approval_skipped_permanent",
+                session_id=session_id,
+                action_type=action_type,
+                path=path_str,
+            )
+            return {
+                "reply": (
+                    f"A **permanent approval** rule matched for `{action_type}` on `{path_str}`. "
+                    "No approval card was created."
+                ),
+                "approval_request": None,
+            }
         spec = ApprovalSpec(
             file_path=path_str,
             action_type=action_type,
@@ -357,6 +381,12 @@ def run(
             "reason": (spec_row.get("reason") if spec_row else None) or reason,
             "created_at": (spec_row or {}).get("created_at") or datetime.now(timezone.utc).isoformat(),
             "catalog_context": catalog_ctx,
+            "file_path": path_str,
+            "payload": brain_spec_match_payload(spec_row)
+            if spec_row
+            else brain_spec_match_payload(
+                {"file_path": path_str, "action_type": action_type, "reason": reason}
+            ),
         }
         log_event("approval_enqueued", session_id=session_id, approval_id=aid, file_path=path_str)
         return {
@@ -405,6 +435,58 @@ def run(
                 session_state.update_active_topic(session_id, "tool_failure")
             reply = f"Run failed: {result.stderr or result.stdout or 'unknown'}"
         return {"reply": reply, "approval_request": None}
+
+    if intent == "approval_explain":
+        ref = (params.get("ref") or "").strip()
+        pending_map = dict(list_pending())
+        aid = ref if ref in pending_map else ref.replace("_", "-")
+        spec = pending_map.get(aid)
+        if not spec and ref.lower().startswith("apr-") and ref[4:].isdigit():
+            aid = f"approval-{ref.split('-', 1)[-1]}"
+            spec = pending_map.get(aid)
+        if not spec:
+            keys = list(pending_map.keys())
+            if keys:
+                reply = f"No pending approval **`{ref}`** in the queue. Pending now: **{keys}**."
+            else:
+                reply = f"No pending approval **`{ref}`** (queue is empty)."
+            return {"reply": reply, "approval_request": None}
+        lines = [
+            f"### {aid}",
+            "",
+        ]
+        order = (
+            "agent",
+            "action",
+            "action_type",
+            "reason",
+            "detail",
+            "gate",
+            "repo_id",
+            "file_path",
+            "risk_level",
+            "status",
+            "created_at",
+        )
+        shown = set()
+        for k in order:
+            v = spec.get(k)
+            if v is not None and str(v).strip():
+                lines.append(f"- **{k}:** {v}")
+                shown.add(k)
+        for k, v in sorted(spec.items()):
+            if k in shown or k == "catalog_context":
+                continue
+            if v is not None and str(v).strip() and not isinstance(v, (dict, list)):
+                lines.append(f"- **{k}:** {v}")
+        cc = spec.get("catalog_context")
+        if cc:
+            lines.extend(["", "**Catalog context:**", "```", str(cc)[:4000], "```"])
+        vr = spec.get("validation_reasons")
+        if isinstance(vr, list) and vr:
+            lines.extend(["", "**Validation notes:**", *[f"- {x}" for x in vr[:20]]])
+        log_event("approval_explain", session_id=session_id, approval_id=aid)
+        return {"reply": "\n".join(lines), "approval_request": None}
 
     if intent == "approval":
         pending = list_pending()
@@ -690,7 +772,7 @@ def run(
                 {"role": "system", "content": system_content},
                 {"role": "user", "content": f"Scan output:\n\n{content[:8000]}"},
             ]
-            model_reply = chat_completion(base_url, model, messages)
+            model_reply = chat_completion(base_url, model, messages, stream_delta=stream_delta)
             if model_reply:
                 session_state.update_active_topic(session_id, "repo_scan_analysis")
                 model_reply += "\n\n**Suggested next steps:**\n1. Say \"find it in repos\" to search for a specific script.\n2. Fix the issues listed above (README, tests, entrypoints).\n3. Say **do it** to run a repo search if you had a recent failure (e.g. missing GrowFlow script)."
@@ -854,6 +936,41 @@ def run(
         if time_context and ("local" in sources or "web" in sources):
             evidence_block += f"\n\n{time_context}"
 
+    # Short catalog shouts: local LLMs often refuse despite in-context catalog; answer deterministically.
+    if intent == "answer":
+        try:
+            from brain.catalog_loader import format_component_grounding, matching_components
+
+            mstrip = (msg or "").strip()
+            if mstrip and len(mstrip) <= 160 and "?" not in mstrip:
+                comps = matching_components(msg)
+                if comps:
+                    reply = "From the **lab system catalog** (authoritative):\n\n" + "\n\n".join(
+                        format_component_grounding(c) for c in comps[:4]
+                    )
+                    if routing_reason:
+                        reply += "\n\n_Used: " + (
+                            routing_reason.split(".")[0] if "." in routing_reason else routing_reason
+                        ) + "._"
+                    log_event(
+                        "turn_trace",
+                        session_id=session_id,
+                        message=msg[:200],
+                        intent=intent,
+                        answer_style=answer_style or "catalog_deterministic",
+                        routing_reason=(routing_reason[:150] if routing_reason else ""),
+                        sources_used=(routing_reason[:100] if routing_reason else ""),
+                        proposals_created=len(proposals_list),
+                        proposal_actions=[getattr(p, "action", None) for p in proposals_list[:5]]
+                        if proposals_list
+                        else [],
+                        execution_attempted=False,
+                        outcome="catalog_deterministic",
+                    )
+                    return {"reply": reply, "approval_request": None}
+        except Exception:
+            pass
+
     fallback = (
         f"[Orchestrator] Intent: {intent}. Say 'run script X', 'sales today', 'scan repo', or 'approve/deny'."
     )
@@ -885,9 +1002,26 @@ def run(
             {"role": "system", "content": system_content},
             {"role": "user", "content": user_content},
         ]
-        model_reply = chat_completion(base_url, model, messages)
+        model_reply = chat_completion(base_url, model, messages, stream_delta=stream_delta)
         if model_reply:
             reply = model_reply
+            # Local LLMs often ignore catalog grounding and still refuse; substitute facts.
+            # Use matching_components (not evidence_block text) so this works even if grounding threw
+            # and fell back to a sparse evidence_block.
+            if intent == "answer":
+                rlow = reply.lower()
+                if "insufficient" in rlow and "evidence" in rlow:
+                    try:
+                        from brain.catalog_loader import format_component_grounding, matching_components
+
+                        comps = matching_components(message)
+                        if comps:
+                            reply = "From the **lab system catalog** (authoritative):\n\n" + "\n\n".join(
+                                format_component_grounding(c) for c in comps[:4]
+                            )
+                            log_event("catalog_reply_substitution", session_id=session_id, components=[c.get("id") for c in comps[:4]])
+                    except Exception:
+                        pass
     if reply == fallback:
         try:
             from brain.catalog_loader import format_catalog_grounding_for_message

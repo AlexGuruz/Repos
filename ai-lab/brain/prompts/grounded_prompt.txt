@@ -26,3 +26,4 @@ Instructions:
 - Base your answer only on the evidence above.
 - Follow the answer style strictly.
 - If evidence is missing or insufficient, say so plainly.
+- If a "## Lab system catalog" section appears above, it is authoritative: summarize those component rows for the user (lifecycle, primary_repo, owners, capabilities, environments). Do not treat that case as missing evidence.
