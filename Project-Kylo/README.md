@@ -20,6 +20,7 @@ Maintenance-only repository for the Kylo processing system. Development is pause
 - `COMMAND_REFERENCE.md` - all operational commands
 - `MAINTENANCE.md` - handoff guide for maintainers
 - `docs/README.md` - operational documentation index
+- `docs/INCREMENTAL_POSTING.md` - incremental Sheets posting, state, and optional **BANK vs TRANSACTIONS** target-cell background tint (`posting.source_tab_fill` in `config/global.yaml`)
 
 ## Repository Structure
 

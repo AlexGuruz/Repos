@@ -36,6 +36,19 @@ python bin/sort_and_post_from_jgdtruth.py --company NUGZ --verify
 | `KYLO_POST_BASELINE`      | Treat the next run as baseline when set to `1/true`                            |
 | `KYLO_VERIFY_POST`        | Enable verification mode when set to `1/true`                                  |
 | `KYLO_STATE_PATH`         | Override the default `.kylo/state.json` location                               |
+| `KYLO_SOURCE_TAB_FILL`    | Set to `0` / `false` / `off` to disable target-cell background tint (overrides YAML) |
+
+## Source tab background fill (BANK vs TRANSACTIONS)
+
+After values are written (or verified) on the **target** financial workbook, Kylo can tint each posted **value cell** using Google Sheets `repeatCell` with **`fields: userEnteredFormat.backgroundColor`** only, so **font, size, and other formatting are not changed**.
+
+- **TRANSACTIONS-only** → `posting.source_tab_fill.transactions_rgb` (RGB floats 0–1).
+- **BANK-only** → `posting.source_tab_fill.bank_rgb`.
+- **Mixed** (e.g. both tabs, or any extra intake tab such as `CREDIT CARDS`) → `posting.source_tab_fill.mixed_rgb`.
+
+Configure under `posting.source_tab_fill` in `config/global.yaml` (see `enabled` and the three `*_rgb` lists). The posting summary and watcher log line include **`fills_applied`** (count of `repeatCell` requests).
+
+**Tests:** `python -m pytest scaffold/tests/posting/test_source_tab_fill.py -v --noconftest` (use `--noconftest` if the repo root `conftest` requires optional DB drivers).
 
 ## State File Anatomy
 

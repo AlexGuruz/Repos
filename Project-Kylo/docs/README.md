@@ -4,6 +4,7 @@ Authoritative source of truth (archived planning):
 - See `../archive/docs/planning/PDR.md` for product/design requirements, decisions, schemas, mover contract, eventing, Sheets policy, tests, and the rolling checklist.
 
 Supporting documents:
+- `docs/INCREMENTAL_POSTING.md`: Incremental JGDTruth Sheets posting, state file, verification, and optional BANK vs TRANSACTIONS target-cell background tint.
 - `docs/IMPORTER.md`: Batch-only importer spec and tests overview.
 - `docs/DRY_RUN_CHECKLIST.md`: Minimal flow to validate idempotency and approvals.
 - `../archive/docs/planning/REPLICATOR_AND_MIGRATIONS_PLAN.md`: Replicator/migrations outline (archived).

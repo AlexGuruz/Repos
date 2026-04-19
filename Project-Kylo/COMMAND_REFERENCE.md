@@ -165,6 +165,7 @@ python -m pytest -q scaffold/tests/test_csv_intake.py
 python -m pytest -q scaffold/tests/test_full_workflow_integration.py
 python -m pytest -q scaffold/tests/triage/test_triage_edge_cases.py
 python -m pytest -q scaffold/tests/mover/test_rules_snapshot.py
+python -m pytest -v scaffold/tests/posting/test_source_tab_fill.py --noconftest
 ```
 
 ### Run Tests with Verbose Output
@@ -172,6 +173,21 @@ python -m pytest -q scaffold/tests/mover/test_rules_snapshot.py
 cd D:\Project-Kylo
 python -m pytest -v scaffold/tests
 ```
+
+---
+
+## 📊 PROJECT-KYLO - JGD TRUTH POSTING (Sheets)
+
+### Sort and post (manual / same engine as watchers)
+
+```powershell
+cd E:\Repos\Project-Kylo
+$env:KYLO_CONFIG_PATH = "config\global.yaml"
+$env:KYLO_ACTIVE_YEARS = "2026"   # optional; matches year_workbooks routing
+python -m bin.sort_and_post_from_jgdtruth --company JGD
+```
+
+**Optional target-cell tint (BANK vs TRANSACTIONS):** Controlled by `posting.source_tab_fill` in `config/global.yaml` (`enabled`, `transactions_rgb`, `bank_rgb`, `mixed_rgb`). Disable without editing YAML: `$env:KYLO_SOURCE_TAB_FILL = "0"`. Details: `docs/INCREMENTAL_POSTING.md` (section *Source tab background fill*).
 
 ---
 

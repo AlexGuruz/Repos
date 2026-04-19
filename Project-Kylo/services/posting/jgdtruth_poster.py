@@ -8,7 +8,7 @@ import unicodedata
 from datetime import date, timedelta
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from services.common.config_loader import load_config
 from services.rules.jgdtruth_provider import fetch_rules_from_jgdtruth
@@ -192,31 +192,6 @@ def _find_header_col(headers: List[str], candidates: List[str]) -> Optional[int]
     return None
 
 
-def _batch_read_headers(service, spreadsheet_id: str, tabs: List[str], header_row: int) -> Dict[str, List[str]]:
-    """Read header row for multiple tabs in a single batchGet call.
-
-    Returns a mapping tab_title -> header_cells(list[str]).
-    """
-    if not tabs:
-        return {}
-    ranges = [f"{_quote_tab_a1(t)}!1:1" if header_row == 1 else f"{_quote_tab_a1(t)}!{header_row}:{header_row}" for t in tabs]
-    req = service.spreadsheets().values().batchGet(
-        spreadsheetId=spreadsheet_id,
-        ranges=ranges,
-        valueRenderOption="UNFORMATTED_VALUE",
-    )
-    resp = google_api_execute(req, label="batchGet:headers")
-    out: Dict[str, List[str]] = {}
-    value_ranges = resp.get("valueRanges", [])
-    for r in value_ranges:
-        rng = r.get("range", "")
-        # Extract tab name before '!'
-        tab_name = rng.split("!")[0].strip("'")
-        vals = r.get("values", [])
-        out[tab_name] = [str(c).strip() for c in (vals[0] if vals else [])]
-    return out
-
-
 def _normalize_text(value: str) -> str:
     if value is None:
         return ""
@@ -228,6 +203,201 @@ def _normalize_text(value: str) -> str:
     # collapse whitespace
     s = re.sub(r"\s+", " ", s).strip()
     return s
+
+
+_MISS = object()
+
+
+def _cfg_get(cfg: Any, dotted: str, default: Any = None) -> Any:
+    """Read nested config for KyloConfig (dotted keys) or plain dict trees."""
+    if cfg is None:
+        return default
+    if hasattr(cfg, "get"):
+        try:
+            v = cfg.get(dotted, _MISS)
+        except TypeError:
+            v = _MISS
+        if v is not _MISS:
+            return v
+    cur: Any = getattr(cfg, "data", None)
+    if not isinstance(cur, dict) and isinstance(cfg, dict):
+        cur = cfg
+    if not isinstance(cur, dict):
+        return default
+    for part in dotted.split("."):
+        if not isinstance(cur, dict) or part not in cur:
+            return default
+        cur = cur[part]
+    return cur
+
+
+def _norm_tab_key_for_fill(value: str) -> str:
+    """Normalize sheet title for lookup (matches posting tab resolver)."""
+    s = str(value or "")
+    try:
+        s = unicodedata.normalize("NFKC", s)
+    except Exception:
+        pass
+    s = s.replace("\u200b", "").replace("\u200c", "").replace("\xa0", " ")
+    s = re.sub(r"\s+", " ", s).strip().lower()
+    return s
+
+
+def _a1_col_letters_to_index0(col_letters: str) -> int:
+    """Convert Excel column letters to 0-based index (A -> 0, B -> 1, AA -> 26)."""
+    n = 0
+    for c in str(col_letters).upper().strip():
+        if c < "A" or c > "Z":
+            raise ValueError(f"Invalid column letters: {col_letters!r}")
+        n = n * 26 + (ord(c) - ord("A") + 1)
+    return n - 1
+
+
+def _parse_target_cell_a1(a1: str) -> Optional[Tuple[str, int, int]]:
+    """Parse a single-cell A1 range into (tab_title, row_1based, col_0based)."""
+    s = str(a1 or "").strip()
+    if "!" not in s:
+        return None
+    tab_part, cell_part = s.rsplit("!", 1)
+    tab_part = tab_part.strip()
+    if tab_part.startswith("'") and tab_part.endswith("'"):
+        tab_title = tab_part[1:-1].replace("''", "'")
+    else:
+        tab_title = tab_part
+    cell_part = cell_part.strip().split(":")[0]
+    m = re.fullmatch(r"([A-Za-z]+)(\d+)", cell_part)
+    if not m:
+        return None
+    col_l, row_s = m.group(1), m.group(2)
+    try:
+        col0 = _a1_col_letters_to_index0(col_l)
+        row1 = int(row_s)
+    except Exception:
+        return None
+    if row1 < 1:
+        return None
+    return tab_title, row1, col0
+
+
+def _rgb_triple_from_cfg(block: Dict[str, object], key: str, default: Tuple[float, float, float]) -> Dict[str, float]:
+    raw = block.get(key, default)
+    if isinstance(raw, (list, tuple)) and len(raw) >= 3:
+        try:
+            r, g, b = (float(raw[0]), float(raw[1]), float(raw[2]))
+        except Exception:
+            r, g, b = default
+    else:
+        r, g, b = default
+    for x in (r, g, b):
+        if x < 0 or x > 1:
+            r, g, b = default
+            break
+    return {"red": r, "green": g, "blue": b}
+
+
+def _color_for_source_tabs(
+    tabs: Set[str],
+    tx_color: Dict[str, float],
+    bank_color: Dict[str, float],
+    mixed_color: Dict[str, float],
+) -> Optional[Dict[str, float]]:
+    """Pick background color from contributing intake tab names."""
+    u = {str(t).strip().upper() for t in tabs if str(t).strip()}
+    if not u:
+        return None
+    if u == {"TRANSACTIONS"}:
+        return tx_color
+    if u == {"BANK"}:
+        return bank_color
+    return mixed_color
+
+
+def _build_sheet_title_to_id(meta: Dict[str, object]) -> Dict[str, int]:
+    """Map normalized tab title -> sheetId (first wins on collision)."""
+    out: Dict[str, int] = {}
+    for sh in meta.get("sheets", []) or []:
+        props = (sh or {}).get("properties") or {}
+        sid = props.get("sheetId")
+        title = props.get("title")
+        if sid is None or not isinstance(title, str) or not title.strip():
+            continue
+        k = _norm_tab_key_for_fill(title)
+        if k not in out:
+            out[k] = int(sid)
+    return out
+
+
+def apply_source_tab_fill_colors(
+    service,
+    spreadsheet_id: str,
+    cfg: Any,
+    posted_ok_ranges: Set[str],
+    cell_source_tabs: Dict[str, Set[str]],
+    sheet_title_to_id: Dict[str, int],
+) -> int:
+    """Apply only backgroundColor on target cells using repeatCell + field mask.
+
+    Does not alter font, size, or other formatting. Returns count of repeatCell requests applied.
+    """
+    raw_off = (os.environ.get("KYLO_SOURCE_TAB_FILL") or "").strip().lower()
+    if raw_off in ("0", "false", "no", "n", "off"):
+        return 0
+    block = _cfg_get(cfg, "posting.source_tab_fill") or {}
+    if not isinstance(block, dict) or not bool(block.get("enabled")):
+        return 0
+
+    tx_rgb = _rgb_triple_from_cfg(block, "transactions_rgb", (0.78, 0.89, 1.0))
+    bank_rgb = _rgb_triple_from_cfg(block, "bank_rgb", (0.85, 0.97, 0.82))
+    mixed_rgb = _rgb_triple_from_cfg(block, "mixed_rgb", (0.92, 0.92, 0.92))
+
+    requests: List[dict] = []
+    for rng in sorted(posted_ok_ranges):
+        tabs = cell_source_tabs.get(rng) or set()
+        color = _color_for_source_tabs(tabs, tx_rgb, bank_rgb, mixed_rgb)
+        if not color:
+            continue
+        parsed = _parse_target_cell_a1(rng)
+        if not parsed:
+            continue
+        tab_title, row_1based, col0 = parsed
+        sid = sheet_title_to_id.get(_norm_tab_key_for_fill(tab_title))
+        if sid is None:
+            continue
+        start_row = int(row_1based) - 1
+        start_col = int(col0)
+        requests.append(
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sid,
+                        "startRowIndex": start_row,
+                        "endRowIndex": start_row + 1,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": start_col + 1,
+                    },
+                    "cell": {"userEnteredFormat": {"backgroundColor": color}},
+                    "fields": "userEnteredFormat.backgroundColor",
+                }
+            }
+        )
+
+    if not requests:
+        return 0
+
+    chunk = 100
+    total = 0
+    for i in range(0, len(requests), chunk):
+        batch = requests[i : i + chunk]
+        google_api_execute(
+            service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body={"requests": batch}),
+            label="target:repeatCell_source_tab_fill",
+        )
+        total += len(batch)
+    try:
+        print(f"[FILL] Applied source-tab background fill to {total} target cell(s) (BANK vs TRANSACTIONS)")
+    except Exception:
+        pass
+    return total
 
 
 def _batch_read_headers(service, spreadsheet_id: str, tabs: List[str], header_row: int) -> Dict[str, List[str]]:
@@ -579,15 +749,19 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         except Exception:
             pass
 
-        # Build case-insensitive tab title resolver from TARGET spreadsheet metadata
+        # Build case-insensitive tab title resolver from TARGET spreadsheet metadata (incl. sheetId for fills)
+        sheet_title_to_id: Dict[str, int] = {}
         try:
             meta = google_api_execute(
-                service.spreadsheets().get(spreadsheetId=target_sid, fields="sheets(properties(title))"),
+                service.spreadsheets().get(spreadsheetId=target_sid, fields="sheets(properties(sheetId,title))"),
                 label="target:tabs_meta",
             )
             titles = [s.get("properties", {}).get("title", "") for s in meta.get("sheets", [])]
+            sheet_title_to_id = _build_sheet_title_to_id(meta)
         except Exception:
+            meta = {}
             titles = []
+            sheet_title_to_id = {}
         title_map = {_norm_tab_key(t): str(t) for t in titles if isinstance(t, str)}
 
         def _resolve_tab_title(name: str) -> str:
@@ -1235,6 +1409,22 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 "source rows for those targets will NOT be marked posted."
             )
 
+        fills_applied = 0
+        if (not dry_run) and posted_ok_ranges and sheet_title_to_id:
+            try:
+                fills_applied = int(
+                    apply_source_tab_fill_colors(
+                        service,
+                        target_sid,
+                        cfg,
+                        posted_ok_ranges,
+                        cell_source_tabs,
+                        sheet_title_to_id,
+                    )
+                )
+            except Exception as e:
+                print(f"[FILL] WARN: could not apply source-tab fills: {e}")
+
         if not dry_run and (update_entries or processed_txn_uids or skipped_txn_uids_no_rule):
             try:
                 # Only persist "processed" txns that we know are reflected in the target:
@@ -1357,6 +1547,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "target_sid": target_sid,
             "cells_written": int(cells_written),
             "rows_marked_true": int(rows_marked_true),
+            "fills_applied": int(fills_applied),
             "tabs": sorted(tabs_touched),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
@@ -1366,6 +1557,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     # Execute per-target posting and aggregate
     total_cells_written = 0
     total_rows_marked_true = 0
+    total_fills_applied = 0
     tabs_all: Set[str] = set()
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
@@ -1375,6 +1567,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         result = _process_target(target_sid, txns_for_target, ignore_posted=ignore_posted_flag)
         total_cells_written += int(result.get("cells_written", 0))
         total_rows_marked_true += int(result.get("rows_marked_true", 0))
+        total_fills_applied += int(result.get("fills_applied", 0))
         tabs_all |= set(result.get("tabs", []))
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
@@ -1435,6 +1628,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "company": company,
         "cells_written": int(total_cells_written),
         "rows_marked_true": int(total_rows_marked_true),
+        "fills_applied": int(total_fills_applied),
         "tabs": sorted(tabs_all),
         "write_plan_path": wp_out,
         "write_plan_count": int(len(write_plan)),
@@ -1444,7 +1638,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Sort and post petty cash via JGDTruth rules (values only)")
+    ap = argparse.ArgumentParser(
+        description="Sort and post petty cash via JGDTruth rules (values + optional BANK/TRANSACTIONS cell fill)"
+    )
     ap.add_argument("--company", required=True, help="Company key (NUGZ, 710, PUFFIN, JGD)")
     ap.add_argument("--baseline", action="store_true", help="Force full write and reseed incremental state")
     ap.add_argument(

@@ -18,6 +18,13 @@ posting:
   sheets:
     apply: true
   mark_posted: true  # Enable marking rows as posted and writing notes
+  # After a successful target value write, tint cells by intake tab (background only).
+  # Disable with posting.source_tab_fill.enabled: false or env KYLO_SOURCE_TAB_FILL=0.
+  source_tab_fill:
+    enabled: true
+    transactions_rgb: [0.78, 0.89, 1.0]
+    bank_rgb: [0.85, 0.97, 0.82]
+    mixed_rgb: [0.92, 0.92, 0.92]
 
 sheets:
   companies:

@@ -580,8 +580,9 @@ def main(argv: list[str] | None = None) -> int:
                     if isinstance(s, dict) and s:
                         cw = s.get("cells_written", 0)
                         rm = s.get("rows_marked_true", 0)
+                        fa = s.get("fills_applied", 0)
                         tabs = s.get("tabs", [])
-                        print(f"{cid}: cells_written={cw}, rows_marked_true={rm}, tabs={tabs}")
+                        print(f"{cid}: cells_written={cw}, rows_marked_true={rm}, fills_applied={fa}, tabs={tabs}")
         except Exception as e:
             if hb is not None:
                 try:
