@@ -1,0 +1,16 @@
+# Validate in playground / SDL — names may differ (e.g. Name vs name).
+query DiscoverFindBrands {
+  findBrands(first: 50) {
+    count
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        objectId
+        name
+      }
+    }
+  }
+}

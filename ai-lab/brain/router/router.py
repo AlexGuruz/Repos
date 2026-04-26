@@ -118,7 +118,7 @@ def classify_intent(message: str) -> tuple[str, dict]:
     # Ops overview (Guru §23): "what systems do I have", "list my workers", "ops overview"
     if any(w in msg for w in ("ops overview", "ops fabric", "what systems", "list my workers", "what workers", "what automations", "what's in my ops", "my systems", "my workers")):
         return "ops_overview", {}
-    if "systems" in msg and ("have" in msg or "list" in msg or "what" in msg or "show" in msg):
+    if "systems" in msg and ("have" in msg or "list" in msg or "what" in msg or "show" in msg or "active" in msg):
         return "ops_overview", {}
     if "workers" in msg and ("list" in msg or "what" in msg or "show" in msg or "my " in msg):
         return "ops_overview", {}

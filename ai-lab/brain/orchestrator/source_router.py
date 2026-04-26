@@ -8,6 +8,7 @@ import os
 from brain.schemas.routing import RoutingDecision, LocalTarget
 from brain.orchestrator.freshness import FreshnessResult
 from brain.orchestrator.session_resolution import SessionResolution
+from brain.orchestrator.routing_policy import match_answer_fast_path
 
 
 def _company_bi_summary_path() -> str | None:
@@ -37,7 +38,7 @@ def route_sources(
     # Internal/system indicators -> local first
     internal_indicators = (
         "repo", "scan", "logs", "script", "config", "integration", "repos", "failure",
-        "our system", "my repos", "registry",
+        "our system", "my repos", "registry", "documentation", "doc status", "docs status",
     )
     # External current -> web
     external_indicators = (
@@ -117,7 +118,14 @@ def route_sources(
 
     # Answer intent: check message for external vs internal
     elif intent == "answer":
-        if any(x in msg for x in comparison_indicators):
+        fast = match_answer_fast_path(message)
+        if fast is not None:
+            needs_local = fast.needs_local
+            needs_web = fast.needs_web
+            local_targets.extend(list(fast.local_targets))
+            reason = fast.reason
+            answer_style_hint = fast.answer_style_hint
+        elif any(x in msg for x in comparison_indicators):
             needs_local = True
             needs_web = True
             reason = "Comparison with current external state requested."

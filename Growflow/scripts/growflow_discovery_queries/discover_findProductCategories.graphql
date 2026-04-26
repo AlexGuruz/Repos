@@ -1,0 +1,16 @@
+# Validate in playground / SDL.
+query DiscoverFindProductCategories {
+  findProductCategories(first: 20) {
+    count
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        objectId
+        name
+      }
+    }
+  }
+}

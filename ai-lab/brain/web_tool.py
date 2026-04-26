@@ -16,7 +16,7 @@ import urllib.parse
 from typing import Any
 
 
-def web_search(query: str, max_results: int = 5) -> list[dict[str, Any]]:
+def web_search(query: str, max_results: int = 5, *, timeout_sec: float = 8.0) -> list[dict[str, Any]]:
     """
     Run a web search and return list of { title, url, snippet, timestamp }.
     Configurable provider; returns [] if unavailable.
@@ -28,11 +28,11 @@ def web_search(query: str, max_results: int = 5) -> list[dict[str, Any]]:
 
     tavily_key = os.environ.get("TAVILY_API_KEY", "").strip()
     if tavily_key:
-        return _tavily_search(q, tavily_key, max_results=max_results)
+        return _tavily_search(q, tavily_key, max_results=max_results, timeout_sec=timeout_sec)
 
     serper_key = os.environ.get("SERPER_API_KEY", "").strip()
     if serper_key:
-        return _serper_search(q, serper_key, max_results=max_results)
+        return _serper_search(q, serper_key, max_results=max_results, timeout_sec=timeout_sec)
 
     return []
 
@@ -48,7 +48,7 @@ def _post_json(url: str, payload: dict[str, Any], headers: dict[str, str], timeo
         return None
 
 
-def _tavily_search(query: str, api_key: str, max_results: int) -> list[dict[str, Any]]:
+def _tavily_search(query: str, api_key: str, max_results: int, *, timeout_sec: float = 8.0) -> list[dict[str, Any]]:
     url = "https://api.tavily.com/search"
     payload = {
         "api_key": api_key,
@@ -57,7 +57,7 @@ def _tavily_search(query: str, api_key: str, max_results: int) -> list[dict[str,
         "include_answer": False,
         "include_raw_content": False,
     }
-    data = _post_json(url, payload, headers={})
+    data = _post_json(url, payload, headers={}, timeout_sec=int(timeout_sec))
     if not data:
         return []
     results = data.get("results") or []
@@ -75,10 +75,10 @@ def _tavily_search(query: str, api_key: str, max_results: int) -> list[dict[str,
     return out
 
 
-def _serper_search(query: str, api_key: str, max_results: int) -> list[dict[str, Any]]:
+def _serper_search(query: str, api_key: str, max_results: int, *, timeout_sec: float = 8.0) -> list[dict[str, Any]]:
     url = "https://google.serper.dev/search"
     payload = {"q": query, "num": max_results}
-    data = _post_json(url, payload, headers={"X-API-KEY": api_key})
+    data = _post_json(url, payload, headers={"X-API-KEY": api_key}, timeout_sec=int(timeout_sec))
     if not data:
         return []
     results = data.get("organic") or []

@@ -1,0 +1,5 @@
+{
+  "user": "zacle",
+  "workerHost": "work-node",
+  "_comment": "Copy to worker_tunnel.local.json (gitignored). workerHost = Tailscale machine name, LAN IP, or SSH config Host alias. Example Tailscale Linux peer: work-node"
+}

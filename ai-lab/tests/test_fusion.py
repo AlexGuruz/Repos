@@ -28,6 +28,18 @@ def test_fuse_insufficient_evidence():
     assert fused.recommended_answer_style in ("insufficient_evidence", "direct_status") or not fused.key_evidence
 
 
+def test_fuse_time_context_avoids_insufficient():
+    """Time-only answer turns must not be classified as insufficient_evidence."""
+    decision = RoutingDecision(intent="answer", needs_local=False, answer_style_hint="direct_status")
+    evidence = LoadedEvidence(
+        local_evidence=[],
+        web_evidence=[],
+        time_context={"current_datetime": "2026-01-01T12:00:00", "timezone": "UTC"},
+    )
+    fused = fuse_evidence(message="what time is it", intent="answer", decision=decision, evidence=evidence)
+    assert fused.recommended_answer_style == "direct_status"
+
+
 def test_fuse_hardware_control_candidate():
     """Guru §25: hardware_status + responsive message + process_top adds set_process_priority candidate."""
     decision = RoutingDecision(intent="hardware_status", needs_local=True, answer_style_hint="direct_status")

@@ -1,0 +1,1914 @@
+{
+  "generated_at_store_local": "2026-04-11T22:04:13.253954-05:00",
+  "growflow_org": "nugzdispensary",
+  "period_store_local_start": "2025-04-12",
+  "period_store_local_end": "2026-04-11",
+  "total_days": 365,
+  "window_days": 30,
+  "num_windows": 13,
+  "top_k": 15,
+  "rank_primary": "gross_usd_desc_then_lines_desc_then_brand_az",
+  "timezone": "America/Chicago",
+  "filters": {
+    "evaluation_preset": true,
+    "exclude_prepackaged_flower": true,
+    "exclude_bulk_flower": true,
+    "exclude_non_cannabis_accessories": true,
+    "excluded_brands_normalized": [
+      "710 empire"
+    ],
+    "non_cannabis_substrings_documented": [
+      "accessories",
+      "accessory",
+      "apparel",
+      "clothing",
+      "merchandise",
+      "gift card",
+      "rolling tray",
+      "rolling papers",
+      "ashtray",
+      "grinder",
+      "hemp wick",
+      "t-shirt",
+      "tee shirt",
+      "sticker",
+      "mug",
+      "lighter",
+      "scale"
+    ]
+  },
+  "windows": [
+    {
+      "window_index": 0,
+      "window_start": "2025-04-12",
+      "window_end": "2025-05-11",
+      "window_label": "2025-04-12..2025-05-11",
+      "brand_count_in_window": 71,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 6311.16,
+          "gross_cents": 631116,
+          "lines": 301,
+          "margin_usd": 2893.66,
+          "margin_cents": 289366
+        },
+        {
+          "rank": 2,
+          "brand": "Puffin Pure",
+          "gross_usd": 6253.21,
+          "gross_cents": 625321,
+          "lines": 1680,
+          "margin_usd": 2696.21,
+          "margin_cents": 269621
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 4432.26,
+          "gross_cents": 443226,
+          "lines": 172,
+          "margin_usd": 2371.26,
+          "margin_cents": 237126
+        },
+        {
+          "rank": 4,
+          "brand": "Country Cannabis",
+          "gross_usd": 3935.79,
+          "gross_cents": 393579,
+          "lines": 282,
+          "margin_usd": 2063.29,
+          "margin_cents": 206329
+        },
+        {
+          "rank": 5,
+          "brand": "Day Changers",
+          "gross_usd": 3194.08,
+          "gross_cents": 319408,
+          "lines": 160,
+          "margin_usd": 2059.67,
+          "margin_cents": 205967
+        },
+        {
+          "rank": 6,
+          "brand": "Dime Industries",
+          "gross_usd": 2700.86,
+          "gross_cents": 270086,
+          "lines": 80,
+          "margin_usd": 1363.11,
+          "margin_cents": 136311
+        },
+        {
+          "rank": 7,
+          "brand": "Rockstars",
+          "gross_usd": 2564.4,
+          "gross_cents": 256440,
+          "lines": 60,
+          "margin_usd": 1881.48,
+          "margin_cents": 188148
+        },
+        {
+          "rank": 8,
+          "brand": "DOC FERGUSON",
+          "gross_usd": 2286.79,
+          "gross_cents": 228679,
+          "lines": 143,
+          "margin_usd": 1380.59,
+          "margin_cents": 138059
+        },
+        {
+          "rank": 9,
+          "brand": "Sunday Extracts",
+          "gross_usd": 1991.15,
+          "gross_cents": 199115,
+          "lines": 77,
+          "margin_usd": 1058.55,
+          "margin_cents": 105855
+        },
+        {
+          "rank": 10,
+          "brand": "Terp Talk",
+          "gross_usd": 1707.35,
+          "gross_cents": 170735,
+          "lines": 115,
+          "margin_usd": 1054.85,
+          "margin_cents": 105485
+        },
+        {
+          "rank": 11,
+          "brand": "Gladiator Cannabis",
+          "gross_usd": 1663.42,
+          "gross_cents": 166342,
+          "lines": 78,
+          "margin_usd": 1356.13,
+          "margin_cents": 135613
+        },
+        {
+          "rank": 12,
+          "brand": "Dabby Wabby",
+          "gross_usd": 1503.85,
+          "gross_cents": 150385,
+          "lines": 175,
+          "margin_usd": 891.35,
+          "margin_cents": 89135
+        },
+        {
+          "rank": 13,
+          "brand": "SAP STIX",
+          "gross_usd": 1500.96,
+          "gross_cents": 150096,
+          "lines": 132,
+          "margin_usd": 719.0,
+          "margin_cents": 71900
+        },
+        {
+          "rank": 14,
+          "brand": "Molecular Extracts",
+          "gross_usd": 1425.46,
+          "gross_cents": 142546,
+          "lines": 88,
+          "margin_usd": 873.98,
+          "margin_cents": 87398
+        },
+        {
+          "rank": 15,
+          "brand": "Timeless",
+          "gross_usd": 1333.44,
+          "gross_cents": 133344,
+          "lines": 59,
+          "margin_usd": 699.44,
+          "margin_cents": 69944
+        }
+      ]
+    },
+    {
+      "window_index": 1,
+      "window_start": "2025-05-12",
+      "window_end": "2025-06-10",
+      "window_label": "2025-05-12..2025-06-10",
+      "brand_count_in_window": 65,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 7220.69,
+          "gross_cents": 722069,
+          "lines": 382,
+          "margin_usd": 3475.69,
+          "margin_cents": 347569
+        },
+        {
+          "rank": 2,
+          "brand": "Puffin Pure",
+          "gross_usd": 6053.17,
+          "gross_cents": 605317,
+          "lines": 1602,
+          "margin_usd": 2394.54,
+          "margin_cents": 239454
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 5025.45,
+          "gross_cents": 502545,
+          "lines": 196,
+          "margin_usd": 2674.45,
+          "margin_cents": 267445
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 4633.7,
+          "gross_cents": 463370,
+          "lines": 164,
+          "margin_usd": 2561.08,
+          "margin_cents": 256108
+        },
+        {
+          "rank": 5,
+          "brand": "Rockstars",
+          "gross_usd": 3761.28,
+          "gross_cents": 376128,
+          "lines": 88,
+          "margin_usd": 2650.38,
+          "margin_cents": 265038
+        },
+        {
+          "rank": 6,
+          "brand": "Country Cannabis",
+          "gross_usd": 3500.19,
+          "gross_cents": 350019,
+          "lines": 210,
+          "margin_usd": 1858.19,
+          "margin_cents": 185819
+        },
+        {
+          "rank": 7,
+          "brand": "Dime Industries",
+          "gross_usd": 2645.39,
+          "gross_cents": 264539,
+          "lines": 78,
+          "margin_usd": 1343.36,
+          "margin_cents": 134336
+        },
+        {
+          "rank": 8,
+          "brand": "Gladiator Cannabis",
+          "gross_usd": 2333.52,
+          "gross_cents": 233352,
+          "lines": 105,
+          "margin_usd": 1899.44,
+          "margin_cents": 189944
+        },
+        {
+          "rank": 9,
+          "brand": "Sunday Extracts",
+          "gross_usd": 1669.29,
+          "gross_cents": 166929,
+          "lines": 65,
+          "margin_usd": 923.79,
+          "margin_cents": 92379
+        },
+        {
+          "rank": 10,
+          "brand": "Terp Talk",
+          "gross_usd": 1461.66,
+          "gross_cents": 146166,
+          "lines": 100,
+          "margin_usd": 900.66,
+          "margin_cents": 90066
+        },
+        {
+          "rank": 11,
+          "brand": "DOC FERGUSON",
+          "gross_usd": 1373.56,
+          "gross_cents": 137356,
+          "lines": 103,
+          "margin_usd": 805.26,
+          "margin_cents": 80526
+        },
+        {
+          "rank": 12,
+          "brand": "Molecular Extracts",
+          "gross_usd": 1355.96,
+          "gross_cents": 135596,
+          "lines": 76,
+          "margin_usd": 803.75,
+          "margin_cents": 80375
+        },
+        {
+          "rank": 13,
+          "brand": "Geek Bar",
+          "gross_usd": 1333.0,
+          "gross_cents": 133300,
+          "lines": 83,
+          "margin_usd": 582.77,
+          "margin_cents": 58277
+        },
+        {
+          "rank": 14,
+          "brand": "Smokiez",
+          "gross_usd": 1257.52,
+          "gross_cents": 125752,
+          "lines": 66,
+          "margin_usd": 711.99,
+          "margin_cents": 71199
+        },
+        {
+          "rank": 15,
+          "brand": "Timeless",
+          "gross_usd": 1089.79,
+          "gross_cents": 108979,
+          "lines": 47,
+          "margin_usd": 606.79,
+          "margin_cents": 60679
+        }
+      ]
+    },
+    {
+      "window_index": 2,
+      "window_start": "2025-06-11",
+      "window_end": "2025-07-10",
+      "window_label": "2025-06-11..2025-07-10",
+      "brand_count_in_window": 64,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Puffin Pure",
+          "gross_usd": 10082.57,
+          "gross_cents": 1008257,
+          "lines": 2115,
+          "margin_usd": 3418.3,
+          "margin_cents": 341830
+        },
+        {
+          "rank": 2,
+          "brand": "Cartel",
+          "gross_usd": 8644.29,
+          "gross_cents": 864429,
+          "lines": 458,
+          "margin_usd": 4312.79,
+          "margin_cents": 431279
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 5669.98,
+          "gross_cents": 566998,
+          "lines": 224,
+          "margin_usd": 3018.95,
+          "margin_cents": 301895
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 4549.02,
+          "gross_cents": 454902,
+          "lines": 205,
+          "margin_usd": 2546.53,
+          "margin_cents": 254653
+        },
+        {
+          "rank": 5,
+          "brand": "Country Cannabis",
+          "gross_usd": 3882.68,
+          "gross_cents": 388268,
+          "lines": 295,
+          "margin_usd": 2202.68,
+          "margin_cents": 220268
+        },
+        {
+          "rank": 6,
+          "brand": "Rockstars",
+          "gross_usd": 3809.21,
+          "gross_cents": 380921,
+          "lines": 89,
+          "margin_usd": 3012.21,
+          "margin_cents": 301221
+        },
+        {
+          "rank": 7,
+          "brand": "Dime Industries",
+          "gross_usd": 3680.89,
+          "gross_cents": 368089,
+          "lines": 109,
+          "margin_usd": 2002.34,
+          "margin_cents": 200234
+        },
+        {
+          "rank": 8,
+          "brand": "Sunday Extracts",
+          "gross_usd": 1674.94,
+          "gross_cents": 167494,
+          "lines": 62,
+          "margin_usd": 876.94,
+          "margin_cents": 87694
+        },
+        {
+          "rank": 9,
+          "brand": "Molecular Extracts",
+          "gross_usd": 1464.79,
+          "gross_cents": 146479,
+          "lines": 88,
+          "margin_usd": 854.38,
+          "margin_cents": 85438
+        },
+        {
+          "rank": 10,
+          "brand": "Smokiez",
+          "gross_usd": 1398.39,
+          "gross_cents": 139839,
+          "lines": 73,
+          "margin_usd": 749.69,
+          "margin_cents": 74969
+        },
+        {
+          "rank": 11,
+          "brand": "DOC FERGUSON",
+          "gross_usd": 1292.5,
+          "gross_cents": 129250,
+          "lines": 86,
+          "margin_usd": 816.75,
+          "margin_cents": 81675
+        },
+        {
+          "rank": 12,
+          "brand": "Geek Bar",
+          "gross_usd": 1185.8,
+          "gross_cents": 118580,
+          "lines": 80,
+          "margin_usd": 514.92,
+          "margin_cents": 51492
+        },
+        {
+          "rank": 13,
+          "brand": "Primal Extracts",
+          "gross_usd": 1179.7,
+          "gross_cents": 117970,
+          "lines": 119,
+          "margin_usd": 679.05,
+          "margin_cents": 67905
+        },
+        {
+          "rank": 14,
+          "brand": "Timeless",
+          "gross_usd": 1175.27,
+          "gross_cents": 117527,
+          "lines": 51,
+          "margin_usd": 620.27,
+          "margin_cents": 62027
+        },
+        {
+          "rank": 15,
+          "brand": "Dabby Wabby",
+          "gross_usd": 1162.77,
+          "gross_cents": 116277,
+          "lines": 136,
+          "margin_usd": 686.77,
+          "margin_cents": 68677
+        }
+      ]
+    },
+    {
+      "window_index": 3,
+      "window_start": "2025-07-11",
+      "window_end": "2025-08-09",
+      "window_label": "2025-07-11..2025-08-09",
+      "brand_count_in_window": 66,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 12140.35,
+          "gross_cents": 1214035,
+          "lines": 436,
+          "margin_usd": 6386.88,
+          "margin_cents": 638688
+        },
+        {
+          "rank": 2,
+          "brand": "Puffin Pure",
+          "gross_usd": 9164.9,
+          "gross_cents": 916490,
+          "lines": 2213,
+          "margin_usd": 3512.96,
+          "margin_cents": 351296
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 4805.13,
+          "gross_cents": 480513,
+          "lines": 187,
+          "margin_usd": 2571.73,
+          "margin_cents": 257173
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 4531.9,
+          "gross_cents": 453190,
+          "lines": 164,
+          "margin_usd": 2644.21,
+          "margin_cents": 264421
+        },
+        {
+          "rank": 5,
+          "brand": "Dime Industries",
+          "gross_usd": 3816.39,
+          "gross_cents": 381639,
+          "lines": 114,
+          "margin_usd": 2034.09,
+          "margin_cents": 203409
+        },
+        {
+          "rank": 6,
+          "brand": "Country Cannabis",
+          "gross_usd": 3654.1,
+          "gross_cents": 365410,
+          "lines": 273,
+          "margin_usd": 2052.58,
+          "margin_cents": 205258
+        },
+        {
+          "rank": 7,
+          "brand": "Rockstars",
+          "gross_usd": 3248.24,
+          "gross_cents": 324824,
+          "lines": 76,
+          "margin_usd": 2588.89,
+          "margin_cents": 258889
+        },
+        {
+          "rank": 8,
+          "brand": "Sunday Extracts",
+          "gross_usd": 2457.7,
+          "gross_cents": 245770,
+          "lines": 97,
+          "margin_usd": 1271.7,
+          "margin_cents": 127170
+        },
+        {
+          "rank": 9,
+          "brand": "OFF-STAMP",
+          "gross_usd": 2178.67,
+          "gross_cents": 217867,
+          "lines": 129,
+          "margin_usd": 1376.53,
+          "margin_cents": 137653
+        },
+        {
+          "rank": 10,
+          "brand": "Presidential",
+          "gross_usd": 1743.35,
+          "gross_cents": 174335,
+          "lines": 59,
+          "margin_usd": 959.08,
+          "margin_cents": 95908
+        },
+        {
+          "rank": 11,
+          "brand": "Molecular Extracts",
+          "gross_usd": 1408.41,
+          "gross_cents": 140841,
+          "lines": 85,
+          "margin_usd": 820.24,
+          "margin_cents": 82024
+        },
+        {
+          "rank": 12,
+          "brand": "Smokiez",
+          "gross_usd": 1378.69,
+          "gross_cents": 137869,
+          "lines": 63,
+          "margin_usd": 688.49,
+          "margin_cents": 68849
+        },
+        {
+          "rank": 13,
+          "brand": "Boro Family Farms",
+          "gross_usd": 1348.02,
+          "gross_cents": 134802,
+          "lines": 80,
+          "margin_usd": 831.08,
+          "margin_cents": 83108
+        },
+        {
+          "rank": 14,
+          "brand": "Primal Extracts",
+          "gross_usd": 1239.63,
+          "gross_cents": 123963,
+          "lines": 129,
+          "margin_usd": 692.04,
+          "margin_cents": 69204
+        },
+        {
+          "rank": 15,
+          "brand": "Edify",
+          "gross_usd": 1184.71,
+          "gross_cents": 118471,
+          "lines": 50,
+          "margin_usd": 828.71,
+          "margin_cents": 82871
+        }
+      ]
+    },
+    {
+      "window_index": 4,
+      "window_start": "2025-08-10",
+      "window_end": "2025-09-08",
+      "window_label": "2025-08-10..2025-09-08",
+      "brand_count_in_window": 69,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 10034.14,
+          "gross_cents": 1003414,
+          "lines": 407,
+          "margin_usd": 5273.95,
+          "margin_cents": 527395
+        },
+        {
+          "rank": 2,
+          "brand": "Puffin Pure",
+          "gross_usd": 6196.92,
+          "gross_cents": 619692,
+          "lines": 1276,
+          "margin_usd": 1999.84,
+          "margin_cents": 199984
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 4615.2,
+          "gross_cents": 461520,
+          "lines": 180,
+          "margin_usd": 2480.6,
+          "margin_cents": 248060
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 4130.27,
+          "gross_cents": 413027,
+          "lines": 147,
+          "margin_usd": 2436.85,
+          "margin_cents": 243685
+        },
+        {
+          "rank": 5,
+          "brand": "Country Cannabis",
+          "gross_usd": 3671.28,
+          "gross_cents": 367128,
+          "lines": 293,
+          "margin_usd": 2077.75,
+          "margin_cents": 207775
+        },
+        {
+          "rank": 6,
+          "brand": "Dime Industries",
+          "gross_usd": 3374.46,
+          "gross_cents": 337446,
+          "lines": 101,
+          "margin_usd": 1725.51,
+          "margin_cents": 172551
+        },
+        {
+          "rank": 7,
+          "brand": "Rockstars",
+          "gross_usd": 2350.7,
+          "gross_cents": 235070,
+          "lines": 55,
+          "margin_usd": 1803.95,
+          "margin_cents": 180395
+        },
+        {
+          "rank": 8,
+          "brand": "Smokiez",
+          "gross_usd": 2235.12,
+          "gross_cents": 223512,
+          "lines": 110,
+          "margin_usd": 1222.53,
+          "margin_cents": 122253
+        },
+        {
+          "rank": 9,
+          "brand": "Sunday Extracts",
+          "gross_usd": 2068.41,
+          "gross_cents": 206841,
+          "lines": 85,
+          "margin_usd": 1058.62,
+          "margin_cents": 105862
+        },
+        {
+          "rank": 10,
+          "brand": "OFF-STAMP",
+          "gross_usd": 1715.45,
+          "gross_cents": 171545,
+          "lines": 96,
+          "margin_usd": 941.61,
+          "margin_cents": 94161
+        },
+        {
+          "rank": 11,
+          "brand": "Presidential",
+          "gross_usd": 1525.72,
+          "gross_cents": 152572,
+          "lines": 49,
+          "margin_usd": 743.7,
+          "margin_cents": 74370
+        },
+        {
+          "rank": 12,
+          "brand": "Dabby Wabby",
+          "gross_usd": 1325.25,
+          "gross_cents": 132525,
+          "lines": 155,
+          "margin_usd": 856.75,
+          "margin_cents": 85675
+        },
+        {
+          "rank": 13,
+          "brand": "Molecular Extracts",
+          "gross_usd": 1302.32,
+          "gross_cents": 130232,
+          "lines": 76,
+          "margin_usd": 772.29,
+          "margin_cents": 77229
+        },
+        {
+          "rank": 14,
+          "brand": "EASY STREET EXTRACTS",
+          "gross_usd": 1215.89,
+          "gross_cents": 121589,
+          "lines": 68,
+          "margin_usd": 769.64,
+          "margin_cents": 76964
+        },
+        {
+          "rank": 15,
+          "brand": "Wally's Green Patch",
+          "gross_usd": 1106.84,
+          "gross_cents": 110684,
+          "lines": 298,
+          "margin_usd": 910.14,
+          "margin_cents": 91014
+        }
+      ]
+    },
+    {
+      "window_index": 5,
+      "window_start": "2025-09-09",
+      "window_end": "2025-10-08",
+      "window_label": "2025-09-09..2025-10-08",
+      "brand_count_in_window": 59,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 11497.24,
+          "gross_cents": 1149724,
+          "lines": 536,
+          "margin_usd": 6076.1,
+          "margin_cents": 607610
+        },
+        {
+          "rank": 2,
+          "brand": "Puffin Pure",
+          "gross_usd": 7504.66,
+          "gross_cents": 750466,
+          "lines": 1425,
+          "margin_usd": 2298.16,
+          "margin_cents": 229816
+        },
+        {
+          "rank": 3,
+          "brand": "Day Changers",
+          "gross_usd": 4056.29,
+          "gross_cents": 405629,
+          "lines": 150,
+          "margin_usd": 2342.17,
+          "margin_cents": 234217
+        },
+        {
+          "rank": 4,
+          "brand": "Country Cannabis",
+          "gross_usd": 3508.59,
+          "gross_cents": 350859,
+          "lines": 267,
+          "margin_usd": 1973.01,
+          "margin_cents": 197301
+        },
+        {
+          "rank": 5,
+          "brand": "CURE INJOY",
+          "gross_usd": 3436.03,
+          "gross_cents": 343603,
+          "lines": 147,
+          "margin_usd": 1672.03,
+          "margin_cents": 167203
+        },
+        {
+          "rank": 6,
+          "brand": "Dime Industries",
+          "gross_usd": 3081.32,
+          "gross_cents": 308132,
+          "lines": 91,
+          "margin_usd": 1570.87,
+          "margin_cents": 157087
+        },
+        {
+          "rank": 7,
+          "brand": "Korporate Kush",
+          "gross_usd": 2248.35,
+          "gross_cents": 224835,
+          "lines": 141,
+          "margin_usd": 1519.35,
+          "margin_cents": 151935
+        },
+        {
+          "rank": 8,
+          "brand": "Sunday Extracts",
+          "gross_usd": 2132.97,
+          "gross_cents": 213297,
+          "lines": 93,
+          "margin_usd": 1075.97,
+          "margin_cents": 107597
+        },
+        {
+          "rank": 9,
+          "brand": "OFF-STAMP",
+          "gross_usd": 1881.75,
+          "gross_cents": 188175,
+          "lines": 98,
+          "margin_usd": 1030.69,
+          "margin_cents": 103069
+        },
+        {
+          "rank": 10,
+          "brand": "Wally's Green Patch",
+          "gross_usd": 1655.21,
+          "gross_cents": 165521,
+          "lines": 460,
+          "margin_usd": 1379.21,
+          "margin_cents": 137921
+        },
+        {
+          "rank": 11,
+          "brand": "Edify",
+          "gross_usd": 1559.09,
+          "gross_cents": 155909,
+          "lines": 62,
+          "margin_usd": 1084.19,
+          "margin_cents": 108419
+        },
+        {
+          "rank": 12,
+          "brand": "Smokiez",
+          "gross_usd": 1477.87,
+          "gross_cents": 147787,
+          "lines": 78,
+          "margin_usd": 750.62,
+          "margin_cents": 75062
+        },
+        {
+          "rank": 13,
+          "brand": "Double Down Dabs",
+          "gross_usd": 1292.31,
+          "gross_cents": 129231,
+          "lines": 30,
+          "margin_usd": 905.71,
+          "margin_cents": 90571
+        },
+        {
+          "rank": 14,
+          "brand": "Terp Talk",
+          "gross_usd": 1165.33,
+          "gross_cents": 116533,
+          "lines": 119,
+          "margin_usd": 779.48,
+          "margin_cents": 77948
+        },
+        {
+          "rank": 15,
+          "brand": "Timeless",
+          "gross_usd": 1136.82,
+          "gross_cents": 113682,
+          "lines": 51,
+          "margin_usd": 742.78,
+          "margin_cents": 74278
+        }
+      ]
+    },
+    {
+      "window_index": 6,
+      "window_start": "2025-10-09",
+      "window_end": "2025-11-07",
+      "window_label": "2025-10-09..2025-11-07",
+      "brand_count_in_window": 54,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 9326.73,
+          "gross_cents": 932673,
+          "lines": 431,
+          "margin_usd": 4909.45,
+          "margin_cents": 490945
+        },
+        {
+          "rank": 2,
+          "brand": "Puffin Pure",
+          "gross_usd": 6914.42,
+          "gross_cents": 691442,
+          "lines": 1092,
+          "margin_usd": 2266.81,
+          "margin_cents": 226681
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 3633.67,
+          "gross_cents": 363367,
+          "lines": 170,
+          "margin_usd": 1593.67,
+          "margin_cents": 159367
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 3312.16,
+          "gross_cents": 331216,
+          "lines": 131,
+          "margin_usd": 1803.91,
+          "margin_cents": 180391
+        },
+        {
+          "rank": 5,
+          "brand": "Country Cannabis",
+          "gross_usd": 3311.61,
+          "gross_cents": 331161,
+          "lines": 236,
+          "margin_usd": 1755.86,
+          "margin_cents": 175586
+        },
+        {
+          "rank": 6,
+          "brand": "Korporate Kush",
+          "gross_usd": 3052.38,
+          "gross_cents": 305238,
+          "lines": 133,
+          "margin_usd": 2091.38,
+          "margin_cents": 209138
+        },
+        {
+          "rank": 7,
+          "brand": "Arctic Extracts",
+          "gross_usd": 2854.56,
+          "gross_cents": 285456,
+          "lines": 119,
+          "margin_usd": 1584.56,
+          "margin_cents": 158456
+        },
+        {
+          "rank": 8,
+          "brand": "Sunday Extracts",
+          "gross_usd": 2068.29,
+          "gross_cents": 206829,
+          "lines": 82,
+          "margin_usd": 1005.29,
+          "margin_cents": 100529
+        },
+        {
+          "rank": 9,
+          "brand": "Primal Extracts",
+          "gross_usd": 1976.71,
+          "gross_cents": 197671,
+          "lines": 208,
+          "margin_usd": 1101.36,
+          "margin_cents": 110136
+        },
+        {
+          "rank": 10,
+          "brand": "Terp Talk",
+          "gross_usd": 1936.81,
+          "gross_cents": 193681,
+          "lines": 150,
+          "margin_usd": 1245.21,
+          "margin_cents": 124521
+        },
+        {
+          "rank": 11,
+          "brand": "Dime Industries",
+          "gross_usd": 1720.58,
+          "gross_cents": 172058,
+          "lines": 53,
+          "margin_usd": 867.23,
+          "margin_cents": 86723
+        },
+        {
+          "rank": 12,
+          "brand": "Smokiez",
+          "gross_usd": 1470.99,
+          "gross_cents": 147099,
+          "lines": 86,
+          "margin_usd": 726.71,
+          "margin_cents": 72671
+        },
+        {
+          "rank": 13,
+          "brand": "GOLD DROP",
+          "gross_usd": 1145.35,
+          "gross_cents": 114535,
+          "lines": 36,
+          "margin_usd": 571.35,
+          "margin_cents": 57135
+        },
+        {
+          "rank": 14,
+          "brand": "Wally's Green Patch",
+          "gross_usd": 1102.08,
+          "gross_cents": 110208,
+          "lines": 306,
+          "margin_usd": 918.48,
+          "margin_cents": 91848
+        },
+        {
+          "rank": 15,
+          "brand": "SAP STIX",
+          "gross_usd": 893.17,
+          "gross_cents": 89317,
+          "lines": 79,
+          "margin_usd": 437.67,
+          "margin_cents": 43767
+        }
+      ]
+    },
+    {
+      "window_index": 7,
+      "window_start": "2025-11-08",
+      "window_end": "2025-12-07",
+      "window_label": "2025-11-08..2025-12-07",
+      "brand_count_in_window": 53,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 10524.06,
+          "gross_cents": 1052406,
+          "lines": 462,
+          "margin_usd": 5404.78,
+          "margin_cents": 540478
+        },
+        {
+          "rank": 2,
+          "brand": "Puffin Pure",
+          "gross_usd": 6990.52,
+          "gross_cents": 699052,
+          "lines": 1628,
+          "margin_usd": 2328.02,
+          "margin_cents": 232802
+        },
+        {
+          "rank": 3,
+          "brand": "Arctic Extracts",
+          "gross_usd": 6069.59,
+          "gross_cents": 606959,
+          "lines": 322,
+          "margin_usd": 3626.05,
+          "margin_cents": 362605
+        },
+        {
+          "rank": 4,
+          "brand": "CURE INJOY",
+          "gross_usd": 4238.67,
+          "gross_cents": 423867,
+          "lines": 198,
+          "margin_usd": 1862.67,
+          "margin_cents": 186267
+        },
+        {
+          "rank": 5,
+          "brand": "Day Changers",
+          "gross_usd": 3749.97,
+          "gross_cents": 374997,
+          "lines": 144,
+          "margin_usd": 2035.44,
+          "margin_cents": 203544
+        },
+        {
+          "rank": 6,
+          "brand": "Country Cannabis",
+          "gross_usd": 3407.41,
+          "gross_cents": 340741,
+          "lines": 297,
+          "margin_usd": 1925.41,
+          "margin_cents": 192541
+        },
+        {
+          "rank": 7,
+          "brand": "Korporate Kush",
+          "gross_usd": 2684.0,
+          "gross_cents": 268400,
+          "lines": 160,
+          "margin_usd": 1845.0,
+          "margin_cents": 184500
+        },
+        {
+          "rank": 8,
+          "brand": "Dime Industries",
+          "gross_usd": 2568.52,
+          "gross_cents": 256852,
+          "lines": 75,
+          "margin_usd": 1377.27,
+          "margin_cents": 137727
+        },
+        {
+          "rank": 9,
+          "brand": "Smokiez",
+          "gross_usd": 1904.93,
+          "gross_cents": 190493,
+          "lines": 102,
+          "margin_usd": 951.06,
+          "margin_cents": 95106
+        },
+        {
+          "rank": 10,
+          "brand": "Primal Extracts",
+          "gross_usd": 1355.73,
+          "gross_cents": 135573,
+          "lines": 156,
+          "margin_usd": 680.77,
+          "margin_cents": 68077
+        },
+        {
+          "rank": 11,
+          "brand": "Edify",
+          "gross_usd": 1278.73,
+          "gross_cents": 127873,
+          "lines": 49,
+          "margin_usd": 867.13,
+          "margin_cents": 86713
+        },
+        {
+          "rank": 12,
+          "brand": "Sunday Extracts",
+          "gross_usd": 1044.06,
+          "gross_cents": 104406,
+          "lines": 39,
+          "margin_usd": 558.11,
+          "margin_cents": 55811
+        },
+        {
+          "rank": 13,
+          "brand": "Boro Family Farms",
+          "gross_usd": 995.4,
+          "gross_cents": 99540,
+          "lines": 74,
+          "margin_usd": 557.9,
+          "margin_cents": 55790
+        },
+        {
+          "rank": 14,
+          "brand": "Nisor Labs",
+          "gross_usd": 957.05,
+          "gross_cents": 95705,
+          "lines": 64,
+          "margin_usd": 637.05,
+          "margin_cents": 63705
+        },
+        {
+          "rank": 15,
+          "brand": "Wally's Green Patch",
+          "gross_usd": 874.08,
+          "gross_cents": 87408,
+          "lines": 266,
+          "margin_usd": 714.48,
+          "margin_cents": 71448
+        }
+      ]
+    },
+    {
+      "window_index": 8,
+      "window_start": "2025-12-08",
+      "window_end": "2026-01-06",
+      "window_label": "2025-12-08..2026-01-06",
+      "brand_count_in_window": 46,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 9985.93,
+          "gross_cents": 998593,
+          "lines": 493,
+          "margin_usd": 5260.59,
+          "margin_cents": 526059
+        },
+        {
+          "rank": 2,
+          "brand": "Arctic Extracts",
+          "gross_usd": 6629.31,
+          "gross_cents": 662931,
+          "lines": 383,
+          "margin_usd": 4048.31,
+          "margin_cents": 404831
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 4915.04,
+          "gross_cents": 491504,
+          "lines": 230,
+          "margin_usd": 2155.04,
+          "margin_cents": 215504
+        },
+        {
+          "rank": 4,
+          "brand": "Country Cannabis",
+          "gross_usd": 3700.02,
+          "gross_cents": 370002,
+          "lines": 327,
+          "margin_usd": 2085.77,
+          "margin_cents": 208577
+        },
+        {
+          "rank": 5,
+          "brand": "Day Changers",
+          "gross_usd": 3649.99,
+          "gross_cents": 364999,
+          "lines": 146,
+          "margin_usd": 1984.2,
+          "margin_cents": 198420
+        },
+        {
+          "rank": 6,
+          "brand": "Korporate Kush",
+          "gross_usd": 3602.8,
+          "gross_cents": 360280,
+          "lines": 199,
+          "margin_usd": 2497.8,
+          "margin_cents": 249780
+        },
+        {
+          "rank": 7,
+          "brand": "Dime Industries",
+          "gross_usd": 2974.53,
+          "gross_cents": 297453,
+          "lines": 87,
+          "margin_usd": 1673.88,
+          "margin_cents": 167388
+        },
+        {
+          "rank": 8,
+          "brand": "Puffin Pure",
+          "gross_usd": 2333.67,
+          "gross_cents": 233367,
+          "lines": 436,
+          "margin_usd": 988.67,
+          "margin_cents": 98867
+        },
+        {
+          "rank": 9,
+          "brand": "Nisor Labs",
+          "gross_usd": 1819.43,
+          "gross_cents": 181943,
+          "lines": 152,
+          "margin_usd": 1059.43,
+          "margin_cents": 105943
+        },
+        {
+          "rank": 10,
+          "brand": "Sunday Extracts",
+          "gross_usd": 1786.95,
+          "gross_cents": 178695,
+          "lines": 71,
+          "margin_usd": 928.28,
+          "margin_cents": 92828
+        },
+        {
+          "rank": 11,
+          "brand": "Smokiez",
+          "gross_usd": 1481.32,
+          "gross_cents": 148132,
+          "lines": 81,
+          "margin_usd": 720.59,
+          "margin_cents": 72059
+        },
+        {
+          "rank": 12,
+          "brand": "Primal Extracts",
+          "gross_usd": 1256.72,
+          "gross_cents": 125672,
+          "lines": 135,
+          "margin_usd": 688.79,
+          "margin_cents": 68879
+        },
+        {
+          "rank": 13,
+          "brand": "Edify",
+          "gross_usd": 1113.74,
+          "gross_cents": 111374,
+          "lines": 48,
+          "margin_usd": 784.94,
+          "margin_cents": 78494
+        },
+        {
+          "rank": 14,
+          "brand": "Boro Family Farms",
+          "gross_usd": 836.91,
+          "gross_cents": 83691,
+          "lines": 68,
+          "margin_usd": 462.91,
+          "margin_cents": 46291
+        },
+        {
+          "rank": 15,
+          "brand": "FOGER",
+          "gross_usd": 803.53,
+          "gross_cents": 80353,
+          "lines": 39,
+          "margin_usd": 375.68,
+          "margin_cents": 37568
+        }
+      ]
+    },
+    {
+      "window_index": 9,
+      "window_start": "2026-01-07",
+      "window_end": "2026-02-05",
+      "window_label": "2026-01-07..2026-02-05",
+      "brand_count_in_window": 44,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Cartel",
+          "gross_usd": 10944.89,
+          "gross_cents": 1094489,
+          "lines": 531,
+          "margin_usd": 5731.89,
+          "margin_cents": 573189
+        },
+        {
+          "rank": 2,
+          "brand": "Arctic Extracts",
+          "gross_usd": 9927.07,
+          "gross_cents": 992707,
+          "lines": 682,
+          "margin_usd": 6008.57,
+          "margin_cents": 600857
+        },
+        {
+          "rank": 3,
+          "brand": "CURE INJOY",
+          "gross_usd": 4830.17,
+          "gross_cents": 483017,
+          "lines": 226,
+          "margin_usd": 2118.17,
+          "margin_cents": 211817
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 3558.68,
+          "gross_cents": 355868,
+          "lines": 146,
+          "margin_usd": 1943.25,
+          "margin_cents": 194325
+        },
+        {
+          "rank": 5,
+          "brand": "Country Cannabis",
+          "gross_usd": 2850.45,
+          "gross_cents": 285045,
+          "lines": 260,
+          "margin_usd": 1595.7,
+          "margin_cents": 159570
+        },
+        {
+          "rank": 6,
+          "brand": "Korporate Kush",
+          "gross_usd": 2837.91,
+          "gross_cents": 283791,
+          "lines": 131,
+          "margin_usd": 1962.41,
+          "margin_cents": 196241
+        },
+        {
+          "rank": 7,
+          "brand": "Puffin Pure",
+          "gross_usd": 2471.85,
+          "gross_cents": 247185,
+          "lines": 354,
+          "margin_usd": 711.73,
+          "margin_cents": 71173
+        },
+        {
+          "rank": 8,
+          "brand": "Dime Industries",
+          "gross_usd": 1914.64,
+          "gross_cents": 191464,
+          "lines": 56,
+          "margin_usd": 1077.44,
+          "margin_cents": 107744
+        },
+        {
+          "rank": 9,
+          "brand": "Smokiez",
+          "gross_usd": 1905.3,
+          "gross_cents": 190530,
+          "lines": 107,
+          "margin_usd": 924.23,
+          "margin_cents": 92423
+        },
+        {
+          "rank": 10,
+          "brand": "Sunday Extracts",
+          "gross_usd": 1526.96,
+          "gross_cents": 152696,
+          "lines": 64,
+          "margin_usd": 754.68,
+          "margin_cents": 75468
+        },
+        {
+          "rank": 11,
+          "brand": "Primal Extracts",
+          "gross_usd": 1163.97,
+          "gross_cents": 116397,
+          "lines": 127,
+          "margin_usd": 612.06,
+          "margin_cents": 61206
+        },
+        {
+          "rank": 12,
+          "brand": "Gladiator Cannabis",
+          "gross_usd": 1121.28,
+          "gross_cents": 112128,
+          "lines": 48,
+          "margin_usd": 821.28,
+          "margin_cents": 82128
+        },
+        {
+          "rank": 13,
+          "brand": "SAP STIX",
+          "gross_usd": 1088.2,
+          "gross_cents": 108820,
+          "lines": 95,
+          "margin_usd": 541.95,
+          "margin_cents": 54195
+        },
+        {
+          "rank": 14,
+          "brand": "Edify",
+          "gross_usd": 1065.04,
+          "gross_cents": 106504,
+          "lines": 42,
+          "margin_usd": 724.94,
+          "margin_cents": 72494
+        },
+        {
+          "rank": 15,
+          "brand": "FOGER",
+          "gross_usd": 799.91,
+          "gross_cents": 79991,
+          "lines": 42,
+          "margin_usd": 382.22,
+          "margin_cents": 38222
+        }
+      ]
+    },
+    {
+      "window_index": 10,
+      "window_start": "2026-02-06",
+      "window_end": "2026-03-07",
+      "window_label": "2026-02-06..2026-03-07",
+      "brand_count_in_window": 37,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Arctic Extracts",
+          "gross_usd": 8708.15,
+          "gross_cents": 870815,
+          "lines": 531,
+          "margin_usd": 5136.8,
+          "margin_cents": 513680
+        },
+        {
+          "rank": 2,
+          "brand": "Cartel",
+          "gross_usd": 7104.12,
+          "gross_cents": 710412,
+          "lines": 370,
+          "margin_usd": 4115.12,
+          "margin_cents": 411512
+        },
+        {
+          "rank": 3,
+          "brand": "Day Changers",
+          "gross_usd": 5040.67,
+          "gross_cents": 504067,
+          "lines": 212,
+          "margin_usd": 2747.17,
+          "margin_cents": 274717
+        },
+        {
+          "rank": 4,
+          "brand": "Dime Industries",
+          "gross_usd": 4273.75,
+          "gross_cents": 427375,
+          "lines": 125,
+          "margin_usd": 2400.0,
+          "margin_cents": 240000
+        },
+        {
+          "rank": 5,
+          "brand": "Korporate Kush",
+          "gross_usd": 3611.89,
+          "gross_cents": 361189,
+          "lines": 333,
+          "margin_usd": 2528.79,
+          "margin_cents": 252879
+        },
+        {
+          "rank": 6,
+          "brand": "CURE INJOY",
+          "gross_usd": 3120.02,
+          "gross_cents": 312002,
+          "lines": 146,
+          "margin_usd": 1368.02,
+          "margin_cents": 136802
+        },
+        {
+          "rank": 7,
+          "brand": "Puffin Pure",
+          "gross_usd": 2944.68,
+          "gross_cents": 294468,
+          "lines": 191,
+          "margin_usd": 921.69,
+          "margin_cents": 92169
+        },
+        {
+          "rank": 8,
+          "brand": "Double Down Dabs",
+          "gross_usd": 2080.46,
+          "gross_cents": 208046,
+          "lines": 61,
+          "margin_usd": 1172.96,
+          "margin_cents": 117296
+        },
+        {
+          "rank": 9,
+          "brand": "Smokiez",
+          "gross_usd": 1813.13,
+          "gross_cents": 181313,
+          "lines": 94,
+          "margin_usd": 878.85,
+          "margin_cents": 87885
+        },
+        {
+          "rank": 10,
+          "brand": "Country Cannabis",
+          "gross_usd": 1792.84,
+          "gross_cents": 179284,
+          "lines": 169,
+          "margin_usd": 974.84,
+          "margin_cents": 97484
+        },
+        {
+          "rank": 11,
+          "brand": "Edify",
+          "gross_usd": 1102.64,
+          "gross_cents": 110264,
+          "lines": 41,
+          "margin_usd": 767.64,
+          "margin_cents": 76764
+        },
+        {
+          "rank": 12,
+          "brand": "Primal Extracts",
+          "gross_usd": 1016.49,
+          "gross_cents": 101649,
+          "lines": 108,
+          "margin_usd": 529.35,
+          "margin_cents": 52935
+        },
+        {
+          "rank": 13,
+          "brand": "DOC FERGUSON",
+          "gross_usd": 820.63,
+          "gross_cents": 82063,
+          "lines": 106,
+          "margin_usd": 489.63,
+          "margin_cents": 48963
+        },
+        {
+          "rank": 14,
+          "brand": "SAP STIX",
+          "gross_usd": 783.86,
+          "gross_cents": 78386,
+          "lines": 68,
+          "margin_usd": 392.86,
+          "margin_cents": 39286
+        },
+        {
+          "rank": 15,
+          "brand": "BEST DAY EVER",
+          "gross_usd": 756.34,
+          "gross_cents": 75634,
+          "lines": 29,
+          "margin_usd": 330.34,
+          "margin_cents": 33034
+        }
+      ]
+    },
+    {
+      "window_index": 11,
+      "window_start": "2026-03-08",
+      "window_end": "2026-04-06",
+      "window_label": "2026-03-08..2026-04-06",
+      "brand_count_in_window": 31,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Arctic Extracts",
+          "gross_usd": 8517.37,
+          "gross_cents": 851737,
+          "lines": 592,
+          "margin_usd": 4954.12,
+          "margin_cents": 495412
+        },
+        {
+          "rank": 2,
+          "brand": "CURE INJOY",
+          "gross_usd": 5530.29,
+          "gross_cents": 553029,
+          "lines": 232,
+          "margin_usd": 2746.29,
+          "margin_cents": 274629
+        },
+        {
+          "rank": 3,
+          "brand": "Cartel",
+          "gross_usd": 4965.78,
+          "gross_cents": 496578,
+          "lines": 203,
+          "margin_usd": 2693.78,
+          "margin_cents": 269378
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 3870.24,
+          "gross_cents": 387024,
+          "lines": 165,
+          "margin_usd": 2106.24,
+          "margin_cents": 210624
+        },
+        {
+          "rank": 5,
+          "brand": "Korporate Kush",
+          "gross_usd": 3865.1,
+          "gross_cents": 386510,
+          "lines": 320,
+          "margin_usd": 2692.1,
+          "margin_cents": 269210
+        },
+        {
+          "rank": 6,
+          "brand": "Country Cannabis",
+          "gross_usd": 3134.47,
+          "gross_cents": 313447,
+          "lines": 330,
+          "margin_usd": 1727.47,
+          "margin_cents": 172747
+        },
+        {
+          "rank": 7,
+          "brand": "Dime Industries",
+          "gross_usd": 2632.63,
+          "gross_cents": 263263,
+          "lines": 77,
+          "margin_usd": 1476.48,
+          "margin_cents": 147648
+        },
+        {
+          "rank": 8,
+          "brand": "Smokiez",
+          "gross_usd": 2212.19,
+          "gross_cents": 221219,
+          "lines": 129,
+          "margin_usd": 1088.99,
+          "margin_cents": 108899
+        },
+        {
+          "rank": 9,
+          "brand": "Puffin Pure",
+          "gross_usd": 1697.53,
+          "gross_cents": 169753,
+          "lines": 107,
+          "margin_usd": 611.6,
+          "margin_cents": 61160
+        },
+        {
+          "rank": 10,
+          "brand": "Rockstars",
+          "gross_usd": 991.51,
+          "gross_cents": 99151,
+          "lines": 29,
+          "margin_usd": 643.8,
+          "margin_cents": 64380
+        },
+        {
+          "rank": 11,
+          "brand": "BEST DAY EVER",
+          "gross_usd": 817.07,
+          "gross_cents": 81707,
+          "lines": 25,
+          "margin_usd": 483.57,
+          "margin_cents": 48357
+        },
+        {
+          "rank": 12,
+          "brand": "DOC FERGUSON",
+          "gross_usd": 519.57,
+          "gross_cents": 51957,
+          "lines": 38,
+          "margin_usd": 283.57,
+          "margin_cents": 28357
+        },
+        {
+          "rank": 13,
+          "brand": "Cure Injoy",
+          "gross_usd": 479.88,
+          "gross_cents": 47988,
+          "lines": 20,
+          "margin_usd": 239.88,
+          "margin_cents": 23988
+        },
+        {
+          "rank": 14,
+          "brand": "Kush Drops",
+          "gross_usd": 441.18,
+          "gross_cents": 44118,
+          "lines": 43,
+          "margin_usd": 290.68,
+          "margin_cents": 29068
+        },
+        {
+          "rank": 15,
+          "brand": "GOLD DROP",
+          "gross_usd": 411.15,
+          "gross_cents": 41115,
+          "lines": 29,
+          "margin_usd": 204.12,
+          "margin_cents": 20412
+        }
+      ]
+    },
+    {
+      "window_index": 12,
+      "window_start": "2026-04-07",
+      "window_end": "2026-04-11",
+      "window_label": "2026-04-07..2026-04-11",
+      "brand_count_in_window": 22,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Arctic Extracts",
+          "gross_usd": 1505.92,
+          "gross_cents": 150592,
+          "lines": 92,
+          "margin_usd": 879.67,
+          "margin_cents": 87967
+        },
+        {
+          "rank": 2,
+          "brand": "Cartel",
+          "gross_usd": 1107.63,
+          "gross_cents": 110763,
+          "lines": 41,
+          "margin_usd": 621.13,
+          "margin_cents": 62113
+        },
+        {
+          "rank": 3,
+          "brand": "Country Cannabis",
+          "gross_usd": 748.57,
+          "gross_cents": 74857,
+          "lines": 77,
+          "margin_usd": 416.57,
+          "margin_cents": 41657
+        },
+        {
+          "rank": 4,
+          "brand": "Smokiez",
+          "gross_usd": 702.62,
+          "gross_cents": 70262,
+          "lines": 31,
+          "margin_usd": 336.96,
+          "margin_cents": 33696
+        },
+        {
+          "rank": 5,
+          "brand": "Korporate Kush",
+          "gross_usd": 696.48,
+          "gross_cents": 69648,
+          "lines": 25,
+          "margin_usd": 484.28,
+          "margin_cents": 48428
+        },
+        {
+          "rank": 6,
+          "brand": "Day Changers",
+          "gross_usd": 618.85,
+          "gross_cents": 61885,
+          "lines": 34,
+          "margin_usd": 348.85,
+          "margin_cents": 34885
+        },
+        {
+          "rank": 7,
+          "brand": "Dime Industries",
+          "gross_usd": 581.23,
+          "gross_cents": 58123,
+          "lines": 17,
+          "margin_usd": 327.08,
+          "margin_cents": 32708
+        },
+        {
+          "rank": 8,
+          "brand": "CURE INJOY",
+          "gross_usd": 550.39,
+          "gross_cents": 55039,
+          "lines": 23,
+          "margin_usd": 274.39,
+          "margin_cents": 27439
+        },
+        {
+          "rank": 9,
+          "brand": "Sunday Extracts",
+          "gross_usd": 362.38,
+          "gross_cents": 36238,
+          "lines": 14,
+          "margin_usd": 194.8,
+          "margin_cents": 19480
+        },
+        {
+          "rank": 10,
+          "brand": "Puffin Pure",
+          "gross_usd": 292.21,
+          "gross_cents": 29221,
+          "lines": 57,
+          "margin_usd": 178.21,
+          "margin_cents": 17821
+        },
+        {
+          "rank": 11,
+          "brand": "DOC FERGUSON",
+          "gross_usd": 164.08,
+          "gross_cents": 16408,
+          "lines": 8,
+          "margin_usd": 89.58,
+          "margin_cents": 8958
+        },
+        {
+          "rank": 12,
+          "brand": "BEST DAY EVER",
+          "gross_usd": 120.51,
+          "gross_cents": 12051,
+          "lines": 4,
+          "margin_usd": 62.01,
+          "margin_cents": 6201
+        },
+        {
+          "rank": 13,
+          "brand": "Smack",
+          "gross_usd": 106.85,
+          "gross_cents": 10685,
+          "lines": 5,
+          "margin_usd": 71.85,
+          "margin_cents": 7185
+        },
+        {
+          "rank": 14,
+          "brand": "Kush Drops",
+          "gross_usd": 92.34,
+          "gross_cents": 9234,
+          "lines": 9,
+          "margin_usd": 60.84,
+          "margin_cents": 6084
+        },
+        {
+          "rank": 15,
+          "brand": "Lookah",
+          "gross_usd": 63.64,
+          "gross_cents": 6364,
+          "lines": 2,
+          "margin_usd": 33.64,
+          "margin_cents": 3364
+        }
+      ]
+    }
+  ]
+}

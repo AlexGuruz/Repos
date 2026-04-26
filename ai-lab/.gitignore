@@ -12,6 +12,9 @@ config/personal_ops.yaml
 email_sorter/gmail_portable/credentials.json
 email_sorter/gmail_portable/token.json
 
+# Local AI response traces (structured benchmarks; do not commit)
+state/ai_response_traces.jsonl
+
 # Logs and temp
 *.log
 logs/

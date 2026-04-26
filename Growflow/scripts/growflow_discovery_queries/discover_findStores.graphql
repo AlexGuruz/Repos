@@ -1,0 +1,16 @@
+# Validate in playground / SDL for multi-store filters.
+query DiscoverFindStores {
+  findStores(first: 20) {
+    count
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        objectId
+        name
+      }
+    }
+  }
+}

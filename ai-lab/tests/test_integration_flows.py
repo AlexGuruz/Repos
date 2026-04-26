@@ -6,6 +6,8 @@ conversational fallback, and proposal expiry/approval boundaries.
 """
 from __future__ import annotations
 
+import uuid
+
 from brain.orchestrator.main import run
 from brain import session_state
 from brain.schemas.proposals import ProposalRecord
@@ -29,19 +31,17 @@ def test_normalize_greeting_variants():
 
 def test_insufficient_evidence_returns_conversational_reply():
     """Guru §24.13: no-evidence turn returns fixed conversational reply, not generic [Orchestrator] fallback."""
-    # Vague question with no session evidence should hit insufficient_evidence override
+    sid = f"it_no_evidence_{uuid.uuid4().hex[:10]}"
     out = run(
         "what did the last scan find?",
         llm_base_url="",
         llm_model="",
-        session_id="it_no_evidence_never_used",
+        session_id=sid,
     )
     assert "reply" in out
     reply = out["reply"]
-    # Must NOT be the generic fallback
-    assert "[Orchestrator] Intent:" not in reply or "I don't have any evidence" in reply
-    # Should be the hard no-evidence reply
-    assert "I don't have any evidence" in reply or "Nothing to go on" in reply or "evidence" in reply.lower()
+    assert "[Orchestrator] Intent:" not in reply
+    assert "session-specific evidence" in reply.lower() or "evidence" in reply.lower()
 
 
 def test_proposal_expiry_clears_pending():
@@ -64,4 +64,16 @@ def test_proposal_expiry_clears_pending():
 def test_do_it_without_pending_is_safe():
     out = run("do it", llm_base_url="", llm_model="", session_id="it_no_pending")
     assert "No pending action" in out["reply"]
+
+
+def test_non_worker_questions_do_not_block_on_worker_health(monkeypatch):
+    """Normal answer/ops turns should not call worker health probes."""
+    import brain.worker_health as wh
+
+    def _boom(*args, **kwargs):
+        raise AssertionError("worker health probe should not run for non-worker intents")
+
+    monkeypatch.setattr(wh, "get_worker_health_snapshot", _boom)
+    out = run("what systems are active?", llm_base_url="", llm_model="", session_id="it_ops_no_worker_probe")
+    assert "Operations registry" in out["reply"]
 

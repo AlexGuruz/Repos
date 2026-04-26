@@ -1,0 +1,1513 @@
+{
+  "captured_at_utc": "2026-04-15T20:58:22.652309+00:00",
+  "spreadsheet_id": "17sqC9JOMMLEWZhd5S_t9FUkZJpKYSqtblBeKs8WCz7U",
+  "spreadsheet_title": "Zac's Order Allocation",
+  "dashboard_tabs": [
+    "raw_layer2",
+    "dashboard_data",
+    "dashboard",
+    "notes"
+  ],
+  "export_note": "build_projection_dashboard_google_sheet.py default run uses Values API clear+update only; does not batchUpdate charts/formatting. Layout reset requires --full-refresh AND --confirm-layout-reset.",
+  "tabs": [
+    {
+      "sheet_id": 580526531,
+      "title": "raw_layer2",
+      "grid_properties": {
+        "row_count": 1000,
+        "column_count": 40,
+        "frozen_row_count": 1,
+        "frozen_column_count": null,
+        "hide_gridlines": null
+      },
+      "merges": [],
+      "conditional_formats": [
+        {
+          "ranges": [
+            {
+              "sheetId": 580526531,
+              "startRowIndex": 1,
+              "endRowIndex": 21,
+              "startColumnIndex": 14,
+              "endColumnIndex": 15
+            }
+          ],
+          "booleanRule": {
+            "condition": {
+              "type": "NUMBER_LESS",
+              "values": [
+                {
+                  "userEnteredValue": "0"
+                }
+              ]
+            },
+            "format": {
+              "backgroundColor": {
+                "red": 0.7490196,
+                "green": 0.7490196,
+                "blue": 0.7764706
+              },
+              "textFormat": {
+                "foregroundColor": {
+                  "red": 0.4,
+                  "green": 0.09803922,
+                  "blue": 0.09803922
+                },
+                "foregroundColorStyle": {
+                  "rgbColor": {
+                    "red": 0.4,
+                    "green": 0.09803922,
+                    "blue": 0.09803922
+                  }
+                }
+              },
+              "backgroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.7490196,
+                  "green": 0.7490196,
+                  "blue": 0.7764706
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 580526531,
+              "startRowIndex": 1,
+              "endRowIndex": 21,
+              "startColumnIndex": 10,
+              "endColumnIndex": 11
+            }
+          ],
+          "booleanRule": {
+            "condition": {
+              "type": "NUMBER_GREATER",
+              "values": [
+                {
+                  "userEnteredValue": "4"
+                }
+              ]
+            },
+            "format": {
+              "backgroundColor": {
+                "red": 1,
+                "green": 0.84705883,
+                "blue": 0.8
+              },
+              "backgroundColorStyle": {
+                "rgbColor": {
+                  "red": 1,
+                  "green": 0.84705883,
+                  "blue": 0.8
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 580526531,
+              "startRowIndex": 1,
+              "endRowIndex": 21,
+              "startColumnIndex": 14,
+              "endColumnIndex": 15
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.84705883,
+                "green": 0.2,
+                "blue": 0.2
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.84705883,
+                  "green": 0.2,
+                  "blue": 0.2
+                }
+              }
+            },
+            "midpoint": {
+              "color": {
+                "red": 1,
+                "green": 0.8980392,
+                "blue": 0.4
+              },
+              "type": "PERCENTILE",
+              "value": "50",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 1,
+                  "green": 0.8980392,
+                  "blue": 0.4
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.2,
+                "green": 0.6,
+                "blue": 0.29803923
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2,
+                  "green": 0.6,
+                  "blue": 0.29803923
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 580526531,
+              "startRowIndex": 1,
+              "endRowIndex": 21,
+              "startColumnIndex": 15,
+              "endColumnIndex": 16
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.8980392,
+                "green": 0.49803922,
+                "blue": 0.49803922
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.8980392,
+                  "green": 0.49803922,
+                  "blue": 0.49803922
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.29803923,
+                "green": 0.49803922,
+                "blue": 0.84705883
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.29803923,
+                  "green": 0.49803922,
+                  "blue": 0.84705883
+                }
+              }
+            }
+          }
+        }
+      ],
+      "banded_ranges": [],
+      "protected_ranges": [],
+      "charts": []
+    },
+    {
+      "sheet_id": 409941671,
+      "title": "dashboard_data",
+      "grid_properties": {
+        "row_count": 3300,
+        "column_count": 56,
+        "frozen_row_count": null,
+        "frozen_column_count": null,
+        "hide_gridlines": null
+      },
+      "merges": [],
+      "conditional_formats": [],
+      "banded_ranges": [],
+      "protected_ranges": [],
+      "charts": []
+    },
+    {
+      "sheet_id": 163278041,
+      "title": "dashboard",
+      "grid_properties": {
+        "row_count": 1000,
+        "column_count": 36,
+        "frozen_row_count": 3,
+        "frozen_column_count": null,
+        "hide_gridlines": null
+      },
+      "merges": [
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 0,
+          "endRowIndex": 1,
+          "startColumnIndex": 0,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 1,
+          "endRowIndex": 2,
+          "startColumnIndex": 0,
+          "endColumnIndex": 22
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 2,
+          "endRowIndex": 3,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 3,
+          "endRowIndex": 4,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 3,
+          "endRowIndex": 4,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 4,
+          "endRowIndex": 5,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 4,
+          "endRowIndex": 5,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 8,
+          "endRowIndex": 9,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 9,
+          "endRowIndex": 10,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 10,
+          "endRowIndex": 11,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 11,
+          "endRowIndex": 12,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 12,
+          "endRowIndex": 13,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 13,
+          "endRowIndex": 14,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 114,
+          "endRowIndex": 115,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 5,
+          "endRowIndex": 6,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 5,
+          "endRowIndex": 6,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 6,
+          "endRowIndex": 7,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 6,
+          "endRowIndex": 7,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 7,
+          "endRowIndex": 8,
+          "startColumnIndex": 0,
+          "endColumnIndex": 2
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 7,
+          "endRowIndex": 8,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 8,
+          "endRowIndex": 9,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 9,
+          "endRowIndex": 10,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 10,
+          "endRowIndex": 11,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 11,
+          "endRowIndex": 12,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 12,
+          "endRowIndex": 13,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 13,
+          "endRowIndex": 14,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 14,
+          "endRowIndex": 15,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 15,
+          "endRowIndex": 16,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 16,
+          "endRowIndex": 17,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 17,
+          "endRowIndex": 18,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 18,
+          "endRowIndex": 19,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 19,
+          "endRowIndex": 20,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 20,
+          "endRowIndex": 21,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 21,
+          "endRowIndex": 22,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 35,
+          "endRowIndex": 36,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 47,
+          "endRowIndex": 48,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 59,
+          "endRowIndex": 60,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 70,
+          "endRowIndex": 71,
+          "startColumnIndex": 0,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 77,
+          "endRowIndex": 78,
+          "startColumnIndex": 0,
+          "endColumnIndex": 4
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 79,
+          "endRowIndex": 80,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 80,
+          "endRowIndex": 81,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 81,
+          "endRowIndex": 82,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 89,
+          "endRowIndex": 90,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 90,
+          "endRowIndex": 91,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 91,
+          "endRowIndex": 92,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 92,
+          "endRowIndex": 93,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 93,
+          "endRowIndex": 94,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 82,
+          "endRowIndex": 83,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 83,
+          "endRowIndex": 84,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 84,
+          "endRowIndex": 85,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 85,
+          "endRowIndex": 86,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 86,
+          "endRowIndex": 87,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 87,
+          "endRowIndex": 88,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        },
+        {
+          "sheetId": 163278041,
+          "startRowIndex": 88,
+          "endRowIndex": 89,
+          "startColumnIndex": 9,
+          "endColumnIndex": 11
+        }
+      ],
+      "conditional_formats": [
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 23,
+              "endRowIndex": 34,
+              "startColumnIndex": 3,
+              "endColumnIndex": 4
+            },
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 37,
+              "endRowIndex": 46,
+              "startColumnIndex": 3,
+              "endColumnIndex": 4
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.2,
+                "green": 0.61960787,
+                "blue": 0.3764706
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2,
+                  "green": 0.61960787,
+                  "blue": 0.3764706
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.9490196,
+                "green": 0.5176471,
+                "blue": 0.31764707
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.9490196,
+                  "green": 0.5176471,
+                  "blue": 0.31764707
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 23,
+              "endRowIndex": 34,
+              "startColumnIndex": 5,
+              "endColumnIndex": 6
+            },
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 37,
+              "endRowIndex": 46,
+              "startColumnIndex": 5,
+              "endColumnIndex": 6
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.8784314,
+                "green": 0.41960785,
+                "blue": 0.41960785
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.8784314,
+                  "green": 0.41960785,
+                  "blue": 0.41960785
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.2784314,
+                "green": 0.5176471,
+                "blue": 0.41960785
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2784314,
+                  "green": 0.5176471,
+                  "blue": 0.41960785
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 37,
+              "endRowIndex": 46,
+              "startColumnIndex": 3,
+              "endColumnIndex": 4
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.2,
+                "green": 0.61960787,
+                "blue": 0.3764706
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2,
+                  "green": 0.61960787,
+                  "blue": 0.3764706
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.9490196,
+                "green": 0.5176471,
+                "blue": 0.31764707
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.9490196,
+                  "green": 0.5176471,
+                  "blue": 0.31764707
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 37,
+              "endRowIndex": 46,
+              "startColumnIndex": 5,
+              "endColumnIndex": 6
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.8784314,
+                "green": 0.41960785,
+                "blue": 0.41960785
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.8784314,
+                  "green": 0.41960785,
+                  "blue": 0.41960785
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.2784314,
+                "green": 0.5176471,
+                "blue": 0.41960785
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2784314,
+                  "green": 0.5176471,
+                  "blue": 0.41960785
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 49,
+              "endRowIndex": 58,
+              "startColumnIndex": 3,
+              "endColumnIndex": 4
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.2,
+                "green": 0.61960787,
+                "blue": 0.3764706
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2,
+                  "green": 0.61960787,
+                  "blue": 0.3764706
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.9490196,
+                "green": 0.5176471,
+                "blue": 0.31764707
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.9490196,
+                  "green": 0.5176471,
+                  "blue": 0.31764707
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 49,
+              "endRowIndex": 58,
+              "startColumnIndex": 5,
+              "endColumnIndex": 6
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.8784314,
+                "green": 0.41960785,
+                "blue": 0.41960785
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.8784314,
+                  "green": 0.41960785,
+                  "blue": 0.41960785
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.2784314,
+                "green": 0.5176471,
+                "blue": 0.41960785
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2784314,
+                  "green": 0.5176471,
+                  "blue": 0.41960785
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 61,
+              "endRowIndex": 70,
+              "startColumnIndex": 3,
+              "endColumnIndex": 4
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.2,
+                "green": 0.61960787,
+                "blue": 0.3764706
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2,
+                  "green": 0.61960787,
+                  "blue": 0.3764706
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.9490196,
+                "green": 0.5176471,
+                "blue": 0.31764707
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.9490196,
+                  "green": 0.5176471,
+                  "blue": 0.31764707
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 61,
+              "endRowIndex": 70,
+              "startColumnIndex": 5,
+              "endColumnIndex": 6
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.8784314,
+                "green": 0.41960785,
+                "blue": 0.41960785
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.8784314,
+                  "green": 0.41960785,
+                  "blue": 0.41960785
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.2784314,
+                "green": 0.5176471,
+                "blue": 0.41960785
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2784314,
+                  "green": 0.5176471,
+                  "blue": 0.41960785
+                }
+              }
+            }
+          }
+        },
+        {
+          "ranges": [
+            {
+              "sheetId": 163278041,
+              "startRowIndex": 72,
+              "endRowIndex": 77,
+              "startColumnIndex": 3,
+              "endColumnIndex": 4
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.8784314,
+                "green": 0.41960785,
+                "blue": 0.41960785
+              },
+              "type": "MIN",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.8784314,
+                  "green": 0.41960785,
+                  "blue": 0.41960785
+                }
+              }
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.2784314,
+                "green": 0.5176471,
+                "blue": 0.41960785
+              },
+              "type": "MAX",
+              "colorStyle": {
+                "rgbColor": {
+                  "red": 0.2784314,
+                  "green": 0.5176471,
+                  "blue": 0.41960785
+                }
+              }
+            }
+          }
+        }
+      ],
+      "banded_ranges": [],
+      "protected_ranges": [],
+      "charts": [
+        {
+          "chart_id": 1263504147,
+          "title": "Which brands hold the most allocated dollars?",
+          "subtitle": "Bars = sum of allocated COG per brand",
+          "position": {
+            "anchor_sheet_id": 163278041,
+            "anchor_row_0based": 3,
+            "anchor_col_0based": 9,
+            "offset_x_px": 2,
+            "offset_y_px": 3,
+            "width_px": 1154,
+            "height_px": 714
+          },
+          "spec": {
+            "title": "Which brands hold the most allocated dollars?",
+            "basicChart": {
+              "chartType": "BAR",
+              "legendPosition": "NO_LEGEND",
+              "axis": [
+                {
+                  "position": "BOTTOM_AXIS",
+                  "viewWindowOptions": {}
+                },
+                {
+                  "position": "LEFT_AXIS",
+                  "title": "Brand",
+                  "format": {
+                    "fontFamily": "Roboto"
+                  },
+                  "viewWindowOptions": {}
+                }
+              ],
+              "domains": [
+                {
+                  "domain": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 199,
+                          "endRowIndex": 219,
+                          "startColumnIndex": 0,
+                          "endColumnIndex": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "series": [
+                {
+                  "series": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 199,
+                          "endRowIndex": 219,
+                          "startColumnIndex": 1,
+                          "endColumnIndex": 2
+                        }
+                      ]
+                    }
+                  },
+                  "targetAxis": "BOTTOM_AXIS",
+                  "dataLabel": {
+                    "type": "NONE",
+                    "textFormat": {
+                      "fontFamily": "Roboto"
+                    }
+                  }
+                }
+              ],
+              "headerCount": 0,
+              "compareMode": "CATEGORY"
+            },
+            "hiddenDimensionStrategy": "SKIP_HIDDEN_ROWS_AND_COLUMNS",
+            "titleTextFormat": {
+              "foregroundColor": {
+                "red": 0.9490196,
+                "green": 0.95686275,
+                "blue": 0.9764706
+              },
+              "fontFamily": "Roboto",
+              "fontSize": 14,
+              "bold": true,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.9490196,
+                  "green": 0.95686275,
+                  "blue": 0.9764706
+                }
+              }
+            },
+            "fontName": "Roboto",
+            "maximized": true,
+            "altText": "Horizontal bars of allocated COG by brand.",
+            "subtitle": "Bars = sum of allocated COG per brand",
+            "subtitleTextFormat": {
+              "foregroundColor": {
+                "red": 0.7176471,
+                "green": 0.75686276,
+                "blue": 0.81960785
+              },
+              "fontFamily": "Roboto",
+              "fontSize": 10,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.7176471,
+                  "green": 0.75686276,
+                  "blue": 0.81960785
+                }
+              }
+            }
+          }
+        },
+        {
+          "chart_id": 701966330,
+          "title": "(no title)",
+          "subtitle": "Horizontal bars: allocated COG per brand \u00d7 category",
+          "position": {
+            "anchor_sheet_id": 163278041,
+            "anchor_row_0based": 3,
+            "anchor_col_0based": 18,
+            "offset_x_px": 5,
+            "offset_y_px": 2,
+            "width_px": 1372,
+            "height_px": 658
+          },
+          "spec": {
+            "basicChart": {
+              "chartType": "BAR",
+              "legendPosition": "NO_LEGEND",
+              "axis": [
+                {
+                  "position": "BOTTOM_AXIS",
+                  "viewWindowOptions": {}
+                },
+                {
+                  "position": "LEFT_AXIS",
+                  "title": "Brand \u00d7 category line",
+                  "format": {
+                    "fontFamily": "Roboto"
+                  },
+                  "viewWindowOptions": {}
+                }
+              ],
+              "domains": [
+                {
+                  "domain": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 17,
+                          "endRowIndex": 32,
+                          "startColumnIndex": 0,
+                          "endColumnIndex": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "series": [
+                {
+                  "series": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 17,
+                          "endRowIndex": 32,
+                          "startColumnIndex": 3,
+                          "endColumnIndex": 4
+                        }
+                      ]
+                    }
+                  },
+                  "targetAxis": "BOTTOM_AXIS",
+                  "dataLabel": {
+                    "type": "NONE",
+                    "textFormat": {
+                      "fontFamily": "Roboto"
+                    }
+                  }
+                }
+              ],
+              "headerCount": 0,
+              "compareMode": "CATEGORY"
+            },
+            "hiddenDimensionStrategy": "SKIP_HIDDEN_ROWS_AND_COLUMNS",
+            "fontName": "Roboto",
+            "maximized": true,
+            "altText": "Top allocation lines by dollars.",
+            "subtitle": "Horizontal bars: allocated COG per brand \u00d7 category",
+            "subtitleTextFormat": {
+              "foregroundColor": {},
+              "fontFamily": "Roboto",
+              "fontSize": 20,
+              "foregroundColorStyle": {
+                "rgbColor": {}
+              }
+            }
+          }
+        },
+        {
+          "chart_id": 1261405103,
+          "title": "Dollars deployed vs projected gross profit",
+          "subtitle": "Blue columns = allocated COG \u00b7 Copper line = projected gross profit",
+          "position": {
+            "anchor_sheet_id": 163278041,
+            "anchor_row_0based": 26,
+            "anchor_col_0based": 9,
+            "offset_x_px": 10,
+            "offset_y_px": 31,
+            "width_px": 1465,
+            "height_px": 714
+          },
+          "spec": {
+            "title": "Dollars deployed vs projected gross profit",
+            "basicChart": {
+              "chartType": "COMBO",
+              "axis": [
+                {
+                  "position": "BOTTOM_AXIS",
+                  "title": "Brand \u00d7 category line",
+                  "format": {
+                    "fontFamily": "Roboto"
+                  },
+                  "viewWindowOptions": {}
+                },
+                {
+                  "position": "LEFT_AXIS",
+                  "viewWindowOptions": {}
+                }
+              ],
+              "domains": [
+                {
+                  "domain": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 17,
+                          "endRowIndex": 32,
+                          "startColumnIndex": 0,
+                          "endColumnIndex": 1
+                        }
+                      ]
+                    }
+                  },
+                  "reversed": true
+                }
+              ],
+              "series": [
+                {
+                  "series": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 17,
+                          "endRowIndex": 32,
+                          "startColumnIndex": 3,
+                          "endColumnIndex": 4
+                        }
+                      ]
+                    }
+                  },
+                  "targetAxis": "LEFT_AXIS",
+                  "type": "COLUMN",
+                  "dataLabel": {
+                    "type": "NONE",
+                    "textFormat": {
+                      "fontFamily": "Roboto"
+                    }
+                  }
+                },
+                {
+                  "series": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 17,
+                          "endRowIndex": 32,
+                          "startColumnIndex": 5,
+                          "endColumnIndex": 6
+                        }
+                      ]
+                    }
+                  },
+                  "targetAxis": "LEFT_AXIS",
+                  "type": "LINE",
+                  "dataLabel": {
+                    "type": "NONE",
+                    "textFormat": {
+                      "fontFamily": "Roboto"
+                    }
+                  }
+                }
+              ],
+              "headerCount": 0,
+              "interpolateNulls": true,
+              "lineSmoothing": true,
+              "compareMode": "CATEGORY"
+            },
+            "hiddenDimensionStrategy": "SKIP_HIDDEN_ROWS_AND_COLUMNS",
+            "titleTextFormat": {
+              "foregroundColor": {
+                "red": 0.9490196,
+                "green": 0.95686275,
+                "blue": 0.9764706
+              },
+              "fontFamily": "Roboto",
+              "fontSize": 14,
+              "bold": true,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.9490196,
+                  "green": 0.95686275,
+                  "blue": 0.9764706
+                }
+              }
+            },
+            "fontName": "Roboto",
+            "maximized": true,
+            "altText": "Combo chart of allocated COG and projected gross profit.",
+            "subtitle": "Blue columns = allocated COG \u00b7 Copper line = projected gross profit",
+            "subtitleTextFormat": {
+              "foregroundColor": {
+                "red": 0.7176471,
+                "green": 0.75686276,
+                "blue": 0.81960785
+              },
+              "fontFamily": "Roboto",
+              "fontSize": 10,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.7176471,
+                  "green": 0.75686276,
+                  "blue": 0.81960785
+                }
+              }
+            }
+          }
+        },
+        {
+          "chart_id": 784531915,
+          "title": "Fastest cash recovery \u2014 payback time (days)",
+          "subtitle": "Lower is faster \u00b7 Same rows as Fastest cash recovery table",
+          "position": {
+            "anchor_sheet_id": 163278041,
+            "anchor_row_0based": 26,
+            "anchor_col_0based": 22,
+            "offset_x_px": 84,
+            "offset_y_px": 27,
+            "width_px": 1056,
+            "height_px": 724
+          },
+          "spec": {
+            "title": "Fastest cash recovery \u2014 payback time (days)",
+            "basicChart": {
+              "chartType": "COLUMN",
+              "legendPosition": "NO_LEGEND",
+              "axis": [
+                {
+                  "position": "BOTTOM_AXIS",
+                  "title": "Line (brand / category)",
+                  "format": {
+                    "fontFamily": "Roboto"
+                  },
+                  "viewWindowOptions": {}
+                },
+                {
+                  "position": "LEFT_AXIS",
+                  "viewWindowOptions": {}
+                }
+              ],
+              "domains": [
+                {
+                  "domain": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 323,
+                          "endRowIndex": 338,
+                          "startColumnIndex": 0,
+                          "endColumnIndex": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "series": [
+                {
+                  "series": {
+                    "sourceRange": {
+                      "sources": [
+                        {
+                          "sheetId": 409941671,
+                          "startRowIndex": 323,
+                          "endRowIndex": 338,
+                          "startColumnIndex": 6,
+                          "endColumnIndex": 7
+                        }
+                      ]
+                    }
+                  },
+                  "targetAxis": "LEFT_AXIS",
+                  "dataLabel": {
+                    "type": "NONE",
+                    "textFormat": {
+                      "fontFamily": "Roboto"
+                    }
+                  }
+                }
+              ],
+              "headerCount": 0,
+              "threeDimensional": true,
+              "compareMode": "CATEGORY"
+            },
+            "hiddenDimensionStrategy": "SKIP_HIDDEN_ROWS_AND_COLUMNS",
+            "titleTextFormat": {
+              "foregroundColor": {
+                "red": 0.9490196,
+                "green": 0.95686275,
+                "blue": 0.9764706
+              },
+              "fontFamily": "Roboto",
+              "fontSize": 14,
+              "bold": true,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.9490196,
+                  "green": 0.95686275,
+                  "blue": 0.9764706
+                }
+              }
+            },
+            "fontName": "Roboto",
+            "maximized": true,
+            "altText": "Column chart of recovery time for fastest lines.",
+            "subtitle": "Lower is faster \u00b7 Same rows as Fastest cash recovery table",
+            "subtitleTextFormat": {
+              "foregroundColor": {
+                "red": 0.7176471,
+                "green": 0.75686276,
+                "blue": 0.81960785
+              },
+              "fontFamily": "Roboto",
+              "fontSize": 10,
+              "foregroundColorStyle": {
+                "rgbColor": {
+                  "red": 0.7176471,
+                  "green": 0.75686276,
+                  "blue": 0.81960785
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "sheet_id": 57142801,
+      "title": "notes",
+      "grid_properties": {
+        "row_count": 1000,
+        "column_count": 26,
+        "frozen_row_count": null,
+        "frozen_column_count": null,
+        "hide_gridlines": null
+      },
+      "merges": [],
+      "conditional_formats": [],
+      "banded_ranges": [],
+      "protected_ranges": [],
+      "charts": []
+    }
+  ],
+  "charts_total": 4
+}

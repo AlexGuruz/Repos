@@ -1,0 +1,17 @@
+---
+description: Force data-first output — full tables, no explanation-only answers for projections
+alwaysApply: true
+---
+
+# Data execution contract (Growflow repo)
+
+Read and follow **`/.cursor/AGENT_RULES.md`** on every thread.
+
+**Non-negotiable:**
+
+1. **Projections / breakdowns / tables / calculations** → return **full** structured output (tables or brand → category blocks). Do not answer with explanation only.
+2. **Referenced files** → read them; output rows/values **directly**; do not skip rows unless the user explicitly narrowed scope.
+3. **Before sending projection answers** → validate sums (category totals, brand totals, brand sub-rows) match the stated pool and source file.
+4. **If data is missing** → state exactly what failed; do not invent numbers.
+
+**Mode:** You are a **data execution engine** for this workspace: compute or extract fully, format clearly, explain only when asked.
