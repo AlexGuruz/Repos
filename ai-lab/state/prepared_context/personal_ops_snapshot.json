@@ -1,19 +1,61 @@
 {
   "snapshot_type": "personal_ops_snapshot",
-  "generated_at": "2026-04-27T01:05:52Z",
+  "generated_at": "2026-04-27T21:19:08Z",
   "freshness_seconds": 86400,
   "source_files_or_tools": [
     "E:\\Repos\\ai-lab\\scripts"
   ],
-  "confidence": 0.45,
+  "confidence": 0.38,
   "stale": false,
   "errors": [],
   "data": {
+    "config_path": null,
     "calendar_events": [],
+    "calendar_today": [],
+    "calendar_upcoming": [],
+    "calendar_horizon_days": 7,
     "reminders": [],
     "daily_digest_available": true,
-    "project_schedule": [],
-    "incomplete_planned_items": [],
+    "repo_pulse": [],
+    "stale_repo_labels": [],
+    "kylo_heartbeats": [],
+    "project_focus": {
+      "today_focus": [
+        "geomapper app",
+        "Greg-Kylo",
+        "awesome-n8n-templates"
+      ],
+      "current_priorities": [
+        "geomapper app",
+        "Greg-Kylo",
+        "awesome-n8n-templates"
+      ],
+      "blocked_items": [
+        "activepieces: stale/no recent updates",
+        "awesome-n8n-templates: stale/no recent updates",
+        "BMAD-METHOD: stale/no recent updates"
+      ],
+      "overdue_tasks": [
+        "activepieces: refresh README/docs",
+        "awesome-n8n-templates: refresh README/docs",
+        "BMAD-METHOD: refresh README/docs"
+      ],
+      "next_actions": [
+        "Review geomapper app",
+        "Review Greg-Kylo",
+        "Review awesome-n8n-templates"
+      ]
+    },
+    "project_schedule": [
+      "Review geomapper app",
+      "Review Greg-Kylo",
+      "Review awesome-n8n-templates"
+    ],
+    "incomplete_planned_items": [
+      "activepieces: stale/no recent updates",
+      "awesome-n8n-templates: stale/no recent updates",
+      "BMAD-METHOD: stale/no recent updates"
+    ],
     "alerts_sent": [],
     "available_scripts": [
       "personal_ops_calendar_snapshot.py",
@@ -21,20 +63,28 @@
       "personal_ops_repo_pulse.py"
     ]
   },
-  "summary_short": "Personal ops snapshot prepared from available personal_ops scripts.",
-  "summary_detailed": "Calendar/digest/planning readiness snapshot with available personal operations tooling and placeholders for integrations.",
+  "summary_short": "Personal planning snapshot: repo activity + optional calendar + agenda cues.",
+  "summary_detailed": "Combines personal_ops.yaml (or example), git repo idle scan, optional Google Calendar events, Kylo heartbeat paths, and on-disk project_agenda when available. Use for daily planning questions.",
   "suggested_questions": [
     "what is on my calendar today?",
-    "what reminders are pending?",
+    "what should I focus on today?",
+    "which repos are stale?",
     "show my daily assistant snapshot"
   ],
   "evidence_items": [
     {
       "title": "Personal ops script availability",
       "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts",
-      "observed_at": "2026-04-27T01:05:52Z",
+      "observed_at": "2026-04-27T21:19:08Z",
       "summary": "available_scripts=['personal_ops_calendar_snapshot.py', 'personal_ops_daily_digest.py', 'personal_ops_repo_pulse.py']",
       "confidence": 0.65
+    },
+    {
+      "title": "Project agenda (cached)",
+      "source_path_or_tool": "state/prepared_context/project_agenda.json",
+      "observed_at": "2026-04-27T01:05:52Z",
+      "summary": "Merged last-built project_agenda for planning context.",
+      "confidence": 0.72
     }
   ]
 }

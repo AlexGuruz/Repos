@@ -17,6 +17,7 @@ References used in this file:
 - `scripts/run_growflow_discovery_queries.py`
 - `docs/GROWFLOW_API.md`
 - `docs/GROWFLOW_RETAIL_SCHEMA_MAP.md`
+- `docs/GROWFLOW_SCHEMA_CONFIDENCE_PLAN.md`
 - `scripts/README.md`
 
 ## Master Matrix
@@ -83,7 +84,7 @@ Canonical brand/category outputs use `lib/brand_category_normalize.py` + `config
 7. Proof rules: required fields + date overlap + dedupe.
 8. Consumers: dashboard, prepared context, AI, par.
 9. Risks: string-level brand/category normalization.
-10. Safe today: partial with strict validation.
+10. Trust: **trusted**; canonical dimensions from normalization layer.
 
 ## Metric Detail: `inventory_on_hand`
 
@@ -96,7 +97,7 @@ Canonical brand/category outputs use `lib/brand_category_normalize.py` + `config
 7. Proof rules: non-negative qty, dedupe by package id, root/field/type checks.
 8. Consumers: dashboard and par readiness checks.
 9. Risks: createdAt slicing vs true on-hand scope.
-10. Safe today: partial.
+10. Trust: **trusted**; createdAt caveat in contract risks; optional brand/economics **inferred**/**unstable** per `field_confidence`.
 
 ## Metric Detail: `transfer_receipts`
 
@@ -109,7 +110,7 @@ Canonical brand/category outputs use `lib/brand_category_normalize.py` + `config
 7. Proof rules: status filter match, date overlap, required fields.
 8. Consumers: transfer DB staging, prepared context, AI/par.
 9. Risks: transfer schema can drift without introspection.
-10. Safe today: partial.
+10. Trust: **trusted**; cross-run fingerprint under `state/schema_fingerprints/`; `Packages` tier **unstable**.
 
 ## Metric Detail: `transfer_units`
 
@@ -122,7 +123,7 @@ Canonical brand/category outputs use `lib/brand_category_normalize.py` + `config
 7. Proof rules: required package arrays, dedupe transfer+package, date checks.
 8. Consumers: landed cost and sell-through staging.
 9. Risks: null `Product`/package attributes on some lines.
-10. Safe today: partial.
+10. Trust: **trusted**; nested package paths monitored for drift; null product lines remain **inferred**.
 
 ## Metric Detail: `brand_profit_velocity`
 
@@ -135,4 +136,30 @@ Canonical brand/category outputs use `lib/brand_category_normalize.py` + `config
 7. Proof rules: date overlap, required fields/types, dedupe.
 8. Consumers: sheet ranking, prepared context, AI answers.
 9. Risks: MJ category heuristic filter + supplier secondary query.
-10. Safe today: p
+10. Trust: **trusted**; supplier join is experimental template; MJ filters **inferred** on top of confirmed lines.
+
+## Metric Detail: `projection_by_category_brand`
+
+1. Business question: where should fixed pool capital deploy.
+2. Script: `scripts/build_projection_by_category_brand.py`.
+3. Query/template: `order_items_projection_buy_plan_v1`.
+4. Raw shape: `data.findOrderItems.edges[].node`.
+5. Required fields: `objectId`, `SoldAt`, `GrossPrice`, `ProductCategory.Name`.
+6. Mapping: normalized line rows, then script computes allocation and layer2 metrics.
+7. Proof rules: root/field/type checks, date overlap, duplicate detection, empty fail.
+8. Consumers: projection dashboard, prepared context, AI/par.
+9. Risks: category heuristics and one-line-equals-one-unit model.
+10. Trust: **trusted**; planner buckets **inferred**; core line economics **confirmed**.
+
+## Metric Detail: `schema_discovery`
+
+1. Business question: what schema is currently validated.
+2. Script: `scripts/run_growflow_discovery_queries.py`.
+3. Query/template: `schema_discovery_runner_v1`.
+4. Raw shape: GraphQL per-discovery operation payload.
+5. Required fields: none (discovery mode).
+6. Mapping: passthrough discovery records.
+7. Proof rules: capture errors/root presence, no trusted-output promotion.
+8. Consumers: docs/contracts/template promotion workflow.
+9. Risks: endpoint permissions, blocked introspection.
+10. Safe today: discovery only (not trusted business output).

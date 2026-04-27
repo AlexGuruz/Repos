@@ -1,6 +1,6 @@
 {
   "snapshot_type": "system_snapshot",
-  "generated_at": "2026-04-27T01:24:14Z",
+  "generated_at": "2026-04-27T21:18:24Z",
   "freshness_seconds": 900,
   "source_files_or_tools": [
     "ops_registry.get_ops_summary_text_cached",
@@ -35,7 +35,7 @@
       "backend_router": "command-center/backend/main.py"
     },
     "last_successful_checks": {
-      "ops_registry_loaded_at": "2026-04-27T01:24:12Z"
+      "ops_registry_loaded_at": "2026-04-27T21:18:21Z"
     },
     "worker_health": {
       "worker_name": "worker-rig-01",
@@ -67,10 +67,56 @@
           "latency_ms": null
         }
       ],
-      "checked_at": "2026-04-27T01:24:12Z",
+      "checked_at": "2026-04-27T21:18:21Z",
       "timeout_budget_ms": 2000,
       "worker_status": "offline_or_unreachable",
-      "last_known_status": null,
+      "last_known_status": {
+        "checked_at": "2026-04-27T21:18:20Z",
+        "worker_status": "offline_or_unreachable",
+        "all_ok": false,
+        "services": [
+          {
+            "name": "worker_assistant",
+            "ok": false,
+            "url": "http://127.0.0.1:8765/health",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          },
+          {
+            "name": "n8n",
+            "ok": false,
+            "url": "http://127.0.0.1:5678/",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          },
+          {
+            "name": "ollama",
+            "ok": false,
+            "url": "http://127.0.0.1:11434/api/tags",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          }
+        ],
+        "tunnel_status": {
+          "worker_name": "worker-rig-01",
+          "expected_ports": [
+            8765,
+            5678,
+            11434
+          ],
+          "reachable_ports": [],
+          "missing_ports": [
+            5678,
+            8765,
+            11434
+          ],
+          "likely_up": false,
+          "detail": "Missing tunnel ports: [5678, 8765, 11434]. Start tunnel or check worker."
+        }
+      },
       "tunnel_status": {
         "worker_name": "worker-rig-01",
         "expected_ports": [
@@ -81,11 +127,11 @@
         "reachable_ports": [],
         "missing_ports": [
           5678,
-          11434,
-          8765
+          8765,
+          11434
         ],
         "likely_up": false,
-        "detail": "Missing tunnel ports: [5678, 11434, 8765]. Start tunnel or check worker."
+        "detail": "Missing tunnel ports: [5678, 8765, 11434]. Start tunnel or check worker."
       }
     },
     "worker_summary": {
@@ -143,14 +189,14 @@
     {
       "title": "Ops registry summary",
       "source_path_or_tool": "ops_registry.get_ops_summary_text_cached",
-      "observed_at": "2026-04-27T01:24:12Z",
+      "observed_at": "2026-04-27T21:18:21Z",
       "summary": "Loaded systems/workers/automations registries.",
       "confidence": 0.9
     },
     {
       "title": "Worker health snapshot",
       "source_path_or_tool": "brain.worker_health.get_worker_health_snapshot",
-      "observed_at": "2026-04-27T01:24:12Z",
+      "observed_at": "2026-04-27T21:18:21Z",
       "summary": "worker_status=offline_or_unreachable",
       "confidence": 0.9
     }

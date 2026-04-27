@@ -27,6 +27,8 @@ Each contract defines:
 - policy (`empty_result_policy`, `duplicate_policy`)
 - sanity checks (`dedupe_key_fields`, `non_negative_field`)
 - allowed consumers and risk/confidence metadata
+- **`field_confidence`** — per-path or logical-field tier: `confirmed` | `inferred` | `unstable` (see `docs/GROWFLOW_SCHEMA_CONFIDENCE_PLAN.md`)
+- **`confidence_level`** — metric-level intent (e.g. `high` for promoted business metrics)
 
 ## Query Template Registry
 
@@ -47,6 +49,29 @@ Each template binds metric to GraphQL operation/source and expected root. Script
   - raw + report only
   - no trusted output written
   - intended for schema discovery metrics
+
+## Field confidence, numeric score, and schema drift
+
+Each validation **report** and **trusted output** includes:
+
+- **`confidence_score`** — float in `[0, 1]` from contract `field_confidence` mix, reduced on schema drift warnings or capped low in `discovery` mode.
+- **`confidence`** (report) / **`confidence_label`** (trusted file) — discrete label for UI and logs.
+- **`field_confidence`** — copy of the contract’s tier map for audit.
+- **`field_confidence_counts`** — count of paths per tier.
+
+**Schema verification** (`lib/schema_verification.py`):
+
+- Baselines live under `state/schema_fingerprints/{metric_id}.json`.
+- Report block **`schema_verification`** holds drift details; **`schema_drift_warnings`** lists concise messages.
+
+**Optional request `context` flags** (passed into `validate_and_normalize`):
+
+- `update_schema_baseline: true` — refresh fingerprint baseline when validation succeeds.
+- `fail_on_schema_drift: true` — add hard failure `schema_drift_critical` when drift marks critical missing paths.
+
+## Brand / category normalization
+
+After row normalization, the gateway applies `lib/brand_category_normalize.apply_to_rows` using `config/brand_category_normalization.json` for canonical brand/category columns on supported metrics. Unmapped strings remain usable but are treated as **inferred** tier in confidence accounting.
 
 ## Script Integration
 
@@ -73,7 +98,8 @@ Report payload includes:
 - schema/shape failures (`missing_required_fields`, `type_errors`)
 - policy outcomes (`empty_result_status`, `duplicate_count`)
 - alignment and parser warnings
-- confidence label and hard-failure list
+- confidence label, **`confidence_score`**, **`field_confidence_counts`**, **`schema_verification`**, **`schema_drift_warnings`**
+- hard-failure list
 - artifact paths for raw/trusted/report
 
 Common failure categories surfaced explicitly:
@@ -91,7 +117,9 @@ Command Center endpoint is added in ai-lab backend:
 
 - `GET /api/growflow/validation-status`
 
-It reads latest validation reports by metric and returns status blocks for UI color coding (green/yellow/red behavior can be based on `ok` and warning/error presence).
+It reads latest validation reports by metric and returns status blocks for UI color coding (green/yellow/red behavior can be based on `ok` and warning/error presence). Response rows include **`confidence_score`**, **`field_confidence_counts`**, and a compact **`schema_drift`** summary when present.
+
+Prepared context `growflow_snapshot` embeds the same fields under `data.validation_status_by_metric` for AI consumption.
 
 ## Promotion Checklist for New Metrics
 
@@ -101,4 +129,7 @@ It reads latest validation reports by metric and returns status blocks for UI co
 4. integrate canonical script call to gateway with metric/template IDs
 5. add tests for happy path + root/field/type/empty/duplicate/date/mode cases
 6. confirm prepared context and command center read the new metric status
-7. keep confidence/risk notes explicit until schema is validated from trusted source
+7. document **`field_confidence`** for every required/optional API path and align the matrix inventory
+8. add or extend `tests/test_schema_verification.py` when fingerprint rules change
+
+Full confidence architecture: **`docs/GROWFLOW_SCHEMA_CONFIDENCE_PLAN.md`**

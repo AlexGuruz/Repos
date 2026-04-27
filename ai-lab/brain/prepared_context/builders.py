@@ -7,17 +7,85 @@ import os
 import json
 import subprocess
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from brain import ops_registry
 from brain.prepared_context.schema import PreparedSnapshot, now_iso
-from brain.prepared_context.store import SNAPSHOT_NAMES
+from brain.prepared_context.store import SNAPSHOT_NAMES, load_snapshot
 from brain.worker_health import get_worker_health_snapshot, worker_health_snapshot_to_dict
 
 
 def _repos_root() -> Path:
     return Path(__file__).resolve().parents[3]
+
+
+def _ai_lab_root() -> Path:
+    """ai-lab package root (parent of `brain/`)."""
+    return Path(__file__).resolve().parents[2]
+
+
+def _personal_ops_config_files() -> list[Path]:
+    root = _ai_lab_root()
+    return [
+        root / "config" / "personal_ops.yaml",
+        root / "config" / "personal_ops.example.yaml",
+    ]
+
+
+def _load_yaml_dict(path: Path) -> dict[str, Any]:
+    text = path.read_text(encoding="utf-8")
+    try:
+        import yaml  # type: ignore
+
+        raw = yaml.safe_load(text)
+        return raw if isinstance(raw, dict) else {}
+    except ImportError:
+        return {}
+
+
+def _heartbeat_snippet(path: Path) -> dict[str, Any]:
+    out: dict[str, Any] = {"path": str(path), "exists": path.is_file()}
+    if not path.is_file():
+        return out
+    out["mtime_utc"] = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).isoformat()
+    try:
+        hb = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(hb, dict):
+            out["keys"] = sorted(hb.keys())[:30]
+            for k in ("ts", "timestamp", "updated_at", "last_ok", "status"):
+                if k in hb:
+                    out[k] = hb.get(k)
+    except Exception as exc:
+        out["parse_error"] = str(exc)
+    return out
+
+
+def _event_start_str(ev: dict[str, Any]) -> str:
+    st = ev.get("start")
+    if isinstance(st, dict):
+        return str(st.get("dateTime") or st.get("date") or "")
+    return ""
+
+
+def _slim_calendar_events(raw: list[dict[str, Any]], *, today_prefix: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split into today vs upcoming (rest), using UTC date prefix on start string."""
+    today_ev: list[dict[str, Any]] = []
+    upcoming: list[dict[str, Any]] = []
+    for ev in raw:
+        s = _event_start_str(ev)
+        slim: dict[str, Any] = {
+            "id": ev.get("id"),
+            "summary": ev.get("summary"),
+            "start": s,
+            "status": ev.get("status"),
+        }
+        if s[:10] == today_prefix[:10]:
+            today_ev.append(slim)
+        else:
+            upcoming.append(slim)
+    return today_ev, upcoming
 
 
 def _is_stale(generated_monotonic: float, freshness_seconds: int) -> bool:
@@ -289,49 +357,231 @@ def build_project_agenda() -> PreparedSnapshot:
 
 
 def build_personal_ops_snapshot() -> PreparedSnapshot:
+    """
+    Daily-planning snapshot: config-driven repo pulse, optional calendar window,
+    Kylo heartbeat files, and cached project_agenda when present.
+    """
     started = time.monotonic()
     errs: list[str] = []
-    root = _repos_root() / "ai-lab" / "scripts"
-    src = [str(root)]
+    scripts_dir = _repos_root() / "ai-lab" / "scripts"
     script_names = [
         "personal_ops_calendar_snapshot.py",
         "personal_ops_daily_digest.py",
         "personal_ops_repo_pulse.py",
     ]
-    available = [n for n in script_names if (root / n).exists()]
-    data = {
+    available = [n for n in script_names if (scripts_dir / n).exists()]
+    src: list[str] = [str(scripts_dir)]
+
+    cfg_path: Path | None = None
+    cfg: dict[str, Any] = {}
+    for candidate in _personal_ops_config_files():
+        if candidate.is_file():
+            cfg_path = candidate
+            try:
+                cfg = _load_yaml_dict(candidate)
+            except Exception as e:
+                errs.append(f"personal_ops_config: {e}")
+                cfg = {}
+            break
+
+    if cfg_path:
+        src.insert(0, str(cfg_path))
+
+    warn_days = float(cfg.get("stale_warning_days") or 7)
+    data: dict[str, Any] = {
+        "config_path": str(cfg_path) if cfg_path else None,
         "calendar_events": [],
+        "calendar_today": [],
+        "calendar_upcoming": [],
+        "calendar_horizon_days": 7,
         "reminders": [],
-        "daily_digest_available": (root / "personal_ops_daily_digest.py").exists(),
+        "daily_digest_available": (scripts_dir / "personal_ops_daily_digest.py").exists(),
+        "repo_pulse": [],
+        "stale_repo_labels": [],
+        "kylo_heartbeats": [],
+        "project_focus": {},
         "project_schedule": [],
         "incomplete_planned_items": [],
         "alerts_sent": [],
         "available_scripts": available,
     }
-    evidence_items = [
+    evidence_items: list[dict[str, Any]] = []
+
+    if cfg_path:
+        evidence_items.append(
+            {
+                "title": "Personal ops config",
+                "source_path_or_tool": str(cfg_path),
+                "observed_at": now_iso(),
+                "summary": f"loaded keys={sorted(cfg.keys())[:12]}",
+                "confidence": 0.82,
+            }
+        )
+
+    evidence_items.append(
         {
             "title": "Personal ops script availability",
-            "source_path_or_tool": str(root),
+            "source_path_or_tool": str(scripts_dir),
             "observed_at": now_iso(),
             "summary": f"available_scripts={available}",
             "confidence": 0.65 if available else 0.4,
         }
-    ]
+    )
+
+    repos_cfg = cfg.get("repos") or []
+    if isinstance(repos_cfg, list) and repos_cfg:
+        try:
+            from lib.repo_staleness import scan_repos
+
+            pulses = scan_repos(repos_cfg)
+            data["repo_pulse"] = [
+                {
+                    "label": p.label,
+                    "path": p.path,
+                    "days_idle": p.days_idle,
+                    "last_commit_iso": p.last_commit_iso,
+                    "error": p.error,
+                }
+                for p in pulses
+            ]
+            data["stale_repo_labels"] = [
+                p.label for p in pulses if p.days_idle is not None and p.days_idle >= warn_days and not p.error
+            ]
+            evidence_items.append(
+                {
+                    "title": "Repo pulse (git idle)",
+                    "source_path_or_tool": "lib.repo_staleness.scan_repos",
+                    "observed_at": now_iso(),
+                    "summary": f"repos={len(pulses)} stale={len(data['stale_repo_labels'])}",
+                    "confidence": 0.78,
+                }
+            )
+        except Exception as e:
+            errs.append(f"repo_pulse: {e}")
+
+    hb_cfg = cfg.get("kylo_heartbeats") or []
+    if isinstance(hb_cfg, list) and hb_cfg:
+        for item in hb_cfg:
+            raw = item.get("path") if isinstance(item, dict) else str(item)
+            if not raw:
+                continue
+            sn = _heartbeat_snippet(Path(str(raw)).expanduser())
+            data["kylo_heartbeats"].append(sn)
+        if data["kylo_heartbeats"]:
+            evidence_items.append(
+                {
+                    "title": "Kylo / worker heartbeats",
+                    "source_path_or_tool": "config.kylo_heartbeats",
+                    "observed_at": now_iso(),
+                    "summary": f"files={len(data['kylo_heartbeats'])}",
+                    "confidence": 0.7,
+                }
+            )
+
+    cal_block = cfg.get("calendar") if isinstance(cfg.get("calendar"), dict) else {}
+    cal_id = (cal_block.get("calendar_id") or ("primary" if cal_block.get("primary") else None)) if cal_block else None
+    horizon = int(data.get("calendar_horizon_days") or 7)
+    # Avoid calling Google when only the checked-in example YAML is present (primary calendar).
+    calendar_network_ok = bool(cal_id and cfg_path and cfg_path.name != "personal_ops.example.yaml")
+    if calendar_network_ok:
+        try:
+            from lib.google_calendar_client import get_calendar_service, list_events, preflight_calendar_auth
+
+            pre = preflight_calendar_auth()
+            if not pre.get("ok"):
+                errs.append("calendar: preflight not ok (credentials/token)")
+            else:
+                svc = get_calendar_service()
+                now = datetime.now(timezone.utc)
+                end = now + timedelta(days=horizon)
+                tfmt = "%Y-%m-%dT%H:%M:%SZ"
+                raw_ev = list_events(
+                    svc,
+                    str(cal_id),
+                    time_min=now.strftime(tfmt),
+                    time_max=end.strftime(tfmt),
+                    max_results=120,
+                )
+                today_prefix = now.strftime("%Y-%m-%d")
+                today_ev, upcoming = _slim_calendar_events(raw_ev, today_prefix=today_prefix)
+                data["calendar_events"] = today_ev + upcoming[:50]
+                data["calendar_today"] = today_ev[:20]
+                data["calendar_upcoming"] = upcoming[:30]
+                evidence_items.append(
+                    {
+                        "title": "Google Calendar window",
+                        "source_path_or_tool": "lib.google_calendar_client.list_events",
+                        "observed_at": now_iso(),
+                        "summary": f"calendar_id={cal_id} events={len(data['calendar_events'])}",
+                        "confidence": 0.85 if data["calendar_events"] else 0.55,
+                    }
+                )
+        except Exception as e:
+            errs.append(f"calendar: {e}")
+
+    pa = load_snapshot("project_agenda")
+    missing_sources: list[str] = []
+    if not cal_id or not calendar_network_ok:
+        missing_sources.append("calendar_not_configured")
+    if not isinstance(pa, dict) or not isinstance(pa.get("data"), dict):
+        missing_sources.append("no_project_agenda_snapshot")
+    if not data.get("alerts_sent"):
+        missing_sources.append("no_recent_alerts")
+    data["missing_sources"] = missing_sources
+
+    if isinstance(pa, dict) and isinstance(pa.get("data"), dict):
+        pad = pa["data"]
+        data["project_focus"] = {
+            "today_focus": pad.get("today_focus") or [],
+            "current_priorities": pad.get("current_priorities") or [],
+            "blocked_items": pad.get("blocked_items") or [],
+            "overdue_tasks": pad.get("overdue_tasks") or [],
+            "next_actions": pad.get("next_actions") or [],
+        }
+        data["incomplete_planned_items"] = list(pad.get("blocked_items") or [])[:8]
+        data["project_schedule"] = list(pad.get("next_actions") or [])[:8]
+        evidence_items.append(
+            {
+                "title": "Project agenda (cached)",
+                "source_path_or_tool": "state/prepared_context/project_agenda.json",
+                "observed_at": pa.get("generated_at") or now_iso(),
+                "summary": "Merged last-built project_agenda for planning context.",
+                "confidence": 0.72,
+            }
+        )
+
+    has_planning_signal = bool(
+        data.get("repo_pulse") or data.get("calendar_events") or data.get("project_focus") or data.get("kylo_heartbeats")
+    )
     freshness = 86400
+    summary_short = (
+        "Personal planning snapshot: repo activity + optional calendar + agenda cues."
+        if has_planning_signal
+        else "Personal ops snapshot: limited data (see config, credentials, and project_agenda freshness)."
+    )
+    summary_detailed = (
+        "Combines personal_ops.yaml (or example), git repo idle scan, optional Google Calendar events, "
+        "Kylo heartbeat paths, and on-disk project_agenda when available. Use for daily planning questions."
+    )
+    base_conf = 0.72 if has_planning_signal else 0.42
+    if not cfg_path:
+        base_conf = min(base_conf, 0.38)
+
     return PreparedSnapshot(
         snapshot_type="personal_ops_snapshot",
         generated_at=now_iso(),
         freshness_seconds=freshness,
         source_files_or_tools=src,
-        confidence=_confidence_from_evidence(evidence_items, base=0.65 if available else 0.4, errors=errs),
+        confidence=_confidence_from_evidence(evidence_items, base=base_conf, errors=errs),
         stale=_is_stale(started, freshness),
         errors=errs,
         data=data,
-        summary_short="Personal ops snapshot prepared from available personal_ops scripts.",
-        summary_detailed="Calendar/digest/planning readiness snapshot with available personal operations tooling and placeholders for integrations.",
+        summary_short=summary_short,
+        summary_detailed=summary_detailed,
         suggested_questions=[
             "what is on my calendar today?",
-            "what reminders are pending?",
+            "what should I focus on today?",
+            "which repos are stale?",
             "show my daily assistant snapshot",
         ],
         evidence_items=evidence_items,
@@ -409,10 +659,42 @@ def build_growflow_snapshot() -> PreparedSnapshot:
                 latest = reports[0]
                 payload = json.loads(latest.read_text(encoding="utf-8", errors="replace"))
                 metric_id = str(payload.get("metric_id") or metric_dir.name)
+                sv = payload.get("schema_verification") if isinstance(payload.get("schema_verification"), dict) else {}
+                drift = sv.get("drift") if isinstance(sv.get("drift"), dict) else {}
+                crit = drift.get("critical_missing_paths") if isinstance(drift.get("critical_missing_paths"), list) else []
+                drift_active = bool(
+                    drift.get("missing_paths") or drift.get("added_paths") or drift.get("critical_missing_paths")
+                )
+                merged_warnings: list[Any] = []
+                for key in (
+                    "warnings",
+                    "sanity_warnings",
+                    "schema_drift_warnings",
+                    "parser_warnings",
+                    "target_alignment_warnings",
+                ):
+                    chunk = payload.get(key)
+                    if isinstance(chunk, list):
+                        merged_warnings.extend(chunk)
+                seen_w: set[str] = set()
+                deduped_warnings: list[Any] = []
+                for w in merged_warnings:
+                    sw = str(w)
+                    if sw not in seen_w:
+                        seen_w.add(sw)
+                        deduped_warnings.append(w)
                 metric_status = {
                     "ok": bool(payload.get("ok")),
                     "confidence": payload.get("confidence"),
-                    "warnings": payload.get("warnings") or payload.get("sanity_warnings") or [],
+                    "confidence_score": payload.get("confidence_score"),
+                    "confidence_label": payload.get("confidence"),
+                    "field_confidence_counts": payload.get("field_confidence_counts") or {},
+                    "schema_drift_summary": {
+                        "baseline_exists": bool(sv.get("baseline_exists")),
+                        "drift": drift_active,
+                        "critical_missing_paths_count": len(crit),
+                    },
+                    "warnings": deduped_warnings,
                     "errors": payload.get("errors") or payload.get("hard_failures") or [],
                     "normalized_row_count": payload.get("normalized_row_count"),
                     "generated_at": payload.get("generated_at"),

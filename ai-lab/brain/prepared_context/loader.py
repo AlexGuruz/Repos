@@ -60,9 +60,29 @@ def _pick_snapshots_for_message(msg: str) -> list[str]:
         "explain repo documentation status",
     )):
         return ["repo_pulse", "system_snapshot"]
-    if any(k in m for k in ("work on today", "what is next", "blocked", "daily plan", "project agenda")):
+    if any(
+        k in m
+        for k in (
+            "what should i work on today",
+            "what to work on today",
+            "what is next",
+            "blocked",
+            "daily plan",
+            "project agenda",
+            "open project agenda",
+        )
+    ):
         return ["project_agenda", "repo_pulse"]
-    if any(k in m for k in ("calendar", "reminder", "daily digest", "personal ops")):
+    if any(k in m for k in (
+        "calendar",
+        "reminder",
+        "daily digest",
+        "personal ops",
+        "focus on today",
+        "what should i focus",
+        "repos are stale",
+        "which repos are stale",
+    )):
         return ["personal_ops_snapshot"]
     if any(k in m for k in ("growflow status", "business", "inventory", "par")):
         return ["growflow_snapshot"]

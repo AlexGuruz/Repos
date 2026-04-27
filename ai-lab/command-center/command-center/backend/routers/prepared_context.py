@@ -104,14 +104,45 @@ async def growflow_validation_status():
             payload = json.loads(latest.read_text(encoding="utf-8", errors="replace"))
         except Exception:
             payload = {}
+        sv = payload.get("schema_verification") if isinstance(payload.get("schema_verification"), dict) else {}
+        drift = sv.get("drift") if isinstance(sv.get("drift"), dict) else {}
+        crit = drift.get("critical_missing_paths") if isinstance(drift.get("critical_missing_paths"), list) else []
+        drift_active = bool(
+            drift.get("missing_paths") or drift.get("added_paths") or drift.get("critical_missing_paths")
+        )
+        merged_warnings: list = []
+        for key in (
+            "warnings",
+            "sanity_warnings",
+            "schema_drift_warnings",
+            "parser_warnings",
+            "target_alignment_warnings",
+        ):
+            chunk = payload.get(key)
+            if isinstance(chunk, list):
+                merged_warnings.extend(chunk)
+        seen_w: set[str] = set()
+        deduped_warnings: list = []
+        for w in merged_warnings:
+            sw = str(w)
+            if sw not in seen_w:
+                seen_w.add(sw)
+                deduped_warnings.append(w)
         out.append(
             {
                 "metric_id": str(payload.get("metric_id") or metric_dir.name),
                 "latest_report": str(latest.name),
                 "ok": bool(payload.get("ok")),
                 "confidence": payload.get("confidence"),
+                "confidence_score": payload.get("confidence_score"),
+                "field_confidence_counts": payload.get("field_confidence_counts") or {},
+                "schema_drift": {
+                    "baseline_exists": bool(sv.get("baseline_exists")),
+                    "drift": drift_active,
+                    "critical_missing_paths_count": len(crit),
+                },
                 "normalized_row_count": payload.get("normalized_row_count"),
-                "warnings": payload.get("warnings") or payload.get("sanity_warnings") or payload.get("target_alignment_warnings") or payload.get("parser_warnings") or [],
+                "warnings": deduped_warnings,
                 "errors": payload.get("errors") or payload.get("hard_failures") or [],
                 "generated_at": payload.get("generated_at"),
                 "report_path": str(latest),

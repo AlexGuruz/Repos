@@ -152,7 +152,11 @@ export default function ToolsPanel() {
               const status = m.ok ? (warnCount > 0 ? 'yellow' : 'green') : 'red'
               return (
                 <div key={m.metric_id} className="text-[10px] font-mono text-white/38 border border-white/10 rounded px-2 py-1">
-                  <div className={color}>{m.metric_id} · {status} · conf {m.confidence ?? 'n/a'} · rows {m.normalized_row_count ?? 0}</div>
+                  <div className={color}>
+                    {m.metric_id} · {status} · conf {m.confidence ?? 'n/a'}
+                    {m.confidence_score != null && m.confidence_score !== undefined ? ` (${Number(m.confidence_score).toFixed(3)})` : ''}
+                    {' '}· rows {m.normalized_row_count ?? 0}
+                  </div>
                   <div className="text-white/28">generated {m.generated_at || 'unknown'}</div>
                   {errCount > 0 ? <div className="text-red-300/70">failure reason: {String(m.errors[0])}</div> : null}
                   {warnCount > 0 ? <div className="text-amber-200/70">warnings: {warnCount}</div> : null}
