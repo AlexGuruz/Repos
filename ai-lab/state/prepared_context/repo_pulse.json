@@ -1,0 +1,290 @@
+{
+  "snapshot_type": "repo_pulse",
+  "generated_at": "2026-04-27T01:11:59Z",
+  "freshness_seconds": 3600,
+  "source_files_or_tools": [
+    "E:\\Repos",
+    "git log",
+    "README.md scan",
+    "TODO/FIXME scan"
+  ],
+  "confidence": 0.82,
+  "stale": false,
+  "errors": [],
+  "data": {
+    "changed_repos": [
+      {
+        "repo": "geomapper app",
+        "path": "E:\\Repos\\geomapper app",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": true,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "76f993f Improve Android background location reliability for soft launch",
+          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding",
+          "0f450e0 StackBlitz: Connect to backend form on login, localStorage api base, app-config.json fallback, app-config.example.json"
+        ],
+        "last_modified_epoch": 1773466643.37,
+        "role": "unknown"
+      },
+      {
+        "repo": "Greg-Kylo",
+        "path": "E:\\Repos\\Greg-Kylo",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "8712c94 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
+          "ebc5218 Initial clone from Project-Kylo for Greg-Kylo"
+        ],
+        "last_modified_epoch": 1773120833.48,
+        "role": "unknown"
+      },
+      {
+        "repo": "awesome-n8n-templates",
+        "path": "E:\\Repos\\awesome-n8n-templates",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 1,
+        "recent_commits": [
+          "12626bd Add comprehensive analysis document for Awesome n8n Templates repository",
+          "018f7d0 Merge pull request #26 from Lalimec/patch-1",
+          "6ce8d87 Merge pull request #25 from crazyyanchao/main"
+        ],
+        "last_modified_epoch": 1757142568.18,
+        "role": "unknown"
+      },
+      {
+        "repo": "activepieces",
+        "path": "E:\\Repos\\activepieces",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "fc4db217bd Merge pull request #9079 from activepieces/fix/speed",
+          "ea03e4cc0b fix: remove db call on check for pieces cache",
+          "0396c1dffa Merge pull request #9078 from activepieces/l10n_main"
+        ],
+        "last_modified_epoch": 1757142460.39,
+        "role": "unknown"
+      },
+      {
+        "repo": "BMAD-METHOD",
+        "path": "E:\\Repos\\BMAD-METHOD",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [],
+        "last_modified_epoch": 1757142379.45,
+        "role": "unknown"
+      }
+    ],
+    "stale_repos": [
+      {
+        "repo": "activepieces",
+        "path": "E:\\Repos\\activepieces",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "fc4db217bd Merge pull request #9079 from activepieces/fix/speed",
+          "ea03e4cc0b fix: remove db call on check for pieces cache",
+          "0396c1dffa Merge pull request #9078 from activepieces/l10n_main"
+        ],
+        "last_modified_epoch": 1757142460.39,
+        "role": "unknown"
+      },
+      {
+        "repo": "awesome-n8n-templates",
+        "path": "E:\\Repos\\awesome-n8n-templates",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 1,
+        "recent_commits": [
+          "12626bd Add comprehensive analysis document for Awesome n8n Templates repository",
+          "018f7d0 Merge pull request #26 from Lalimec/patch-1",
+          "6ce8d87 Merge pull request #25 from crazyyanchao/main"
+        ],
+        "last_modified_epoch": 1757142568.18,
+        "role": "unknown"
+      },
+      {
+        "repo": "BMAD-METHOD",
+        "path": "E:\\Repos\\BMAD-METHOD",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [],
+        "last_modified_epoch": 1757142379.45,
+        "role": "unknown"
+      },
+      {
+        "repo": "geomapper app",
+        "path": "E:\\Repos\\geomapper app",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": true,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "76f993f Improve Android background location reliability for soft launch",
+          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding",
+          "0f450e0 StackBlitz: Connect to backend form on login, localStorage api base, app-config.json fallback, app-config.example.json"
+        ],
+        "last_modified_epoch": 1773466643.37,
+        "role": "unknown"
+      },
+      {
+        "repo": "Greg-Kylo",
+        "path": "E:\\Repos\\Greg-Kylo",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "8712c94 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
+          "ebc5218 Initial clone from Project-Kylo for Greg-Kylo"
+        ],
+        "last_modified_epoch": 1773120833.48,
+        "role": "unknown"
+      }
+    ],
+    "docs_needing_updates": [
+      "activepieces",
+      "awesome-n8n-templates",
+      "BMAD-METHOD",
+      "Greg-Kylo"
+    ],
+    "readme_freshness": {
+      "activepieces": false,
+      "awesome-n8n-templates": false,
+      "BMAD-METHOD": false,
+      "geomapper app": true,
+      "Greg-Kylo": false
+    },
+    "repos": [
+      {
+        "repo": "activepieces",
+        "path": "E:\\Repos\\activepieces",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "fc4db217bd Merge pull request #9079 from activepieces/fix/speed",
+          "ea03e4cc0b fix: remove db call on check for pieces cache",
+          "0396c1dffa Merge pull request #9078 from activepieces/l10n_main"
+        ],
+        "last_modified_epoch": 1757142460.39,
+        "role": "unknown"
+      },
+      {
+        "repo": "awesome-n8n-templates",
+        "path": "E:\\Repos\\awesome-n8n-templates",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 1,
+        "recent_commits": [
+          "12626bd Add comprehensive analysis document for Awesome n8n Templates repository",
+          "018f7d0 Merge pull request #26 from Lalimec/patch-1",
+          "6ce8d87 Merge pull request #25 from crazyyanchao/main"
+        ],
+        "last_modified_epoch": 1757142568.18,
+        "role": "unknown"
+      },
+      {
+        "repo": "BMAD-METHOD",
+        "path": "E:\\Repos\\BMAD-METHOD",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [],
+        "last_modified_epoch": 1757142379.45,
+        "role": "unknown"
+      },
+      {
+        "repo": "geomapper app",
+        "path": "E:\\Repos\\geomapper app",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": true,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "76f993f Improve Android background location reliability for soft launch",
+          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding",
+          "0f450e0 StackBlitz: Connect to backend form on login, localStorage api base, app-config.json fallback, app-config.example.json"
+        ],
+        "last_modified_epoch": 1773466643.37,
+        "role": "unknown"
+      },
+      {
+        "repo": "Greg-Kylo",
+        "path": "E:\\Repos\\Greg-Kylo",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 0,
+        "recent_commits": [
+          "8712c94 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
+          "ebc5218 Initial clone from Project-Kylo for Greg-Kylo"
+        ],
+        "last_modified_epoch": 1773120833.48,
+        "role": "unknown"
+      }
+    ]
+  },
+  "summary_short": "Repo pulse built for 5 repos.",
+  "summary_detailed": "Tracks changed repos, stale repos, docs freshness, TODO/FIXME density, and recent commits where available.",
+  "suggested_questions": [
+    "what changed recently?",
+    "what repo needs cleanup?",
+    "what docs are stale?",
+    "summarize repo status"
+  ],
+  "evidence_items": [
+    {
+      "title": "Repo pulse: geomapper app",
+      "source_path_or_tool": "E:\\Repos\\geomapper app",
+      "observed_at": "2026-04-27T01:11:59Z",
+      "summary": "readme_fresh=True stale=True todo_fixme=0",
+      "confidence": 0.8
+    },
+    {
+      "title": "Repo pulse: Greg-Kylo",
+      "source_path_or_tool": "E:\\Repos\\Greg-Kylo",
+      "observed_at": "2026-04-27T01:11:59Z",
+      "summary": "readme_fresh=False stale=True todo_fixme=0",
+      "confidence": 0.8
+    },
+    {
+      "title": "Repo pulse: awesome-n8n-templates",
+      "source_path_or_tool": "E:\\Repos\\awesome-n8n-templates",
+      "observed_at": "2026-04-27T01:11:59Z",
+      "summary": "readme_fresh=False stale=True todo_fixme=1",
+      "confidence": 0.8
+    },
+    {
+      "title": "Repo pulse: activepieces",
+      "source_path_or_tool": "E:\\Repos\\activepieces",
+      "observed_at": "2026-04-27T01:11:59Z",
+      "summary": "readme_fresh=False stale=True todo_fixme=0",
+      "confidence": 0.8
+    },
+    {
+      "title": "Repo pulse: BMAD-METHOD",
+      "source_path_or_tool": "E:\\Repos\\BMAD-METHOD",
+      "observed_at": "2026-04-27T01:11:59Z",
+      "summary": "readme_fresh=False stale=True todo_fixme=0",
+      "confidence": 0.8
+    }
+  ]
+}

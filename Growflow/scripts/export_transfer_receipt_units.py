@@ -26,6 +26,7 @@ from pathlib import Path
 _root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_root))
 
+from lib.data_validation_gateway import validate_and_normalize
 from lib.transfer_receipt_export import fetch_transfer_receipt_rows, write_jsonl
 
 
@@ -75,6 +76,12 @@ def main() -> None:
         action="store_true",
         help="Append to --out instead of overwriting (JSONL only)",
     )
+    ap.add_argument(
+        "--validation-mode",
+        choices=("strict", "warning", "discovery"),
+        default="strict",
+        help="Validation gateway mode (strict fail-closed by default).",
+    )
     args = ap.parse_args()
     cp = _credentials_path()
     if not cp and not (os.environ.get("GROWFLOW_ACCESS_TOKEN") or "").strip():
@@ -86,6 +93,21 @@ def main() -> None:
         status=args.status,
         credentials_path=cp,
     )
+    validation = validate_and_normalize(
+        metric_id="transfer_units",
+        template_id="transfer_units_from_receipts_v1",
+        raw_json={"data": {"findTransfers": {"nodes": rows}}},
+        request_context={
+            "requested_date_range": {"from": None, "to": None},
+            "status": args.status,
+            "source_script": "scripts/export_transfer_receipt_units.py",
+        },
+        mode=args.validation_mode,
+    )
+    print(f"Validation report: {validation.get('report_path')}")
+    if not validation.get("ok"):
+        print(f"Validation blocked trusted output: {validation.get('errors')}", file=sys.stderr)
+        sys.exit(1)
     out = Path(args.out)
     write_jsonl(out, rows, append=args.append)
     verb = "Appended" if args.append else "Wrote"

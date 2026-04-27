@@ -1,0 +1,46 @@
+{
+  "data": {
+    "findOrderItems": {
+      "edges": [
+        {
+          "node": {
+            "id": "row-1",
+            "objectId": "row-1",
+            "SoldAt": "2026-04-20T12:00:00.000Z",
+            "GrossPrice": 1200,
+            "NetPrice": 1100,
+            "COG": 700,
+            "ProductCategory": {
+              "Name": "Edibles"
+            },
+            "Product": {
+              "objectId": "p1",
+              "Brand": {
+                "Name": "BrandA"
+              }
+            }
+          }
+        },
+        {
+          "node": {
+            "id": "row-1",
+            "objectId": "row-1",
+            "SoldAt": "2026-04-20T12:00:00.000Z",
+            "GrossPrice": 1200,
+            "NetPrice": 1100,
+            "COG": 700,
+            "ProductCategory": {
+              "Name": "Edibles"
+            },
+            "Product": {
+              "objectId": "p1",
+              "Brand": {
+                "Name": "BrandA"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

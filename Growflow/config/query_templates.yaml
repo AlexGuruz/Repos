@@ -1,0 +1,110 @@
+[
+  {
+    "template_id": "order_items_sales_today_v1",
+    "metric_id": "sales_today",
+    "graphql_operation_name": "OrderItems",
+    "query_source": "lib/growflow_queries.py:ORDER_ITEMS_QUERY",
+    "required_variables": ["first", "where.SoldAt.greaterThanOrEqualTo", "where.SoldAt.lessThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findOrderItems",
+    "allowed_date_window_rules": "single store-local day translated to UTC SoldAt range",
+    "known_schema_assumptions": ["Product.Brand may be unavailable; ORDER_ITEMS_QUERY_NO_BRAND fallback allowed"],
+    "status": "active"
+  },
+  {
+    "template_id": "order_items_brand_category_v1",
+    "metric_id": "sales_by_brand_category",
+    "graphql_operation_name": "OrderItems",
+    "query_source": "lib/growflow_queries.py:ORDER_ITEMS_QUERY",
+    "required_variables": ["first", "where.SoldAt.greaterThanOrEqualTo", "where.SoldAt.lessThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findOrderItems",
+    "allowed_date_window_rules": "trailing window by SoldAt UTC range",
+    "known_schema_assumptions": ["Brand normalization uses Product.Brand.Name string"],
+    "status": "active"
+  },
+  {
+    "template_id": "packages_on_hand_v1",
+    "metric_id": "inventory_on_hand",
+    "graphql_operation_name": "Packages",
+    "query_source": "lib/growflow_queries.py:PACKAGES_TABLE_QUERY_WITH_BRAND",
+    "required_variables": ["first", "where.createdAt.greaterThanOrEqualTo", "where.createdAt.lessThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findPackages",
+    "allowed_date_window_rules": "createdAt chunk windows; may require additional CurrentQty filters for true on-hand",
+    "known_schema_assumptions": ["CurrentQty is live inventory, OriginalQty is intake quantity"],
+    "status": "active"
+  },
+  {
+    "template_id": "transfer_receipts_accepted_v1",
+    "metric_id": "transfer_receipts",
+    "graphql_operation_name": "TransferReceiptsPaged",
+    "query_source": "lib/transfer_receipt_export.py:TRANSFER_RECEIPTS_PAGED_QUERY",
+    "required_variables": ["first", "where.Status.equalTo", "where.ReceivedAt.greaterThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findTransfers",
+    "allowed_date_window_rules": "ReceivedAt >= since timestamp, descending by ReceivedAt",
+    "known_schema_assumptions": ["Packages are union-expanded with ... on Packages in query"],
+    "status": "active"
+  },
+  {
+    "template_id": "transfer_units_from_receipts_v1",
+    "metric_id": "transfer_units",
+    "graphql_operation_name": "TransferReceiptsPaged",
+    "query_source": "lib/transfer_receipt_export.py:TRANSFER_RECEIPTS_PAGED_QUERY",
+    "required_variables": ["first", "where.Status.equalTo", "where.ReceivedAt.greaterThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findTransfers",
+    "allowed_date_window_rules": "same as transfer_receipts_accepted_v1",
+    "known_schema_assumptions": ["Package Product object can be null for some transfer lines"],
+    "status": "active"
+  },
+  {
+    "template_id": "order_items_brand_profit_velocity_v1",
+    "metric_id": "brand_profit_velocity",
+    "graphql_operation_name": "OrderItems",
+    "query_source": "lib/growflow_queries.py:ORDER_ITEMS_QUERY",
+    "required_variables": ["first", "where.SoldAt.greaterThanOrEqualTo", "where.SoldAt.lessThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findOrderItems",
+    "allowed_date_window_rules": "trailing window by store-local days",
+    "known_schema_assumptions": ["rank_mj_brands_profit_velocity_sheet.py combines this with findProducts supplier lookup"],
+    "status": "active"
+  },
+  {
+    "template_id": "products_brand_supplier_mj_v1",
+    "metric_id": "brand_profit_velocity",
+    "graphql_operation_name": "ProductsBrandSupplierMj",
+    "query_source": "scripts/rank_mj_brands_profit_velocity_sheet.py:PRODUCTS_BRAND_SUPPLIER_MJ_QUERY",
+    "required_variables": ["first"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findProducts",
+    "allowed_date_window_rules": "no date filter in query",
+    "known_schema_assumptions": ["Supplier may be string or object"],
+    "status": "experimental"
+  },
+  {
+    "template_id": "order_items_projection_buy_plan_v1",
+    "metric_id": "projection_by_category_brand",
+    "graphql_operation_name": "OrderItems",
+    "query_source": "lib/growflow_queries.py:ORDER_ITEMS_QUERY",
+    "required_variables": ["first", "where.SoldAt.greaterThanOrEqualTo", "where.SoldAt.lessThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findOrderItems",
+    "allowed_date_window_rules": "multi-chunk trailing SoldAt window",
+    "known_schema_assumptions": ["buy-plan logic still uses inferred format buckets"],
+    "status": "active"
+  },
+  {
+    "template_id": "schema_discovery_runner_v1",
+    "metric_id": "schema_discovery",
+    "graphql_operation_name": "discover_*",
+    "query_source": "scripts/run_growflow_discovery_queries.py + scripts/growflow_discovery_queries/discover_*.graphql",
+    "required_variables": [],
+    "optional_variables": [],
+    "expected_response_root": "data",
+    "allowed_date_window_rules": "none",
+    "known_schema_assumptions": ["discovery only; not trusted business metric output"],
+    "status": "experimental"
+  }
+]

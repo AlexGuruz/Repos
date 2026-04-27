@@ -23,4 +23,3 @@ Goal rubric: `already wired` / `partially wired` / `missing`.
 - Approvals/allowlist: `brain/approval_queue/queue.py`, `brain/permanent_allowlist.py`, `backend/routers/events.py`
 - Worker: `brain/worker_health.py`, `brain/worker_clients.py`, `backend/services/supervisor_bridge.py`
 - Repo indexing: `backend/services/repo_index_coordinator.py`, `backend/services/repo_watcher.py`
-

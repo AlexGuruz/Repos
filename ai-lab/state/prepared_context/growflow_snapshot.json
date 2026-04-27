@@ -1,0 +1,60 @@
+{
+  "snapshot_type": "growflow_snapshot",
+  "generated_at": "2026-04-27T01:05:52Z",
+  "freshness_seconds": 3600,
+  "source_files_or_tools": [
+    "E:\\Repos\\Growflow\\company_bi\\METRICS.md",
+    "E:\\Repos\\Growflow\\exports"
+  ],
+  "confidence": 0.8,
+  "stale": false,
+  "errors": [],
+  "data": {
+    "latest_sales_summary": "# Metric Definitions and Formulas\n\n## Confidence labels\n\n- **Confirmed:** Sourced directly from API or transaction data with no inference.\n- **Estimated:** Derived from proxies, heuristics, or partial data; documented.\n- **Not available:** Data or field missing.\n\n---\n\n## 1. Sales view\n\n| Metric | Formula | Source | Confidence |\n|--------|---------|--------|------------|\n| Daily sales | Sum(GrossPrice)/100 for order items where SoldAt date = d | GrowFlow findOrderItems | Confirmed |\n| Weekly sales | Sum(daily sales) for days in week | GrowFlow | Confirmed |\n| Monthly sales | Sum(GrossPrice)/100 for order items where SoldAt in month | GrowFlow | Confirmed |\n| Average ticket | Monthly sales / count(distinct orders) in month | GrowFlow (orders or order items grouped) | Confirmed if orders available |\n| Trend direction | (current_month_sales - prior_month_sales) / prior_month_sales | GrowFlow | Confirmed |\n| Volatility | std(daily_sales) / mean(daily_sales) over period | GrowFlow | Confirmed |\n| Sales spike | Day d where daily_sales(d) > mean + 2*std | GrowFlow | Confirmed |\n| Sales dip | Day d where daily_sales(d) < mean - 2*std | GrowFlow | Confirmed |\n\n---\n\n## 2. Expense view\n\n| Metr",
+    "inventory_par_health": null,
+    "transfer_receipt_status": "unknown",
+    "dashboard_export_status": {
+      "latest_file": "dashboard_charts.json",
+      "mtime": 1776286704.0
+    },
+    "recent_automation_failures": [],
+    "data_freshness_timestamps": {
+      "metrics_mtime": 1777151438.0
+    },
+    "latest_successful_exports": [
+      "dashboard_charts.json",
+      "top15_mj_brands_30d_x13_windows_20260411_2204_curated_no_prepack_flower_no_bulk_flower_no_accessory_skus_no_710_empire.json",
+      "top15_mj_brands_30d_x13_windows_20260411_2204_curated_no_prepack_flower_no_bulk_flower_no_accessory_skus_no_710_empire.csv",
+      "top5_mj_brands_30d_x1_windows_20260411_2143_curated_no_prepack_flower_no_bulk_flower_no_accessory_skus_no_710_empire.json",
+      "top5_mj_brands_30d_x1_windows_20260411_2143_curated_no_prepack_flower_no_bulk_flower_no_accessory_skus_no_710_empire.csv",
+      "top15_mj_brands_30d_x13_windows_20260411_2118_curated_no_prepack_flower_no_accessory_skus_no_710_empire.json",
+      "top15_mj_brands_30d_x13_windows_20260411_2118_curated_no_prepack_flower_no_accessory_skus_no_710_empire.csv",
+      "top15_mj_brands_30d_x2_windows_20260411_2106_curated_no_prepack_flower_no_accessory_skus_no_710_empire.json"
+    ],
+    "par_inventory_pipeline_status": "likely_available",
+    "known_blockers": []
+  },
+  "summary_short": "Growflow/business snapshot from local metrics and export artifacts.",
+  "summary_detailed": "Business automation health snapshot with sales summary availability, export freshness, and data timestamp signals.",
+  "suggested_questions": [
+    "what is Growflow status?",
+    "is business data fresh?",
+    "what is the dashboard export status?"
+  ],
+  "evidence_items": [
+    {
+      "title": "Growflow metrics",
+      "source_path_or_tool": "E:\\Repos\\Growflow\\company_bi\\METRICS.md",
+      "observed_at": "2026-04-27T01:05:52Z",
+      "summary": "Loaded METRICS.md sales/business summary.",
+      "confidence": 0.85
+    },
+    {
+      "title": "Growflow exports",
+      "source_path_or_tool": "E:\\Repos\\Growflow\\exports",
+      "observed_at": "2026-04-27T01:05:52Z",
+      "summary": "latest_export=dashboard_charts.json",
+      "confidence": 0.8
+    }
+  ]
+}

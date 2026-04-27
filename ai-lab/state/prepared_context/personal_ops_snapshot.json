@@ -1,0 +1,40 @@
+{
+  "snapshot_type": "personal_ops_snapshot",
+  "generated_at": "2026-04-27T01:05:52Z",
+  "freshness_seconds": 86400,
+  "source_files_or_tools": [
+    "E:\\Repos\\ai-lab\\scripts"
+  ],
+  "confidence": 0.45,
+  "stale": false,
+  "errors": [],
+  "data": {
+    "calendar_events": [],
+    "reminders": [],
+    "daily_digest_available": true,
+    "project_schedule": [],
+    "incomplete_planned_items": [],
+    "alerts_sent": [],
+    "available_scripts": [
+      "personal_ops_calendar_snapshot.py",
+      "personal_ops_daily_digest.py",
+      "personal_ops_repo_pulse.py"
+    ]
+  },
+  "summary_short": "Personal ops snapshot prepared from available personal_ops scripts.",
+  "summary_detailed": "Calendar/digest/planning readiness snapshot with available personal operations tooling and placeholders for integrations.",
+  "suggested_questions": [
+    "what is on my calendar today?",
+    "what reminders are pending?",
+    "show my daily assistant snapshot"
+  ],
+  "evidence_items": [
+    {
+      "title": "Personal ops script availability",
+      "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts",
+      "observed_at": "2026-04-27T01:05:52Z",
+      "summary": "available_scripts=['personal_ops_calendar_snapshot.py', 'personal_ops_daily_digest.py', 'personal_ops_repo_pulse.py']",
+      "confidence": 0.65
+    }
+  ]
+}

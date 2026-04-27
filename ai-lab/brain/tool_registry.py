@@ -65,6 +65,42 @@ _DEFAULT_TOOLS: list[dict[str, Any]] = [
         "risk_level": "medium",
         "output_shape": "response status and body",
     },
+    {
+        "name": "growflow_sales_today",
+        "description": "Fetch today's sales summary from GrowFlow API.",
+        "args": {"date": "optional", "location_id": "optional"},
+        "side_effects": "read_only",
+        "approval_required": False,
+        "risk_level": "low",
+        "output_shape": "sales summary object",
+    },
+    {
+        "name": "repo_full_rebuild_gate_a",
+        "description": "Force full rebuild in worker staging and promote (Gate A).",
+        "args": {"repo_id": "string", "gate": "string"},
+        "side_effects": "modifies index state and promotion targets",
+        "approval_required": True,
+        "risk_level": "high",
+        "output_shape": "execution result",
+    },
+    {
+        "name": "repo_policy_migration_gate_c",
+        "description": "Force full rebuild for policy/schema migration and promote (Gate C).",
+        "args": {"repo_id": "string", "gate": "string"},
+        "side_effects": "modifies index state and promotion targets",
+        "approval_required": True,
+        "risk_level": "high",
+        "output_shape": "execution result",
+    },
+    {
+        "name": "rules_sheet_apps_script",
+        "description": "Rules sheet Apps Script helper.",
+        "args": {},
+        "side_effects": "modifies external sheet configuration",
+        "approval_required": True,
+        "risk_level": "medium",
+        "output_shape": "script execution result",
+    },
 ]
 
 

@@ -1,0 +1,49 @@
+{
+  "metric_id": "transfer_receipts",
+  "description": "Accepted transfer receipt headers and package lines from findTransfers.",
+  "business_question": "What transfer receipts landed, when, and from which supplier/store?",
+  "allowed_query_template_ids": ["transfer_receipts_accepted_v1"],
+  "expected_root_path": "data.findTransfers",
+  "required_fields": ["objectId", "Status", "ReceivedAt", "FromName"],
+  "optional_fields": ["Store.objectId", "Store.Name", "ReceivingStore.objectId", "ReceivingStore.Name", "Packages"],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "Status": "confirmed",
+    "ReceivedAt": "confirmed",
+    "FromName": "confirmed",
+    "Store.objectId": "inferred",
+    "Store.Name": "inferred",
+    "ReceivingStore.objectId": "inferred",
+    "ReceivingStore.Name": "inferred",
+    "Packages": "unstable"
+  },
+  "field_types": {
+    "objectId": "str",
+    "Status": "str",
+    "ReceivedAt": "iso_datetime",
+    "FromName": "str"
+  },
+  "date_field_expectations": {
+    "date_fields": ["ReceivedAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": true,
+    "source_of_truth": "request_context.requested_store_or_org"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_optional": true
+  },
+  "empty_result_policy": "warn",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["transfer_object_id"],
+    "non_negative_field": "cost_cents"
+  },
+  "downstream_outputs_allowed": ["dashboard", "prepared_context", "par_logic", "ai_answer"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Packages array shape and nested Product nullability tracked as unstable/inferred in field_confidence."
+  ]
+}

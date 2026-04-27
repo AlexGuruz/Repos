@@ -174,4 +174,5 @@ export const api = {
   preparedContextByType: (snapshotType) => get(`/api/prepared-context/${encodeURIComponent(snapshotType)}`),
   refreshPreparedContext: (snapshotType) => post(`/api/prepared-context/refresh/${encodeURIComponent(snapshotType)}`, {}),
   preparedContextRefresherStatus: () => get('/api/prepared-context/status/refresher'),
+  growflowValidationStatus: () => get('/api/growflow/validation-status'),
 }

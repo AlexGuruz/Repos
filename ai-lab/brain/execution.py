@@ -10,6 +10,9 @@ import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
+
+from brain.approval_enforcement import evaluate_action
 
 AI_LAB_ROOT = Path(__file__).resolve().parents[1]
 
@@ -64,8 +67,30 @@ def _resolve_path(entry: dict) -> Path | None:
     return full if full.exists() else None
 
 
-def run(tool_name: str, args: dict | None = None, timeout_sec: int = 300) -> RunResult:
+def run(
+    tool_name: str,
+    args: dict | None = None,
+    timeout_sec: int = 300,
+    *,
+    approval_context: dict[str, Any] | None = None,
+) -> RunResult:
     args = args or {}
+    approval_context = approval_context or {}
+    approved = bool(approval_context.get("approved"))
+    decision = evaluate_action(
+        action="run_script",
+        tool_name=tool_name,
+        approved=approved,
+        fail_closed_on_missing_metadata=True,
+    )
+    if not decision.allowed:
+        return RunResult(
+            stdout="",
+            stderr=f"Execution blocked by approval policy: {decision.reason}",
+            exit_code=3,
+            duration=0.0,
+            success=False,
+        )
     entry = _find_tool(tool_name)
     if not entry:
         return RunResult(

@@ -28,6 +28,31 @@ def _ensure_brain_path():
         pass
 
 
+def _approval_decision(op: str, approved: bool = False):
+    _ensure_brain_path()
+    try:
+        from brain.approval_enforcement import evaluate_action
+
+        return evaluate_action(
+            action=op,
+            tool_name=op,
+            approved=approved,
+            fail_closed_on_missing_metadata=False,
+        )
+    except Exception:
+        return None
+
+
+def _has_tool_metadata(op: str) -> bool:
+    _ensure_brain_path()
+    try:
+        from brain.tool_registry import get_tool_metadata
+
+        return get_tool_metadata(op) is not None
+    except Exception:
+        return False
+
+
 def _catalog_attachment_from_payload(payload: dict) -> str | None:
     try:
         from core.ai_lab import ensure_ai_lab_root_on_path
@@ -184,6 +209,19 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
     a task. Returns a dict the chat router sends back to the UI.
     """
     act_id = f"ACT-{uuid.uuid4().hex[:6].upper()}"
+    decision = _approval_decision(op, approved=False)
+    if op in effective_allowlisted_read_ops() and op not in ALLOWLISTED_READ_OPS and not _has_tool_metadata(op):
+        return {
+            "ok": False,
+            "act_id": act_id,
+            "error": f"Read-op extension '{op}' is missing tool metadata and is blocked by policy.",
+        }
+    if decision and decision.requires_approval and op in effective_allowlisted_read_ops():
+        return {
+            "ok": False,
+            "act_id": act_id,
+            "error": f"Policy mismatch: '{op}' is marked approval-required and cannot run as allowlisted read.",
+        }
 
     # Read-only → forward to worker
     if op in effective_allowlisted_read_ops():
@@ -210,6 +248,12 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
 
     # State-changing → permanent rule may auto-execute; else approval card
     if op in CONTROLLED_OPS:
+        if decision and not decision.requires_approval:
+            return {
+                "ok": False,
+                "act_id": act_id,
+                "error": f"Policy mismatch: '{op}' is controlled but not marked approval-required.",
+            }
         _ensure_brain_path()
         match_payload: dict = {}
         rule = None

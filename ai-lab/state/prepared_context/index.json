@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-04-27T01:05:58Z",
+  "snapshots": [
+    {
+      "snapshot_type": "system_snapshot",
+      "generated_at": "2026-04-27T01:05:20Z",
+      "freshness_seconds": 900,
+      "stale": false,
+      "confidence": 0.86,
+      "errors": [],
+      "summary_short": "Systems snapshot with ops + worker health."
+    },
+    {
+      "snapshot_type": "repo_pulse",
+      "generated_at": "2026-04-27T01:05:46Z",
+      "freshness_seconds": 3600,
+      "stale": false,
+      "confidence": 0.82,
+      "errors": [],
+      "summary_short": "Repo pulse built for 5 repos."
+    },
+    {
+      "snapshot_type": "project_agenda",
+      "generated_at": "2026-04-27T01:05:52Z",
+      "freshness_seconds": 86400,
+      "stale": false,
+      "confidence": 0.55,
+      "errors": [],
+      "summary_short": "Project agenda prepared from repo pulse and activity."
+    },
+    {
+      "snapshot_type": "personal_ops_snapshot",
+      "generated_at": "2026-04-27T01:05:52Z",
+      "freshness_seconds": 86400,
+      "stale": false,
+      "confidence": 0.45,
+      "errors": [],
+      "summary_short": "Personal ops snapshot prepared from available personal_ops scripts."
+    },
+    {
+      "snapshot_type": "growflow_snapshot",
+      "generated_at": "2026-04-27T01:05:52Z",
+      "freshness_seconds": 3600,
+      "stale": false,
+      "confidence": 0.8,
+      "errors": [],
+      "summary_short": "Growflow/business snapshot from local metrics and export artifacts."
+    },
+    {
+      "snapshot_type": "worker_snapshot",
+      "generated_at": "2026-04-27T01:05:54Z",
+      "freshness_seconds": 900,
+      "stale": false,
+      "confidence": 0.7,
+      "errors": [],
+      "summary_short": "Worker snapshot with health and tunnel state."
+    }
+  ]
+}

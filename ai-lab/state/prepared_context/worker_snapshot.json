@@ -1,0 +1,125 @@
+{
+  "snapshot_type": "worker_snapshot",
+  "generated_at": "2026-04-27T01:05:54Z",
+  "freshness_seconds": 900,
+  "source_files_or_tools": [
+    "brain.worker_health",
+    "brain.worker_tunnel"
+  ],
+  "confidence": 0.7,
+  "stale": false,
+  "errors": [],
+  "data": {
+    "worker_name": "worker-rig-01",
+    "ssh_configured": false,
+    "all_ok": false,
+    "services": [
+      {
+        "name": "worker_assistant",
+        "ok": false,
+        "url": "http://127.0.0.1:8765/health",
+        "status_code": null,
+        "detail": "timed out",
+        "latency_ms": null
+      },
+      {
+        "name": "n8n",
+        "ok": false,
+        "url": "http://127.0.0.1:5678/",
+        "status_code": null,
+        "detail": "timed out",
+        "latency_ms": null
+      },
+      {
+        "name": "ollama",
+        "ok": false,
+        "url": "http://127.0.0.1:11434/api/tags",
+        "status_code": null,
+        "detail": "timed out",
+        "latency_ms": null
+      }
+    ],
+    "checked_at": "2026-04-27T01:05:52Z",
+    "timeout_budget_ms": 2000,
+    "worker_status": "offline_or_unreachable",
+    "last_known_status": {
+      "checked_at": "2026-04-27T01:05:17Z",
+      "worker_status": "offline_or_unreachable",
+      "all_ok": false,
+      "services": [
+        {
+          "name": "worker_assistant",
+          "ok": false,
+          "url": null,
+          "status_code": null,
+          "detail": "timeout after 1200ms budget",
+          "latency_ms": null
+        },
+        {
+          "name": "n8n",
+          "ok": false,
+          "url": null,
+          "status_code": null,
+          "detail": "timeout after 1200ms budget",
+          "latency_ms": null
+        },
+        {
+          "name": "ollama",
+          "ok": false,
+          "url": null,
+          "status_code": null,
+          "detail": "timeout after 1200ms budget",
+          "latency_ms": null
+        }
+      ],
+      "tunnel_status": {
+        "worker_name": "worker-rig-01",
+        "expected_ports": [
+          8765,
+          5678,
+          11434
+        ],
+        "reachable_ports": [],
+        "missing_ports": [
+          5678,
+          8765,
+          11434
+        ],
+        "likely_up": false,
+        "detail": "Missing tunnel ports: [5678, 8765, 11434]. Start tunnel or check worker."
+      }
+    },
+    "tunnel_status": {
+      "worker_name": "worker-rig-01",
+      "expected_ports": [
+        8765,
+        5678,
+        11434
+      ],
+      "reachable_ports": [],
+      "missing_ports": [
+        8765,
+        11434,
+        5678
+      ],
+      "likely_up": false,
+      "detail": "Missing tunnel ports: [8765, 11434, 5678]. Start tunnel or check worker."
+    }
+  },
+  "summary_short": "Worker snapshot with health and tunnel state.",
+  "summary_detailed": "Worker online/offline, service availability (assistant/n8n/ollama), tunnel state, and last-known status.",
+  "suggested_questions": [
+    "check worker health",
+    "is ollama available on worker?",
+    "should I offload to worker?"
+  ],
+  "evidence_items": [
+    {
+      "title": "Worker health",
+      "source_path_or_tool": "brain.worker_health.get_worker_health_snapshot",
+      "observed_at": "2026-04-27T01:05:52Z",
+      "summary": "worker_status=offline_or_unreachable",
+      "confidence": 0.9
+    }
+  ]
+}

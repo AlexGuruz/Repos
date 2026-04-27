@@ -1,0 +1,43 @@
+{
+  "ok": false,
+  "metric_id": "schema_discovery",
+  "template_id": "schema_discovery_runner_v1",
+  "request_id": "unit_test_req",
+  "mode": "discovery",
+  "requested_date_range": {
+    "from": "2026-04-20T00:00:00.000Z",
+    "to": "2026-04-20T23:59:59.000Z"
+  },
+  "response_date_range_detected": {
+    "from": null,
+    "to": null
+  },
+  "expected_root_found": true,
+  "missing_required_fields": [],
+  "type_errors": [],
+  "empty_result_status": "allowed",
+  "duplicate_count": 0,
+  "sanity_warnings": [],
+  "target_alignment_warnings": [],
+  "parser_warnings": [],
+  "schema_drift_warnings": [],
+  "schema_verification": {
+    "baseline_exists": false,
+    "drift": null,
+    "baseline_updated": false,
+    "schema_drift_warnings": []
+  },
+  "normalized_row_count": 0,
+  "confidence": "discovery",
+  "confidence_score": 0.35,
+  "field_confidence": {},
+  "field_confidence_counts": {
+    "confirmed": 0,
+    "inferred": 0,
+    "unstable": 0
+  },
+  "hard_failures": [],
+  "raw_saved_path": "E:\\Repos\\Growflow\\state\\raw_responses\\schema_discovery\\unit_test_req.json",
+  "normalized_output_path": null,
+  "generated_at": "2026-04-27T19:34:39Z"
+}

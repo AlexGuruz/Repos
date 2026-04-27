@@ -37,6 +37,7 @@ from lib.brand_merit_pool import (
     package_in_format_product_pool,
 )
 from lib.dashboard_sheets_env import load_dashboard_sheets_env_file
+from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
@@ -173,7 +174,7 @@ def aggregate_mj_brands_sales(
     *,
     days: int,
     chunk_days: int,
-) -> dict[str, tuple[int, int]]:
+) -> tuple[dict[str, tuple[int, int]], list[dict[str, Any]]]:
     """
     Returns brand -> (line_count, margin_cents_sum).
     """
@@ -187,6 +188,7 @@ def aggregate_mj_brands_sales(
     lines_ct: dict[str, int] = defaultdict(int)
     margin_cents: dict[str, int] = defaultdict(int)
     seen: set[str] = set()
+    normalized_source_rows: list[dict[str, Any]] = []
 
     for fi, ti in iter_sold_at_date_chunks(start_utc, end_utc, chunk_days):
         where = {"SoldAt": {"greaterThanOrEqualTo": fi, "lessThanOrEqualTo": ti}}
@@ -212,8 +214,9 @@ def aggregate_mj_brands_sales(
                 continue
             lines_ct[b] += 1
             margin_cents[b] += _line_margin_cents(n)
+            normalized_source_rows.append(n)
 
-    return {b: (lines_ct[b], margin_cents[b]) for b in lines_ct}
+    return ({b: (lines_ct[b], margin_cents[b]) for b in lines_ct}, normalized_source_rows)
 
 
 def _suppliers_for_brands(creds: str | None, brands: set[str]) -> dict[str, set[str]]:
@@ -265,6 +268,12 @@ def main() -> None:
     ap.add_argument("--days", type=int, default=7, help="Trailing store-local calendar days")
     ap.add_argument("--chunk-days", type=int, default=30, help="SoldAt chunk size for API")
     ap.add_argument("--sheets-service-account", default=None)
+    ap.add_argument(
+        "--validation-mode",
+        choices=("strict", "warning", "discovery"),
+        default="strict",
+        help="Validation gateway mode (strict fail-closed by default).",
+    )
     args = ap.parse_args()
 
     _load_org()
@@ -281,9 +290,24 @@ def main() -> None:
         flush=True,
     )
 
-    agg = aggregate_mj_brands_sales(cp, tz, days=d, chunk_days=max(1, args.chunk_days))
+    agg, validation_rows = aggregate_mj_brands_sales(cp, tz, days=d, chunk_days=max(1, args.chunk_days))
     if not agg:
         print("No MJ sales lines in window; nothing to write.", file=sys.stderr)
+        sys.exit(1)
+    validation = validate_and_normalize(
+        metric_id="brand_profit_velocity",
+        template_id="order_items_brand_profit_velocity_v1",
+        raw_json={"data": {"findOrderItems": {"edges": [{"node": r} for r in validation_rows]}}},
+        request_context={
+            "requested_date_range": {"from": None, "to": None},
+            "days": d,
+            "source_script": "scripts/rank_mj_brands_profit_velocity_sheet.py",
+        },
+        mode=args.validation_mode,
+    )
+    print(f"Validation report: {validation.get('report_path')}")
+    if not validation.get("ok"):
+        print(f"Validation blocked trusted output: {validation.get('errors')}", file=sys.stderr)
         sys.exit(1)
 
     profit_per_day: dict[str, float] = {}

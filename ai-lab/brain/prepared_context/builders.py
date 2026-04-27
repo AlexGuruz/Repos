@@ -342,7 +342,7 @@ def build_growflow_snapshot() -> PreparedSnapshot:
     started = time.monotonic()
     errs: list[str] = []
     root = _repos_root() / "Growflow"
-    src = [str(root / "company_bi" / "METRICS.md"), str(root / "exports")]
+    src = [str(root / "company_bi" / "METRICS.md"), str(root / "exports"), str(root / "state" / "validation_reports")]
     metrics = root / "company_bi" / "METRICS.md"
     exports = root / "exports"
     data: dict[str, Any] = {
@@ -355,6 +355,10 @@ def build_growflow_snapshot() -> PreparedSnapshot:
         "latest_successful_exports": [],
         "par_inventory_pipeline_status": "unknown",
         "known_blockers": [],
+        "validation_status_by_metric": {},
+        "validation_failures": [],
+        "schema_drift_warnings": [],
+        "latest_trusted_output_by_metric": {},
     }
     evidence_items: list[dict[str, Any]] = []
     try:
@@ -393,9 +397,56 @@ def build_growflow_snapshot() -> PreparedSnapshot:
     except Exception as e:
         errs.append(f"exports_scan: {e}")
         data["known_blockers"].append(f"exports_scan: {e}")
+    try:
+        vr = root / "state" / "validation_reports"
+        to = root / "state" / "trusted_outputs"
+        rr = root / "state" / "raw_responses"
+        if vr.exists():
+            for metric_dir in sorted([p for p in vr.iterdir() if p.is_dir()]):
+                reports = sorted([p for p in metric_dir.glob("*.json")], key=lambda p: p.stat().st_mtime, reverse=True)
+                if not reports:
+                    continue
+                latest = reports[0]
+                payload = json.loads(latest.read_text(encoding="utf-8", errors="replace"))
+                metric_id = str(payload.get("metric_id") or metric_dir.name)
+                metric_status = {
+                    "ok": bool(payload.get("ok")),
+                    "confidence": payload.get("confidence"),
+                    "warnings": payload.get("warnings") or payload.get("sanity_warnings") or [],
+                    "errors": payload.get("errors") or payload.get("hard_failures") or [],
+                    "normalized_row_count": payload.get("normalized_row_count"),
+                    "generated_at": payload.get("generated_at"),
+                    "report_path": str(latest),
+                    "last_raw_response_timestamp": None,
+                    "last_trusted_output_timestamp": None,
+                }
+                raw_metric = rr / metric_id
+                if raw_metric.exists():
+                    raw_files = sorted(raw_metric.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+                    if raw_files:
+                        metric_status["last_raw_response_timestamp"] = datetime.fromtimestamp(raw_files[0].stat().st_mtime, timezone.utc).isoformat().replace("+00:00", "Z")
+                trusted_metric = to / metric_id
+                if trusted_metric.exists():
+                    trust_files = sorted(trusted_metric.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+                    if trust_files:
+                        ts = datetime.fromtimestamp(trust_files[0].stat().st_mtime, timezone.utc).isoformat().replace("+00:00", "Z")
+                        metric_status["last_trusted_output_timestamp"] = ts
+                        data["latest_trusted_output_by_metric"][metric_id] = str(trust_files[0])
+                data["validation_status_by_metric"][metric_id] = metric_status
+                if not metric_status["ok"]:
+                    data["validation_failures"].append({"metric_id": metric_id, "report_path": str(latest)})
+                for warn in metric_status["warnings"] or []:
+                    w = str(warn)
+                    if "schema" in w.lower() or "root" in w.lower() or "field" in w.lower():
+                        data["schema_drift_warnings"].append({"metric_id": metric_id, "warning": w})
+    except Exception as e:
+        errs.append(f"validation_scan: {e}")
+        data["known_blockers"].append(f"validation_scan: {e}")
     data["par_inventory_pipeline_status"] = "likely_available" if (root / "scripts").exists() else "unknown"
     if not data.get("latest_sales_summary"):
         data["known_blockers"].append("latest_sales_summary_missing")
+    if data.get("validation_failures"):
+        data["known_blockers"].append("latest_validation_failed")
     freshness = 3600
     return PreparedSnapshot(
         snapshot_type="growflow_snapshot",

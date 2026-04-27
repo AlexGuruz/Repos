@@ -26,12 +26,13 @@ export default function ToolsPanel() {
   })
   const [preparedSnapshots, setPreparedSnapshots] = useState([])
   const [preparedRefresher, setPreparedRefresher] = useState(null)
+  const [growflowValidationMetrics, setGrowflowValidationMetrics] = useState([])
   const preparedRef = useRef(null)
   const [preparedOpen, setPreparedOpen] = useState(false)
 
   const fetchTools = useCallback(() => {
-    Promise.allSettled([api.toolsStats(), api.preparedContext(), api.preparedContextRefresherStatus()])
-      .then(([toolsRes, pctxRes, refresherRes]) => {
+    Promise.allSettled([api.toolsStats(), api.preparedContext(), api.preparedContextRefresherStatus(), api.growflowValidationStatus()])
+      .then(([toolsRes, pctxRes, refresherRes, growflowValidationRes]) => {
         if (toolsRes.status === 'fulfilled') {
           const res = toolsRes.value || {}
           setToolCalls(res.toolCalls || [])
@@ -51,6 +52,10 @@ export default function ToolsPanel() {
         }
         if (refresherRes.status === 'fulfilled') {
           setPreparedRefresher(refresherRes.value || null)
+        }
+        if (growflowValidationRes.status === 'fulfilled') {
+          const rows = growflowValidationRes.value?.metrics || []
+          setGrowflowValidationMetrics(Array.isArray(rows) ? rows : [])
         }
       })
       .catch(() => {})
@@ -133,6 +138,27 @@ export default function ToolsPanel() {
                 {s.summary_short ? <div className="text-white/32">{s.summary_short}</div> : null}
               </div>
             ))}
+          </div>
+        </details>
+      ) : null}
+      {growflowValidationMetrics.length > 0 ? (
+        <details className="mb-4">
+          <summary className="text-[11px] text-white/45 cursor-pointer">Growflow validation status ({growflowValidationMetrics.length})</summary>
+          <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
+            {growflowValidationMetrics.map((m) => {
+              const warnCount = Array.isArray(m.warnings) ? m.warnings.length : 0
+              const errCount = Array.isArray(m.errors) ? m.errors.length : 0
+              const color = m.ok ? (warnCount > 0 ? 'text-amber-300/80' : 'text-emerald-300/80') : 'text-red-300/80'
+              const status = m.ok ? (warnCount > 0 ? 'yellow' : 'green') : 'red'
+              return (
+                <div key={m.metric_id} className="text-[10px] font-mono text-white/38 border border-white/10 rounded px-2 py-1">
+                  <div className={color}>{m.metric_id} · {status} · conf {m.confidence ?? 'n/a'} · rows {m.normalized_row_count ?? 0}</div>
+                  <div className="text-white/28">generated {m.generated_at || 'unknown'}</div>
+                  {errCount > 0 ? <div className="text-red-300/70">failure reason: {String(m.errors[0])}</div> : null}
+                  {warnCount > 0 ? <div className="text-amber-200/70">warnings: {warnCount}</div> : null}
+                </div>
+              )
+            })}
           </div>
         </details>
       ) : null}

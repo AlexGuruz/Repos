@@ -1,0 +1,48 @@
+{
+  "metric_id": "sales_today",
+  "description": "Store-local same-day sales line feed from findOrderItems.",
+  "business_question": "What has sold today and for how much gross/net?",
+  "allowed_query_template_ids": ["order_items_sales_today_v1"],
+  "expected_root_path": "data.findOrderItems",
+  "required_fields": ["objectId", "SoldAt", "GrossPrice", "NetPrice"],
+  "optional_fields": ["COG", "Product.objectId", "Product.Brand.Name", "ProductCategory.Name"],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "NetPrice": "confirmed",
+    "COG": "inferred",
+    "Product.objectId": "confirmed",
+    "Product.Brand.Name": "unstable",
+    "ProductCategory.Name": "inferred"
+  },
+  "field_types": {
+    "objectId": "str",
+    "SoldAt": "iso_datetime",
+    "GrossPrice": "int",
+    "NetPrice": "int"
+  },
+  "date_field_expectations": {
+    "date_fields": ["SoldAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": true,
+    "source_of_truth": "request_context.requested_store_or_org"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_optional": true
+  },
+  "empty_result_policy": "warn",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["order_item_id", "sold_at"],
+    "non_negative_field": "gross_price_cents"
+  },
+  "downstream_outputs_allowed": ["dashboard", "prepared_context", "ai_answer", "par_logic"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Brand path marked unstable when token lacks Product.Brand; optional COG inferred from line economics."
+  ]
+}

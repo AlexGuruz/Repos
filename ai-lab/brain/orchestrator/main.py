@@ -31,6 +31,7 @@ from brain.schemas.proposals import ProposalRecord
 from brain import source_selection
 from brain import web_tool
 from brain.telemetry import log_event
+from brain.approval_enforcement import evaluate_action
 from brain.orchestrator.response_trace import (
     StageTimer,
     append_response_trace,
@@ -731,6 +732,29 @@ def run(
         action = pending.get("action")
         args = pending.get("args") or {}
         log_event("execute_proposal", session_id=session_id, action=action, args=args)
+        action_guard = evaluate_action(
+            action=str(action or ""),
+            tool_name=str(pending.get("tool") or ""),
+            approved=False,
+            fail_closed_on_missing_metadata=True,
+        )
+        if action_guard.requires_approval:
+            session_state.clear_pending_proposal(session_id)
+            _trace_execute(session_id, message, intent, str(action or ""), "approval_required")
+            return {
+                "reply": (
+                    f"Action `{action}` is approval-gated and cannot execute via `do it` without an approval record. "
+                    "Use the approval flow (`approve <id>`) or queue a controlled approval first."
+                ),
+                "approval_request": None,
+            }
+        if not action_guard.allowed:
+            session_state.clear_pending_proposal(session_id)
+            _trace_execute(session_id, message, intent, str(action or ""), "blocked")
+            return {
+                "reply": f"Blocked by approval policy: {action_guard.reason}.",
+                "approval_request": None,
+            }
         if action == "repo_search":
             query = args.get("query") or pending.get("query") or pending.get("target") or "sales script growflow"
             matches = repo_search_mod.search_repos(query, max_results=10)

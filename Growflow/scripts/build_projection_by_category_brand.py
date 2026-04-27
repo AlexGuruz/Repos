@@ -59,6 +59,7 @@ from lib.brand_merit_pool import (
     order_line_format_bucket,
     parse_iso_utc,
 )
+from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
@@ -1341,6 +1342,12 @@ def main() -> int:
         default=None,
         help="Output path for --compare-modes (default: <stem>_allocation_compare.md next to --out).",
     )
+    ap.add_argument(
+        "--validation-mode",
+        choices=("strict", "warning", "discovery"),
+        default="strict",
+        help="Validation gateway mode (strict fail-closed by default).",
+    )
     args = ap.parse_args()
 
     _load_config_flags()
@@ -1390,6 +1397,7 @@ def main() -> int:
     # biweek_idx -> brand -> gross cents (same rules as pair_gross)
     biweek_by_brand: dict[int, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     chunk_idx = 0
+    validation_rows: list[dict[str, Any]] = []
 
     for from_iso, to_iso in iter_sold_at_date_chunks(window_start, window_end, args.chunk_days):
         chunk_idx += 1
@@ -1407,6 +1415,7 @@ def main() -> int:
             if k in seen:
                 continue
             seen.add(k)
+            validation_rows.append(n)
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
                 continue
@@ -1457,6 +1466,24 @@ def main() -> int:
             biweek_by_brand[bidx][b] += gp
 
     total_fmt = sum(pair_gross.values())
+    validation = validate_and_normalize(
+        metric_id="projection_by_category_brand",
+        template_id="order_items_projection_buy_plan_v1",
+        raw_json={"data": {"findOrderItems": {"edges": [{"node": r} for r in validation_rows]}}},
+        request_context={
+            "requested_date_range": {
+                "from": window_start.isoformat().replace("+00:00", "Z"),
+                "to": window_end.isoformat().replace("+00:00", "Z"),
+            },
+            "source_script": "scripts/build_projection_by_category_brand.py",
+            "allocation_mode": args.allocation_mode,
+        },
+        mode=args.validation_mode,
+    )
+    print(f"Validation report: {validation.get('report_path')}", flush=True)
+    if not validation.get("ok"):
+        print(f"Validation blocked trusted output: {validation.get('errors')}", flush=True)
+        return 1
     if total_fmt <= 0:
         print("No sales in focus categories in this window; cannot build projection.", flush=True)
         return 1

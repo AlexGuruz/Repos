@@ -1,0 +1,74 @@
+{
+  "snapshot_type": "project_agenda",
+  "generated_at": "2026-04-27T01:05:52Z",
+  "freshness_seconds": 86400,
+  "source_files_or_tools": [
+    "repo_pulse",
+    "ops_registry"
+  ],
+  "confidence": 0.55,
+  "stale": false,
+  "errors": [],
+  "data": {
+    "active_projects": [
+      "geomapper app",
+      "Greg-Kylo",
+      "awesome-n8n-templates",
+      "activepieces",
+      "BMAD-METHOD"
+    ],
+    "current_priorities": [
+      "geomapper app",
+      "Greg-Kylo",
+      "awesome-n8n-templates"
+    ],
+    "next_actions": [
+      "Review geomapper app",
+      "Review Greg-Kylo",
+      "Review awesome-n8n-templates"
+    ],
+    "blocked_items": [
+      "activepieces: stale/no recent updates",
+      "awesome-n8n-templates: stale/no recent updates",
+      "BMAD-METHOD: stale/no recent updates"
+    ],
+    "overdue_tasks": [
+      "activepieces: refresh README/docs",
+      "awesome-n8n-templates: refresh README/docs",
+      "BMAD-METHOD: refresh README/docs"
+    ],
+    "today_focus": [
+      "geomapper app",
+      "Greg-Kylo",
+      "awesome-n8n-templates"
+    ],
+    "tomorrow_focus": [
+      "activepieces",
+      "BMAD-METHOD"
+    ],
+    "project_to_repo_map": {
+      "geomapper app": "geomapper app",
+      "Greg-Kylo": "Greg-Kylo",
+      "awesome-n8n-templates": "awesome-n8n-templates",
+      "activepieces": "activepieces",
+      "BMAD-METHOD": "BMAD-METHOD"
+    }
+  },
+  "summary_short": "Project agenda prepared from repo pulse and activity.",
+  "summary_detailed": "Daily planning context: priorities, next actions, blocked/overdue signals, and project-to-repo mapping.",
+  "suggested_questions": [
+    "what should I work on today?",
+    "what is next?",
+    "what am I blocked on?",
+    "make me a daily plan"
+  ],
+  "evidence_items": [
+    {
+      "title": "Agenda from repo pulse",
+      "source_path_or_tool": "prepared_context.repo_pulse",
+      "observed_at": "2026-04-27T01:05:52Z",
+      "summary": "top_focus=['geomapper app', 'Greg-Kylo', 'awesome-n8n-templates'] blocked=['activepieces', 'awesome-n8n-templates', 'BMAD-METHOD']",
+      "confidence": 0.75
+    }
+  ]
+}

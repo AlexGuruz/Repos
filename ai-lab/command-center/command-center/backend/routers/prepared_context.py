@@ -4,6 +4,9 @@ Prepared context visibility + refresh endpoints.
 from __future__ import annotations
 
 import asyncio
+import json
+from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import APIRouter
 
@@ -80,4 +83,39 @@ async def prepared_context_refresher_status():
     from services.prepared_context_refresher import get_refresher_status
 
     return get_refresher_status()
+
+
+@router.get("/api/growflow/validation-status")
+async def growflow_validation_status():
+    from core.ai_lab import AI_LAB_ROOT
+
+    growflow_root = AI_LAB_ROOT.parent / "Growflow"
+    reports_root = growflow_root / "state" / "validation_reports"
+    out: list[dict] = []
+    if not reports_root.exists():
+        return {"metrics": out, "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}
+
+    for metric_dir in sorted([p for p in reports_root.iterdir() if p.is_dir()]):
+        files = sorted(metric_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if not files:
+            continue
+        latest = files[0]
+        try:
+            payload = json.loads(latest.read_text(encoding="utf-8", errors="replace"))
+        except Exception:
+            payload = {}
+        out.append(
+            {
+                "metric_id": str(payload.get("metric_id") or metric_dir.name),
+                "latest_report": str(latest.name),
+                "ok": bool(payload.get("ok")),
+                "confidence": payload.get("confidence"),
+                "normalized_row_count": payload.get("normalized_row_count"),
+                "warnings": payload.get("warnings") or payload.get("sanity_warnings") or payload.get("target_alignment_warnings") or payload.get("parser_warnings") or [],
+                "errors": payload.get("errors") or payload.get("hard_failures") or [],
+                "generated_at": payload.get("generated_at"),
+                "report_path": str(latest),
+            }
+        )
+    return {"metrics": out, "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}
 

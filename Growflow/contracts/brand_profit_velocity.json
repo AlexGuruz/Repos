@@ -1,0 +1,47 @@
+{
+  "metric_id": "brand_profit_velocity",
+  "description": "MJ brand rank by normalized profit/day and units/day.",
+  "business_question": "Which MJ brands are strongest on combined margin velocity and unit velocity?",
+  "allowed_query_template_ids": ["order_items_brand_profit_velocity_v1", "products_brand_supplier_mj_v1"],
+  "expected_root_path": "data.findOrderItems",
+  "required_fields": ["objectId", "SoldAt", "GrossPrice", "Product.Brand.Name"],
+  "optional_fields": ["COG", "ProductCategory.Name", "Product.objectId"],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "Product.Brand.Name": "unstable",
+    "COG": "inferred",
+    "ProductCategory.Name": "inferred",
+    "Product.objectId": "confirmed"
+  },
+  "field_types": {
+    "objectId": "str",
+    "SoldAt": "iso_datetime",
+    "GrossPrice": "int",
+    "Product.Brand.Name": "str"
+  },
+  "date_field_expectations": {
+    "date_fields": ["SoldAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": true,
+    "source_of_truth": "request_context.requested_store_or_org"
+  },
+  "brand_category_expectations": {
+    "brand_required": true,
+    "category_optional": true
+  },
+  "empty_result_policy": "warn",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["order_item_id", "sold_at"],
+    "non_negative_field": "gross_price_cents"
+  },
+  "downstream_outputs_allowed": ["dashboard", "prepared_context", "ai_answer"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Secondary findProducts supplier join is experimental template; MJ filters remain inferred heuristics on top of confirmed line economics."
+  ]
+}

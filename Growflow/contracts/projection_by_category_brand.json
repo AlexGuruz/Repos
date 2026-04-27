@@ -1,0 +1,48 @@
+{
+  "metric_id": "projection_by_category_brand",
+  "description": "Brand x category projection input rows from order items before pool allocation.",
+  "business_question": "How should a fixed pool be distributed across brand/category based on recent sales velocity and economics?",
+  "allowed_query_template_ids": ["order_items_projection_buy_plan_v1"],
+  "expected_root_path": "data.findOrderItems",
+  "required_fields": ["objectId", "SoldAt", "GrossPrice", "ProductCategory.Name"],
+  "optional_fields": ["COG", "Product.Brand.Name", "Product.objectId", "SKU"],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "ProductCategory.Name": "confirmed",
+    "COG": "inferred",
+    "Product.Brand.Name": "unstable",
+    "Product.objectId": "confirmed",
+    "SKU": "inferred"
+  },
+  "field_types": {
+    "objectId": "str",
+    "SoldAt": "iso_datetime",
+    "GrossPrice": "int",
+    "ProductCategory.Name": "str"
+  },
+  "date_field_expectations": {
+    "date_fields": ["SoldAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": true,
+    "source_of_truth": "request_context.requested_store_or_org"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_required": true
+  },
+  "empty_result_policy": "fail",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["order_item_id", "sold_at"],
+    "non_negative_field": "gross_price_cents"
+  },
+  "downstream_outputs_allowed": ["dashboard", "prepared_context", "ai_answer", "par_logic"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Planner format buckets remain inferred on top of confirmed ProductCategory.Name; unit model without line qty is isolated as inferred."
+  ]
+}

@@ -17,6 +17,7 @@ APPROVAL_REQUIRED = frozenset({
     "modify", "delete", "commit", "push", "send", "notify", "calendar",
     "set_process_priority", "process_priority", "set_cpu_affinity", "cpu_affinity",
     "run_script", "n8n_trigger", "worker_n8n_trigger",
+    "restart_service", "modify_registry", "write_sheet", "run_approved", "submit_approval",
 })
 
 

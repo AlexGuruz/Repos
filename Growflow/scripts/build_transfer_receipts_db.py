@@ -36,6 +36,7 @@ from lib.product_landed_cost_sqlite import (
     export_product_landed_cost_current_csv,
     rebuild_product_landed_cost_current,
 )
+from lib.data_validation_gateway import validate_and_normalize
 from lib.transfer_receipt_export import (
     fetch_transfer_nodes_since,
     load_retail_org_from_config,
@@ -278,6 +279,12 @@ def main() -> int:
     ap.add_argument("--page-size", type=int, default=100, help="GraphQL page size")
     ap.add_argument("--leaderboard-top", type=int, default=15, help="Leaderboard supplier row count")
     ap.add_argument(
+        "--validation-mode",
+        choices=("strict", "warning", "discovery"),
+        default="strict",
+        help="Validation gateway mode (strict fail-closed by default).",
+    )
+    ap.add_argument(
         "--rebuild-costs-only",
         action="store_true",
         help="Skip Growflow fetch; only rebuild product_landed_cost_current from existing package rows.",
@@ -326,6 +333,21 @@ def main() -> int:
         page_size=args.page_size,
         credentials_path=cp,
     )
+    validation = validate_and_normalize(
+        metric_id="transfer_receipts",
+        template_id="transfer_receipts_accepted_v1",
+        raw_json={"data": {"findTransfers": {"nodes": nodes}}},
+        request_context={
+            "requested_date_range": {"from": args.since, "to": None},
+            "status": args.status,
+            "source_script": "scripts/build_transfer_receipts_db.py",
+        },
+        mode=args.validation_mode,
+    )
+    print(f"Validation report: {validation.get('report_path')}")
+    if not validation.get("ok"):
+        print(f"Validation blocked trusted output: {validation.get('errors')}", file=sys.stderr)
+        return 1
     exported_at = datetime.now(timezone.utc)
     rows: list[dict] = []
     for n in nodes:
