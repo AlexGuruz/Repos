@@ -1,6 +1,6 @@
 {
   "snapshot_type": "personal_ops_snapshot",
-  "generated_at": "2026-04-27T21:19:08Z",
+  "generated_at": "2026-04-27T23:00:39Z",
   "freshness_seconds": 86400,
   "source_files_or_tools": [
     "E:\\Repos\\ai-lab\\scripts"
@@ -61,6 +61,10 @@
       "personal_ops_calendar_snapshot.py",
       "personal_ops_daily_digest.py",
       "personal_ops_repo_pulse.py"
+    ],
+    "missing_sources": [
+      "calendar_not_configured",
+      "no_recent_alerts"
     ]
   },
   "summary_short": "Personal planning snapshot: repo activity + optional calendar + agenda cues.",
@@ -75,7 +79,7 @@
     {
       "title": "Personal ops script availability",
       "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts",
-      "observed_at": "2026-04-27T21:19:08Z",
+      "observed_at": "2026-04-27T23:00:39Z",
       "summary": "available_scripts=['personal_ops_calendar_snapshot.py', 'personal_ops_daily_digest.py', 'personal_ops_repo_pulse.py']",
       "confidence": 0.65
     },
