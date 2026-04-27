@@ -75,5 +75,5 @@ def test_non_worker_questions_do_not_block_on_worker_health(monkeypatch):
 
     monkeypatch.setattr(wh, "get_worker_health_snapshot", _boom)
     out = run("what systems are active?", llm_base_url="", llm_model="", session_id="it_ops_no_worker_probe")
-    assert "Operations registry" in out["reply"]
+    assert "system_snapshot" in out["reply"] or "Operations registry" in out["reply"]
 

@@ -123,6 +123,16 @@ def classify_intent(message: str) -> tuple[str, dict]:
     if "workers" in msg and ("list" in msg or "what" in msg or "show" in msg or "my " in msg):
         return "ops_overview", {}
 
+    # Keep common status-summary phrasing on answer path (fast local routing), not heavy repo scan.
+    if any(w in msg for w in (
+        "summarize current repo status",
+        "current repo status",
+        "repo status summary",
+        "open project agenda",
+        "what changed recently",
+    )):
+        return "answer", {}
+
     # Repo: "scan repo", "summarize repo", "find in repos", "search repos", "look in repo", "find it in repos"
     if "repo" in msg or "repos" in msg:
         if any(w in msg for w in ("scan", "summarize", "find", "search", "look", "show")):

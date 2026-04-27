@@ -321,15 +321,31 @@ def _write_turn_trace_if_enabled(
     fallback_reason: str | None,
     final_answer_type: str,
     reply_preview: str,
+    prepared_context_used: bool = False,
+    snapshot_types_used: list[str] | None = None,
+    snapshot_generated_at: dict[str, str] | None = None,
+    snapshot_stale: bool | None = None,
+    context_load_ms: float | None = None,
+    avoided_retrieval: bool | None = None,
+    avoided_worker_call: bool | None = None,
+    final_answer_source: str | None = None,
+    prepared_quality_score: float | None = None,
+    prepared_quality_reasons: dict | None = None,
+    prepared_quality_low: bool | None = None,
 ) -> None:
     if not write:
         return
+    total = run_timer.total_ms()
+    ft_ms = first_token_ms if first_token_ms is not None else total
+    ft_wall = first_token_wall_ms
+    if ft_wall is None and receive_wall_ms is not None:
+        ft_wall = receive_wall_ms + ft_ms
     recv_to_first = None
-    if receive_wall_ms is not None and first_token_wall_ms is not None:
-        recv_to_first = round(first_token_wall_ms - receive_wall_ms, 2)
+    if receive_wall_ms is not None and ft_wall is not None:
+        recv_to_first = round(ft_wall - receive_wall_ms, 2)
     client_to_first = None
-    if client_submit_epoch_ms is not None and first_token_wall_ms is not None:
-        client_to_first = round(first_token_wall_ms - client_submit_epoch_ms, 2)
+    if client_submit_epoch_ms is not None and ft_wall is not None:
+        client_to_first = round(ft_wall - client_submit_epoch_ms, 2)
     merged = dict(run_timer.segments_ms)
     merged.update(extra_stage_timings_ms or {})
     append_response_trace(
@@ -341,15 +357,26 @@ def _write_turn_trace_if_enabled(
             "model": model or "",
             "worker_used": worker_used,
             "stage_timings_ms": merged,
-            "first_token_ms": first_token_ms,
+            "first_token_ms": ft_ms,
             "receive_to_first_token_ms": recv_to_first,
             "client_epoch_to_first_token_ms": client_to_first,
-            "total_ms": run_timer.total_ms(),
+            "total_ms": total,
             "evidence_count": evidence_count,
             "sources_used": sources_used,
             "fallback_reason": fallback_reason,
             "final_answer_type": final_answer_type,
             "reply_preview": (reply_preview or "")[:400],
+            "prepared_context_used": prepared_context_used,
+            "snapshot_types_used": snapshot_types_used or [],
+            "snapshot_generated_at": snapshot_generated_at or {},
+            "snapshot_stale": snapshot_stale,
+            "context_load_ms": context_load_ms,
+            "avoided_retrieval": avoided_retrieval,
+            "avoided_worker_call": avoided_worker_call,
+            "final_answer_source": final_answer_source or "unknown",
+            "prepared_quality_score": prepared_quality_score,
+            "prepared_quality_reasons": prepared_quality_reasons or {},
+            "prepared_quality_low": prepared_quality_low,
         }
     )
 
@@ -422,6 +449,7 @@ def run(
                 fallback_reason=None,
                 final_answer_type="greeting_help",
                 reply_preview=rep,
+                final_answer_source="tool",
             )
             return {"reply": rep, "approval_request": None}
         topic = session_state.get_active_topic(session_id) or "(none)"
@@ -446,6 +474,7 @@ def run(
             fallback_reason=None,
             final_answer_type="greeting_shortcircuit",
             reply_preview=rep2,
+            final_answer_source="tool",
         )
         return {"reply": rep2, "approval_request": None}
     if msg.lower().startswith("approve ") or msg.lower().startswith("deny "):
@@ -465,6 +494,49 @@ def run(
     intent, params = classify_intent(message)
     run_timer.segment("intent_classification")
     log_event("intent", session_id=session_id, intent=intent, params=params)
+
+    # Prepared context fast path: answer from cached intelligence before retrieval/model.
+    if intent in ("answer", "ops_overview", "company_bi"):
+        try:
+            from brain.prepared_context.loader import try_prepared_context_answer
+
+            pctx = try_prepared_context_answer(msg, intent)
+        except Exception:
+            pctx = None
+        if pctx and pctx.get("reply"):
+            reply = pctx["reply"]
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route=intent,
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=len(pctx.get("snapshot_types_used") or []),
+                sources_used=list(pctx.get("snapshot_types_used") or []),
+                fallback_reason=None,
+                final_answer_type="prepared_context",
+                reply_preview=reply,
+                prepared_context_used=True,
+                snapshot_types_used=list(pctx.get("snapshot_types_used") or []),
+                snapshot_generated_at=dict(pctx.get("snapshot_generated_at") or {}),
+                snapshot_stale=bool(pctx.get("snapshot_stale")),
+                context_load_ms=float(pctx.get("context_load_ms") or 0.0),
+                avoided_retrieval=bool(pctx.get("avoided_retrieval")),
+                avoided_worker_call=bool(pctx.get("avoided_worker_call")),
+                final_answer_source=str(pctx.get("final_answer_source") or "prepared_context"),
+                prepared_quality_score=float(pctx.get("prepared_quality_score") or 0.0),
+                prepared_quality_reasons=dict(pctx.get("prepared_quality_reasons") or {}),
+                prepared_quality_low=bool(pctx.get("prepared_quality_low")),
+            )
+            return {"reply": reply, "approval_request": None}
 
     if intent == "enqueue_approval":
         pending_prop = session_state.get_pending_proposal(session_id)
@@ -968,6 +1040,7 @@ def run(
                 fallback_reason=None,
                 final_answer_type="worker_health",
                 reply_preview=reply,
+                final_answer_source="tool",
             )
             return {"reply": reply, "approval_request": None}
         except Exception as e:
@@ -1042,6 +1115,7 @@ def run(
                 fallback_reason=None,
                 final_answer_type="ops_overview",
                 reply_preview=reply,
+                final_answer_source="tool",
             )
             return {"reply": reply, "approval_request": None}
         except Exception as e:
@@ -1136,6 +1210,7 @@ def run(
                 fallback_reason="insufficient_evidence_hard_stop",
                 final_answer_type="insufficient_evidence",
                 reply_preview=reply,
+                final_answer_source="retrieval",
             )
             return {"reply": reply, "approval_request": None}
         # Set pending proposal for first executable hardware control so "do it" works (Guru §25)
@@ -1327,6 +1402,14 @@ def run(
     merged_timings = dict(g_timings)
     merged_timings.update(llm_extra)
     fb = "orchestrator_fallback" if reply.strip().startswith("[Orchestrator]") else None
+    if fb:
+        final_src = "orchestrator_fallback"
+    elif base_url:
+        final_src = "model"
+    elif evidence_block and "\nKey Evidence:\n(none)" not in evidence_block:
+        final_src = "retrieval"
+    else:
+        final_src = "tool"
     _write_turn_trace_if_enabled(
         write=write_response_trace,
         req_id=req_id,
@@ -1346,6 +1429,7 @@ def run(
         fallback_reason=fb,
         final_answer_type=(answer_style or "llm_answer")[:80],
         reply_preview=reply,
+        final_answer_source=final_src,
     )
 
     return {

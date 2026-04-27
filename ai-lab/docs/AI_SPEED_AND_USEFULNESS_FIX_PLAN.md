@@ -12,10 +12,10 @@ This closes the audit loop: **bottlenecks**, **quality issues**, **files touched
 ## Top 5 bottlenecks
 
 1. **Worker health SSH/TCP** (was ~10–13s when worker unreachable, now ~2.2s in interactive checks) — `main.py` worker branch, `worker_health.py`, `worker_tunnel.py`, command-center workers API.
-2. **LLM TTFT + completion** — LAN latency + model size; reduce prompt size and skip `/models` probe when possible (`AI_LAB_LLM_SKIP_MODEL_LIST_PROBE`).
-3. **Large grounded prompts** — ops registry + README + catalog in one user message (`build_grounded_response` + `grounded_prompt.txt`).
-4. **Web search** (when triggered) — bounded but still slower than pure local; freshness heuristics in `freshness.py` aim to avoid spurious web.
-5. **Session SQLite load** — first access per `session_id` (`session_store.load_session`).
+2. **Common Q&A doing runtime retrieval/model work** — mitigated by new Prepared Context snapshots and orchestrator pre-check path (`brain/prepared_context/*`, `main.py`).
+3. **LLM TTFT + completion** — LAN latency + model size; reduce prompt size and skip `/models` probe when possible (`AI_LAB_LLM_SKIP_MODEL_LIST_PROBE`).
+4. **Large grounded prompts** — ops registry + README + catalog in one user message (`build_grounded_response` + `grounded_prompt.txt`).
+5. **Web search** (when triggered) — bounded but still slower than pure local; freshness heuristics in `freshness.py` aim to avoid spurious web.
 
 ## Top 5 quality issues (addressed or tracked)
 
@@ -34,9 +34,16 @@ This closes the audit loop: **bottlenecks**, **quality issues**, **files touched
 | `brain/worker_health.py` | Parallel worker service probes with hard interactive timeout budget, status caching, timestamped snapshot, degraded/offline status metadata. |
 | `brain/worker_tunnel.py` | Parallel local tunnel port checks with configurable per-port and total timeouts. |
 | `command-center/command-center/backend/routers/workers.py` | Worker health API now uses interactive 2s budget snapshot path. |
+| `brain/prepared_context/schema.py` | Snapshot schema + validation for prepared context records. |
+| `brain/prepared_context/store.py` | Snapshot persistence in `state/prepared_context/` + index. |
+| `brain/prepared_context/builders.py` | Builders for system/repo/agenda/personal_ops/growflow/worker snapshots. |
+| `brain/prepared_context/loader.py` | Prepared-context selection and answer path decision logic. |
+| `command-center/command-center/backend/routers/prepared_context.py` | API visibility + refresh endpoints for prepared context. |
+| `scripts/build_prepared_context.py` | CLI refresh job for all or specific snapshot types. |
 | `tests/test_integration_flows.py` | Random `session_id` for insufficient test; assertion avoids accepting fallback; non-worker questions do not probe worker health. |
 | `tests/test_routing_policy.py` | New test for doc/repo README path. |
 | `tests/test_worker_health.py` | Added budget-latency and last-known-status coverage for worker-down behavior. |
+| `tests/test_prepared_context.py` | Schema/staleness/fallback/orchestrator trace coverage for prepared context. |
 
 *(Earlier session work—already in repo—includes `response_trace.py`, `chat.py` trace args, `evidence_fusion.py`, `source_router.py`, `router.py`, `llm_client.py`, `.gitignore` for traces, `scripts/benchmark_ai_response.py`.)*
 
@@ -56,7 +63,7 @@ Approximate **before** state refers to the broken behaviors described in `AI_RES
 
 ## Remaining recommended changes (safe, incremental)
 
-1. **Worker health budget**: completed for interactive path (2s budget + parallel probes + degraded payload). Next: align non-interactive/admin health endpoints to optional stricter budgets by caller profile.
+1. **Prepared context scheduler wiring**: attach `scripts/refresh_prepared_context_*.ps1` to OS task scheduler cadence.
 2. **Compact prompt mode** for chat: shrink `_format_evidence` caps via env (`AI_LAB_CHAT_EVIDENCE_CHAR_CAP`).
 3. **No-LLM friendly formatter**: short markdown summary instead of raw `grounded_prompt.txt` body.
 4. **Frontend timing**: log `performance.now()` delta to first SSE `delta` in `ChatPanel.jsx` and optionally POST to a dev-only endpoint (later).

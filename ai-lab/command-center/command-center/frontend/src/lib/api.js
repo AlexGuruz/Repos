@@ -170,4 +170,8 @@ export const api = {
   toolsWorkerReachable: () => get('/api/tools/worker-reachable'),
   toolsInvoke: (op, payload = {}, agent = 'command-center') =>
     post('/api/tools/invoke', { op, agent, payload }),
+  preparedContext: () => get('/api/prepared-context'),
+  preparedContextByType: (snapshotType) => get(`/api/prepared-context/${encodeURIComponent(snapshotType)}`),
+  refreshPreparedContext: (snapshotType) => post(`/api/prepared-context/refresh/${encodeURIComponent(snapshotType)}`, {}),
+  preparedContextRefresherStatus: () => get('/api/prepared-context/status/refresher'),
 }

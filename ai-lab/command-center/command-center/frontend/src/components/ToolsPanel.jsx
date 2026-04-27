@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../lib/api'
 import { SectionLabel } from './Primitives'
 
@@ -24,20 +24,34 @@ export default function ToolsPanel() {
     registryCount: 0,
     note: '',
   })
+  const [preparedSnapshots, setPreparedSnapshots] = useState([])
+  const [preparedRefresher, setPreparedRefresher] = useState(null)
+  const preparedRef = useRef(null)
+  const [preparedOpen, setPreparedOpen] = useState(false)
 
   const fetchTools = useCallback(() => {
-    api.toolsStats()
-      .then(res => {
-        setToolCalls(res.toolCalls || [])
-        setDataMovement(res.dataMovement || [])
-        setRegistryMeta({
-          registeredTools: res.registeredTools || [],
-          workerReadOps: res.workerReadOps || [],
-          controlledOps: res.controlledOps || [],
-          registryPath: res.registryPath || '',
-          registryCount: res.registryCount ?? 0,
-          note: res.note || '',
-        })
+    Promise.allSettled([api.toolsStats(), api.preparedContext(), api.preparedContextRefresherStatus()])
+      .then(([toolsRes, pctxRes, refresherRes]) => {
+        if (toolsRes.status === 'fulfilled') {
+          const res = toolsRes.value || {}
+          setToolCalls(res.toolCalls || [])
+          setDataMovement(res.dataMovement || [])
+          setRegistryMeta({
+            registeredTools: res.registeredTools || [],
+            workerReadOps: res.workerReadOps || [],
+            controlledOps: res.controlledOps || [],
+            registryPath: res.registryPath || '',
+            registryCount: res.registryCount ?? 0,
+            note: res.note || '',
+          })
+        }
+        if (pctxRes.status === 'fulfilled') {
+          const snapshots = pctxRes.value?.index?.snapshots || []
+          setPreparedSnapshots(Array.isArray(snapshots) ? snapshots : [])
+        }
+        if (refresherRes.status === 'fulfilled') {
+          setPreparedRefresher(refresherRes.value || null)
+        }
       })
       .catch(() => {})
   }, [])
@@ -47,6 +61,17 @@ export default function ToolsPanel() {
     const t = setInterval(fetchTools, TOOLS_POLL_MS)
     return () => clearInterval(t)
   }, [fetchTools])
+
+  useEffect(() => {
+    const onFocus = () => {
+      setPreparedOpen(true)
+      if (preparedRef.current) {
+        preparedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+    window.addEventListener('focusPreparedContextSection', onFocus)
+    return () => window.removeEventListener('focusPreparedContextSection', onFocus)
+  }, [])
 
   const maxCalls = toolCalls.length > 0
     ? Math.max(1, ...toolCalls.map(d => (d.orch || 0) + (d.worker || 0) + (d.rag || 0) + (d.sup || 0)))
@@ -87,6 +112,29 @@ export default function ToolsPanel() {
             </pre>
           </details>
         </div>
+      ) : null}
+      {preparedSnapshots.length > 0 ? (
+        <details
+          className="mb-4"
+          ref={preparedRef}
+          id="prepared-context-section"
+          open={preparedOpen}
+          onToggle={(e) => setPreparedOpen(e.currentTarget.open)}
+        >
+          <summary className="text-[11px] text-white/45 cursor-pointer">Prepared context snapshots ({preparedSnapshots.length})</summary>
+          {preparedRefresher?.generated_at ? (
+            <div className="text-[10px] text-white/28 mt-1">refresher heartbeat: {preparedRefresher.generated_at}</div>
+          ) : null}
+          <div className="mt-2 space-y-1 max-h-36 overflow-y-auto">
+            {preparedSnapshots.map(s => (
+              <div key={s.snapshot_type} className="text-[10px] font-mono text-white/38 border border-white/10 rounded px-2 py-1">
+                <div>{s.snapshot_type} · conf {s.confidence ?? 'n/a'} · stale {String(!!s.stale)}</div>
+                <div className="text-white/28">generated {s.generated_at || 'unknown'}</div>
+                {s.summary_short ? <div className="text-white/32">{s.summary_short}</div> : null}
+              </div>
+            ))}
+          </div>
+        </details>
       ) : null}
       {/* Legend */}
       <div className="flex gap-4 mb-4">

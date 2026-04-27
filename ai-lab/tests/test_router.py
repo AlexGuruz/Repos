@@ -120,6 +120,17 @@ def test_classify_empty_and_whitespace():
     assert intent == "answer"
 
 
+def test_classify_repo_status_and_agenda_as_answer():
+    for phrase in (
+        "summarize current repo status",
+        "current repo status",
+        "open project agenda",
+        "what changed recently?",
+    ):
+        intent, _ = classify_intent(phrase)
+        assert intent == "answer", phrase
+
+
 def test_classify_worker_index():
     """Worker Assistant: index repo on worker (Guru §26)."""
     intent, params = classify_intent("index repo")

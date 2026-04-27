@@ -53,6 +53,9 @@ def match_answer_fast_path(message: str) -> AnswerFastPath | None:
         "what's my priority",
         "whats my priority",
         "backlog",
+        "open project agenda",
+        "project agenda",
+        "today agenda",
     )
     if any(p in msg for p in planning_markers):
         return AnswerFastPath(
@@ -115,6 +118,36 @@ def match_answer_fast_path(message: str) -> AnswerFastPath | None:
             answer_style_hint="summary_from_artifact",
         )
 
+    # Explicit repo status phrase coverage for fast local answers.
+    repo_status_markers = (
+        "summarize current repo status",
+        "current repo status",
+        "repo status summary",
+        "summarize repo status",
+    )
+    if any(m in msg for m in repo_status_markers):
+        readme = _ai_lab_readme_path()
+        if readme:
+            return AnswerFastPath(
+                needs_local=True,
+                needs_web=False,
+                local_targets=(
+                    LocalTarget(
+                        kind="artifact",
+                        path=readme,
+                        priority=1,
+                        reason="Repo status summary from ai-lab README (no web).",
+                    ),
+                    LocalTarget(
+                        kind="ops_registry",
+                        priority=2,
+                        reason="Repo status context from ops registry (no web).",
+                    ),
+                ),
+                reason="Repo status question: README + ops registry fast path.",
+                answer_style_hint="summary_from_artifact",
+            )
+
     growflow_markers = ("growflow", "grow flow")
     change_markers = ("change", "changed", "recent", "delta", "what's new", "whats new", "since")
     if any(g in msg for g in growflow_markers) and any(c in msg for c in change_markers):
@@ -136,6 +169,37 @@ def match_answer_fast_path(message: str) -> AnswerFastPath | None:
                 reason="Growflow change/context question — README snapshot (use git log for exact deltas).",
                 answer_style_hint="summary_from_artifact",
             )
+
+    # Generic "what changed recently?" should be fast and local by default.
+    if (
+        "what changed recently" in msg
+        or "what changed" in msg
+        or "recent changes" in msg
+    ):
+        targets: list[LocalTarget] = [
+            LocalTarget(
+                kind="ops_registry",
+                priority=1,
+                reason="Recent changes question — start from cached systems/ops context (no worker, no web).",
+            )
+        ]
+        readme = _ai_lab_readme_path()
+        if readme:
+            targets.append(
+                LocalTarget(
+                    kind="artifact",
+                    path=readme,
+                    priority=2,
+                    reason="Recent changes orientation from ai-lab README.",
+                )
+            )
+        return AnswerFastPath(
+            needs_local=True,
+            needs_web=False,
+            local_targets=tuple(targets),
+            reason="Generic change question: local cached context fast path.",
+            answer_style_hint="summary_from_artifact",
+        )
 
     doc_markers = ("documentation", "doc status", "docs status", "doc health")
     repo_markers = ("repo", "repos", "repository")

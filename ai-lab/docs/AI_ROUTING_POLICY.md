@@ -2,6 +2,14 @@
 
 This policy describes **how user messages should be routed** for speed and usefulness. It aligns with code in `brain/router/router.py`, `brain/orchestrator/source_router.py`, `brain/orchestrator/routing_policy.py`, and early branches in `brain/orchestrator/main.py`.
 
+## Prepared Context First
+
+- Common system/repo/planning/business questions should first consult prepared snapshots via `brain.prepared_context.loader`.
+- If snapshots are high-confidence, answer immediately from prepared context.
+- If snapshots are stale, answer with a stale warning and `generated_at`; do not fake freshness.
+- If snapshots are missing/insufficient, fall back to normal retrieval/model flow.
+- Do not block chat while rebuilding snapshots (refresh via scripts or API).
+
 ## Principles
 
 1. **Local-first**: prefer registry, session artifacts, and on-disk README summaries before paid web search.
@@ -14,6 +22,7 @@ This policy describes **how user messages should be routed** for speed and usefu
 | User need | Intent / path | Retrieval | Worker | Implementation pointers |
 |-----------|---------------|-----------|--------|-------------------------|
 | Greetings / small talk / help openers | Early return in `main.run()` | **No** | **No** | `_load_conversational_openers`, `_is_short_social_greeting`, `normalize_chat_text`. |
+| Common system/repo/planning questions | `prepared_context` pre-check | **Usually No** | **No** | `brain.prepared_context.loader.try_prepared_context_answer`. |
 | Simple “what’s active / systems / workers” | `ops_overview` | Ops registry only | **No** | `router.classify_intent` + deterministic block in `main.run()` using `ops_registry.get_ops_summary_text_cached()`. |
 | Planning / prioritization (“what should I work on”, backlog, etc.) | `answer` + fast path | **Ops registry** (no web) | **No** | `routing_policy.match_answer_fast_path` → `source_router` applies `AnswerFastPath`. |
 | Lab / Command Center “current state” | `answer` + fast path | Ops + optional `ai-lab/README.md` | **No** | Same; README when path exists. |
@@ -35,3 +44,14 @@ This policy describes **how user messages should be routed** for speed and usefu
 ## Trace field: `route_chosen`
 
 Structured traces (`state/ai_response_traces.jsonl`) use `route_chosen` (e.g. `greeting_shortcircuit`, `ops_overview`, intent name from `classify_intent`) for analytics—see `main._write_turn_trace_if_enabled` and `response_trace.append_response_trace`.
+
+Prepared-context usage is also traced via:
+
+- `prepared_context_used`
+- `snapshot_types_used`
+- `snapshot_generated_at`
+- `snapshot_stale`
+- `context_load_ms`
+- `avoided_retrieval`
+- `avoided_worker_call`
+- `final_answer_source`
