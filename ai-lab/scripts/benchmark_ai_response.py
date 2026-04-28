@@ -10,6 +10,12 @@ from __future__ import annotations
 
 import os
 import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 import time
 import json
 import uuid
@@ -206,6 +212,18 @@ def main() -> int:
         )
     print("")
     print("For **first-token** and **per-stage** timings, see `state/ai_response_traces.jsonl` with `write_response_trace=True` (Command Center chat).")
+    # Practical regression probe: warm greeting should stay fast.
+    warm_sid = f"bench_hello_warm_{uuid.uuid4().hex[:6]}"
+    _ = run("hello", llm_base_url="", llm_model="", session_id=warm_sid, write_response_trace=False)
+    warm_ms: list[float] = []
+    for _ in range(3):
+        t0 = time.perf_counter()
+        _ = run("hello", llm_base_url="", llm_model="", session_id=warm_sid, write_response_trace=False)
+        warm_ms.append(round((time.perf_counter() - t0) * 1000.0, 2))
+    warm_median = sorted(warm_ms)[1]
+    print(f"Warm greeting latency probe (ms): {warm_ms} median={warm_median}")
+    if os.environ.get("AI_LAB_BENCH_ASSERT", "").strip() in ("1", "true", "yes"):
+        assert warm_median < 300.0, f"warm greeting median too slow: {warm_median}ms"
     _update_benchmark_doc(rows)
     print(f"Updated doc snapshot: {BENCHMARK_DOC}")
     return 0

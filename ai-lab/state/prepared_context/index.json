@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-27T01:05:58Z",
+  "generated_at": "2026-04-28T02:29:06Z",
   "snapshots": [
     {
       "snapshot_type": "system_snapshot",
-      "generated_at": "2026-04-27T01:05:20Z",
+      "generated_at": "2026-04-28T02:28:58Z",
       "freshness_seconds": 900,
       "stale": false,
       "confidence": 0.86,
@@ -12,7 +12,7 @@
     },
     {
       "snapshot_type": "repo_pulse",
-      "generated_at": "2026-04-27T01:05:46Z",
+      "generated_at": "2026-04-28T02:29:01Z",
       "freshness_seconds": 3600,
       "stale": false,
       "confidence": 0.82,
@@ -21,25 +21,25 @@
     },
     {
       "snapshot_type": "project_agenda",
-      "generated_at": "2026-04-27T01:05:52Z",
+      "generated_at": "2026-04-28T02:29:03Z",
       "freshness_seconds": 86400,
       "stale": false,
-      "confidence": 0.55,
+      "confidence": 0.75,
       "errors": [],
       "summary_short": "Project agenda prepared from repo pulse and activity."
     },
     {
       "snapshot_type": "personal_ops_snapshot",
-      "generated_at": "2026-04-27T01:05:52Z",
+      "generated_at": "2026-04-28T02:29:04Z",
       "freshness_seconds": 86400,
       "stale": false,
-      "confidence": 0.45,
+      "confidence": 0.72,
       "errors": [],
-      "summary_short": "Personal ops snapshot prepared from available personal_ops scripts."
+      "summary_short": "Personal planning snapshot: repo activity + optional calendar + agenda cues."
     },
     {
       "snapshot_type": "growflow_snapshot",
-      "generated_at": "2026-04-27T01:05:52Z",
+      "generated_at": "2026-04-28T02:29:04Z",
       "freshness_seconds": 3600,
       "stale": false,
       "confidence": 0.8,
@@ -48,7 +48,7 @@
     },
     {
       "snapshot_type": "worker_snapshot",
-      "generated_at": "2026-04-27T01:05:54Z",
+      "generated_at": "2026-04-28T02:29:06Z",
       "freshness_seconds": 900,
       "stale": false,
       "confidence": 0.7,

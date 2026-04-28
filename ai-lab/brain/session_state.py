@@ -64,6 +64,19 @@ def get_active_topic(session_id: str) -> str | None:
     return get(session_id).get("active_topic")
 
 
+def peek_active_topic(session_id: str) -> str | None:
+    """Fast non-hydrating read for hot paths (e.g. greeting).
+
+    Returns active_topic only if session already exists in in-memory cache.
+    Avoids SQLite/session-store I/O when we only need a display hint.
+    """
+    state = _SESSIONS.get(session_id)
+    if not isinstance(state, dict):
+        return None
+    topic = state.get("active_topic")
+    return str(topic) if topic is not None else None
+
+
 def update_active_topic(session_id: str, topic: str | None) -> None:
     """Set or clear the current conversation topic (e.g. growflow_sales_issue, repo_scan_analysis)."""
     get(session_id)["active_topic"] = topic

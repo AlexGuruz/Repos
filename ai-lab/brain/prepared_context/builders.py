@@ -324,7 +324,28 @@ def build_project_agenda() -> PreparedSnapshot:
         "today_focus": top_focus[:3],
         "tomorrow_focus": top_focus[3:6],
         "project_to_repo_map": {x: x for x in top_focus},
+        "stale_repos_needing_attention": blocked[:8],
+        "missing_sources": [],
     }
+    if not changed:
+        data["missing_sources"].append("no_recent_repo_changes")
+    if not stale:
+        data["missing_sources"].append("no_stale_repo_signals")
+    # Optional enrichment from latest personal_ops snapshot (calendar and reminders).
+    try:
+        pos = load_snapshot("personal_ops_snapshot")
+        pos_data = (pos or {}).get("data") if isinstance(pos, dict) else {}
+        if isinstance(pos_data, dict):
+            data["calendar_today_preview"] = list(pos_data.get("calendar_today") or [])[:5]
+            data["calendar_upcoming_preview"] = list(pos_data.get("calendar_upcoming") or [])[:5]
+            if data.get("calendar_today_preview") or data.get("calendar_upcoming_preview"):
+                data["missing_sources"] = [m for m in data["missing_sources"] if m != "calendar_not_configured"]
+            else:
+                data["missing_sources"].append("calendar_not_configured")
+        else:
+            data["missing_sources"].append("no_personal_ops_snapshot")
+    except Exception:
+        data["missing_sources"].append("no_personal_ops_snapshot")
     evidence_items = [
         {
             "title": "Agenda from repo pulse",
@@ -334,6 +355,43 @@ def build_project_agenda() -> PreparedSnapshot:
             "confidence": 0.75,
         }
     ]
+    evidence_items.append(
+        {
+            "title": "Active projects and next actions",
+            "source_path_or_tool": "prepared_context.repo_pulse.changed_repos",
+            "observed_at": now_iso(),
+            "summary": (
+                f"active={len(data['active_projects'])} priorities={len(data['current_priorities'])} "
+                f"next_actions={len(data['next_actions'])}"
+            ),
+            "confidence": 0.72 if data["active_projects"] else 0.5,
+        }
+    )
+    evidence_items.append(
+        {
+            "title": "Blockers and stale repos",
+            "source_path_or_tool": "prepared_context.repo_pulse.stale_repos",
+            "observed_at": now_iso(),
+            "summary": (
+                f"blocked_items={len(data['blocked_items'])} "
+                f"stale_repos_needing_attention={len(data['stale_repos_needing_attention'])}"
+            ),
+            "confidence": 0.7 if data["blocked_items"] else 0.55,
+        }
+    )
+    if data.get("calendar_today_preview") or data.get("calendar_upcoming_preview"):
+        evidence_items.append(
+            {
+                "title": "Calendar context (from personal ops)",
+                "source_path_or_tool": "state/prepared_context/personal_ops_snapshot.json",
+                "observed_at": now_iso(),
+                "summary": (
+                    f"today={len(data.get('calendar_today_preview') or [])} "
+                    f"upcoming={len(data.get('calendar_upcoming_preview') or [])}"
+                ),
+                "confidence": 0.65,
+            }
+        )
     freshness = 86400
     return PreparedSnapshot(
         snapshot_type="project_agenda",
@@ -540,6 +598,29 @@ def build_personal_ops_snapshot() -> PreparedSnapshot:
         }
         data["incomplete_planned_items"] = list(pad.get("blocked_items") or [])[:8]
         data["project_schedule"] = list(pad.get("next_actions") or [])[:8]
+        # Lightweight alerts summary for planning prompts and missing_sources diagnostics.
+        agenda_blocked = list(pad.get("blocked_items") or [])[:5]
+        stale_repos = list(data.get("stale_repo_labels") or [])[:5]
+        alerts: list[dict[str, Any]] = []
+        if agenda_blocked:
+            alerts.append(
+                {
+                    "kind": "blocked_items",
+                    "count": len(agenda_blocked),
+                    "items": agenda_blocked,
+                }
+            )
+        if stale_repos:
+            alerts.append(
+                {
+                    "kind": "stale_repos",
+                    "count": len(stale_repos),
+                    "items": stale_repos,
+                }
+            )
+        data["alerts_sent"] = alerts
+        if alerts and "no_recent_alerts" in missing_sources:
+            missing_sources.remove("no_recent_alerts")
         evidence_items.append(
             {
                 "title": "Project agenda (cached)",
@@ -547,6 +628,52 @@ def build_personal_ops_snapshot() -> PreparedSnapshot:
                 "observed_at": pa.get("generated_at") or now_iso(),
                 "summary": "Merged last-built project_agenda for planning context.",
                 "confidence": 0.72,
+            }
+        )
+        evidence_items.append(
+            {
+                "title": "Planning detail depth",
+                "source_path_or_tool": "personal_ops_snapshot.project_focus",
+                "observed_at": now_iso(),
+                "summary": (
+                    f"today_focus={len(data['project_focus'].get('today_focus') or [])} "
+                    f"next_actions={len(data['project_schedule'])} "
+                    f"blocked={len(data['incomplete_planned_items'])}"
+                ),
+                "confidence": 0.74 if data["project_schedule"] else 0.58,
+            }
+        )
+    if data.get("stale_repo_labels"):
+        evidence_items.append(
+            {
+                "title": "Stale repos needing attention",
+                "source_path_or_tool": "lib.repo_staleness.scan_repos",
+                "observed_at": now_iso(),
+                "summary": f"stale_repo_labels={data['stale_repo_labels'][:8]}",
+                "confidence": 0.7,
+            }
+        )
+    if data.get("calendar_today") or data.get("calendar_upcoming"):
+        evidence_items.append(
+            {
+                "title": "Calendar planning cues",
+                "source_path_or_tool": "lib.google_calendar_client.list_events",
+                "observed_at": now_iso(),
+                "summary": (
+                    f"today={len(data.get('calendar_today') or [])} "
+                    f"upcoming={len(data.get('calendar_upcoming') or [])}"
+                ),
+                "confidence": 0.74,
+            }
+        )
+    if data.get("daily_digest_available"):
+        evidence_items.append(
+            {
+                "title": "Daily digest script available",
+                "source_path_or_tool": str(scripts_dir / "personal_ops_daily_digest.py"),
+                "observed_at": now_iso(),
+                "summary": "daily digest tool available for operator check-ins",
+                "confidence": 0.62,
             }
         )
 

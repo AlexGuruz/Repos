@@ -88,6 +88,24 @@ def test_negative_no_prepared_for_unrelated_trivia() -> None:
     assert sel.snapshot_types == []
 
 
+@pytest.mark.parametrize(
+    "msg",
+    [
+        "what changed recently in Growflow?",
+        "Growflow updates",
+        "recent Growflow automation changes",
+    ],
+)
+def test_growflow_recent_change_phrases_select_growflow(msg: str) -> None:
+    sel = select_snapshots_for_message(msg, "answer")
+    assert "growflow_snapshot" in sel.snapshot_types, (msg, sel.snapshot_types, sel.scores)
+
+
+def test_generic_changed_recently_does_not_force_growflow() -> None:
+    sel = select_snapshots_for_message("what changed recently?", "answer")
+    assert "growflow_snapshot" not in sel.snapshot_types
+
+
 def test_time_sensitive_flag() -> None:
     assert select_snapshots_for_message("what is the current worker status?", "answer").time_sensitive is True
 
@@ -146,6 +164,21 @@ def test_worker_not_called_when_prepared_worker_snapshot(monkeypatch: pytest.Mon
         session_id=f"pc-sel-{uuid.uuid4().hex[:8]}",
     )
     assert "worker_snapshot" in out["reply"] or "ollama" in out["reply"].lower()
+
+
+def test_greeting_short_circuit_warm_under_300ms() -> None:
+    sid = f"hello-warm-{uuid.uuid4().hex[:6]}"
+    # Warm-up (cache openers / initialize session structures)
+    _ = run("hello", llm_base_url="", llm_model="", session_id=sid)
+    ms: list[float] = []
+    for _ in range(4):
+        t0 = time.perf_counter()
+        out = run("hello", llm_base_url="", llm_model="", session_id=sid)
+        ms.append((time.perf_counter() - t0) * 1000.0)
+        assert "Ready." in out["reply"]
+    ms_sorted = sorted(ms)
+    median = (ms_sorted[1] + ms_sorted[2]) / 2.0
+    assert median < 300.0, f"warm greeting median too slow: {median:.2f}ms"
 
 
 def test_company_bi_intent_boosts_growflow(monkeypatch: pytest.MonkeyPatch) -> None:

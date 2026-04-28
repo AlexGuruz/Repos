@@ -6,7 +6,7 @@ Deterministic only (no embeddings). Target: sub-millisecond typical runtime.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 _ALL_TYPES: tuple[str, ...] = (
     "system_snapshot",
     "repo_pulse",
@@ -111,6 +111,8 @@ _WORKER_HINTS: tuple[tuple[float, str], ...] = (
 
 _GROWFLOW_HINTS: tuple[tuple[float, str], ...] = (
     (0.5, "growflow status"),
+    (0.48, "growflow updates"),
+    (0.44, "recent growflow automation changes"),
     (0.46, "grow flow"),
     (0.42, "par system"),
     (0.4, "transfer receipt"),
@@ -120,6 +122,27 @@ _GROWFLOW_HINTS: tuple[tuple[float, str], ...] = (
     (0.36, "inventory automation status"),
     (0.34, "landed cost"),
     (0.32, "company bi"),
+)
+
+_CHANGE_MARKERS = (
+    "changed",
+    "change",
+    "recent",
+    "update",
+    "updates",
+    "delta",
+    "new",
+)
+
+_REPO_CODE_DOC_MARKERS = (
+    "repo",
+    "repos",
+    "code",
+    "docs",
+    "documentation",
+    "readme",
+    "cleanup",
+    "commit",
 )
 
 # Require at least one of these substrings for growflow when generic "inventory" appears alone.
@@ -212,6 +235,19 @@ def select_snapshots_for_message(message: str, intent: str | None = None) -> Sna
     if intent == "worker_health":
         scores["worker_snapshot"] = max(scores["worker_snapshot"], 0.52)
         reasons["worker_snapshot"].append("intent:worker_health")
+
+    # Growflow recent-change phrasing should prefer growflow_snapshot.
+    growflow_mentioned = ("growflow" in m) or ("grow flow" in m)
+    change_mentioned = any(c in m for c in _CHANGE_MARKERS)
+    if growflow_mentioned and change_mentioned:
+        scores["growflow_snapshot"] = max(scores["growflow_snapshot"], 0.54)
+        reasons["growflow_snapshot"].append("growflow_change_boost")
+        # Keep repo_pulse only when the prompt explicitly asks about repo/code/doc changes.
+        if not any(k in m for k in _REPO_CODE_DOC_MARKERS):
+            if scores.get("repo_pulse", 0.0) > 0:
+                rejected.append({"snapshot_type": "repo_pulse", "reason": "growflow_change_without_repo_code_docs"})
+            scores["repo_pulse"] = 0.0
+            reasons["repo_pulse"] = []
 
     # Repo documentation / cleanup: keep legacy pairing with system_snapshot without firing the broad trio.
     doc_repo_q = any(x in m for x in ("documentation", "docs", "readme", "cleanup")) and scores.get("repo_pulse", 0) >= 0.25

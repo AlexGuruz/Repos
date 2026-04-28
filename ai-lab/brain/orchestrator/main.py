@@ -422,7 +422,9 @@ def run(
     msg = _sanitize_chat_input(message or "")
     # Guru §24.13: Hard early conversational gate — allowlist + short social phrases; before intent/evidence pipeline
     normalized = normalize_chat_text(msg)
+    _g_openers_t0 = time.perf_counter()
     openers = _load_conversational_openers()
+    greeting_openers_ms = round((time.perf_counter() - _g_openers_t0) * 1000.0, 2)
     if normalized in openers or _is_short_social_greeting(normalized):
         help_phrases = {"help", "what can you do"}
         if normalized in help_phrases:
@@ -459,7 +461,9 @@ def run(
                 final_answer_source="tool",
             )
             return {"reply": rep, "approval_request": None}
-        topic = session_state.get_active_topic(session_id) or "(none)"
+        _g_topic_t0 = time.perf_counter()
+        topic = session_state.peek_active_topic(session_id) or "(none)"
+        greeting_topic_lookup_ms = round((time.perf_counter() - _g_topic_t0) * 1000.0, 2)
         log_event("conversational_fallback", session_id=session_id, kind="greeting", active_topic=topic)
         rep2 = f"Ready. Active topic: **{topic}**. What do you want to work on?"
         _write_turn_trace_if_enabled(

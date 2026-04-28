@@ -1,23 +1,41 @@
 {
   "snapshot_type": "personal_ops_snapshot",
-  "generated_at": "2026-04-28T00:33:03Z",
+  "generated_at": "2026-04-28T02:29:04Z",
   "freshness_seconds": 86400,
   "source_files_or_tools": [
+    "E:\\Repos\\ai-lab\\config\\personal_ops.example.yaml",
     "E:\\Repos\\ai-lab\\scripts"
   ],
-  "confidence": 0.38,
+  "confidence": 0.72,
   "stale": false,
   "errors": [],
   "data": {
-    "config_path": null,
+    "config_path": "E:\\Repos\\ai-lab\\config\\personal_ops.example.yaml",
     "calendar_events": [],
     "calendar_today": [],
     "calendar_upcoming": [],
     "calendar_horizon_days": 7,
     "reminders": [],
     "daily_digest_available": true,
-    "repo_pulse": [],
-    "stale_repo_labels": [],
+    "repo_pulse": [
+      {
+        "label": "AI-Lab",
+        "path": "E:\\Repos",
+        "days_idle": 0.05,
+        "last_commit_iso": "2026-04-28T01:17:50+00:00",
+        "error": null
+      },
+      {
+        "label": "Project Kylo",
+        "path": "E:\\Repos",
+        "days_idle": 8.12,
+        "last_commit_iso": "2026-04-19T23:35:15+00:00",
+        "error": null
+      }
+    ],
+    "stale_repo_labels": [
+      "Project Kylo"
+    ],
     "kylo_heartbeats": [],
     "project_focus": {
       "today_focus": [
@@ -56,15 +74,31 @@
       "awesome-n8n-templates: stale/no recent updates",
       "BMAD-METHOD: stale/no recent updates"
     ],
-    "alerts_sent": [],
+    "alerts_sent": [
+      {
+        "kind": "blocked_items",
+        "count": 3,
+        "items": [
+          "activepieces: stale/no recent updates",
+          "awesome-n8n-templates: stale/no recent updates",
+          "BMAD-METHOD: stale/no recent updates"
+        ]
+      },
+      {
+        "kind": "stale_repos",
+        "count": 1,
+        "items": [
+          "Project Kylo"
+        ]
+      }
+    ],
     "available_scripts": [
       "personal_ops_calendar_snapshot.py",
       "personal_ops_daily_digest.py",
       "personal_ops_repo_pulse.py"
     ],
     "missing_sources": [
-      "calendar_not_configured",
-      "no_recent_alerts"
+      "calendar_not_configured"
     ]
   },
   "summary_short": "Personal planning snapshot: repo activity + optional calendar + agenda cues.",
@@ -77,11 +111,25 @@
   ],
   "evidence_items": [
     {
+      "title": "Personal ops config",
+      "source_path_or_tool": "E:\\Repos\\ai-lab\\config\\personal_ops.example.yaml",
+      "observed_at": "2026-04-28T02:29:03Z",
+      "summary": "loaded keys=['calendar', 'kylo_heartbeats', 'repos', 'stale_warning_days']",
+      "confidence": 0.82
+    },
+    {
       "title": "Personal ops script availability",
       "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts",
-      "observed_at": "2026-04-28T00:33:03Z",
+      "observed_at": "2026-04-28T02:29:03Z",
       "summary": "available_scripts=['personal_ops_calendar_snapshot.py', 'personal_ops_daily_digest.py', 'personal_ops_repo_pulse.py']",
       "confidence": 0.65
+    },
+    {
+      "title": "Repo pulse (git idle)",
+      "source_path_or_tool": "lib.repo_staleness.scan_repos",
+      "observed_at": "2026-04-28T02:29:04Z",
+      "summary": "repos=2 stale=1",
+      "confidence": 0.78
     },
     {
       "title": "Project agenda (cached)",
@@ -89,6 +137,27 @@
       "observed_at": "2026-04-27T01:05:52Z",
       "summary": "Merged last-built project_agenda for planning context.",
       "confidence": 0.72
+    },
+    {
+      "title": "Planning detail depth",
+      "source_path_or_tool": "personal_ops_snapshot.project_focus",
+      "observed_at": "2026-04-28T02:29:04Z",
+      "summary": "today_focus=3 next_actions=3 blocked=3",
+      "confidence": 0.74
+    },
+    {
+      "title": "Stale repos needing attention",
+      "source_path_or_tool": "lib.repo_staleness.scan_repos",
+      "observed_at": "2026-04-28T02:29:04Z",
+      "summary": "stale_repo_labels=['Project Kylo']",
+      "confidence": 0.7
+    },
+    {
+      "title": "Daily digest script available",
+      "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts\\personal_ops_daily_digest.py",
+      "observed_at": "2026-04-28T02:29:04Z",
+      "summary": "daily digest tool available for operator check-ins",
+      "confidence": 0.62
     }
   ]
 }
