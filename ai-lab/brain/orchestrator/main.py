@@ -333,6 +333,9 @@ def _write_turn_trace_if_enabled(
     prepared_quality_score: float | None = None,
     prepared_quality_reasons: dict | None = None,
     prepared_quality_low: bool | None = None,
+    prepared_selection_scores: dict[str, float] | None = None,
+    prepared_selection_reasons: dict[str, Any] | None = None,
+    prepared_selection_ms: float | None = None,
 ) -> None:
     if not write:
         return
@@ -378,6 +381,9 @@ def _write_turn_trace_if_enabled(
             "prepared_quality_score": prepared_quality_score,
             "prepared_quality_reasons": prepared_quality_reasons or {},
             "prepared_quality_low": prepared_quality_low,
+            "prepared_context_selection_scores": prepared_selection_scores or {},
+            "prepared_context_selection_reasons": prepared_selection_reasons or {},
+            "prepared_context_selection_ms": prepared_selection_ms,
         }
     )
 
@@ -536,6 +542,9 @@ def run(
                 prepared_quality_score=float(pctx.get("prepared_quality_score") or 0.0),
                 prepared_quality_reasons=dict(pctx.get("prepared_quality_reasons") or {}),
                 prepared_quality_low=bool(pctx.get("prepared_quality_low")),
+                prepared_selection_scores=dict(pctx.get("prepared_context_selection_scores") or {}),
+                prepared_selection_reasons=dict(pctx.get("prepared_context_selection_reasons") or {}),
+                prepared_selection_ms=float(pctx.get("prepared_context_selection_ms") or 0.0),
             )
             return {"reply": reply, "approval_request": None}
 
@@ -1013,8 +1022,52 @@ def run(
         reply += "\n\n**Suggested next steps:**\n1. Search repos for a script (e.g. \"search repos for growflow\").\n2. Update registry or fix findings above."
         return {"reply": reply, "approval_request": None}
 
-    # Worker health (Guru §26)
+    # Worker health (Guru §26): prefer cached worker_snapshot prepared context before live probes.
     if intent == "worker_health":
+        try:
+            from brain.prepared_context.loader import try_prepared_context_answer
+
+            pctx_wh = try_prepared_context_answer(msg, intent)
+        except Exception:
+            pctx_wh = None
+        if pctx_wh and pctx_wh.get("reply"):
+            reply = pctx_wh["reply"]
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="worker_health",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=len(pctx_wh.get("snapshot_types_used") or []),
+                sources_used=list(pctx_wh.get("snapshot_types_used") or []),
+                fallback_reason=None,
+                final_answer_type="prepared_context",
+                reply_preview=reply,
+                prepared_context_used=True,
+                snapshot_types_used=list(pctx_wh.get("snapshot_types_used") or []),
+                snapshot_generated_at=dict(pctx_wh.get("snapshot_generated_at") or {}),
+                snapshot_stale=bool(pctx_wh.get("snapshot_stale")),
+                context_load_ms=float(pctx_wh.get("context_load_ms") or 0.0),
+                avoided_retrieval=bool(pctx_wh.get("avoided_retrieval")),
+                avoided_worker_call=True,
+                final_answer_source=str(pctx_wh.get("final_answer_source") or "prepared_context"),
+                prepared_quality_score=float(pctx_wh.get("prepared_quality_score") or 0.0),
+                prepared_quality_reasons=dict(pctx_wh.get("prepared_quality_reasons") or {}),
+                prepared_quality_low=bool(pctx_wh.get("prepared_quality_low")),
+                prepared_selection_scores=dict(pctx_wh.get("prepared_context_selection_scores") or {}),
+                prepared_selection_reasons=dict(pctx_wh.get("prepared_context_selection_reasons") or {}),
+                prepared_selection_ms=float(pctx_wh.get("prepared_context_selection_ms") or 0.0),
+            )
+            return {"reply": reply, "approval_request": None}
+
         try:
             from brain.worker_health import get_worker_health_snapshot
 

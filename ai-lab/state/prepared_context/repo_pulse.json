@@ -1,6 +1,6 @@
 {
   "snapshot_type": "repo_pulse",
-  "generated_at": "2026-04-27T21:19:32Z",
+  "generated_at": "2026-04-28T00:38:04Z",
   "freshness_seconds": 3600,
   "source_files_or_tools": [
     "E:\\Repos",
@@ -21,9 +21,9 @@
         "readme_fresh": true,
         "todo_fixme_count": 0,
         "recent_commits": [
+          "09665ca Driver app Android project, route build scripts, and backend/driver portal updates.",
           "76f993f Improve Android background location reliability for soft launch",
-          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding",
-          "0f450e0 StackBlitz: Connect to backend form on login, localStorage api base, app-config.json fallback, app-config.example.json"
+          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding"
         ],
         "last_modified_epoch": 1773466643.37,
         "role": "unknown"
@@ -36,7 +36,8 @@
         "readme_fresh": false,
         "todo_fixme_count": 0,
         "recent_commits": [
-          "8712c94 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
+          "171722f chore: ignore service account JSON; add GCP credential template example.",
+          "6259a51 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
           "ebc5218 Initial clone from Project-Kylo for Greg-Kylo"
         ],
         "last_modified_epoch": 1773120833.48,
@@ -79,7 +80,9 @@
         "readme_present": true,
         "readme_fresh": false,
         "todo_fixme_count": 0,
-        "recent_commits": [],
+        "recent_commits": [
+          "78a52bc Initial import of BMAD-METHOD workspace."
+        ],
         "last_modified_epoch": 1757142379.45,
         "role": "unknown"
       }
@@ -122,7 +125,9 @@
         "readme_present": true,
         "readme_fresh": false,
         "todo_fixme_count": 0,
-        "recent_commits": [],
+        "recent_commits": [
+          "78a52bc Initial import of BMAD-METHOD workspace."
+        ],
         "last_modified_epoch": 1757142379.45,
         "role": "unknown"
       },
@@ -134,9 +139,9 @@
         "readme_fresh": true,
         "todo_fixme_count": 0,
         "recent_commits": [
+          "09665ca Driver app Android project, route build scripts, and backend/driver portal updates.",
           "76f993f Improve Android background location reliability for soft launch",
-          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding",
-          "0f450e0 StackBlitz: Connect to backend form on login, localStorage api base, app-config.json fallback, app-config.example.json"
+          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding"
         ],
         "last_modified_epoch": 1773466643.37,
         "role": "unknown"
@@ -149,7 +154,8 @@
         "readme_fresh": false,
         "todo_fixme_count": 0,
         "recent_commits": [
-          "8712c94 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
+          "171722f chore: ignore service account JSON; add GCP credential template example.",
+          "6259a51 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
           "ebc5218 Initial clone from Project-Kylo for Greg-Kylo"
         ],
         "last_modified_epoch": 1773120833.48,
@@ -207,7 +213,9 @@
         "readme_present": true,
         "readme_fresh": false,
         "todo_fixme_count": 0,
-        "recent_commits": [],
+        "recent_commits": [
+          "78a52bc Initial import of BMAD-METHOD workspace."
+        ],
         "last_modified_epoch": 1757142379.45,
         "role": "unknown"
       },
@@ -219,9 +227,9 @@
         "readme_fresh": true,
         "todo_fixme_count": 0,
         "recent_commits": [
+          "09665ca Driver app Android project, route build scripts, and backend/driver portal updates.",
           "76f993f Improve Android background location reliability for soft launch",
-          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding",
-          "0f450e0 StackBlitz: Connect to backend form on login, localStorage api base, app-config.json fallback, app-config.example.json"
+          "5b13c39 Add login/auth gating and phase 4-7 backend/UI scaffolding"
         ],
         "last_modified_epoch": 1773466643.37,
         "role": "unknown"
@@ -234,7 +242,8 @@
         "readme_fresh": false,
         "todo_fixme_count": 0,
         "recent_commits": [
-          "8712c94 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
+          "171722f chore: ignore service account JSON; add GCP credential template example.",
+          "6259a51 Refactor and update documentation for Greg-Kylo project. Changed references from Project-Kylo to Greg-Kylo across multiple files, updated Docker configurations, and modified setup script to create account-based tables. Adjusted paths and commands for consistency with new project structure.",
           "ebc5218 Initial clone from Project-Kylo for Greg-Kylo"
         ],
         "last_modified_epoch": 1773120833.48,
@@ -254,35 +263,35 @@
     {
       "title": "Repo pulse: geomapper app",
       "source_path_or_tool": "E:\\Repos\\geomapper app",
-      "observed_at": "2026-04-27T21:19:32Z",
+      "observed_at": "2026-04-28T00:38:04Z",
       "summary": "readme_fresh=True stale=True todo_fixme=0",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: Greg-Kylo",
       "source_path_or_tool": "E:\\Repos\\Greg-Kylo",
-      "observed_at": "2026-04-27T21:19:32Z",
+      "observed_at": "2026-04-28T00:38:04Z",
       "summary": "readme_fresh=False stale=True todo_fixme=0",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: awesome-n8n-templates",
       "source_path_or_tool": "E:\\Repos\\awesome-n8n-templates",
-      "observed_at": "2026-04-27T21:19:32Z",
+      "observed_at": "2026-04-28T00:38:04Z",
       "summary": "readme_fresh=False stale=True todo_fixme=1",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: activepieces",
       "source_path_or_tool": "E:\\Repos\\activepieces",
-      "observed_at": "2026-04-27T21:19:32Z",
+      "observed_at": "2026-04-28T00:38:04Z",
       "summary": "readme_fresh=False stale=True todo_fixme=0",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: BMAD-METHOD",
       "source_path_or_tool": "E:\\Repos\\BMAD-METHOD",
-      "observed_at": "2026-04-27T21:19:32Z",
+      "observed_at": "2026-04-28T00:38:04Z",
       "summary": "readme_fresh=False stale=True todo_fixme=0",
       "confidence": 0.8
     }

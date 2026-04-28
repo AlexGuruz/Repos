@@ -1,5 +1,9 @@
 # AI response benchmarks
 
+## Phase 5 — prepared context selection (Apr 2026)
+
+Prepared-context routing gained a dedicated selector (`brain/prepared_context/selection.py`) with paraphrase families, negative guardrails, and optional multi-snapshot “broad lab” behavior. The benchmark script’s `PROMPTS` list was extended with representative paraphrases; **re-run** `python scripts/benchmark_ai_response.py` from `ai-lab` to refresh the auto-generated table below and capture new `prepared_context_selection_*` trace fields in `state/ai_response_traces.jsonl`.
+
 ## How these runs were produced
 
 - **Command** (from `E:/Repos/ai-lab`):  

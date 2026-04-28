@@ -1,6 +1,6 @@
 {
   "snapshot_type": "personal_ops_snapshot",
-  "generated_at": "2026-04-27T23:00:39Z",
+  "generated_at": "2026-04-28T00:33:03Z",
   "freshness_seconds": 86400,
   "source_files_or_tools": [
     "E:\\Repos\\ai-lab\\scripts"
@@ -79,7 +79,7 @@
     {
       "title": "Personal ops script availability",
       "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts",
-      "observed_at": "2026-04-27T23:00:39Z",
+      "observed_at": "2026-04-28T00:33:03Z",
       "summary": "available_scripts=['personal_ops_calendar_snapshot.py', 'personal_ops_daily_digest.py', 'personal_ops_repo_pulse.py']",
       "confidence": 0.65
     },

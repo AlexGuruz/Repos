@@ -39,6 +39,16 @@ PROMPTS = [
     "what docs need cleanup?",
     "what changed recently in Growflow?",
     "explain repo documentation status",
+    # Phase 5 — prepared-context selection paraphrases
+    "anything broken?",
+    "status of the lab",
+    "which repos need cleanup?",
+    "what are my next actions?",
+    "plan my day",
+    "is ollama up on the worker?",
+    "transfer receipt status",
+    "business automation status",
+    "who won the super bowl in 2024?",
 ]
 
 BENCHMARK_DOC = ROOT / "docs" / "AI_RESPONSE_BENCHMARKS.md"

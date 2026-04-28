@@ -5,6 +5,7 @@ This policy describes **how user messages should be routed** for speed and usefu
 ## Prepared Context First
 
 - Common system/repo/planning/business questions should first consult prepared snapshots via `brain.prepared_context.loader`.
+- Snapshot **choice** is hybrid keyword + intent scoring in `brain.prepared_context.selection` (fast, deterministic). See `docs/PREPARED_CONTEXT_SELECTION_HARDENING.md`.
 - If snapshots are high-confidence, answer immediately from prepared context.
 - If snapshots are stale, answer with a stale warning and `generated_at`; do not fake freshness.
 - If snapshots are missing/insufficient, fall back to normal retrieval/model flow.

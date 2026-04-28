@@ -7,7 +7,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-from brain.prepared_context.store import SNAPSHOT_NAMES, load_index, load_snapshot
+from brain.prepared_context.selection import select_snapshots_for_message
+from brain.prepared_context.store import SNAPSHOT_NAMES, load_snapshot
 
 
 def _iso_to_epoch(s: str | None) -> float | None:
@@ -43,52 +44,6 @@ def load_all_snapshots() -> dict[str, dict[str, Any]]:
         if s:
             out[name] = s
     return out
-
-
-def _pick_snapshots_for_message(msg: str) -> list[str]:
-    m = (msg or "").lower()
-    if any(k in m for k in ("systems are active", "system status", "what is running", "what is broken")):
-        return ["system_snapshot"]
-    if any(k in m for k in (
-        "what changed recently",
-        "repo status",
-        "docs stale",
-        "docs need cleanup",
-        "repo docs status",
-        "documentation cleanup status",
-        "which readmes are stale",
-        "explain repo documentation status",
-    )):
-        return ["repo_pulse", "system_snapshot"]
-    if any(
-        k in m
-        for k in (
-            "what should i work on today",
-            "what to work on today",
-            "what is next",
-            "blocked",
-            "daily plan",
-            "project agenda",
-            "open project agenda",
-        )
-    ):
-        return ["project_agenda", "repo_pulse"]
-    if any(k in m for k in (
-        "calendar",
-        "reminder",
-        "daily digest",
-        "personal ops",
-        "focus on today",
-        "what should i focus",
-        "repos are stale",
-        "which repos are stale",
-    )):
-        return ["personal_ops_snapshot"]
-    if any(k in m for k in ("growflow status", "business", "inventory", "par")):
-        return ["growflow_snapshot"]
-    if any(k in m for k in ("worker", "ollama", "n8n", "offload")):
-        return ["worker_snapshot"]
-    return []
 
 
 def _quality_gate(
@@ -152,7 +107,8 @@ def try_prepared_context_answer(message: str, intent: str) -> dict[str, Any] | N
     """Return prepared-context answer payload or None if not applicable."""
     if intent not in ("answer", "ops_overview", "worker_health", "company_bi"):
         return None
-    wanted = _pick_snapshots_for_message(message)
+    sel = select_snapshots_for_message(message, intent)
+    wanted = sel.snapshot_types
     if not wanted:
         return None
     used: list[dict[str, Any]] = []
@@ -231,6 +187,7 @@ def try_prepared_context_answer(message: str, intent: str) -> dict[str, Any] | N
         reply = "\n".join(limited) + warning
     else:
         reply = "\n\n".join(lines) + warning
+    reasons_compact = {k: "; ".join(v) for k, v in sel.reasons.items()}
     return {
         "reply": reply,
         "prepared_context_used": True,
@@ -245,5 +202,10 @@ def try_prepared_context_answer(message: str, intent: str) -> dict[str, Any] | N
         "prepared_quality_score": quality_score,
         "prepared_quality_reasons": quality_reasons,
         "prepared_quality_low": low_quality,
+        "prepared_context_selection_scores": sel.scores,
+        "prepared_context_selection_reasons": reasons_compact,
+        "prepared_context_selection_broad": sel.broad_prompt,
+        "prepared_context_selection_time_sensitive": sel.time_sensitive,
+        "prepared_context_rejected_candidates": sel.rejected_candidates,
+        "prepared_context_selection_ms": sel.selection_ms,
     }
-
