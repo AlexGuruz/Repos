@@ -1,5 +1,7 @@
 # Script and Tool Inventory
 
+See also: auto-generated drift inventory (`docs/SCRIPT_TOOL_INVENTORY_AUTO.md`, run `python scripts/generate_integration_inventory.py`).
+
 Method: path scan + reference scan across `ai-lab`, `command-center`, and `Growflow` plus registry and router/orchestrator wiring.
 
 Status legend: `wired` / `partial` / `orphan` / `deprecated` / `risky`.

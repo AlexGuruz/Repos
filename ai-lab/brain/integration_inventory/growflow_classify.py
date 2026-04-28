@@ -101,7 +101,6 @@ _EXPLICIT_CATEGORY: dict[str, str] = {
     "company_bi/scripts/suggest_category_rules.py": "manual_diagnostic",
     "company_bi/scripts/list_uncategorized_and_review.py": "manual_diagnostic",
     "company_bi/scripts/list_rent_matches.py": "manual_diagnostic",
-    "company_bi/scripts/__init__.py": "unknown_needs_review",
 }
 
 
@@ -138,8 +137,8 @@ def classify_growflow_entry(relative_path: str) -> dict[str, Any]:
         return {
             "path": f"Growflow/{rel}",
             "relative": rel,
-            "category": "unknown_needs_review",
-            "notes": "package init",
+            "category": "manual_diagnostic",
+            "notes": "package namespace marker only; not an execution entrypoint",
             "approval_required_for_tool_registry": False,
             "prepared_context_source": False,
         }

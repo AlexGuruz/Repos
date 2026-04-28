@@ -25,7 +25,9 @@ def test_growflow_runners_json_schema_and_nonempty() -> None:
     assert inv.get("version") == 1
     scripts = inv["scripts"]
     assert isinstance(scripts, list) and len(scripts) >= 10
+    assert all(r.get("category") != "unknown_needs_review" for r in scripts)
     counts = inv.get("counts") or {}
+    assert counts.get("unknown_needs_review", 0) == 0
     assert sum(counts.get(k, 0) for k in inv["classification_labels"]) == len(scripts)
     assert counts.get("prepared_context_feeders", 0) == sum(
         1 for r in scripts if r.get("prepared_context_source")

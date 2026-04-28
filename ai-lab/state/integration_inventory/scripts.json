@@ -1,0 +1,4024 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-28T00:02:59Z",
+  "scripts": [
+    {
+      "path": "brain/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Brain: orchestrator, router, approval queue, planner",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/approval_enforcement.py",
+      "name": "approval_enforcement.py",
+      "extension": ".py",
+      "guessed_purpose": "Shared approval enforcement guard used across execution lanes.\r \r Phase 1 goal: one policy decision model for orchestrator, execution, and supervisor paths.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/approval_queue/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Approval queue: submit, list_pending, resolve (stub in Phase 0; full impl in Track E)",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/approval_queue/queue.py",
+      "name": "queue.py",
+      "extension": ".py",
+      "guessed_purpose": "Approval queue: submit(spec) -> id, list_pending(), resolve(id, approve).\r Persists to logs/approval_logs/pending.json; logs resolved to approval_logs/.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/automation/planner.py",
+      "name": "planner.py",
+      "extension": ".py",
+      "guessed_purpose": "Automation planner (PDR Phase 3). Builds a plan from user goal: steps, graph, connectors, risks.\r Output can be turned into ProposalRecords for approval-gated execution.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/automation/runner.py",
+      "name": "runner.py",
+      "extension": ".py",
+      "guessed_purpose": "Job runner (PDR Phase 3). Executes automation jobs: scheduled, manual, dry-run.\r Skeleton: run_job does nothing until wired to connector execution.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/catalog_loader.py",
+      "name": "catalog_loader.py",
+      "extension": ".py",
+      "guessed_purpose": "Read-only load of ai-lab-governance system catalog (components, environments, repo paths).\r Used by the orchestrator for grounded answers; does not mutate catalog data.\r \r Resolution order for gover",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/execution.py",
+      "name": "execution.py",
+      "extension": ".py",
+      "guessed_purpose": "Execution layer: run(tool_name, args) -> RunResult.\r Validates against registry and policy; runs script locally or via SSH; logs to execution_logs.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/failure_analysis.py",
+      "name": "failure_analysis.py",
+      "extension": ".py",
+      "guessed_purpose": "Failure analysis layer (Guru \u00a724.14).\r \r Classifies failure text into category, summary, likely_cause, and suggested_actions\r so responses can be sharper. Output shape: { category, summary, likely_c",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Hardware observability (Guru \u00a725). CPU/GPU monitoring, process attribution, telemetry.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/collectors/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Hardware collectors (Guru \u00a725). CPU, GPU, process metrics.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/collectors/cpu_monitor.py",
+      "name": "cpu_monitor.py",
+      "extension": ".py",
+      "guessed_purpose": "CPU metrics collector (Guru \u00a725). Package/core temps, usage, frequency, top processes.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/collectors/gpu_monitor.py",
+      "name": "gpu_monitor.py",
+      "extension": ".py",
+      "guessed_purpose": "GPU metrics collector (Guru \u00a725). Uses nvidia-smi; falls back gracefully if unavailable.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/collectors/process_monitor.py",
+      "name": "process_monitor.py",
+      "extension": ".py",
+      "guessed_purpose": "Process attribution (Guru \u00a725). Top CPU/GPU consumers for assistant reasoning.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/collectors/snapshot.py",
+      "name": "snapshot.py",
+      "extension": ".py",
+      "guessed_purpose": "Single hardware snapshot combining CPU, GPU, RAM (Guru \u00a725).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/control/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Approval-gated resource control (Guru \u00a725 Phase 25C). Stubs for priority/affinity/scheduling.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/control/cpu_affinity.py",
+      "name": "cpu_affinity.py",
+      "extension": ".py",
+      "guessed_purpose": "CPU affinity control (Guru \u00a725). Approval-gated; uses psutil.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/control/gpu_scheduler.py",
+      "name": "gpu_scheduler.py",
+      "extension": ".py",
+      "guessed_purpose": "GPU workload scheduling (Guru \u00a725). Queue/noncritical job gating; stub.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/control/process_priority.py",
+      "name": "process_priority.py",
+      "extension": ".py",
+      "guessed_purpose": "Process priority control (Guru \u00a725). Approval-gated; uses psutil.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/schemas/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/schemas/hardware_metrics.py",
+      "name": "hardware_metrics.py",
+      "extension": ".py",
+      "guessed_purpose": "Hardware metrics schema (Guru \u00a725). Normalized CPU/GPU/process snapshot.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/telemetry/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/telemetry/alerts.py",
+      "name": "alerts.py",
+      "extension": ".py",
+      "guessed_purpose": "Threshold alerts (Guru \u00a725). Detect high temp/util and return alert messages.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/hardware/telemetry/hardware_logger.py",
+      "name": "hardware_logger.py",
+      "extension": ".py",
+      "guessed_purpose": "Hardware telemetry logger (Guru \u00a725). Writes snapshots for trend/debug; optional.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/integration_inventory/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Machine-readable integration inventories (Growflow runners, etc.).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/integration_inventory/growflow_classify.py",
+      "name": "growflow_classify.py",
+      "extension": ".py",
+      "guessed_purpose": "Heuristic classification for Growflow automation entrypoints (Phase 3).\r \r Used by tests and scripts/generate_growflow_runners_json.py \u2014 not used at chat runtime.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/integration_inventory/integration_inventory_generator.py",
+      "name": "integration_inventory_generator.py",
+      "extension": ".py",
+      "guessed_purpose": "Phase 4 \u2014 integration inventory generator (visibility + drift detection only).\r \r Produces JSON + markdown under state/integration_inventory/ and docs/.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/llm_client.py",
+      "name": "llm_client.py",
+      "extension": ".py",
+      "guessed_purpose": "OpenAI-compatible chat completion client for local model runtimes (e.g. LM Studio).\r Supports LM Studio native API (/api/v1/chat) first, then OpenAI-style /v1/chat/completions.\r Uses stdlib only so",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/ops_registry.py",
+      "name": "ops_registry.py",
+      "extension": ".py",
+      "guessed_purpose": "Ops registry reader (Guru \u00a723 Phase 4). Load systems, workers, automations for assistant evidence.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Orchestrator: main entrypoint for user messages",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/approval_gate.py",
+      "name": "approval_gate.py",
+      "extension": ".py",
+      "guessed_purpose": "Approval gate (Guru \u00a721). Determines if an action can run immediately or requires approval.\r Consults tool_registry when available (Guru \u00a724.14).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/evidence_fusion.py",
+      "name": "evidence_fusion.py",
+      "extension": ".py",
+      "guessed_purpose": "Evidence fusion (Guru \u00a721). Turns loaded evidence into a compact FusedContext for reasoning.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/evidence_loader.py",
+      "name": "evidence_loader.py",
+      "extension": ".py",
+      "guessed_purpose": "Evidence loader (Guru \u00a721). Loads sources selected by router into LoadedEvidence.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/freshness.py",
+      "name": "freshness.py",
+      "extension": ".py",
+      "guessed_purpose": "Freshness detection (Guru \u00a721). Determines if the message needs current external info and/or time context.\r \r Uses whole-word token matching for short triggers so substrings like",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "guessed_purpose": "Orchestrator: parse user message, classify intent, consult registry/memory, apply policy, run or enqueue approval. V1: session state, structured tool results, evidence loading, scan_results intent, a",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/proposal_engine.py",
+      "name": "proposal_engine.py",
+      "extension": ".py",
+      "guessed_purpose": "Proposal engine (Guru \u00a721). Produces 2\u20134 grounded next actions from FusedContext.\r Uses tool_registry when available for description, approval_required, risk_level (Guru \u00a724.14).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/response_trace.py",
+      "name": "response_trace.py",
+      "extension": ".py",
+      "guessed_purpose": "Structured per-request timing for AI-lab orchestrator \u2192 command-center chat.\r \r Writes one JSON object per completed turn to state/ai_response_traces.jsonl (append-only).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/routing_policy.py",
+      "name": "routing_policy.py",
+      "extension": ".py",
+      "guessed_purpose": "Fast-path routing hints for intent=answer (no new architecture).\r \r Keeps source_router readable: return overrides before generic freshness\u2192web heuristics.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/session_resolution.py",
+      "name": "session_resolution.py",
+      "extension": ".py",
+      "guessed_purpose": "Session resolution (Guru \u00a721). Resolve references (that, it, the scan, do it) to session context.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/source_router.py",
+      "name": "source_router.py",
+      "extension": ".py",
+      "guessed_purpose": "Source router (Guru \u00a721). Chooses minimum sufficient source mix (local, web, time, session).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/orchestrator/strategies.py",
+      "name": "strategies.py",
+      "extension": ".py",
+      "guessed_purpose": "Answer strategy layer (Guru \u00a721). Chooses how the assistant should respond.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/permanent_allowlist.py",
+      "name": "permanent_allowlist.py",
+      "extension": ".py",
+      "guessed_purpose": "Durable rules: skip the approval card when action + payload keys match.\r Stored at ai-lab/state/permanent_approvals.json (created on first use).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/planner/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Planner: daily agenda, project status (later phase)",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/planner/agenda.py",
+      "name": "agenda.py",
+      "extension": ".py",
+      "guessed_purpose": "Daily agenda stub: read project_state / summaries, return today's focus list.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/prepared_context/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Prepared context package.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/prepared_context/builders.py",
+      "name": "builders.py",
+      "extension": ".py",
+      "guessed_purpose": "Prepared context builders.",
+      "classification": "prepared_context_builder",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "snapshot builder entrypoint"
+      ]
+    },
+    {
+      "path": "brain/prepared_context/loader.py",
+      "name": "loader.py",
+      "extension": ".py",
+      "guessed_purpose": "Prepared context loading, freshness, and lightweight answer selection.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/prepared_context/schema.py",
+      "name": "schema.py",
+      "extension": ".py",
+      "guessed_purpose": "Prepared context snapshot schema and validation helpers.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/prepared_context/store.py",
+      "name": "store.py",
+      "extension": ".py",
+      "guessed_purpose": "Prepared context file store.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/repo_search.py",
+      "name": "repo_search.py",
+      "extension": ".py",
+      "guessed_purpose": "Repo search: search repos by keyword (filename + path), return ranked matches. Used for",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/router/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Router: intent classification and agent/tool selection (Track C)",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/router/router.py",
+      "name": "router.py",
+      "extension": ".py",
+      "guessed_purpose": "Router: classify intent and select agent/tool. Keyword-based with relaxed phrasing (slang, short terms).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/schemas/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Schemas for routing, evidence, and proposals (Guru \u00a721).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/schemas/evidence.py",
+      "name": "evidence.py",
+      "extension": ".py",
+      "guessed_purpose": "Evidence and fused context schemas (Guru \u00a721).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/schemas/proposals.py",
+      "name": "proposals.py",
+      "extension": ".py",
+      "guessed_purpose": "Proposal record schema (Guru \u00a721, PDR Phase 2.75).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/schemas/routing.py",
+      "name": "routing.py",
+      "extension": ".py",
+      "guessed_purpose": "Routing decision schema (Guru \u00a721).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/secret_broker.py",
+      "name": "secret_broker.py",
+      "extension": ".py",
+      "guessed_purpose": "Secret broker (PDR Phase 3). Fetches credentials; never exposes secrets to LLM; enforces scope.\r Backends: Google Secret Manager, local encrypted vault. Stub implementation.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/session_state.py",
+      "name": "session_state.py",
+      "extension": ".py",
+      "guessed_purpose": "Session state for Local Assistant V1: working memory per chat session.\r Tracks last tool action, last artifacts, last failure, recent entities.\r PDR Phase 2.75: turn_counter, user_timezone, typed pe",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/session_store.py",
+      "name": "session_store.py",
+      "extension": ".py",
+      "guessed_purpose": "SQLite session persistence (Guru \u00a724 / Phase 3.1).\r \r Stores minimal session fields so restarts don't lose context.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/source_selection.py",
+      "name": "source_selection.py",
+      "extension": ".py",
+      "guessed_purpose": "Source selection for Phase-7: freshness detection and source router.\r Determines when to use local only, web, or both (Tier 1/2/3).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/ssh_worker.py",
+      "name": "ssh_worker.py",
+      "extension": ".py",
+      "guessed_purpose": "SSH worker adapter: run commands on a worker rig over SSH, return stdout/stderr.\r Used for worker-backed flows (e.g. repo_cartographer). Main persists results to summaries/.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/telemetry.py",
+      "name": "telemetry.py",
+      "extension": ".py",
+      "guessed_purpose": "Lightweight telemetry (Guru \u00a724 / Phase 3.1).\r \r Writes jsonl events for debugging trust: intent, sources used, proposals created/executed.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/tool_registry.py",
+      "name": "tool_registry.py",
+      "extension": ".py",
+      "guessed_purpose": "Tool metadata registry (Guru \u00a724.14).\r \r Single source of truth per tool: name, description, args, side_effects, approval_required, risk_level, output_shape.\r Improves proposal generation, approval",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/tools/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "Tools for web search, repo search, time context (Guru \u00a721).",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/tools/time_context.py",
+      "name": "time_context.py",
+      "extension": ".py",
+      "guessed_purpose": "Time context tool (Guru \u00a721, PDR Phase 2.75). Returns current date/time in user timezone.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/tools/weather_context.py",
+      "name": "weather_context.py",
+      "extension": ".py",
+      "guessed_purpose": "Free weather context via Open-Meteo (no API key). Used instead of Tavily/Serper for weather asks.\r \r Env (optional):\r   WEATHER_LAT, WEATHER_LON \u2014 fixed coordinates (skip geocoding)\r   WEATHER_CITY",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/web_query_builder.py",
+      "name": "web_query_builder.py",
+      "extension": ".py",
+      "guessed_purpose": "Web query builder (PDR Phase 2.9). Builds search queries from message + session.\r Rules: include entities, expand vague phrasing, add freshness terms when needed.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/web_tool.py",
+      "name": "web_tool.py",
+      "extension": ".py",
+      "guessed_purpose": "Web search tool (Guru \u00a724 / Phase 3.1). Returns structured results for evidence fusion.\r \r Providers are selected by env vars (no new dependencies required):\r - Tavily: set TAVILY_API_KEY\r - Serper:",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/worker_clients.py",
+      "name": "worker_clients.py",
+      "extension": ".py",
+      "guessed_purpose": "Worker service HTTP clients (Guru \u00a726). Normalized wrappers for Worker Assistant, n8n, Ollama.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/worker_health.py",
+      "name": "worker_health.py",
+      "extension": ".py",
+      "guessed_purpose": "Worker service health checks (Guru \u00a726). Worker Assistant, n8n, Ollama \u2014 normalized status, no unhandled exceptions.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/worker_registry.py",
+      "name": "worker_registry.py",
+      "extension": ".py",
+      "guessed_purpose": "Worker registry loader (Guru \u00a726). Load worker and service definitions from ops/registry/workers.yaml.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/worker_services.py",
+      "name": "worker_services.py",
+      "extension": ".py",
+      "guessed_purpose": "Worker service URL resolver (Guru \u00a726). Resolve effective service URLs from env + registry.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "brain/worker_tunnel.py",
+      "name": "worker_tunnel.py",
+      "extension": ".py",
+      "guessed_purpose": "Worker tunnel status (Guru \u00a726). Check local tunnel port reachability; no full tunnel manager yet.",
+      "classification": "runtime_service",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/core/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/core/ai_lab.py",
+      "name": "ai_lab.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/core/config.py",
+      "name": "config.py",
+      "extension": ".py",
+      "guessed_purpose": "Fail closed if enforcement env is wrong or governance root missing.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/core/models.py",
+      "name": "models.py",
+      "extension": ".py",
+      "guessed_purpose": "Envelope sent over the WebSocket to all connected clients.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/main.py",
+      "name": "main.py",
+      "extension": ".py",
+      "guessed_purpose": "main.py \u2014 AI Lab Command Center backend\r Runs on main rig only. Fails closed if governance env is wrong.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/chat.py",
+      "name": "chat.py",
+      "extension": ".py",
+      "guessed_purpose": "chat.py \u2014 routes the command center chat through the real ai-lab orchestrator rather than the local command-center stub bridge.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/events.py",
+      "name": "events.py",
+      "extension": ".py",
+      "guessed_purpose": "action + match, or approval_id to derive from the brain queue row.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/guru.py",
+      "name": "guru.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/hardware.py",
+      "name": "hardware.py",
+      "extension": ".py",
+      "guessed_purpose": "Use brain.hardware (Guru \u00a725) for normalized snapshot when ai-lab is on path.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/prepared_context.py",
+      "name": "prepared_context.py",
+      "extension": ".py",
+      "guessed_purpose": "Prepared context visibility + refresh endpoints.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/repo.py",
+      "name": "repo.py",
+      "extension": ".py",
+      "guessed_purpose": "Return basic metadata for a single file path.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/repo_index.py",
+      "name": "repo_index.py",
+      "extension": ".py",
+      "guessed_purpose": "Debug/status endpoint for the hub repo index coordinator.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/tools.py",
+      "name": "tools.py",
+      "extension": ".py",
+      "guessed_purpose": "Tool registry + worker bridge ops for Tools panel and diagnostics.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/routers/workers.py",
+      "name": "workers.py",
+      "extension": ".py",
+      "guessed_purpose": "Worker service health API (Guru \u00a726). GET /api/workers/health and /api/workers/health/{worker_name}. Includes tunnel_status, last_checked, and per-service latency for frontend visibility.  _sync heal",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/feed_bus.py",
+      "name": "feed_bus.py",
+      "extension": ".py",
+      "guessed_purpose": "feed_bus.py \u2014 central pub/sub for all lab events.  Any service (NvidiaPoller, RepoWatcher, SupervisorBridge) calls `await bus.publish(event, data)` and every connected WebSocket client receives it in",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/guru_service.py",
+      "name": "guru_service.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/index_job_types.py",
+      "name": "index_job_types.py",
+      "extension": ".py",
+      "guessed_purpose": "Worker-reported identity + counters for strict validation before promote.\r     Stored as a flat bag so coordinator can compare fields reliably.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/index_policy.py",
+      "name": "index_policy.py",
+      "extension": ".py",
+      "guessed_purpose": "Deterministic serialization for hashing.     Uses sorted keys + compact separators to avoid whitespace drift.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/nvidia_poller.py",
+      "name": "nvidia_poller.py",
+      "extension": ".py",
+      "guessed_purpose": "nvidia_poller.py \u2014 polls hardware every N seconds and publishes snapshots.  As of Guru \u00a725 (Phase 3.2 Hardware Observability), prefer brain.hardware for normalized CPU/GPU/process attribution, but ke",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/observability.py",
+      "name": "observability.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/prepared_context_refresher.py",
+      "name": "prepared_context_refresher.py",
+      "extension": ".py",
+      "guessed_purpose": "Background refresher for prepared context snapshots.\r \r Runs inside Command Center backend so snapshots refresh automatically\r without manual script-by-script execution.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/repo_index_coordinator.py",
+      "name": "repo_index_coordinator.py",
+      "extension": ".py",
+      "guessed_purpose": "Hub-side coordinator.\r \r     - Watches repo_watcher signals (mark_dirty).\r     - Schedules staging builds (incremental or repo_refresh).\r     - Enforces strict validation before promotion.",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/repo_index_state_store.py",
+      "name": "repo_index_state_store.py",
+      "extension": ".py",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/repo_watcher.py",
+      "name": "repo_watcher.py",
+      "extension": ".py",
+      "guessed_purpose": "repo_watcher.py \u2014 uses watchdog to monitor lab repo paths and publish file-level events (read/write) to the EventBus.  Only watches directories listed in WATCH_PATHS (configured via env or passed at",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/backend/services/supervisor_bridge.py",
+      "name": "supervisor_bridge.py",
+      "extension": ".py",
+      "guessed_purpose": "supervisor_bridge.py \u2014 the ONLY path from the command center to state-changing lab actions.  Flow for every intent from the UI:     1. Check repo_class via registry     2. If CONTROLLED \u2192 submit_appr",
+      "classification": "command_center_backend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/App.jsx",
+      "name": "App.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/ChatPanel.jsx",
+      "name": "ChatPanel.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/ChatPanel.test.jsx",
+      "name": "ChatPanel.test.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/ComputePanel.jsx",
+      "name": "ComputePanel.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/DiagnosticsPanel.jsx",
+      "name": "DiagnosticsPanel.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/FeedPanel.jsx",
+      "name": "FeedPanel.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/GuruPanel.jsx",
+      "name": "GuruPanel.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/GuruPanel.test.jsx",
+      "name": "GuruPanel.test.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/Primitives.jsx",
+      "name": "Primitives.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/RepoPanel.jsx",
+      "name": "RepoPanel.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/Sidebar.jsx",
+      "name": "Sidebar.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/components/ToolsPanel.jsx",
+      "name": "ToolsPanel.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/hooks/useWebSocket.js",
+      "name": "useWebSocket.js",
+      "extension": ".js",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/hooks/useWebSocket.test.jsx",
+      "name": "useWebSocket.test.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/lib/api.js",
+      "name": "api.js",
+      "extension": ".js",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/lib/diagnostics.js",
+      "name": "diagnostics.js",
+      "extension": ".js",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/main.jsx",
+      "name": "main.jsx",
+      "extension": ".jsx",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/store/index.js",
+      "name": "index.js",
+      "extension": ".js",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "command-center/command-center/frontend/src/test/setup.js",
+      "name": "setup.js",
+      "extension": ".js",
+      "guessed_purpose": "unspecified",
+      "classification": "command_center_frontend",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "wired",
+      "reasons": [
+        "application/module surface"
+      ]
+    },
+    {
+      "path": "scripts/analyze_trace_sessions.py",
+      "name": "analyze_trace_sessions.py",
+      "extension": ".py",
+      "guessed_purpose": "!/usr/bin/env python3",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/benchmark_ai_response.py",
+      "name": "benchmark_ai_response.py",
+      "extension": ".py",
+      "guessed_purpose": "Run orchestrator prompts with AI_LAB_ORCH_NO_LLM=1 (no LM Studio calls) and print a markdown table.\r \r Usage (from ai-lab root):\r   set AI_LAB_ORCH_NO_LLM=1\r   python scripts/benchmark_ai_response.p",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/build_prepared_context.py",
+      "name": "build_prepared_context.py",
+      "extension": ".py",
+      "guessed_purpose": "Build prepared context snapshots for fast orchestrator answers.",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [
+        "brain/prepared_context/loader.py"
+      ],
+      "scheduled_by": [
+        "scripts/refresh_prepared_context_all.ps1",
+        "scripts/refresh_prepared_context_system.ps1",
+        "scripts/refresh_prepared_context_repo_pulse.ps1",
+        "scripts/refresh_prepared_context_personal_ops.ps1",
+        "scripts/refresh_prepared_context_worker.ps1",
+        "scripts/refresh_prepared_context_growflow.ps1",
+        "scripts/refresh_prepared_context_project_agenda.ps1"
+      ],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "partial",
+      "reasons": [
+        "scheduled_by_wrappers=['scripts/refresh_prepared_context_all.ps1', 'scripts/refresh_prepared_context_system.ps1', 'scripts/refresh_prepared_context_repo_pulse.ps1', 'scripts/refresh_prepared_context_personal_ops.ps1', 'scripts/refresh_prepared_context_worker.ps1']",
+        "referenced_by_count=1",
+        "invoked from PowerShell wrapper; verify Task Scheduler"
+      ]
+    },
+    {
+      "path": "scripts/check_worker_connectivity.py",
+      "name": "check_worker_connectivity.py",
+      "extension": ".py",
+      "guessed_purpose": "Confirm the main rig can reach the worker node (Guru \u00a726).\r Run from ai-lab repo root with PYTHONPATH set so brain is importable.\r Usage: python scripts/check_worker_connectivity.py",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [
+        "scripts/start_worker_tunnel.ps1"
+      ],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "partial",
+      "reasons": [
+        "scheduled_by_wrappers=['scripts/start_worker_tunnel.ps1']",
+        "invoked from PowerShell wrapper; verify Task Scheduler"
+      ]
+    },
+    {
+      "path": "scripts/generate_growflow_runners_json.py",
+      "name": "generate_growflow_runners_json.py",
+      "extension": ".py",
+      "guessed_purpose": "Regenerate state/integration_inventory/growflow_runners.json from Growflow tree.",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/generate_integration_inventory.py",
+      "name": "generate_integration_inventory.py",
+      "extension": ".py",
+      "guessed_purpose": "CLI entry for Phase 4 integration inventory (JSON + markdown).",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/generate_invoice_pdf.py",
+      "name": "generate_invoice_pdf.py",
+      "extension": ".py",
+      "guessed_purpose": "From / Bill To",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/maintain_worker_tunnel.ps1",
+      "name": "maintain_worker_tunnel.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "ai-lab \u00b7 maintain_worker_tunnel.ps1",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/personal_ops_calendar_snapshot.py",
+      "name": "personal_ops_calendar_snapshot.py",
+      "extension": ".py",
+      "guessed_purpose": "Print Google calendars and upcoming events so you can see IDs, titles, and time format.\r \r First run opens a browser OAuth consent (Calendar scope only); token saved to\r GOOGLE_CALENDAR_TOKEN_FILE o",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [
+        "brain/prepared_context/builders.py",
+        "scripts/personal_ops_worker_ollama_calendar.py"
+      ],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "partial",
+      "reasons": [
+        "referenced_by_count=2"
+      ]
+    },
+    {
+      "path": "scripts/personal_ops_daily_digest.py",
+      "name": "personal_ops_daily_digest.py",
+      "extension": ".py",
+      "guessed_purpose": "Combine repo pulse + optional Google Calendar window + optional Kylo heartbeat files;\r print a digest; optionally send Telegram; optionally append one line to a standing Calendar event.\r \r Telegram",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [
+        "brain/prepared_context/builders.py"
+      ],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "partial",
+      "reasons": [
+        "referenced_by_count=1"
+      ]
+    },
+    {
+      "path": "scripts/personal_ops_repo_pulse.py",
+      "name": "personal_ops_repo_pulse.py",
+      "extension": ".py",
+      "guessed_purpose": "Git staleness for configured repos (local, no Google).\r \r   python scripts/personal_ops_repo_pulse.py --config config/personal_ops.example.yaml",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [
+        "brain/prepared_context/builders.py"
+      ],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "partial",
+      "reasons": [
+        "referenced_by_count=1"
+      ]
+    },
+    {
+      "path": "scripts/personal_ops_worker_ollama_calendar.py",
+      "name": "personal_ops_worker_ollama_calendar.py",
+      "extension": ".py",
+      "guessed_purpose": "Use Ollama on the worker to suggest calendar updates from a snapshot of primary events.\r \r Flow: local Google Calendar read (your token) -> HTTP POST to worker Ollama /api/generate -> print model ou",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/refresh_prepared_context_all.ps1",
+      "name": "refresh_prepared_context_all.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/refresh_prepared_context_growflow.ps1",
+      "name": "refresh_prepared_context_growflow.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/refresh_prepared_context_personal_ops.ps1",
+      "name": "refresh_prepared_context_personal_ops.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/refresh_prepared_context_project_agenda.ps1",
+      "name": "refresh_prepared_context_project_agenda.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/refresh_prepared_context_repo_pulse.ps1",
+      "name": "refresh_prepared_context_repo_pulse.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/refresh_prepared_context_system.ps1",
+      "name": "refresh_prepared_context_system.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/refresh_prepared_context_worker.ps1",
+      "name": "refresh_prepared_context_worker.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/remove_prepared_context_tasks.ps1",
+      "name": "remove_prepared_context_tasks.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/repo_full_rebuild_gate_a.py",
+      "name": "repo_full_rebuild_gate_a.py",
+      "extension": ".py",
+      "guessed_purpose": "Approval tool: Gate A full rebuild staging -> promote.\r \r This is executed via `brain/execution.run(tool_name, args)` and receives args as:\r   --repo_id <id> --gate <A> --expected_policy_hash <...>",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": "repo_full_rebuild_gate_a",
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "partial",
+      "reasons": [
+        "registered_tool=repo_full_rebuild_gate_a"
+      ]
+    },
+    {
+      "path": "scripts/repo_policy_migration_gate_c.py",
+      "name": "repo_policy_migration_gate_c.py",
+      "extension": ".py",
+      "guessed_purpose": "Approval tool: Gate C policy/schema migration full rebuild staging -> promote.\r \r Executed via `brain/execution.run()` with args from the hub approval submission.",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": "repo_policy_migration_gate_c",
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "partial",
+      "reasons": [
+        "registered_tool=repo_policy_migration_gate_c"
+      ]
+    },
+    {
+      "path": "scripts/restart.ps1",
+      "name": "restart.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "Restarts Command Center (stop ports 8000/5173, then start.ps1).",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/run_trace_sessions.py",
+      "name": "run_trace_sessions.py",
+      "extension": ".py",
+      "guessed_purpose": "!/usr/bin/env python3",
+      "classification": "cli_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/setup_prepared_context_tasks.ps1",
+      "name": "setup_prepared_context_tasks.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/setup_worker_tunnel_task.ps1",
+      "name": "setup_worker_tunnel_task.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "ai-lab \u00b7 setup_worker_tunnel_task.ps1",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/start-background.ps1",
+      "name": "start-background.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "Starts Command Center backend + frontend hidden (logs under command-center/.logs/). See BOOT.md.",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/start.ps1",
+      "name": "start.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "Starts Command Center (Vite + FastAPI). Safe to run from E:\\Repos\\ai-lab.",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/start_worker_tunnel.ps1",
+      "name": "start_worker_tunnel.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "Start SSH tunnel from main rig to worker so 127.0.0.1:8765,5678,11434 forward to the worker.",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/stop.ps1",
+      "name": "stop.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "Stops Command Center listeners on ports 8000 and 5173.",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/worker_ai/validate_m1_checklist.ps1",
+      "name": "validate_m1_checklist.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "1. TCP connectivity",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": false,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "scripts/worker_visible_ollama_demo.ps1",
+      "name": "worker_visible_ollama_demo.ps1",
+      "extension": ".ps1",
+      "guessed_purpose": "unspecified",
+      "classification": "scheduled_script",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": false,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "orphan_candidate",
+      "reasons": [
+        "no registry, no schedule wrapper, no cross-ref hits"
+      ]
+    },
+    {
+      "path": "../Growflow/all_categories_inventory_and_daily_rebuild.py",
+      "name": "all_categories_inventory_and_daily_rebuild.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=unsafe_without_approval_metadata"
+      ]
+    },
+    {
+      "path": "../Growflow/allocate_brand_pool_merit.py",
+      "name": "allocate_brand_pool_merit.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/allocate_stock_pool_by_brand.py",
+      "name": "allocate_stock_pool_by_brand.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/__init__.py",
+      "name": "__init__.py",
+      "extension": ".py",
+      "guessed_purpose": "package namespace marker only; not an execution entrypoint",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/audit_other_expenses.py",
+      "name": "audit_other_expenses.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=read_safe_tool_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/ingest_growflow_to_db.py",
+      "name": "ingest_growflow_to_db.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=unsafe_without_approval_metadata"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/list_rent_matches.py",
+      "name": "list_rent_matches.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/list_uncategorized_and_review.py",
+      "name": "list_uncategorized_and_review.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/monthly_run.py",
+      "name": "monthly_run.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/payroll_last_period.py",
+      "name": "payroll_last_period.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/recurring_bills_summary.py",
+      "name": "recurring_bills_summary.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/company_bi/scripts/suggest_category_rules.py",
+      "name": "suggest_category_rules.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/inventory_sales_monitor.py",
+      "name": "inventory_sales_monitor.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/inventory_vs_sales_last_6_months.py",
+      "name": "inventory_vs_sales_last_6_months.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/monthly_gross_projection_to_sheet.py",
+      "name": "monthly_gross_projection_to_sheet.py",
+      "extension": ".py",
+      "guessed_purpose": "explicit classification",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_cartel_7pk_first_receipt_sellout.py",
+      "name": "_cartel_7pk_first_receipt_sellout.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_cartel_7pk_sellout_projection.py",
+      "name": "_cartel_7pk_sellout_projection.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_cartel_preroll_velocity_budget.py",
+      "name": "_cartel_preroll_velocity_budget.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_check_fast_row.py",
+      "name": "_check_fast_row.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_dashboard_audit_once.py",
+      "name": "_dashboard_audit_once.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_dump_sheet_formulas.py",
+      "name": "_dump_sheet_formulas.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_find_pkg_by_sku.py",
+      "name": "_find_pkg_by_sku.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_fix_arctic_line.py",
+      "name": "_fix_arctic_line.py",
+      "extension": ".py",
+      "guessed_purpose": "legacy patch / one-off",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=deprecated_archive_later"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_last_accepted_transfer.py",
+      "name": "_last_accepted_transfer.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_orderitem_product_created.py",
+      "name": "_orderitem_product_created.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_patch_ac10.py",
+      "name": "_patch_ac10.py",
+      "extension": ".py",
+      "guessed_purpose": "legacy patch / one-off",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=deprecated_archive_later"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_patch_iferror_test.py",
+      "name": "_patch_iferror_test.py",
+      "extension": ".py",
+      "guessed_purpose": "legacy patch / one-off",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=deprecated_archive_later"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_print_pool_breakdown.py",
+      "name": "_print_pool_breakdown.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_probe_cartel_origin.py",
+      "name": "_probe_cartel_origin.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_probe_introspection.py",
+      "name": "_probe_introspection.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_probe_one_pkg.py",
+      "name": "_probe_one_pkg.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_probe_pkg_fields.py",
+      "name": "_probe_pkg_fields.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_probe_pkg_fields2.py",
+      "name": "_probe_pkg_fields2.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_probe_sheet_funcs.py",
+      "name": "_probe_sheet_funcs.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_query_arctic_disposable_inventory.py",
+      "name": "_query_arctic_disposable_inventory.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_sales_today.py",
+      "name": "_sales_today.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_scan_orderitem_names.py",
+      "name": "_scan_orderitem_names.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_scan_package_names.py",
+      "name": "_scan_package_names.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_sellout_final.py",
+      "name": "_sellout_final.py",
+      "extension": ".py",
+      "guessed_purpose": "legacy patch / one-off",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=deprecated_archive_later"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_test_oi_product_where.py",
+      "name": "_test_oi_product_where.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_tmp_query_transfers_db.py",
+      "name": "_tmp_query_transfers_db.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/_weekday_sales_avg.py",
+      "name": "_weekday_sales_avg.py",
+      "extension": ".py",
+      "guessed_purpose": "underscore / probe / ad-hoc analysis",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/build_projection_by_category_brand.py",
+      "name": "build_projection_by_category_brand.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/build_projection_dashboard_google_sheet.py",
+      "name": "build_projection_dashboard_google_sheet.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/build_transfer_receipts_db.py",
+      "name": "build_transfer_receipts_db.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/build_trip_sheet_google_doc.py",
+      "name": "build_trip_sheet_google_doc.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/cartel_7pk_portfolio_projection.py",
+      "name": "cartel_7pk_portfolio_projection.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/complete_18k_projection.py",
+      "name": "complete_18k_projection.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/diag_vape_product_buckets.py",
+      "name": "diag_vape_product_buckets.py",
+      "extension": ".py",
+      "guessed_purpose": "diagnostic / report script",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/export_brand_suppliers_to_sheet.py",
+      "name": "export_brand_suppliers_to_sheet.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/export_projection_dashboard_layout.py",
+      "name": "export_projection_dashboard_layout.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/export_top15_mj_brands_30d_windows.py",
+      "name": "export_top15_mj_brands_30d_windows.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/export_transfer_receipt_units.py",
+      "name": "export_transfer_receipt_units.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": true,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/introspect_growflow_schema.py",
+      "name": "introspect_growflow_schema.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/list_projection_dashboard_charts.py",
+      "name": "list_projection_dashboard_charts.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/probe_growflow_discovery_entities.py",
+      "name": "probe_growflow_discovery_entities.py",
+      "extension": ".py",
+      "guessed_purpose": "probe script",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/probe_orderitems_field_batches.py",
+      "name": "probe_orderitems_field_batches.py",
+      "extension": ".py",
+      "guessed_purpose": "probe script",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/projection_dashboard_to_sheet.py",
+      "name": "projection_dashboard_to_sheet.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": true,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/projection_efficiency_distribution_report.py",
+      "name": "projection_efficiency_distribution_report.py",
+      "extension": ".py",
+      "guessed_purpose": "diagnostic / report script",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/query_sap_stix_velocity.py",
+      "name": "query_sap_stix_velocity.py",
+      "extension": ".py",
+      "guessed_purpose": "diagnostic / report script",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/rank_mj_brands_profit_velocity_sheet.py",
+      "name": "rank_mj_brands_profit_velocity_sheet.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=scheduled_job_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/restore_dashboard_charts_from_layout_snapshot.py",
+      "name": "restore_dashboard_charts_from_layout_snapshot.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/run_growflow_discovery_queries.py",
+      "name": "run_growflow_discovery_queries.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/snapshot_dashboard_chart_layout.py",
+      "name": "snapshot_dashboard_chart_layout.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/supplier_sales_pace_by_category.py",
+      "name": "supplier_sales_pace_by_category.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/top_allocation_velocity_scan.py",
+      "name": "top_allocation_velocity_scan.py",
+      "extension": ".py",
+      "guessed_purpose": "diagnostic / report script",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/transfer_sellout_by_brand_category.py",
+      "name": "transfer_sellout_by_brand_category.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/validate_cartel_7pk_projection.py",
+      "name": "validate_cartel_7pk_projection.py",
+      "extension": ".py",
+      "guessed_purpose": "read-biased; confirm side effects before tool registry",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=read_safe_tool_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/validate_projection_layer2_csv.py",
+      "name": "validate_projection_layer2_csv.py",
+      "extension": ".py",
+      "guessed_purpose": "read-biased; confirm side effects before tool registry",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=read_safe_tool_candidate"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/verify_projection_dashboard_sheet.py",
+      "name": "verify_projection_dashboard_sheet.py",
+      "extension": ".py",
+      "guessed_purpose": "primary pipeline / exports",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=canonical_runner"
+      ]
+    },
+    {
+      "path": "../Growflow/scripts/worst_recovery_scan.py",
+      "name": "worst_recovery_scan.py",
+      "extension": ".py",
+      "guessed_purpose": "diagnostic / report script",
+      "classification": "growflow_runner",
+      "imported_by_or_referenced_by": [],
+      "scheduled_by": [],
+      "registered_tool_name": null,
+      "prepared_context_source": false,
+      "writes_state_guess": true,
+      "external_side_effect_guess": true,
+      "approval_required_guess": false,
+      "status": "manual_only",
+      "reasons": [
+        "growflow_runners.json: category=manual_diagnostic"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-28T00:02:59Z",
+  "ai_lab_root": "E:\\Repos\\ai-lab",
+  "total_scripts_scanned": 222,
+  "total_tools": 13,
+  "total_triggers": 30,
+  "orphan_candidates": 25,
+  "deprecated_candidates": 4,
+  "missing_metadata_tools": 0,
+  "write_capable_scripts_lacking_approval_guess": 0,
+  "growflow_inventory_scripts_merged": 71,
+  "top_10_highest_priority_cleanup_items": [],
+  "top_10_missing_triggers": [
+    "n8n_worker_automation_assumption",
+    "start.ps1",
+    "stop.ps1",
+    "restart.ps1",
+    "start-background.ps1",
+    "worker_visible_ollama_demo.ps1",
+    "maintain_worker_tunnel.ps1",
+    "setup_worker_tunnel_task.ps1",
+    "setup_prepared_context_tasks.ps1",
+    "remove_prepared_context_tasks.ps1"
+  ],
+  "recommended_next_actions": [
+    "Re-run after registry or scheduler changes",
+    "Triage orphan_candidate rows before wiring",
+    "Do not auto-register tools from this inventory"
+  ]
+}

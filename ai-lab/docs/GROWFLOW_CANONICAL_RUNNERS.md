@@ -20,7 +20,7 @@ Each discovered `*.py` under the scanned roots gets exactly one **category** lab
 | `manual_diagnostic` | Probes, scans, one-off analysis, underscore-prefixed ad-hoc scripts. |
 | `deprecated_archive_later` | Legacy patches / one-offs; do not treat as production path (do not delete yet). |
 | `unsafe_without_approval_metadata` | Writes external state (DB, Sheets, APIs); **must not** be registered as a tool until full approval metadata exists. |
-| `unknown_needs_review` | Default bucket when heuristics do not fit; assign an owner and recategorize. |
+| `unknown_needs_review` | Reserved default in the classifier; the committed `growflow_runners.json` should keep **count 0** — anything landing here should be reclassified before merge. |
 
 **Secondary flag (not a category):** `prepared_context_source: true` when the script’s outputs are inputs to the ai-lab `growflow_snapshot` builder (`brain/prepared_context/builders.py` — exports, transfer receipts, projection dashboard artifacts).
 

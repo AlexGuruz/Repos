@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-04-27T22:57:23Z",
+  "generated_at": "2026-04-27T23:39:09Z",
   "growflow_root": "E:\\Repos\\Growflow",
   "classification_labels": [
     "canonical_runner",
@@ -15,10 +15,10 @@
     "canonical_runner": 14,
     "read_safe_tool_candidate": 3,
     "scheduled_job_candidate": 13,
-    "manual_diagnostic": 34,
+    "manual_diagnostic": 35,
     "deprecated_archive_later": 4,
     "unsafe_without_approval_metadata": 2,
-    "unknown_needs_review": 1,
+    "unknown_needs_review": 0,
     "prepared_context_feeders": 5
   },
   "scripts": [
@@ -49,8 +49,8 @@
     {
       "path": "Growflow/company_bi/scripts/__init__.py",
       "relative": "company_bi/scripts/__init__.py",
-      "category": "unknown_needs_review",
-      "notes": "explicit classification",
+      "category": "manual_diagnostic",
+      "notes": "package namespace marker only; not an execution entrypoint",
       "approval_required_for_tool_registry": false,
       "prepared_context_source": false
     },
