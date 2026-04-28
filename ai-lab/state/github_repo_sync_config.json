@@ -1,0 +1,16 @@
+{
+  "workspace_root": "E:/Repos",
+  "remote": "origin",
+  "repos": [
+    { "path": ".", "label": "Repos (umbrella)" },
+    { "path": "activepieces", "label": "activepieces", "fetch": false },
+    { "path": "awesome-n8n-templates", "label": "awesome-n8n-templates" },
+    { "path": "BMAD-METHOD", "label": "BMAD-METHOD" },
+    { "path": "Greg-Kylo", "label": "Greg-Kylo" },
+    { "path": "geomapper app", "label": "geomapper" },
+    {
+      "path": "Gigatt Transport LLC/gigatt-transport-frontend/gigatt-transport",
+      "label": "gigatt-transport"
+    }
+  ]
+}
