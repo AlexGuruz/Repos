@@ -1,7 +1,7 @@
 """
-Worker / adapter skeletons for live work orchestration (Phase 9).
+Worker / adapter skeletons for live work orchestration (Phase 9 + Phase 10).
 
-All collectors are read-only. No Asana, Slack sends, or calendar writes.
+All collectors are read-only. No ClickUp mutations, calendar writes, or outbound sends.
 """
 from __future__ import annotations
 
@@ -70,18 +70,13 @@ class EmailDriveIntakeWorker(_ReadOnlyWorker):
         return {"stub": True, "note": "Gmail/Drive adapters not wired in Phase 9", "read_only": True}
 
 
-class AsanaIntakeWorker(_ReadOnlyWorker):
-    name = "asana_intake"
+class ClickUpIntakeWorker(_ReadOnlyWorker):
+    """Read-only stub for future ClickUp task/comment/status ingestion (no API in Phase 10)."""
+
+    name = "clickup_intake"
 
     def collect(self, context: dict[str, Any] | None = None) -> dict[str, Any]:
-        return {"stub": True, "note": "Asana read API not called in Phase 9", "read_only": True}
-
-
-class SlackIntakeWorker(_ReadOnlyWorker):
-    name = "slack_intake"
-
-    def collect(self, context: dict[str, Any] | None = None) -> dict[str, Any]:
-        return {"stub": True, "note": "Slack read not called in Phase 9", "read_only": True}
+        return {"stub": True, "note": "ClickUp read API not called in Phase 10 foundation", "read_only": True}
 
 
 class ProgressMonitorWorker(_ReadOnlyWorker):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build Phase 9 live work orchestration snapshots (read-only).
+Build live work orchestration snapshots (read-only; Phase 9–10).
 
 Writes under ai-lab/state/live_work_orchestration/
 
@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build live work orchestration snapshots (Phase 9).")
+    parser = argparse.ArgumentParser(description="Build live work orchestration snapshots (Phase 9–10).")
     parser.add_argument("--preview", action="store_true", help="Print compact daily plan preview to stdout")
     args = parser.parse_args()
 

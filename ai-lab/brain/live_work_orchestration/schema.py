@@ -1,5 +1,5 @@
 """
-Planning data model for live work orchestration (Phase 9).
+Planning data model for live work orchestration (Phase 9 + Phase 10 ClickUp alignment).
 
 Serializable dataclasses — no side effects.
 """
@@ -11,7 +11,9 @@ from typing import Any, Literal
 
 StatusT = Literal["open", "in_progress", "done", "blocked", "cancelled", "unknown"]
 BlockerSeverityT = Literal["low", "medium", "high"]
-QueueKindT = Literal["slack_clarify", "slack_notify", "asana_note", "email", "other"]
+CommQueueTypeT = Literal["clarification", "followup", "system_message"]
+ActionStateT = Literal["preview", "queued", "approved", "executed"]
+ProgressSourceT = Literal["repo", "manual", "clickup", "system"]
 
 
 @dataclass
@@ -61,6 +63,7 @@ class PlanningBlock:
     block_type: str = ""
     start_hint: str = ""
     end_hint: str = ""
+    linked_actions: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -78,6 +81,10 @@ class PlannedTask:
     status: StatusT = "open"
     title: str = ""
     bucket: str = ""
+    clickup_list: str = ""
+    clickup_task_id: str | None = None
+    category: str = ""
+    action_state: ActionStateT = "preview"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -111,6 +118,7 @@ class ProgressEvent:
     evidence: list[str] = field(default_factory=list)
     status: StatusT = "done"
     metric: str = ""
+    source_type: ProgressSourceT = "repo"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -126,11 +134,14 @@ class CommunicationQueueItem:
     notes: str
     evidence: list[str] = field(default_factory=list)
     status: StatusT = "open"
-    kind: QueueKindT = "slack_clarify"
+    clickup_list: str = ""
+    comm_type: CommQueueTypeT = "clarification"
     payload_summary: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d = asdict(self)
+        d["type"] = d.pop("comm_type")
+        return d
 
 
 @dataclass
@@ -185,6 +196,8 @@ class DailyPlanPreview:
     constraints: str = ""
     risks_to_watch: str = ""
     a_good_day_looks_like: str = ""
+    proposed_clickup_actions: list[dict[str, Any]] = field(default_factory=list)
+    pending_clarifications: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -6,12 +6,12 @@ This document preserves the **design** of the ChatGPT **Daily Work Planner** age
 
 ## 1. Original source summary
 
-The original agent is a **Daily Work Planner** connected to **Google Calendar**, **GitHub**, **Google Drive**, **Gmail**, **Asana**, **Slack**, and a **scheduling sheet**. It:
+The original agent is a **Daily Work Planner** connected to **Google Calendar**, **GitHub**, **Google Drive**, **Gmail**, **ClickUp** (as the unified tasks + communication surface), and a **scheduling sheet**. It:
 
 - Collects **work demands** (tasks, requests, deadlines, maintenance signals).
 - Collects **time and life constraints** (calendar, focus blocks, immovable commitments).
 - **Combines** them into an execution structure: prioritized tasks, blocker routing, calendar guidance, and progress tracking.
-- Uses **Slack** for clarification (one question at a time) and **Asana** for canonical task tracking.
+- Uses **ClickUp** for clarification threads (one question at a time, routed to the **Agent Clarifications** list) and for **canonical task tracking** in workspace lists.
 - Uses **memory files** for continuity and **safety rules** to avoid over-automation.
 
 **Archival note:** This spec now includes a reconciled **archived instruction copy** (Appendix A) for the Daily Work Planner behavior contract used by local migration. Treat this file as canonical unless a newer upstream instruction set is intentionally versioned here.
@@ -26,7 +26,7 @@ The original agent is a **Daily Work Planner** connected to **Google Calendar**,
 
 1. Reduce cognitive load by surfacing **what matters today** vs noise.
 2. Respect **time reality** (calendar, meetings, focus windows).
-3. Route **blockers** to the right channel (Slack question, Asana dependency, calendar move—**only** when policy and approvals allow).
+3. Route **blockers** to the right surface (ClickUp clarification or task, calendar move—**only** when policy and approvals allow).
 4. Maintain **continuity** across days via structured memory and snapshots.
 5. Never **silently** mutate external systems; **approval-gated** writes match ai-lab governance.
 
@@ -38,12 +38,12 @@ The original agent is a **Daily Work Planner** connected to **Google Calendar**,
 
 **Inputs (intake):**
 
-- Asana tasks (assigned, due, projects, dependencies).
+- ClickUp tasks (assigned, due, lists, dependencies).
 - GitHub PRs/issues/mentions (optional depth by repo).
 - Email / Gmail threads flagged as actionable (bounded scan).
 - Google Drive “inbox” docs or review requests (metadata-first).
 - Repo activity (commits, stale README, CI) via `repo_pulse` / similar.
-- Manual “drop a note here” inputs (Slack DM to bot, sheet row, etc.).
+- Manual “drop a note here” inputs (ClickUp comment, sheet row, etc.).
 
 **Outputs:**
 
@@ -68,11 +68,11 @@ The original agent is a **Daily Work Planner** connected to **Google Calendar**,
 **Outputs:**
 
 - **PlannedTask** list ordered by: deadline → dependency → impact → energy fit (policy-tunable).
-- **Blocker** list with **route_hint**: `slack_clarify`, `asana_link`, `calendar_move`, `defer`, `human_only`.
+- **Blocker** list with **route_hint**: `clickup_clarify`, `clickup_task`, `calendar_move`, `defer`, `human_only`.
 - **Calendar guidance** (where to place focus blocks; **writes** only with approval + calendar policy).
 - **Progress tracking** model (**ProgressEvent**); replanning triggers deferred to Phase 12+.
 
-**Local Phase 9 realization:** `compile_daily_plan_preview()` produces a **read-only** `DailyPlanPreview` with sections: **Today**, **Before shift**, **During shift**, **After shift**, **Top priorities**, **Constraints**, **Risks to watch**, **A good day looks like** — no external writes.
+**Local Phase 9–10 realization:** `compile_daily_plan_preview()` produces a **read-only** `DailyPlanPreview` with those sections plus optional **`proposed_clickup_actions`** and **`pending_clarifications`** (preview payloads only). No external ClickUp writes from the compiler.
 
 ---
 
@@ -85,8 +85,7 @@ The original agent is a **Daily Work Planner** connected to **Google Calendar**,
 | Google Calendar live API | No | Phase 10+ |
 | Gmail / Drive | No | Phase 10+ |
 | GitHub API | Partial via repo signals | Expand |
-| Asana API | No | Phase 10 (approval) |
-| Slack API | No | Phase 10 (approval) |
+| ClickUp API | No | Phase 10+ (read intake stub; writes approval-gated) |
 | Scheduling sheet | No | Phase 13 |
 
 ---
@@ -101,47 +100,47 @@ The original agent is a **Daily Work Planner** connected to **Google Calendar**,
 | **RepoActivityWorker** | Repo / pulse signals | Read `repo_pulse` |
 | **LocalActivityWorker** | Desktop / IDE activity | **Stub** (Phase 11) |
 | **EmailDriveIntakeWorker** | Gmail/Drive | **Stub** |
-| **AsanaIntakeWorker** | Asana read | **Stub** |
-| **SlackIntakeWorker** | Slack read | **Stub** |
+| **ClickUpIntakeWorker** | ClickUp read (tasks/comments/status) | **Stub** |
 | **ProgressMonitorWorker** | Progress vs plan | Worker snapshot probe |
 
 Implementations live under `brain/live_work_orchestration/workers.py` (extend, do not bypass approvals).
 
 ---
 
-## 6. Asana taxonomy and routing
+## 6. ClickUp taxonomy and routing
 
-**Canonical project taxonomy (example buckets — adjust to your org):**
+**Canonical ClickUp lists (exact names in code — adjust to your org):**
 
-- `Inbox` / triage
-- `This week`
-- `Deep work`
-- `Maintenance`
-- `Waiting on …`
-- `Someday`
+- **Dev / Core Work** — dev, repos, AI work
+- **Agent Clarifications** — questions, blockers (one-question clarification queue targets this list)
+- **Agent Bills** — expenses
+- **Agent Ops** — system ops
+- **Agent System Feedback** — bugs/improvements
+- **Company Finances** — financial data
+- **Nugz Bills** — vendor payments
+- **Nugz Orders** — orders
 
 **Routing policy:**
 
-- Every **WorkDemand** that becomes committed work maps to **one** Asana project + section.
-- **Blockers** that need tracking get an Asana task with dependency links—not duplicate Slack threads as system of record.
-- **No** Asana create/update in Phase 9. Phase 10+: use **approval queue** + tool registry metadata (`approval_required: true`).
+- Every **WorkDemand** that becomes committed work maps to **one** ClickUp list (deterministic classifier in `clickup_routing.py`).
+- **Blockers** that need tracking are represented as **proposed** ClickUp tasks or comments—local JSON queues hold drafts until approval; ClickUp remains system of record once synced manually or via an approved executor.
+- **No** automatic ClickUp create/update in Phase 10 foundation. Use **approval queue** + tool registry metadata (`approval_required: true`).
 
 ---
 
-## 7. Slack taxonomy and one-question clarification queue
+## 7. ClickUp clarification and one-question queue
 
-**Channels / topics (example):**
+**Lists / topics:**
 
-- `#planner-clarify` — bot asks **one** multiple-choice or short question at a time.
-- `#planner-log` — optional human-readable summaries (never auto-spam).
+- **Agent Clarifications** — at most **one** active clarification item in the local queue; additional items stay queued.
+- Other lists carry tasks and operational threads per section 6.
 
 **One-question queue policy:**
 
-- At most **one** open clarification question per user per **N** hours (configurable).
 - Questions are **specific** (deadline, priority, which repo, which meeting may move).
 - Answers feed back into **PlanRevision** / next snapshot cycle—not instant silent calendar writes.
 
-**Phase 9:** `communication_queue_snapshot` is empty; `missing_sources` lists live Slack read until connected.
+**Phase 9–10:** `communication_queue_snapshot` mirrors pending clarification rows from local state when present; `missing_sources` lists live ClickUp read until connected.
 
 ---
 
@@ -167,7 +166,7 @@ Implementations live under `brain/live_work_orchestration/workers.py` (extend, d
 
 **Progress check:**
 
-- Compare **PlannedTask** completion vs **ProgressEvent** (from activity, Asana state, manual check-ins).
+- Compare **PlannedTask** completion vs **ProgressEvent** (from activity, ClickUp state when wired, manual check-ins).
 - Surface “**at risk**” tasks before end of **during shift** window.
 
 **Replanning (Phase 12+):**
@@ -185,7 +184,11 @@ Implementations live under `brain/live_work_orchestration/workers.py` (extend, d
 | `state/live_work_orchestration/work_demand_snapshot.json` | Latest normalized demands |
 | `state/live_work_orchestration/time_constraints_snapshot.json` | Constraints / calendar slim |
 | `state/live_work_orchestration/daily_progress_snapshot.json` | Progress events / probes |
-| `state/live_work_orchestration/communication_queue_snapshot.json` | Outbound queue (empty in Phase 9) |
+| `state/live_work_orchestration/communication_queue_snapshot.json` | ClickUp clarification queue mirror |
+| `state/live_work_orchestration/clickup_action_snapshot.json` | Optional mirror of `clickup_action_queue.json` |
+| `state/live_work_orchestration/clickup_action_queue.json` | Proposed actions (local; not committed by default) |
+| `state/live_work_orchestration/clickup_clarification_queue.json` | One-question clarification queue |
+| `state/live_work_orchestration/clickup_action_log.jsonl` | Append-only local audit of queue events |
 | `state/live_work_orchestration/planning_gaps_snapshot.json` | Missing inputs |
 | `state/live_work_orchestration/index.json` | Index of snapshots |
 | Future: `memory/live_work/*.json` | Longer-horizon preferences (bounded, redact secrets) |
@@ -196,10 +199,10 @@ Implementations live under `brain/live_work_orchestration/workers.py` (extend, d
 
 ## 12. Safety rules
 
-1. **No surprise writes** to Asana, Slack, Calendar, Gmail, or Drive.
+1. **No surprise writes** to ClickUp, Calendar, Gmail, or Drive.
 2. **No** customer-facing outbound comms from this planner path unless a **separate** consent workflow exists.
 3. **Prepared-context quality gates** stay on: stale or low-confidence snapshots produce **warnings**, not fabricated facts.
-4. **One-question Slack** discipline: no walls of text; no parallel ambiguous threads.
+4. **One-question clarification** discipline: no walls of text; no parallel ambiguous threads.
 5. **Evidence-first:** every `WorkDemand` / `Blocker` should carry `evidence` or explicit low-confidence flag.
 6. **Kill switch:** disabling `live_work` workers leaves core chat and prepared context unaffected.
 
@@ -209,7 +212,7 @@ Implementations live under `brain/live_work_orchestration/workers.py` (extend, d
 
 1. **Phase 9 (done in code):** schemas, stubs, snapshots, compiler preview, script, GET APIs, tests.
 2. **Wire prompts** (optional): route benchmark phrases to snapshot + preview in orchestrator (later).
-3. **Phase 10:** Slack read + approved send loop; Asana read + approved task mutations; extend `communication_queue_snapshot`.
+3. **Phase 10:** ClickUp routing + local action/clarification queues + read-only Command Center endpoints; extend `communication_queue_snapshot` and optional `clickup_action_snapshot`. **No** auto posts or task mutations—approval pipeline only.
 4. **Phase 11:** `LocalActivityWorker` real collectors (privacy budget).
 5. **Phase 12–13:** duration learning, calendar/sheet maintenance, full daily loop.
 
@@ -244,7 +247,7 @@ You are the **Daily Work Planner**. Your job is to convert incoming obligations 
    - Constraints
    - Risks to watch
    - A good day looks like
-4. Surface blockers and route them through approved channels (Slack clarification queue, Asana tracking, calendar guidance) according to policy.
+4. Surface blockers and route them through approved channels (ClickUp clarification queue and task lists, calendar guidance) according to policy.
 
 ### A.3 Source hierarchy and confidence behavior
 
@@ -253,21 +256,21 @@ You are the **Daily Work Planner**. Your job is to convert incoming obligations 
 - If a source is missing or stale, report a **gap** explicitly and avoid speculation.
 - Do not fabricate meetings, tasks, owners, deadlines, or completion claims.
 
-### A.4 Asana routing contract
+### A.4 ClickUp task and list routing contract
 
-- Asana is the canonical task ledger for committed execution work.
-- Map each committed `WorkDemand` to one project/section taxonomy destination.
-- Blockers that need persistence should be represented in Asana with dependency context.
+- ClickUp is the canonical task and threaded-communication surface for committed execution work.
+- Map each committed `WorkDemand` to one list in the workspace taxonomy (see section 6).
+- Blockers that need persistence should be represented as ClickUp tasks or threaded comments with dependency context.
 - Avoid duplicate shadow systems for ownership tracking.
 - Any create/update action must remain approval-gated in local ai-lab flows.
 
-### A.5 Slack routing contract (one-question queue)
+### A.5 ClickUp clarification contract (one-question queue)
 
-- Slack is for clarification and coordination, not canonical task storage.
+- Clarifications use the **Agent Clarifications** list (and the local one-question queue for ordering).
 - Ask **one clarification question at a time** when ambiguity blocks safe planning.
 - Queue questions in order; avoid parallel unresolved asks.
 - Questions should be concrete and answerable (priority, due date, owner, sequencing, constraints).
-- Outbound Slack sends must use approved/gated execution paths.
+- Outbound ClickUp comments or tasks must use approved/gated execution paths.
 
 ### A.6 Calendar policy
 
@@ -305,7 +308,7 @@ You are the **Daily Work Planner**. Your job is to convert incoming obligations 
 
 - Autonomous replanning loops
 - Live desktop monitoring
-- Unapproved Asana/Slack/calendar writes
+- Unapproved ClickUp/calendar writes
 - Full scheduling-sheet sync writes
 
 These remain deferred until later phases with approval-aware wiring.

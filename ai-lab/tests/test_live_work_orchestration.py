@@ -38,6 +38,7 @@ def test_snapshot_builder_writes_files(monkeypatch: pytest.MonkeyPatch, tmp_path
         "daily_progress_snapshot",
         "communication_queue_snapshot",
         "planning_gaps_snapshot",
+        "clickup_action_snapshot",
         "index",
     ):
         p = tmp_path / f"{name}.json"
@@ -71,13 +72,14 @@ def test_daily_plan_preview_sections(monkeypatch: pytest.MonkeyPatch, tmp_path: 
         assert key in prev and isinstance(prev[key], str)
 
 
-def test_compiler_has_no_asana_slack_side_effects(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_compiler_has_no_automatic_external_side_effects(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path)
     build_all_live_work_snapshots()
     prev = compile_daily_plan_preview()
     blob = json.dumps(prev).lower()
     assert "asana_task_created" not in blob
     assert "slack_message_sent" not in blob
+    assert "clickup_task_created" not in blob
     assert "read-only" in (prev.get("notes") or "").lower()
 
 
