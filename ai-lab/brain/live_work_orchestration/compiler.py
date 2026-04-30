@@ -1,7 +1,7 @@
 """
-Read-only daily plan preview compiler (Phase 9).
+Read-only daily plan preview compiler (Phase 9–11).
 
-Does not create Asana tasks, send Slack messages, or write calendar events.
+Does not create ClickUp tasks, post comments, update statuses, or write calendar events.
 """
 from __future__ import annotations
 
@@ -25,6 +25,26 @@ def _load_live_snapshot(name: str) -> dict[str, Any] | None:
         return None
 
 
+def generate_clickup_action_recommendations(
+    plan_preview: dict[str, Any],
+    snapshots: dict[str, Any],
+    *,
+    clickup_tool_available: bool = False,
+    enqueue: bool = False,
+) -> dict[str, Any]:
+    """Delegate to ``clickup_actions`` — plan-shaped ClickUp proposals only (no execution)."""
+    from brain.live_work_orchestration.clickup_actions import (
+        generate_clickup_action_recommendations as _generate,
+    )
+
+    return _generate(
+        plan_preview,
+        snapshots,
+        clickup_tool_available=clickup_tool_available,
+        enqueue=enqueue,
+    )
+
+
 def compile_daily_plan_preview(
     *,
     work_demand_snapshot: dict[str, Any] | None = None,
@@ -32,6 +52,7 @@ def compile_daily_plan_preview(
     daily_progress_snapshot: dict[str, Any] | None = None,
     planning_gaps_snapshot: dict[str, Any] | None = None,
     communication_queue_snapshot: dict[str, Any] | None = None,
+    include_action_recommendations: bool = True,
 ) -> dict[str, Any]:
     """
     Combine work demand + time constraints + progress (+ optional gaps/queue) into a preview dict.
@@ -42,11 +63,14 @@ def compile_daily_plan_preview(
     tc = time_constraints_snapshot or _load_live_snapshot("time_constraints_snapshot") or {}
     pr = daily_progress_snapshot or _load_live_snapshot("daily_progress_snapshot") or {}
     gaps = planning_gaps_snapshot or _load_live_snapshot("planning_gaps_snapshot") or {}
-    _ = communication_queue_snapshot or _load_live_snapshot("communication_queue_snapshot")
+    cq = communication_queue_snapshot or _load_live_snapshot("communication_queue_snapshot") or {}
 
     demands = (wd.get("data") or {}).get("demands") or []
     constraints = (tc.get("data") or {}).get("constraints") or []
-    events = (pr.get("data") or {}).get("events") or []
+    pr_data = pr.get("data") if isinstance(pr.get("data"), dict) else {}
+    events = pr_data.get("events") or []
+    repo_activity_rows = pr_data.get("repo_activity_rows") or []
+    repo_activity_summary = pr_data.get("repo_activity_ingestion_summary") or {}
     gap_list = (gaps.get("data") or {}).get("gaps") or []
 
     prio_lines = [str(d.get("title") or d.get("notes")) for d in demands[:8]]
@@ -56,24 +80,85 @@ def compile_daily_plan_preview(
         risk_lines.append(f"Missing sources (do not guess): {wd.get('missing_sources')}")
     if tc.get("missing_sources"):
         risk_lines.append(f"Time snapshot gaps: {tc.get('missing_sources')}")
+    if isinstance(repo_activity_summary, dict) and int(repo_activity_summary.get("repos_with_activity") or 0) > 0:
+        planned_text = " ".join(prio_lines).lower()
+        mismatch = False
+        for row in repo_activity_rows:
+            if not isinstance(row, dict):
+                continue
+            feature = str(row.get("likely_feature_name") or "").lower()
+            if feature and feature not in planned_text:
+                mismatch = True
+                break
+        if mismatch:
+            risk_lines.append(
+                "Planned vs actual mismatch signal: recent repo activity suggests work streams not explicitly listed in planned priorities."
+            )
 
     today = " — ".join(prio_lines[:5]) if prio_lines else "(No prioritized items in work demand snapshot.)"
     before_shift = "Light prep: review top priorities and calendar blocks from snapshot only."
     during_shift = "Focus blocks: " + (today[:400] if today else "undefined") + " | Progress events: " + str(len(events))
+    if isinstance(repo_activity_summary, dict):
+        during_shift += (
+            " | Repo activity: "
+            f"{repo_activity_summary.get('repos_with_activity', 0)}/{repo_activity_summary.get('repos_scanned', 0)} repos active"
+        )
     after_shift = "Capture outcomes in repo/docs or personal ops digest when available (manual)."
     top_p = "\n".join(f"- {p}" for p in prio_lines) or "- (none)"
     cons = "\n".join(f"- {c}" for c in con_lines) or "- (none — calendar may be empty)"
     risks = "\n".join(f"- {r}" for r in risk_lines) or "- (none identified)"
     good_day = "Top priorities touched, constraints respected, no speculative commitments without evidence."
 
+    preview_id = f"preview-{now_iso()}"
+    observed = now_iso()
+    created = now_iso()
+    snapshots_bundle = {
+        "work_demand_snapshot": wd,
+        "time_constraints_snapshot": tc,
+        "daily_progress_snapshot": pr,
+        "planning_gaps_snapshot": gaps,
+        "communication_queue_snapshot": cq,
+    }
+    plan_for_rec: dict[str, Any] = {
+        "id": preview_id,
+        "source": "compile_daily_plan_preview",
+        "confidence": min(float(wd.get("confidence") or 0.5), float(tc.get("confidence") or 0.5)),
+        "observed_at": observed,
+        "created_at": created,
+        "notes": "Read-only preview. No ClickUp/calendar mutations from this compiler path.",
+        "evidence": ["work_demand_snapshot", "time_constraints_snapshot", "daily_progress_snapshot"],
+        "status": "open",
+        "today": today,
+        "before_shift": before_shift,
+        "during_shift": during_shift,
+        "after_shift": after_shift,
+        "top_priorities": top_p,
+        "constraints": cons,
+        "risks_to_watch": risks,
+        "a_good_day_looks_like": good_day,
+    }
+
+    proposed: list[dict[str, Any]] = []
+    pending_clar: list[dict[str, Any]] = []
+    rec: dict[str, Any] | None = None
+    if include_action_recommendations:
+        rec = generate_clickup_action_recommendations(
+            plan_for_rec,
+            snapshots_bundle,
+            clickup_tool_available=False,
+            enqueue=False,
+        )
+        proposed = list(rec.get("proposed_clickup_actions") or [])
+        pending_clar = list(rec.get("pending_clarifications") or [])
+
     preview = DailyPlanPreview(
-        id=f"preview-{now_iso()}",
+        id=preview_id,
         source="compile_daily_plan_preview",
-        confidence=min(float(wd.get("confidence") or 0.5), float(tc.get("confidence") or 0.5)),
-        observed_at=now_iso(),
-        created_at=now_iso(),
-        notes="Read-only preview. No Asana/Slack/calendar mutations.",
-        evidence=["work_demand_snapshot", "time_constraints_snapshot", "daily_progress_snapshot"],
+        confidence=float(plan_for_rec["confidence"]),
+        observed_at=observed,
+        created_at=created,
+        notes=str(plan_for_rec["notes"]),
+        evidence=list(plan_for_rec["evidence"]),
         status="open",
         today=today,
         before_shift=before_shift,
@@ -83,5 +168,10 @@ def compile_daily_plan_preview(
         constraints=cons,
         risks_to_watch=risks,
         a_good_day_looks_like=good_day,
+        proposed_clickup_actions=proposed,
+        pending_clarifications=pending_clar,
     )
-    return preview.to_dict()
+    out = preview.to_dict()
+    if include_action_recommendations and rec is not None:
+        out["clickup_action_recommendations"] = rec
+    return out

@@ -1,5 +1,5 @@
 """
-Snapshot builders for live work orchestration (Phase 9).
+Snapshot builders for live work orchestration (Phase 9–11).
 
 Writes JSON under state/live_work_orchestration/. Read-only inputs from prepared context.
 """
@@ -13,13 +13,12 @@ from brain.prepared_context.schema import now_iso
 from brain.prepared_context.store import load_snapshot
 
 from brain.live_work_orchestration.workers import (
-    AsanaIntakeWorker,
     CalendarIntakeWorker,
+    ClickUpIntakeWorker,
     EmailDriveIntakeWorker,
     LocalActivityWorker,
     ProgressMonitorWorker,
     RepoActivityWorker,
-    SlackIntakeWorker,
     TimeConstraintWorker,
     WorkDemandWorker,
 )
@@ -74,6 +73,16 @@ def _write(name: str, payload: dict[str, Any]) -> Path:
     p = live_work_dir() / f"{name}.json"
     p.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     return p
+
+
+def _load_ingestion_snapshot(name: str) -> dict[str, Any] | None:
+    p = live_work_dir() / "ingestion" / f"{name}.json"
+    if not p.is_file():
+        return None
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
 
 
 def build_work_demand_snapshot() -> dict[str, Any]:
@@ -148,7 +157,7 @@ def build_work_demand_snapshot() -> dict[str, Any]:
         confidence=0.72 if not missing else 0.45,
         sources=sources,
         summary_short=f"Work demands: {len(demands)} items (read-only)",
-        summary_detailed="Synthesized from project_agenda and repo_pulse only; external Asana/GitHub not queried in Phase 9.",
+        summary_detailed="Synthesized from project_agenda and repo_pulse only; live ClickUp/GitHub not queried in Phase 9.",
     )
     _write("work_demand_snapshot", snap)
     return snap
@@ -228,11 +237,19 @@ def build_time_constraints_snapshot() -> dict[str, Any]:
 
 
 def build_daily_progress_snapshot() -> dict[str, Any]:
-    sources = ["prepared_context:worker_snapshot", "prepared_context:repo_pulse", "workers:read_only_probe"]
+    sources = [
+        "prepared_context:worker_snapshot",
+        "prepared_context:repo_pulse",
+        "workers:read_only_probe",
+        "ingestion:repo_activity_snapshot",
+    ]
     missing: list[str] = []
     ws = load_snapshot("worker_snapshot")
     if not ws:
         missing.append("worker_snapshot")
+    repo_ingestion = _load_ingestion_snapshot("repo_activity_snapshot")
+    if not repo_ingestion:
+        missing.append("repo_activity_snapshot")
     events: list[dict[str, Any]] = []
     if isinstance(ws, dict):
         events.append(
@@ -246,47 +263,107 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
                 "evidence": ["worker_snapshot"],
                 "status": "done",
                 "metric": "worker_snapshot_loaded",
+                "source_type": "repo",
             }
         )
+    repo_activity_rows: list[dict[str, Any]] = []
+    repo_activity_events: list[dict[str, Any]] = []
+    if isinstance(repo_ingestion, dict):
+        data = repo_ingestion.get("data") if isinstance(repo_ingestion.get("data"), dict) else {}
+        repo_activity_rows = list(data.get("activity") or [])
+        for i, ev in enumerate(list(data.get("progress_events") or [])):
+            if not isinstance(ev, dict):
+                continue
+            events.append(
+                {
+                    "id": f"pe-repo-{i}",
+                    "source": "repo_activity_ingestion",
+                    "confidence": float(ev.get("confidence") or repo_ingestion.get("confidence") or 0.5),
+                    "observed_at": str(ev.get("observed_at") or repo_ingestion.get("generated_at") or now_iso()),
+                    "created_at": now_iso(),
+                    "notes": str(ev.get("summary") or ""),
+                    "evidence": list(ev.get("evidence") or []),
+                    "status": "done",
+                    "metric": str(ev.get("activity_intensity") or "repo_activity"),
+                    "source_type": "repo",
+                }
+            )
+            repo_activity_events.append(ev)
     snap = _wrap(
         "daily_progress_snapshot",
         data={
             "events": events,
             "worker_probe": ProgressMonitorWorker().collect(),
             "repo_probe": RepoActivityWorker().collect(),
+            "repo_activity_ingestion_summary": (repo_ingestion or {}).get("data", {}).get("summary", {}),
+            "repo_activity_rows": repo_activity_rows,
+            "repo_activity_events": repo_activity_events,
             "local_activity_probe": LocalActivityWorker().collect(),
         },
         missing_sources=missing,
-        evidence_items=[_evidence("Progress", f"{len(events)} events")],
-        confidence=0.6,
+        evidence_items=[
+            _evidence("Progress", f"{len(events)} events"),
+            _evidence(
+                "Repo activity ingestion",
+                f"{len(repo_activity_events)} repo activity signals",
+                "state/live_work_orchestration/ingestion/repo_activity_snapshot.json",
+            ),
+        ],
+        confidence=0.65 if repo_ingestion else 0.55,
         sources=sources,
-        summary_short="Daily progress stub from worker + repo probes",
-        summary_detailed="Local desktop activity deferred to Phase 11.",
+        summary_short=f"Daily progress: {len(events)} events with repo activity ingestion",
+        summary_detailed="Read-only progress combines worker probes and local git metadata ingestion; no completion assumptions.",
     )
     _write("daily_progress_snapshot", snap)
     return snap
 
 
 def build_communication_queue_snapshot() -> dict[str, Any]:
-    """No outbound messages — queue is empty unless future adapters enqueue drafts."""
+    """ClickUp-facing clarification queue snapshot (read-only; no outbound sends)."""
+    from brain.live_work_orchestration.clickup_queue import list_clarification_items
+
+    pending = [x for x in list_clarification_items() if x.get("status") in ("queued", "active")]
     snap = _wrap(
         "communication_queue_snapshot",
         data={
-            "items": [],
+            "items": pending,
+            "queue_role": "clickup_clarification_pending",
             "probes": {
-                "slack": SlackIntakeWorker().collect(),
-                "asana": AsanaIntakeWorker().collect(),
+                "clickup": ClickUpIntakeWorker().collect(),
                 "email_drive": EmailDriveIntakeWorker().collect(),
             },
         },
-        missing_sources=["slack_live_read", "asana_live_read", "gmail_api"],
-        evidence_items=[_evidence("Communication queue", "Empty — Phase 9 does not send Slack/Asana/email")],
+        missing_sources=["clickup_live_read", "gmail_api"],
+        evidence_items=[_evidence("Communication queue", "ClickUp clarification queue — local state only until approval")],
         confidence=0.9,
-        sources=["stubs_only"],
-        summary_short="Communication queue empty (read-only foundation)",
-        summary_detailed="Slack one-question queue and Asana routing will populate in Phase 10 with approvals.",
+        sources=["stubs_only", "clickup_clarification_queue.json"],
+        summary_short="ClickUp clarification queue snapshot (read-only)",
+        summary_detailed="One active clarification at a time; proposals enqueue with approval; no automatic ClickUp posts.",
     )
     _write("communication_queue_snapshot", snap)
+    return snap
+
+
+def build_clickup_action_snapshot() -> dict[str, Any]:
+    """Optional aggregate of pending ClickUp action proposals (local JSON only)."""
+    from brain.live_work_orchestration.clickup_queue import get_action_queue_document
+
+    doc = get_action_queue_document()
+    items = list(doc.get("items") or [])
+    snap = _wrap(
+        "clickup_action_snapshot",
+        data={
+            "items": items,
+            "pending_count": len([x for x in items if str(x.get("status")) == "queued"]),
+        },
+        missing_sources=["clickup_live_read"],
+        evidence_items=[_evidence("ClickUp actions", f"{len(items)} queued/preview rows (no execution)")],
+        confidence=0.85,
+        sources=["clickup_action_queue.json"],
+        summary_short="ClickUp action queue mirror (read-only)",
+        summary_detailed="Task/comment/status proposals only; execution requires approval pipeline.",
+    )
+    _write("clickup_action_snapshot", snap)
     return snap
 
 
@@ -330,10 +407,12 @@ def build_live_work_index() -> dict[str, Any]:
         "daily_progress_snapshot",
         "communication_queue_snapshot",
         "planning_gaps_snapshot",
+        "clickup_action_snapshot",
+        "ingestion/repo_activity_snapshot",
     ]
     rows = []
     for n in names:
-        p = live_work_dir() / f"{n}.json"
+        p = live_work_dir() / (f"{n}.json" if "/" not in n else f"{n}.json")
         row = {"snapshot_type": n, "path": str(p), "exists": p.is_file()}
         if p.is_file():
             try:
@@ -344,18 +423,22 @@ def build_live_work_index() -> dict[str, Any]:
             except Exception:
                 row["error"] = "read_failed"
         rows.append(row)
-    payload = {"generated_at": now_iso(), "snapshots": rows, "live_work_orchestration_version": 9}
+    payload = {"generated_at": now_iso(), "snapshots": rows, "live_work_orchestration_version": 11}
     (live_work_dir() / "index.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
 
 
 def build_all_live_work_snapshots() -> dict[str, Any]:
-    """Build all Phase 9 snapshots in dependency order."""
+    """Build all Phase 9–11 snapshots in dependency order."""
     out: dict[str, Any] = {}
+    from brain.live_work_orchestration.ingestion.repo_activity import build_repo_activity_snapshot
+
+    out["repo_activity_snapshot"] = build_repo_activity_snapshot()
     out["work_demand_snapshot"] = build_work_demand_snapshot()
     out["time_constraints_snapshot"] = build_time_constraints_snapshot()
     out["daily_progress_snapshot"] = build_daily_progress_snapshot()
     out["communication_queue_snapshot"] = build_communication_queue_snapshot()
     out["planning_gaps_snapshot"] = build_planning_gaps_snapshot()
+    out["clickup_action_snapshot"] = build_clickup_action_snapshot()
     out["index"] = build_live_work_index()
     return out
