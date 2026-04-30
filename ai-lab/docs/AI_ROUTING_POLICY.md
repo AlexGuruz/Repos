@@ -28,6 +28,7 @@ This policy describes **how user messages should be routed** for speed and usefu
 | Planning / prioritization (“what should I work on”, backlog, etc.) | `answer` + fast path | **Ops registry** (no web) | **No** | `routing_policy.match_answer_fast_path` → `source_router` applies `AnswerFastPath`. |
 | Lab / Command Center “current state” | `answer` + fast path | Ops + optional `ai-lab/README.md` | **No** | Same; README when path exists. |
 | Repo documentation **status** (doc + repo wording) | `answer` + fast path | `ai-lab/README.md` artifact | **No** | `routing_policy` doc+repo markers. |
+| Repo docs maintainer status/plan/proposal | `docs_status` / `docs_cleanup_plan` / `docs_update_proposal` | Prepared context (`repo_pulse`) | **No** (normal path) | `brain/repo_docs_maintainer.py` + orchestrator approval queue integration. |
 | Growflow “what changed / recent” (local README) | `answer` + fast path | `Growflow/README.md` when present | **No** | `routing_policy` growflow + change markers. |
 | Repo file / script questions | `repo_search` / `run_agent` | Repo index / cartographer | **Optional worker** | `router` + execution (`brain/execution.py`); worker index/retrieve intents per `router.py`. |
 | Heavy summarization over large corpora | `answer` or agent-specific | Evidence + LLM and/or **worker** | **Yes** when configured | Prefer worker when index is large; keep timeouts (see fix plan). |

@@ -2,12 +2,13 @@
 
 ## Phase 5 — prepared context selection (Apr 2026)
 
-Prepared-context routing gained a dedicated selector (`brain/prepared_context/selection.py`) with paraphrase families, negative guardrails, and optional multi-snapshot “broad lab” behavior. The benchmark script’s `PROMPTS` list was extended with representative paraphrases; **re-run** `python scripts/benchmark_ai_response.py` from `ai-lab` to refresh the auto-generated table below and capture new `prepared_context_selection_*` trace fields in `state/ai_response_traces.jsonl`.
+Prepared-context routing gained a dedicated selector (`brain/prepared_context/selection.py`) with paraphrase families, negative guardrails, and optional multi-snapshot “broad lab” behavior. The benchmark script’s `PROMPTS` list was extended with representative paraphrases. To refresh the **auto-generated snapshot block** in this file (for milestones or committed tables), run from `ai-lab` with `AI_LAB_BENCH_WRITE_DOC=1`. A normal run prints the table to stdout only and does not modify this file.
 
 ## How these runs were produced
 
 - **Command** (from `E:/Repos/ai-lab`):  
-  `python scripts/benchmark_ai_response.py`
+  `python scripts/benchmark_ai_response.py`  
+  Optional: `set AI_LAB_BENCH_WRITE_DOC=1` (Windows) or `AI_LAB_BENCH_WRITE_DOC=1` before the command to rewrite the `<!-- AUTO_BENCHMARK_SNAPSHOT_* -->` section below.
 - **Environment**: `AI_LAB_ORCH_NO_LLM=1`, `AI_LAB_LLM_SKIP_MODEL_LIST_PROBE=1`, and `run(..., llm_base_url="", llm_model="")` so **no LM Studio** traffic is measured—only orchestrator, routing, evidence, and local branches (including worker health SSH when that prompt runs).
 - **Heuristic “route” column**: derived in the script from reply shape (`_route_from_reply` in `scripts/benchmark_ai_response.py`); it is **not** the same as `route_chosen` in JSONL traces.
 - **First-token latency**: not captured by this script; enable `write_response_trace=True` (default in `run()` for production chat) and inspect `state/ai_response_traces.jsonl` after Command Center traffic.
@@ -63,31 +64,38 @@ For **first-token** and **per-stage** timings, see `state/ai_response_traces.jso
 <!-- AUTO_BENCHMARK_SNAPSHOT_START -->
 ## Auto Benchmark Snapshot
 
-Updated: `2026-04-28T02:30:23Z`
+Updated: `2026-04-30T00:22:31Z`
 
 | Prompt | First token ms | Total ms | Useful | Wrong refusal | Evidence used | Worker used |
 |--------|----------------|----------|--------|---------------|---------------|-------------|
-| hello | 18.24 | 20.3 | yes | no | 0 | False |
-| what systems are active? | 8.74 | 13.1 | yes | no | 1 | False |
-| what changed recently? | 5.09 | 9.1 | yes | no | 1 | False |
-| summarize my ai-lab current state | 70.0 | 70.0 | yes | no | 0 | False |
-| what should I work on today? | 4.83 | 6.9 | yes | no | 1 | False |
-| summarize current repo status | 5.95 | 10.2 | yes | no | 3 | False |
-| open project agenda | 5.11 | 8.0 | yes | no | 1 | False |
-| check worker health | 17.93 | 20.1 | yes | no | 1 | False |
-| what is Growflow status? | 2.49 | 6.3 | yes | no | 1 | False |
-| what docs need cleanup? | 5.03 | 8.8 | yes | no | 2 | False |
-| what changed recently in Growflow? | 4.98 | 7.0 | yes | no | 1 | False |
-| explain repo documentation status | 5.27 | 9.2 | yes | no | 2 | False |
-| anything broken? | 4.94 | 8.9 | yes | no | 3 | False |
-| status of the lab | 5.32 | 9.1 | yes | no | 3 | False |
-| which repos need cleanup? | 5.21 | 9.4 | yes | no | 2 | False |
-| what are my next actions? | 4.53 | 7.6 | yes | no | 1 | False |
-| plan my day | 4.6 | 7.2 | yes | no | 1 | False |
-| is ollama up on the worker? | 4.48 | 8.4 | yes | no | 1 | False |
-| transfer receipt status | 5.61 | 9.3 | yes | no | 4 | False |
-| business automation status | 6.23 | 10.1 | yes | no | 4 | False |
-| who won the super bowl in 2024? | 44.7 | 47.0 | yes | yes | 0 | False |
+| hello | 31.57 | 33.6 | yes | no | 0 | False |
+| what systems are active? | 31.57 | 35.4 | yes | no | 1 | False |
+| what changed recently? | 2.28 | 6.0 | yes | no | 1 | False |
+| summarize my ai-lab current state | 2149.0 | 2149.0 | yes | no | 0 | False |
+| what should I work on today? | 161.17 | 216.0 | yes | no | 1 | False |
+| summarize current repo status | 167.15 | 169.8 | yes | no | 3 | False |
+| open project agenda | 3.12 | 5.2 | yes | no | 1 | False |
+| check worker health | 126.31 | 184.4 | yes | no | 1 | False |
+| what is Growflow status? | 9.08 | 65.1 | yes | no | 1 | False |
+| what docs need cleanup? | 1426.71 | 1432.1 | yes | no | 1 | False |
+| make a docs cleanup plan | 343.23 | 348.6 | yes | no | 1 | False |
+| prepare a docs update proposal | 626.97 | 685.2 | yes | no | 1 | False |
+| which README needs updating? | 1178.66 | 1184.6 | yes | no | 1 | False |
+| what changed recently in Growflow? | 210.02 | 265.9 | yes | no | 1 | False |
+| explain repo documentation status | 170.13 | 172.5 | yes | no | 1 | False |
+| what is wrong with this README? | 123.7 | 126.5 | yes | no | 1 | False |
+| validate repo documentation | 1045.91 | 1051.9 | yes | no | 1 | False |
+| what sections are missing in docs? | 852.81 | 860.0 | yes | no | 1 | False |
+| improve this repo documentation | 1008.0 | 1010.6 | yes | no | 1 | False |
+| anything broken? | 177.79 | 235.0 | yes | no | 3 | False |
+| status of the lab | 276.08 | 336.3 | yes | no | 3 | False |
+| which repos need cleanup? | 117.49 | 121.2 | yes | no | 2 | False |
+| what are my next actions? | 111.65 | 115.8 | yes | no | 1 | False |
+| plan my day | 480.99 | 538.7 | yes | no | 1 | False |
+| is ollama up on the worker? | 109.29 | 111.7 | yes | no | 1 | False |
+| transfer receipt status | 6.18 | 10.7 | yes | no | 4 | False |
+| business automation status | 117.76 | 121.8 | yes | no | 4 | False |
+| who won the super bowl in 2024? | 901.91 | 906.1 | yes | yes | 0 | False |
 
 _Generated by `scripts/benchmark_ai_response.py`._
 <!-- AUTO_BENCHMARK_SNAPSHOT_END -->

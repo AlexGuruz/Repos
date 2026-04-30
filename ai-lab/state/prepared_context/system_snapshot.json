@@ -1,6 +1,6 @@
 {
   "snapshot_type": "system_snapshot",
-  "generated_at": "2026-04-28T02:28:58Z",
+  "generated_at": "2026-04-28T03:01:44Z",
   "freshness_seconds": 900,
   "source_files_or_tools": [
     "ops_registry.get_ops_summary_text_cached",
@@ -35,7 +35,7 @@
       "backend_router": "command-center/backend/main.py"
     },
     "last_successful_checks": {
-      "ops_registry_loaded_at": "2026-04-28T02:28:56Z"
+      "ops_registry_loaded_at": "2026-04-28T03:01:40Z"
     },
     "worker_health": {
       "worker_name": "worker-rig-01",
@@ -67,10 +67,56 @@
           "latency_ms": null
         }
       ],
-      "checked_at": "2026-04-28T02:28:56Z",
+      "checked_at": "2026-04-28T03:01:40Z",
       "timeout_budget_ms": 2000,
       "worker_status": "offline_or_unreachable",
-      "last_known_status": null,
+      "last_known_status": {
+        "checked_at": "2026-04-28T03:01:22Z",
+        "worker_status": "offline_or_unreachable",
+        "all_ok": false,
+        "services": [
+          {
+            "name": "worker_assistant",
+            "ok": false,
+            "url": "http://127.0.0.1:8765/health",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          },
+          {
+            "name": "n8n",
+            "ok": false,
+            "url": "http://127.0.0.1:5678/",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          },
+          {
+            "name": "ollama",
+            "ok": false,
+            "url": "http://127.0.0.1:11434/api/tags",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          }
+        ],
+        "tunnel_status": {
+          "worker_name": "worker-rig-01",
+          "expected_ports": [
+            8765,
+            5678,
+            11434
+          ],
+          "reachable_ports": [],
+          "missing_ports": [
+            8765,
+            11434,
+            5678
+          ],
+          "likely_up": false,
+          "detail": "Missing tunnel ports: [8765, 11434, 5678]. Start tunnel or check worker."
+        }
+      },
       "tunnel_status": {
         "worker_name": "worker-rig-01",
         "expected_ports": [
@@ -107,15 +153,7 @@
       },
       {
         "fallback_reason": "insufficient_evidence_hard_stop",
-        "message": "another turn"
-      },
-      {
-        "fallback_reason": "insufficient_evidence_hard_stop",
-        "message": "something else"
-      },
-      {
-        "fallback_reason": "insufficient_evidence_hard_stop",
-        "message": "what did the last scan find?"
+        "message": "who won the super bowl in 2024?"
       },
       {
         "fallback_reason": "insufficient_evidence_hard_stop",
@@ -128,6 +166,14 @@
       {
         "fallback_reason": "insufficient_evidence_hard_stop",
         "message": "what did the last scan find?"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "another turn"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "something else"
       }
     ]
   },
@@ -143,14 +189,14 @@
     {
       "title": "Ops registry summary",
       "source_path_or_tool": "ops_registry.get_ops_summary_text_cached",
-      "observed_at": "2026-04-28T02:28:56Z",
+      "observed_at": "2026-04-28T03:01:40Z",
       "summary": "Loaded systems/workers/automations registries.",
       "confidence": 0.9
     },
     {
       "title": "Worker health snapshot",
       "source_path_or_tool": "brain.worker_health.get_worker_health_snapshot",
-      "observed_at": "2026-04-28T02:28:56Z",
+      "observed_at": "2026-04-28T03:01:40Z",
       "summary": "worker_status=offline_or_unreachable",
       "confidence": 0.9
     }

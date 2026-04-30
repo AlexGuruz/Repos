@@ -1,6 +1,6 @@
 {
   "snapshot_type": "worker_snapshot",
-  "generated_at": "2026-04-28T02:30:06Z",
+  "generated_at": "2026-04-28T03:01:14Z",
   "freshness_seconds": 86400,
   "source_files_or_tools": [
     "test"
@@ -18,14 +18,14 @@
     {
       "title": "t1",
       "source_path_or_tool": "test://a",
-      "observed_at": "2026-04-28T02:30:06Z",
+      "observed_at": "2026-04-28T03:01:14Z",
       "summary": "s",
       "confidence": 0.8
     },
     {
       "title": "t2",
       "source_path_or_tool": "test://b",
-      "observed_at": "2026-04-28T02:30:06Z",
+      "observed_at": "2026-04-28T03:01:14Z",
       "summary": "s2",
       "confidence": 0.8
     }

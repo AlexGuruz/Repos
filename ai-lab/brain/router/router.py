@@ -115,6 +115,29 @@ def classify_intent(message: str) -> tuple[str, dict]:
     if ("sales" in msg or "expenses" in msg or "payroll" in msg or "inventory" in msg) and any(w in msg for w in ("summary", "overview", "report", "how are we", "what's our", "our business")):
         return "company_bi", {}
 
+    # Repo Documentation Maintainer (Phase 6–7)
+    if any(w in msg for w in ("make a docs cleanup plan", "documentation cleanup plan", "plan documentation updates", "docs maintainer update first")):
+        return "docs_cleanup_plan", {}
+    if any(w in msg for w in (
+        "draft updates for readme",
+        "prepare a docs update proposal",
+        "propose updates for stale repo docs",
+        "docs update proposal",
+        "improve this repo documentation",
+    )):
+        return "docs_update_proposal", {}
+    if any(w in msg for w in (
+        "what docs need cleanup",
+        "which repos have stale docs",
+        "explain repo documentation status",
+        "what readme needs updating",
+        "which readme needs updating",
+        "validate repo documentation",
+        "what sections are missing in docs",
+        "what is wrong with this readme",
+    )):
+        return "docs_status", {}
+
     # Ops overview (Guru §23): "what systems do I have", "list my workers", "ops overview"
     if any(w in msg for w in ("ops overview", "ops fabric", "what systems", "list my workers", "what workers", "what automations", "what's in my ops", "my systems", "my workers")):
         return "ops_overview", {}

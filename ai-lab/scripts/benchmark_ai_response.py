@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """
-Run orchestrator prompts with AI_LAB_ORCH_NO_LLM=1 (no LM Studio calls) and print a markdown table.
+Run orchestrator prompts with AI_LAB_ORCH_NO_LLM=1 (no LM Studio calls) and print a markdown table to stdout.
+
+By default this does **not** modify `docs/AI_RESPONSE_BENCHMARKS.md` (avoids noisy git churn on every run).
+To refresh the auto snapshot block in that file—for prompt-set changes, structural updates, or milestone
+snapshots—set `AI_LAB_BENCH_WRITE_DOC=1` when running.
 
 Usage (from ai-lab root):
   set AI_LAB_ORCH_NO_LLM=1
-  python scripts/benchmark_ai_response.py > docs/AI_RESPONSE_BENCHMARKS.md
+  python scripts/benchmark_ai_response.py
+  # optional: redirect stdout yourself, or milestone snapshot:
+  set AI_LAB_BENCH_WRITE_DOC=1
+  python scripts/benchmark_ai_response.py
 """
 from __future__ import annotations
 
@@ -43,8 +50,16 @@ PROMPTS = [
     "check worker health",
     "what is Growflow status?",
     "what docs need cleanup?",
+    "make a docs cleanup plan",
+    "prepare a docs update proposal",
+    "which README needs updating?",
     "what changed recently in Growflow?",
     "explain repo documentation status",
+    # Phase 7 — documentation policy / validation paraphrases
+    "what is wrong with this README?",
+    "validate repo documentation",
+    "what sections are missing in docs?",
+    "improve this repo documentation",
     # Phase 5 — prepared-context selection paraphrases
     "anything broken?",
     "status of the lab",
@@ -224,8 +239,38 @@ def main() -> int:
     print(f"Warm greeting latency probe (ms): {warm_ms} median={warm_median}")
     if os.environ.get("AI_LAB_BENCH_ASSERT", "").strip() in ("1", "true", "yes"):
         assert warm_median < 300.0, f"warm greeting median too slow: {warm_median}ms"
-    _update_benchmark_doc(rows)
-    print(f"Updated doc snapshot: {BENCHMARK_DOC}")
+    write_bench_doc = os.environ.get("AI_LAB_BENCH_WRITE_DOC", "").strip().lower() in ("1", "true", "yes")
+    if write_bench_doc:
+        _update_benchmark_doc(rows)
+        print(f"Wrote auto snapshot block to: {BENCHMARK_DOC}")
+    else:
+        print(
+            f"Skipped writing {BENCHMARK_DOC.name} (set AI_LAB_BENCH_WRITE_DOC=1 to refresh the committed snapshot)."
+        )
+
+    if os.environ.get("AI_LAB_DOC_BENCH", "").strip() in ("1", "true", "yes"):
+        from brain.repo_doc_validation import validate_readme
+        from brain.repo_docs_maintainer import build_docs_cleanup_plan, create_docs_update_proposal
+
+        readme = ROOT / "README.md"
+        t0 = time.perf_counter()
+        if readme.is_file():
+            for _ in range(5):
+                validate_readme(readme)
+        v_ms = round((time.perf_counter() - t0) * 1000.0 / max(5, 1), 2)
+        t1 = time.perf_counter()
+        for _ in range(3):
+            build_docs_cleanup_plan(message="bench", max_items=10)
+        p_ms = round((time.perf_counter() - t1) * 1000.0 / 3.0, 2)
+        t2 = time.perf_counter()
+        for _ in range(3):
+            create_docs_update_proposal(message="bench")
+        prop_ms = round((time.perf_counter() - t2) * 1000.0 / 3.0, 2)
+        print("")
+        print("Phase 7 doc policy microbench (AI_LAB_DOC_BENCH=1, mean ms over repeats):")
+        print(f"- validate_readme(README): {v_ms}ms (target <300ms per call)")
+        print(f"- build_docs_cleanup_plan: {p_ms}ms (target <1000ms)")
+        print(f"- create_docs_update_proposal: {prop_ms}ms (target <2000ms)")
     return 0
 
 

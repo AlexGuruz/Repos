@@ -552,6 +552,173 @@ def run(
             )
             return {"reply": reply, "approval_request": None}
 
+    if intent == "docs_status":
+        from brain.repo_docs_maintainer import analyze_repo_docs_status
+
+        status = analyze_repo_docs_status(message=msg)
+        findings = list(status.get("findings") or [])
+        lines = [
+            "### repo_documentation_status",
+            "- source_snapshot: `repo_pulse`",
+            f"- generated_at: `{status.get('generated_at')}`",
+            f"- stale: `{status.get('stale')}`",
+            f"- confidence: `{round(float(status.get('confidence') or 0.0), 3)}`",
+            f"- findings_count: `{len(findings)}`",
+        ]
+        if status.get("source_paths"):
+            lines.append(f"- source_paths: {list(status.get('source_paths') or [])[:8]}")
+        if status.get("missing_data"):
+            lines.append(f"- missing_data: {list(status.get('missing_data') or [])}")
+        rv = list(status.get("readme_validations") or [])
+        if rv:
+            lines.append(f"- readme_validations_sample: `{len(rv)}` repos checked (deterministic policy)")
+            for entry in rv[:3]:
+                if entry.get("skipped"):
+                    lines.append(f"  - {entry.get('repo')}: skipped ({entry.get('reason')})")
+                else:
+                    lines.append(
+                        f"  - {entry.get('repo')}: valid={entry.get('is_valid')} "
+                        f"missing={entry.get('missing_sections')} weak={entry.get('weak_sections')}"
+                    )
+        for f in findings[:8]:
+            lines.append(
+                f"- {f.get('repo')}: `{f.get('doc_file')}` — {f.get('issue')} "
+                f"(risk={f.get('risk_level')}, approval_required={f.get('approval_required')})"
+            )
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="docs_status",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse"],
+            fallback_reason=None,
+            final_answer_type="docs_status",
+            reply_preview=reply,
+            final_answer_source="prepared_context",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "docs_cleanup_plan":
+        from brain.repo_docs_maintainer import build_docs_cleanup_plan
+
+        plan = build_docs_cleanup_plan(message=msg, max_items=10)
+        items = list(plan.get("plan_items") or [])
+        lines = [
+            "### docs_cleanup_plan",
+            f"- generated_at: `{plan.get('generated_at')}`",
+            f"- stale: `{plan.get('stale')}`",
+            f"- confidence: `{round(float(plan.get('confidence') or 0.0), 3)}`",
+            f"- items: `{len(items)}`",
+        ]
+        if plan.get("missing_data"):
+            lines.append(f"- missing_data: {list(plan.get('missing_data') or [])}")
+        for i in items[:10]:
+            vr = i.get("readme_validation") or {}
+            pol_hint = ""
+            if vr:
+                pol_hint = (
+                    f" priority_score={i.get('priority_score')} "
+                    f"policy_missing={vr.get('missing_sections')} policy_weak={vr.get('weak_sections')}"
+                )
+            lines.append(
+                f"- repo={i.get('repo')} file=`{i.get('doc_file')}` issue={i.get('issue_found')} "
+                f"update={i.get('recommended_update')} risk={i.get('risk_level')} "
+                f"approval_required={i.get('approval_required')} verify={i.get('suggested_verification')}"
+                f"{pol_hint}"
+            )
+        if not items:
+            lines.append("- No actionable plan items from current snapshot; refresh repo_pulse or request deeper scan.")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="docs_cleanup_plan",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse"],
+            fallback_reason=None,
+            final_answer_type="docs_cleanup_plan",
+            reply_preview=reply,
+            final_answer_source="prepared_context",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "docs_update_proposal":
+        from brain.repo_docs_maintainer import create_docs_update_proposal
+
+        proposal = create_docs_update_proposal(message=msg)
+        compat = proposal.get("approval_request_compatible") or {}
+        aid = submit(
+            ApprovalSpec(
+                file_path=str(compat.get("file_path") or "README.md"),
+                action_type=str(compat.get("action_type") or "write_docs_update"),
+                reason=str(compat.get("reason") or "repo docs update proposal"),
+                diff_preview=str(proposal.get("patch_preview") or "")[:4000],
+                risk_level=str(compat.get("risk_level") or "medium"),
+            )
+        )
+        lines = [
+            "### docs_update_proposal",
+            f"- title: {proposal.get('title')}",
+            f"- target_file: `{proposal.get('target_file')}`",
+            f"- reason: {proposal.get('reason')}",
+            f"- proposed_change_summary: {proposal.get('proposed_change_summary')}",
+            f"- issues: {proposal.get('issues') or []}",
+            f"- missing_sections: {proposal.get('missing_sections') or []}",
+            f"- proposed_sections_count: `{len(proposal.get('proposed_sections') or [])}`",
+            f"- approval_required: `{proposal.get('approval_required')}`",
+            f"- action_classification: `{proposal.get('action_classification')}`",
+            f"- approval_request_id: `{aid}`",
+            "- patch_preview:",
+            f"{proposal.get('patch_preview')}",
+            "- verification_steps:",
+        ]
+        for step in list(proposal.get("verification_steps") or []):
+            lines.append(f"  - {step}")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="docs_update_proposal",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse"],
+            fallback_reason=None,
+            final_answer_type="docs_update_proposal",
+            reply_preview=reply,
+            final_answer_source="proposal",
+        )
+        return {"reply": reply, "approval_request": {"id": aid}}
+
     if intent == "enqueue_approval":
         pending_prop = session_state.get_pending_proposal(session_id)
         path_str = ""
