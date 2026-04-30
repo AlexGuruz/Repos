@@ -1,0 +1,10 @@
+repo_activity:
+  enabled: true
+  repo_roots:
+    - E:/Repos/ai-lab
+  scan_depth: 2
+  include_file_samples: true
+  max_file_samples: 20
+  include_commit_subjects: true
+  max_commit_subjects: 20
+  since_hours: 24

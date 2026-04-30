@@ -15,6 +15,9 @@ email_sorter/gmail_portable/token.json
 # Local AI response traces (structured benchmarks; do not commit)
 state/ai_response_traces.jsonl
 state/live_work_orchestration/*.json
+state/live_work_orchestration/*.jsonl
+state/live_work_orchestration/ingestion/*.json
+state/live_work_orchestration/ingestion/*.jsonl
 !state/live_work_orchestration/fixtures/
 !state/live_work_orchestration/fixtures/**
 
