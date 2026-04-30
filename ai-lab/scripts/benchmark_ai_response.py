@@ -60,6 +60,13 @@ PROMPTS = [
     "validate repo documentation",
     "what sections are missing in docs?",
     "improve this repo documentation",
+    # Phase 8 — repo-level docs maintainer
+    "score repo documentation",
+    "give ai-lab docs a grade",
+    "make a repo docs workplan",
+    "check docs consistency",
+    "create a batch docs proposal",
+    "what docs should be updated together?",
     # Phase 5 — prepared-context selection paraphrases
     "anything broken?",
     "status of the lab",
@@ -271,6 +278,35 @@ def main() -> int:
         print(f"- validate_readme(README): {v_ms}ms (target <300ms per call)")
         print(f"- build_docs_cleanup_plan: {p_ms}ms (target <1000ms)")
         print(f"- create_docs_update_proposal: {prop_ms}ms (target <2000ms)")
+
+        from brain.repo_docs_repo_level import (
+            assess_repo_documentation,
+            build_repo_docs_workplan,
+            check_repo_docs_consistency,
+            create_repo_docs_batch_proposal,
+        )
+
+        t3 = time.perf_counter()
+        for _ in range(3):
+            assess_repo_documentation(ROOT)
+        s_ms = round((time.perf_counter() - t3) * 1000.0 / 3.0, 2)
+        t4 = time.perf_counter()
+        for _ in range(3):
+            check_repo_docs_consistency(ROOT)
+        c_ms = round((time.perf_counter() - t4) * 1000.0 / 3.0, 2)
+        t5 = time.perf_counter()
+        for _ in range(3):
+            build_repo_docs_workplan(ROOT)
+        w_ms = round((time.perf_counter() - t5) * 1000.0 / 3.0, 2)
+        t6 = time.perf_counter()
+        for _ in range(3):
+            create_repo_docs_batch_proposal(ROOT)
+        b_ms = round((time.perf_counter() - t6) * 1000.0 / 3.0, 2)
+        print("Phase 8 repo-level microbench (same env, mean ms / 3 runs on ai-lab root):")
+        print(f"- assess_repo_documentation: {s_ms}ms (target <500ms)")
+        print(f"- check_repo_docs_consistency: {c_ms}ms (target <1000ms)")
+        print(f"- build_repo_docs_workplan: {w_ms}ms (target <1000ms)")
+        print(f"- create_repo_docs_batch_proposal: {b_ms}ms (target <2000ms)")
     return 0
 
 

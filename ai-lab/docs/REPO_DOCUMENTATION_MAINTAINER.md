@@ -6,7 +6,8 @@ Provide a governed documentation-maintenance assistant role that:
 
 - inspects existing repo documentation freshness from prepared context (`repo_pulse`),
 - returns a prioritized docs cleanup plan,
-- drafts approval-gated documentation update proposals.
+- drafts approval-gated documentation update proposals,
+- (Phase 8) scores a **single repo** on disk, builds **multi-file workplans**, runs **consistency checks**, and drafts **batch** proposals—still read-only until a human approves execution.
 
 This role does **not** directly edit files.
 
@@ -29,6 +30,13 @@ This role does **not** directly edit files.
   - `prepare a docs update proposal`
   - `propose updates for stale repo docs`
   - `improve this repo documentation`
+- Repo-level (Phase 8) — resolves repo from message (`repo_pulse` name, **ai-lab** default, or a `D:\path` style path on Windows):
+  - `score repo documentation`
+  - `give ai-lab docs a grade`
+  - `make a repo docs workplan`
+  - `check docs consistency`
+  - `create a batch docs proposal`
+  - `what docs should be updated together?`
 
 ## Data sources
 
@@ -41,6 +49,21 @@ Secondary:
 - `state/prepared_context/system_snapshot.json` (freshness/system role context)
 
 No worker calls are required for normal status/plan/proposal turns.
+
+Phase 8 repo-level flows add **bounded local reads** under the resolved repo root (plus `repo_pulse` for freshness when the path matches a snapshot row).
+
+## Command Center read-only API (Phase 8)
+
+- `GET /api/repo-docs/status` — compact summary from `analyze_repo_docs_status()` (prepared context).
+- `GET /api/repo-docs/score?repo=…` — `assess_repo_documentation` for a named repo (default `ai-lab`).
+
+No write routes in this phase.
+
+## Repo scoring and workplans (Phase 8)
+
+See [`REPO_DOCUMENTATION_SCORING.md`](REPO_DOCUMENTATION_SCORING.md) for the scoring model, grades, workplan shape, consistency rules, and limitations.
+
+Implementation: `brain/repo_docs_repo_level.py` (`assess_repo_documentation`, `check_repo_docs_consistency`, `build_repo_docs_workplan`, `create_repo_docs_batch_proposal`).
 
 ## Policy and validation (Phase 7)
 
@@ -117,7 +140,6 @@ Returns:
 
 ## Future expansion
 
-- Add repo-scoped optional deep inspection mode (explicit user request only).
-- Deeper runbook/system-map coverage with explicit path hints from users.
-- Add command-center summary view if needed (read-only).
+- Deeper cross-package consistency (e.g. package.json script names vs README) behind explicit flags.
+- Optional caching of assessment keyed by README mtimes in prepared context.
 

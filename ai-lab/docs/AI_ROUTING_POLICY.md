@@ -29,6 +29,10 @@ This policy describes **how user messages should be routed** for speed and usefu
 | Lab / Command Center “current state” | `answer` + fast path | Ops + optional `ai-lab/README.md` | **No** | Same; README when path exists. |
 | Repo documentation **status** (doc + repo wording) | `answer` + fast path | `ai-lab/README.md` artifact | **No** | `routing_policy` doc+repo markers. |
 | Repo docs maintainer status/plan/proposal | `docs_status` / `docs_cleanup_plan` / `docs_update_proposal` | Prepared context (`repo_pulse`) | **No** (normal path) | `brain/repo_docs_maintainer.py` + orchestrator approval queue integration. |
+| Repo documentation **score / grade** (single repo on disk) | `repo_docs_score` | Local README + bounded `docs/**/*.md` + `repo_pulse` row when path matches | **No** | `brain/repo_docs_repo_level.py` → `assess_repo_documentation`; resolve repo from message (`router.py`). |
+| Repo documentation **consistency** (links, paths, duplicates) | `repo_docs_consistency` | Same bounded local scan | **No** | `check_repo_docs_consistency`. |
+| Repo documentation **multi-file workplan** | `repo_docs_workplan` | Assessment + consistency → ordered tasks | **No** | `build_repo_docs_workplan`. |
+| Repo documentation **batch proposal** (multi-file, approval-gated) | `repo_docs_batch_proposal` | Workplan-derived targets; **one** `ApprovalSpec` today | **No** | `create_repo_docs_batch_proposal` + orchestrator `submit()` — see follow-up below. |
 | Growflow “what changed / recent” (local README) | `answer` + fast path | `Growflow/README.md` when present | **No** | `routing_policy` growflow + change markers. |
 | Repo file / script questions | `repo_search` / `run_agent` | Repo index / cartographer | **Optional worker** | `router` + execution (`brain/execution.py`); worker index/retrieve intents per `router.py`. |
 | Heavy summarization over large corpora | `answer` or agent-specific | Evidence + LLM and/or **worker** | **Yes** when configured | Prefer worker when index is large; keep timeouts (see fix plan). |
@@ -57,3 +61,8 @@ Prepared-context usage is also traced via:
 - `avoided_retrieval`
 - `avoided_worker_call`
 - `final_answer_source`
+
+## Repo documentation maintainer — Phase 8+ follow-ups
+
+- **Batch approvals today:** `repo_docs_batch_proposal` enqueues a single approval card using a **primary** `file_path` and a **truncated JSON summary** in `diff_preview`. That is intentional for this phase and acceptable operationally.
+- **Future improvement:** **multi-file approval UI** with **per-file cards** (one row per affected path, expandable rationale, optional per-file approve/deny or grouped approve with file checklist). Until that exists, reviewers should read `diff_preview` and the chat reply’s `target_files` list before approving.

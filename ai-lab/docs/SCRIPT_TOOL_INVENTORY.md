@@ -24,7 +24,7 @@ Status legend: `wired` / `partial` / `orphan` / `deprecated` / `risky`.
 | `scripts/maintain_worker_tunnel.ps1` | keep ssh tunnel alive | scheduled task/manual | no | indirect (worker status visible) | yes | no | no | tunnel process/log output | wired |
 | `scripts/start_worker_tunnel.ps1` | start tunnel manually | manual | no | indirect | no | no | no | tunnel startup output | manual |
 | `scripts/check_worker_connectivity.py` | connectivity diagnostics | manual | no | no | no | no | no | stdout only | manual |
-| `scripts/benchmark_ai_response.py` | benchmark latency/usefulness | manual/CI-like audit | no | no | no | no | yes (doc update) | `docs/AI_RESPONSE_BENCHMARKS.md` | wired |
+| `scripts/benchmark_ai_response.py` | benchmark latency/usefulness | manual/CI-like audit | no | no | no | no | optional (`AI_LAB_BENCH_WRITE_DOC=1`) | stdout; optional `docs/AI_RESPONSE_BENCHMARKS.md` | wired |
 | `scripts/run_trace_sessions.py` | generate live traces | manual | no | no | no | no | yes | `state/ai_response_traces.jsonl` | partial |
 | `scripts/analyze_trace_sessions.py` | analyze traces | manual | no | no | no | no | no | stdout summary | partial |
 | `scripts/personal_ops_calendar_snapshot.py` | personal ops data pull | manual | no | indirectly via prepared snapshot | no | no | likely yes | script-defined outputs | partial |

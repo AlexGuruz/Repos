@@ -115,6 +115,16 @@ def classify_intent(message: str) -> tuple[str, dict]:
     if ("sales" in msg or "expenses" in msg or "payroll" in msg or "inventory" in msg) and any(w in msg for w in ("summary", "overview", "report", "how are we", "what's our", "our business")):
         return "company_bi", {}
 
+    # Repo Documentation Maintainer — Phase 8 (repo-level score / workplan / consistency / batch)
+    if any(w in msg for w in ("batch docs proposal", "create a batch docs proposal")):
+        return "repo_docs_batch_proposal", {}
+    if any(w in msg for w in ("repo docs workplan", "make a repo docs workplan", "what docs should be updated together")):
+        return "repo_docs_workplan", {}
+    if "check docs consistency" in msg or ("docs consistency" in msg and "check" in msg):
+        return "repo_docs_consistency", {}
+    if any(w in msg for w in ("score repo documentation", "documentation score", "docs a grade", "give ai-lab docs a grade")):
+        return "repo_docs_score", {}
+
     # Repo Documentation Maintainer (Phase 6–7)
     if any(w in msg for w in ("make a docs cleanup plan", "documentation cleanup plan", "plan documentation updates", "docs maintainer update first")):
         return "docs_cleanup_plan", {}

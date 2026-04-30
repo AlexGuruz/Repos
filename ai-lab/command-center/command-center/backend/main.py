@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings, verify_governance
 from core.ai_lab import AI_LAB_ROOT
-from routers import chat, events, guru, hardware, prepared_context, repo, repo_index, tools, workers
+from routers import chat, events, guru, hardware, live_work, prepared_context, repo, repo_docs, repo_index, tools, workers
 from services.nvidia_poller import nvidia_poll_loop
 from services.prepared_context_refresher import run_prepared_context_refresher
 from services.repo_watcher import start_watcher, stop_watcher, WATCH_PATHS
@@ -74,6 +74,8 @@ app.include_router(repo_index.router)
 app.include_router(tools.router)
 app.include_router(workers.router)
 app.include_router(prepared_context.router)
+app.include_router(repo_docs.router)
+app.include_router(live_work.router)
 
 
 @app.get("/api/llm-status")

@@ -35,7 +35,7 @@ For `intent == worker_health`, the orchestrator **tries prepared context first**
 
 ## Cadence
 
-Re-run `tests/test_prepared_context_selection.py` after changing hints. Optionally extend `scripts/benchmark_ai_response.py` prompts and regenerate `docs/AI_RESPONSE_BENCHMARKS.md` for latency tables.
+Re-run `tests/test_prepared_context_selection.py` after changing hints. Optionally extend `scripts/benchmark_ai_response.py` prompts; regenerate `docs/AI_RESPONSE_BENCHMARKS.md` only when committing a milestone snapshot (`AI_LAB_BENCH_WRITE_DOC=1`).
 
 ## Hard rules (unchanged)
 

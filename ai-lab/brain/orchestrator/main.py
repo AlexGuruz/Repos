@@ -719,6 +719,240 @@ def run(
         )
         return {"reply": reply, "approval_request": {"id": aid}}
 
+    if intent == "repo_docs_score":
+        from brain.repo_docs_repo_level import assess_repo_documentation, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = (
+                "### repo_documentation_score\n"
+                f"- error: `{err}`\n"
+                "- hint: name a repo from **repo_pulse**, include a repo path, or say **ai-lab** for this workspace."
+            )
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="repo_docs_score",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=0,
+                sources_used=[],
+                fallback_reason=err,
+                final_answer_type="repo_docs_score",
+                reply_preview=reply,
+                final_answer_source="local_docs_scan",
+            )
+            return {"reply": reply, "approval_request": None}
+
+        a = assess_repo_documentation(path, repo_id=rid)
+        lines = [
+            "### repo_documentation_score",
+            f"- repo_path: `{a.get('repo_path')}`",
+            f"- score: `{a.get('score_0_to_100')}` / 100",
+            f"- grade: `{a.get('grade')}`",
+            f"- risk_level: `{a.get('risk_level')}`",
+            f"- missing_docs: {a.get('missing_docs') or []}",
+            f"- invalid_docs: {len(a.get('invalid_docs') or [])} file(s)",
+            f"- consistency_issues: `{len(a.get('consistency_issues') or [])}`",
+            "- top_recommendations:",
+        ]
+        for r in (a.get("top_recommendations") or [])[:5]:
+            lines.append(f"  - {r}")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_score",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse", "local_readme_scan"],
+            fallback_reason=None,
+            final_answer_type="repo_docs_score",
+            reply_preview=reply,
+            final_answer_source="local_docs_scan",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "repo_docs_consistency":
+        from brain.repo_docs_repo_level import check_repo_docs_consistency, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = "### repo_docs_consistency\n" f"- error: `{err}`"
+        else:
+            c = check_repo_docs_consistency(path)
+            lines = [
+                "### repo_docs_consistency",
+                f"- repo_path: `{c.get('repo_path')}`",
+                f"- issue_count: `{len(c.get('issues') or [])}`",
+            ]
+            for it in (c.get("issues") or [])[:12]:
+                lines.append(
+                    f"- [{it.get('type')}] {it.get('source_file')}: {it.get('detail', it.get('reference'))}"
+                )
+            reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_consistency",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["local_docs_scan"],
+            fallback_reason=err if path is None else None,
+            final_answer_type="repo_docs_consistency",
+            reply_preview=reply,
+            final_answer_source="local_docs_scan",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "repo_docs_workplan":
+        from brain.repo_docs_repo_level import build_repo_docs_workplan, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = "### repo_docs_workplan\n" f"- error: `{err}`"
+        else:
+            wp = build_repo_docs_workplan(path, repo_id=rid)
+            tasks = list(wp.get("ordered_tasks") or [])
+            lines = [
+                "### repo_docs_workplan",
+                f"- repo_path: `{wp.get('repo_path')}`",
+                f"- task_count: `{len(tasks)}`",
+            ]
+            for t in tasks[:12]:
+                lines.append(
+                    f"- `{t.get('task_id')}` files={t.get('affected_files')} type={t.get('issue_type')} "
+                    f"effort={t.get('estimated_effort')} risk={t.get('risk_level')} approval_required={t.get('approval_required')}"
+                )
+            reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_workplan",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse", "local_docs_scan"],
+            fallback_reason=err if path is None else None,
+            final_answer_type="repo_docs_workplan",
+            reply_preview=reply,
+            final_answer_source="local_docs_scan",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "repo_docs_batch_proposal":
+        from brain.repo_docs_repo_level import create_repo_docs_batch_proposal, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = "### repo_docs_batch_proposal\n" f"- error: `{err}`"
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="repo_docs_batch_proposal",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=0,
+                sources_used=[],
+                fallback_reason=err,
+                final_answer_type="repo_docs_batch_proposal",
+                reply_preview=reply,
+                final_answer_source="proposal",
+            )
+            return {"reply": reply, "approval_request": None}
+
+        batch = create_repo_docs_batch_proposal(path, repo_id=rid)
+        targets = list(batch.get("target_files") or [])
+        primary = targets[0] if targets else str(path / "README.md")
+        preview = json.dumps(batch.get("proposed_changes") or [], ensure_ascii=False)[:3800]
+        aid = submit(
+            ApprovalSpec(
+                file_path=primary,
+                action_type="write_docs_update",
+                reason=f"batch docs proposal {batch.get('proposal_id')} ({len(targets)} files)",
+                diff_preview=preview,
+                risk_level=str(batch.get("risk_level") or "medium"),
+            )
+        )
+        lines = [
+            "### repo_docs_batch_proposal",
+            f"- proposal_id: `{batch.get('proposal_id')}`",
+            f"- target_files: {targets[:12]}{'…' if len(targets) > 12 else ''}",
+            f"- task_count: `{batch.get('task_count')}`",
+            f"- risk_level: `{batch.get('risk_level')}`",
+            f"- approval_required: `{batch.get('approval_required')}`",
+            f"- no_direct_write_performed: `{batch.get('no_direct_write_performed')}`",
+            f"- approval_request_id: `{aid}`",
+            "- verification_steps:",
+        ]
+        for step in list(batch.get("verification_steps") or []):
+            lines.append(f"  - {step}")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_batch_proposal",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["local_docs_scan"],
+            fallback_reason=None,
+            final_answer_type="repo_docs_batch_proposal",
+            reply_preview=reply,
+            final_answer_source="proposal",
+        )
+        return {"reply": reply, "approval_request": {"id": aid}}
+
     if intent == "enqueue_approval":
         pending_prop = session_state.get_pending_proposal(session_id)
         path_str = ""

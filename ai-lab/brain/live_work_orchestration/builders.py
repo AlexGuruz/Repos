@@ -1,0 +1,361 @@
+"""
+Snapshot builders for live work orchestration (Phase 9).
+
+Writes JSON under state/live_work_orchestration/. Read-only inputs from prepared context.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+from brain.prepared_context.schema import now_iso
+from brain.prepared_context.store import load_snapshot
+
+from brain.live_work_orchestration.workers import (
+    AsanaIntakeWorker,
+    CalendarIntakeWorker,
+    EmailDriveIntakeWorker,
+    LocalActivityWorker,
+    ProgressMonitorWorker,
+    RepoActivityWorker,
+    SlackIntakeWorker,
+    TimeConstraintWorker,
+    WorkDemandWorker,
+)
+
+
+def live_work_dir() -> Path:
+    root = Path(__file__).resolve().parents[2]
+    d = root / "state" / "live_work_orchestration"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _evidence(title: str, summary: str, path: str | None = None) -> dict[str, Any]:
+    return {
+        "title": title,
+        "summary": summary,
+        "source_path_or_tool": path,
+        "observed_at": now_iso(),
+        "confidence": 0.75,
+    }
+
+
+def _wrap(
+    snapshot_type: str,
+    *,
+    data: dict[str, Any],
+    missing_sources: list[str],
+    evidence_items: list[dict[str, Any]],
+    confidence: float,
+    sources: list[str],
+    summary_short: str,
+    summary_detailed: str,
+    errors: list[str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "snapshot_type": snapshot_type,
+        "generated_at": now_iso(),
+        "stale": False,
+        "confidence": float(confidence),
+        "source_files_or_tools": sources,
+        "missing_sources": missing_sources,
+        "errors": list(errors or []),
+        "data": data,
+        "summary_short": summary_short,
+        "summary_detailed": summary_detailed,
+        "evidence_items": evidence_items,
+        "suggested_questions": [],
+    }
+
+
+def _write(name: str, payload: dict[str, Any]) -> Path:
+    p = live_work_dir() / f"{name}.json"
+    p.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+    return p
+
+
+def build_work_demand_snapshot() -> dict[str, Any]:
+    missing: list[str] = []
+    sources: list[str] = ["prepared_context:project_agenda", "prepared_context:repo_pulse"]
+    pa = load_snapshot("project_agenda")
+    rp = load_snapshot("repo_pulse")
+    if not pa:
+        missing.append("project_agenda")
+    if not rp:
+        missing.append("repo_pulse")
+    demands: list[dict[str, Any]] = []
+    if isinstance(pa, dict):
+        d = pa.get("data") or {}
+        for i, line in enumerate((d.get("today_focus") or [])[:12]):
+            demands.append(
+                {
+                    "id": f"wd-today-{i}",
+                    "source": "project_agenda.today_focus",
+                    "confidence": 0.7 if not missing else 0.4,
+                    "observed_at": pa.get("generated_at", now_iso()),
+                    "created_at": now_iso(),
+                    "notes": str(line),
+                    "evidence": ["project_agenda"],
+                    "status": "open",
+                    "title": str(line),
+                    "project_hint": str(line),
+                }
+            )
+        for i, line in enumerate((d.get("next_actions") or [])[:12]):
+            demands.append(
+                {
+                    "id": f"wd-next-{i}",
+                    "source": "project_agenda.next_actions",
+                    "confidence": 0.65,
+                    "observed_at": pa.get("generated_at", now_iso()),
+                    "created_at": now_iso(),
+                    "notes": str(line),
+                    "evidence": ["project_agenda"],
+                    "status": "open",
+                    "title": str(line),
+                    "project_hint": "",
+                }
+            )
+    if isinstance(rp, dict):
+        for i, row in enumerate((rp.get("data") or {}).get("repos") or []):
+            if not isinstance(row, dict):
+                continue
+            if not row.get("readme_fresh") or row.get("stale"):
+                demands.append(
+                    {
+                        "id": f"wd-repo-{i}",
+                        "source": "repo_pulse",
+                        "confidence": 0.55,
+                        "observed_at": rp.get("generated_at", now_iso()),
+                        "created_at": now_iso(),
+                        "notes": f"Repo maintenance signal: {row.get('repo')}",
+                        "evidence": ["repo_pulse"],
+                        "status": "open",
+                        "title": f"Attention: {row.get('repo')}",
+                        "project_hint": str(row.get("repo") or ""),
+                    }
+                )
+    ev = [
+        _evidence("Work demand snapshot", f"{len(demands)} demand rows synthesized", "project_agenda"),
+    ]
+    snap = _wrap(
+        "work_demand_snapshot",
+        data={"demands": demands, "worker_probe": WorkDemandWorker().collect()},
+        missing_sources=missing,
+        evidence_items=ev,
+        confidence=0.72 if not missing else 0.45,
+        sources=sources,
+        summary_short=f"Work demands: {len(demands)} items (read-only)",
+        summary_detailed="Synthesized from project_agenda and repo_pulse only; external Asana/GitHub not queried in Phase 9.",
+    )
+    _write("work_demand_snapshot", snap)
+    return snap
+
+
+def build_time_constraints_snapshot() -> dict[str, Any]:
+    missing: list[str] = []
+    sources = ["prepared_context:personal_ops_snapshot", "prepared_context:system_snapshot"]
+    po = load_snapshot("personal_ops_snapshot")
+    ss = load_snapshot("system_snapshot")
+    if not po:
+        missing.append("personal_ops_snapshot")
+    if not ss:
+        missing.append("system_snapshot")
+    constraints: list[dict[str, Any]] = []
+    if isinstance(po, dict):
+        d = po.get("data") or {}
+        for i, ev in enumerate((d.get("calendar_today") or [])[:20]):
+            if not isinstance(ev, dict):
+                continue
+            constraints.append(
+                {
+                    "id": f"tc-cal-{i}",
+                    "source": "personal_ops.calendar_today",
+                    "confidence": 0.8,
+                    "observed_at": po.get("generated_at", now_iso()),
+                    "created_at": now_iso(),
+                    "notes": str(ev.get("summary") or ev),
+                    "evidence": ["personal_ops_snapshot"],
+                    "status": "open",
+                    "label": "calendar",
+                    "window_hint": str(ev.get("start") or ""),
+                }
+            )
+        if not constraints and not (d.get("calendar_today") or []):
+            constraints.append(
+                {
+                    "id": "tc-no-calendar",
+                    "source": "personal_ops",
+                    "confidence": 0.3,
+                    "observed_at": po.get("generated_at", now_iso()),
+                    "created_at": now_iso(),
+                    "notes": "No calendar events in snapshot; do not invent meetings.",
+                    "evidence": [],
+                    "status": "open",
+                    "label": "gap",
+                    "window_hint": "",
+                }
+            )
+    if isinstance(ss, dict):
+        constraints.append(
+            {
+                "id": "tc-system",
+                "source": "system_snapshot",
+                "confidence": 0.5,
+                "observed_at": ss.get("generated_at", now_iso()),
+                "created_at": now_iso(),
+                "notes": "System / ops context available for shift boundary hints only.",
+                "evidence": ["system_snapshot"],
+                "status": "open",
+                "label": "system",
+                "window_hint": "",
+            }
+        )
+    snap = _wrap(
+        "time_constraints_snapshot",
+        data={"constraints": constraints, "worker_probe": TimeConstraintWorker().collect()},
+        missing_sources=missing,
+        evidence_items=[_evidence("Time constraints", f"{len(constraints)} rows")],
+        confidence=0.68 if not missing else 0.42,
+        sources=sources,
+        summary_short=f"Time constraints: {len(constraints)} rows",
+        summary_detailed="Calendar + system snapshot only; no calendar writes.",
+    )
+    _write("time_constraints_snapshot", snap)
+    return snap
+
+
+def build_daily_progress_snapshot() -> dict[str, Any]:
+    sources = ["prepared_context:worker_snapshot", "prepared_context:repo_pulse", "workers:read_only_probe"]
+    missing: list[str] = []
+    ws = load_snapshot("worker_snapshot")
+    if not ws:
+        missing.append("worker_snapshot")
+    events: list[dict[str, Any]] = []
+    if isinstance(ws, dict):
+        events.append(
+            {
+                "id": "pe-worker",
+                "source": "worker_snapshot",
+                "confidence": 0.55,
+                "observed_at": ws.get("generated_at", now_iso()),
+                "created_at": now_iso(),
+                "notes": "Worker health / reachability summary (read-only).",
+                "evidence": ["worker_snapshot"],
+                "status": "done",
+                "metric": "worker_snapshot_loaded",
+            }
+        )
+    snap = _wrap(
+        "daily_progress_snapshot",
+        data={
+            "events": events,
+            "worker_probe": ProgressMonitorWorker().collect(),
+            "repo_probe": RepoActivityWorker().collect(),
+            "local_activity_probe": LocalActivityWorker().collect(),
+        },
+        missing_sources=missing,
+        evidence_items=[_evidence("Progress", f"{len(events)} events")],
+        confidence=0.6,
+        sources=sources,
+        summary_short="Daily progress stub from worker + repo probes",
+        summary_detailed="Local desktop activity deferred to Phase 11.",
+    )
+    _write("daily_progress_snapshot", snap)
+    return snap
+
+
+def build_communication_queue_snapshot() -> dict[str, Any]:
+    """No outbound messages — queue is empty unless future adapters enqueue drafts."""
+    snap = _wrap(
+        "communication_queue_snapshot",
+        data={
+            "items": [],
+            "probes": {
+                "slack": SlackIntakeWorker().collect(),
+                "asana": AsanaIntakeWorker().collect(),
+                "email_drive": EmailDriveIntakeWorker().collect(),
+            },
+        },
+        missing_sources=["slack_live_read", "asana_live_read", "gmail_api"],
+        evidence_items=[_evidence("Communication queue", "Empty — Phase 9 does not send Slack/Asana/email")],
+        confidence=0.9,
+        sources=["stubs_only"],
+        summary_short="Communication queue empty (read-only foundation)",
+        summary_detailed="Slack one-question queue and Asana routing will populate in Phase 10 with approvals.",
+    )
+    _write("communication_queue_snapshot", snap)
+    return snap
+
+
+def build_planning_gaps_snapshot() -> dict[str, Any]:
+    wd = load_snapshot("work_demand_snapshot")  # may not exist first run — use live dir file after build order
+    # This builder runs after others in build_all; still compute from prepared context
+    missing_inputs: list[dict[str, Any]] = []
+    inv_path = Path(__file__).resolve().parents[2] / "state" / "integration_inventory" / "summary.json"
+    if not inv_path.is_file():
+        missing_inputs.append(
+            {
+                "id": "gap-inv",
+                "source": "integration_inventory",
+                "confidence": 1.0,
+                "observed_at": now_iso(),
+                "created_at": now_iso(),
+                "notes": "integration_inventory summary not found",
+                "evidence": [],
+                "status": "open",
+                "gap_type": "integration_inventory_missing",
+            }
+        )
+    snap = _wrap(
+        "planning_gaps_snapshot",
+        data={"gaps": missing_inputs},
+        missing_sources=[g["gap_type"] for g in missing_inputs] if missing_inputs else [],
+        evidence_items=[_evidence("Planning gaps", f"{len(missing_inputs)} gap(s) reported, not guessed")],
+        confidence=0.85,
+        sources=["state/integration_inventory/summary.json"],
+        summary_short="Planning input gaps",
+        summary_detailed="Lists missing optional sources only; no fabricated tasks.",
+    )
+    _write("planning_gaps_snapshot", snap)
+    return snap
+
+
+def build_live_work_index() -> dict[str, Any]:
+    names = [
+        "work_demand_snapshot",
+        "time_constraints_snapshot",
+        "daily_progress_snapshot",
+        "communication_queue_snapshot",
+        "planning_gaps_snapshot",
+    ]
+    rows = []
+    for n in names:
+        p = live_work_dir() / f"{n}.json"
+        row = {"snapshot_type": n, "path": str(p), "exists": p.is_file()}
+        if p.is_file():
+            try:
+                d = json.loads(p.read_text(encoding="utf-8"))
+                row["generated_at"] = d.get("generated_at")
+                row["confidence"] = d.get("confidence")
+                row["stale"] = d.get("stale")
+            except Exception:
+                row["error"] = "read_failed"
+        rows.append(row)
+    payload = {"generated_at": now_iso(), "snapshots": rows, "live_work_orchestration_version": 9}
+    (live_work_dir() / "index.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return payload
+
+
+def build_all_live_work_snapshots() -> dict[str, Any]:
+    """Build all Phase 9 snapshots in dependency order."""
+    out: dict[str, Any] = {}
+    out["work_demand_snapshot"] = build_work_demand_snapshot()
+    out["time_constraints_snapshot"] = build_time_constraints_snapshot()
+    out["daily_progress_snapshot"] = build_daily_progress_snapshot()
+    out["communication_queue_snapshot"] = build_communication_queue_snapshot()
+    out["planning_gaps_snapshot"] = build_planning_gaps_snapshot()
+    out["index"] = build_live_work_index()
+    return out
