@@ -1,5 +1,5 @@
 """
-Snapshot builders for live work orchestration (Phase 9–11).
+Snapshot builders for live work orchestration (Phase 9–12).
 
 Writes JSON under state/live_work_orchestration/. Read-only inputs from prepared context.
 """
@@ -242,6 +242,7 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
         "prepared_context:repo_pulse",
         "workers:read_only_probe",
         "ingestion:repo_activity_snapshot",
+        "ingestion:github_activity_snapshot",
     ]
     missing: list[str] = []
     ws = load_snapshot("worker_snapshot")
@@ -250,6 +251,9 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
     repo_ingestion = _load_ingestion_snapshot("repo_activity_snapshot")
     if not repo_ingestion:
         missing.append("repo_activity_snapshot")
+    github_ingestion = _load_ingestion_snapshot("github_activity_snapshot")
+    if not github_ingestion:
+        missing.append("github_activity_snapshot")
     events: list[dict[str, Any]] = []
     if isinstance(ws, dict):
         events.append(
@@ -268,6 +272,9 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
         )
     repo_activity_rows: list[dict[str, Any]] = []
     repo_activity_events: list[dict[str, Any]] = []
+    github_feature_states: list[dict[str, Any]] = []
+    github_blockers: list[dict[str, Any]] = []
+    github_remote_summary: dict[str, Any] = {}
     if isinstance(repo_ingestion, dict):
         data = repo_ingestion.get("data") if isinstance(repo_ingestion.get("data"), dict) else {}
         repo_activity_rows = list(data.get("activity") or [])
@@ -289,6 +296,39 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
                 }
             )
             repo_activity_events.append(ev)
+    if isinstance(github_ingestion, dict):
+        g_data = github_ingestion.get("data") if isinstance(github_ingestion.get("data"), dict) else {}
+        github_feature_states = list(g_data.get("feature_states") or [])
+        github_remote_summary = dict(g_data.get("correlation_summary") or {})
+        for i, fs in enumerate(github_feature_states):
+            if not isinstance(fs, dict):
+                continue
+            blockers = list(fs.get("blockers") or [])
+            if blockers:
+                github_blockers.append(
+                    {
+                        "feature_name": fs.get("feature_name"),
+                        "repo_name": fs.get("repo_name"),
+                        "blockers": blockers,
+                    }
+                )
+            events.append(
+                {
+                    "id": f"pe-gh-{i}",
+                    "source": "github_activity_ingestion",
+                    "confidence": float(fs.get("confidence") or github_ingestion.get("confidence") or 0.6),
+                    "observed_at": str(github_ingestion.get("generated_at") or now_iso()),
+                    "created_at": now_iso(),
+                    "notes": (
+                        f"{fs.get('repo_name')}::{fs.get('feature_name')} stage={fs.get('rollout_stage')} "
+                        f"local={fs.get('local_activity_present')} blockers={len(blockers)}"
+                    ),
+                    "evidence": list(fs.get("evidence") or []),
+                    "status": "done",
+                    "metric": str(fs.get("rollout_stage") or "github_activity"),
+                    "source_type": "repo",
+                }
+            )
     snap = _wrap(
         "daily_progress_snapshot",
         data={
@@ -298,6 +338,9 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
             "repo_activity_ingestion_summary": (repo_ingestion or {}).get("data", {}).get("summary", {}),
             "repo_activity_rows": repo_activity_rows,
             "repo_activity_events": repo_activity_events,
+            "github_feature_states": github_feature_states,
+            "github_remote_summary": github_remote_summary,
+            "github_blockers": github_blockers,
             "local_activity_probe": LocalActivityWorker().collect(),
         },
         missing_sources=missing,
@@ -308,11 +351,16 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
                 f"{len(repo_activity_events)} repo activity signals",
                 "state/live_work_orchestration/ingestion/repo_activity_snapshot.json",
             ),
+            _evidence(
+                "GitHub activity ingestion",
+                f"{len(github_feature_states)} feature state signals",
+                "state/live_work_orchestration/ingestion/github_activity_snapshot.json",
+            ),
         ],
-        confidence=0.65 if repo_ingestion else 0.55,
+        confidence=0.72 if (repo_ingestion and github_ingestion) else (0.62 if repo_ingestion else 0.55),
         sources=sources,
-        summary_short=f"Daily progress: {len(events)} events with repo activity ingestion",
-        summary_detailed="Read-only progress combines worker probes and local git metadata ingestion; no completion assumptions.",
+        summary_short=f"Daily progress: {len(events)} events with local+GitHub ingestion",
+        summary_detailed="Read-only progress combines worker probes, local git metadata, and GitHub PR/issue states; no completion assumptions.",
     )
     _write("daily_progress_snapshot", snap)
     return snap
@@ -409,6 +457,7 @@ def build_live_work_index() -> dict[str, Any]:
         "planning_gaps_snapshot",
         "clickup_action_snapshot",
         "ingestion/repo_activity_snapshot",
+        "ingestion/github_activity_snapshot",
     ]
     rows = []
     for n in names:
@@ -423,17 +472,21 @@ def build_live_work_index() -> dict[str, Any]:
             except Exception:
                 row["error"] = "read_failed"
         rows.append(row)
-    payload = {"generated_at": now_iso(), "snapshots": rows, "live_work_orchestration_version": 11}
+    payload = {"generated_at": now_iso(), "snapshots": rows, "live_work_orchestration_version": 12}
     (live_work_dir() / "index.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
 
 
 def build_all_live_work_snapshots() -> dict[str, Any]:
-    """Build all Phase 9–11 snapshots in dependency order."""
+    """Build all Phase 9–12 snapshots in dependency order."""
     out: dict[str, Any] = {}
+    from brain.live_work_orchestration.ingestion.github_activity import build_github_activity_snapshot
     from brain.live_work_orchestration.ingestion.repo_activity import build_repo_activity_snapshot
 
     out["repo_activity_snapshot"] = build_repo_activity_snapshot()
+    out["github_activity_snapshot"] = build_github_activity_snapshot(
+        repo_activity_snapshot=out["repo_activity_snapshot"]
+    )
     out["work_demand_snapshot"] = build_work_demand_snapshot()
     out["time_constraints_snapshot"] = build_time_constraints_snapshot()
     out["daily_progress_snapshot"] = build_daily_progress_snapshot()

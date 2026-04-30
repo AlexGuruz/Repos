@@ -1,5 +1,5 @@
 """
-Read-only daily plan preview compiler (Phase 9–11).
+Read-only daily plan preview compiler (Phase 9–12).
 
 Does not create ClickUp tasks, post comments, update statuses, or write calendar events.
 """
@@ -71,6 +71,9 @@ def compile_daily_plan_preview(
     events = pr_data.get("events") or []
     repo_activity_rows = pr_data.get("repo_activity_rows") or []
     repo_activity_summary = pr_data.get("repo_activity_ingestion_summary") or {}
+    github_feature_states = pr_data.get("github_feature_states") or []
+    github_remote_summary = pr_data.get("github_remote_summary") or {}
+    github_blockers = pr_data.get("github_blockers") or []
     gap_list = (gaps.get("data") or {}).get("gaps") or []
 
     prio_lines = [str(d.get("title") or d.get("notes")) for d in demands[:8]]
@@ -94,6 +97,13 @@ def compile_daily_plan_preview(
             risk_lines.append(
                 "Planned vs actual mismatch signal: recent repo activity suggests work streams not explicitly listed in planned priorities."
             )
+    if github_blockers:
+        risk_lines.append(f"GitHub blockers detected: {len(github_blockers)} feature(s) have PR/issue blockers.")
+    ready_to_merge = len(
+        [x for x in github_feature_states if isinstance(x, dict) and str(x.get("rollout_stage")) == "ready_to_merge"]
+    )
+    if ready_to_merge:
+        risk_lines.append(f"{ready_to_merge} feature(s) appear ready to merge and may need review/merge attention.")
 
     today = " — ".join(prio_lines[:5]) if prio_lines else "(No prioritized items in work demand snapshot.)"
     before_shift = "Light prep: review top priorities and calendar blocks from snapshot only."
@@ -102,6 +112,13 @@ def compile_daily_plan_preview(
         during_shift += (
             " | Repo activity: "
             f"{repo_activity_summary.get('repos_with_activity', 0)}/{repo_activity_summary.get('repos_scanned', 0)} repos active"
+        )
+    if isinstance(github_remote_summary, dict):
+        during_shift += (
+            " | GitHub: "
+            f"{github_remote_summary.get('local_with_pr_match', 0)} matched, "
+            f"{github_remote_summary.get('local_without_pr', 0)} local w/o PR, "
+            f"{github_remote_summary.get('open_pr_without_local_activity', 0)} stale open PR"
         )
     after_shift = "Capture outcomes in repo/docs or personal ops digest when available (manual)."
     top_p = "\n".join(f"- {p}" for p in prio_lines) or "- (none)"

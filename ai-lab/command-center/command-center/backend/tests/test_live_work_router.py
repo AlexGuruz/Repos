@@ -55,3 +55,11 @@ def test_live_work_repo_activity_ingestion_endpoint(monkeypatch):
         r = _client().get("/api/live-work/ingestion/repo-activity")
     assert r.status_code == 200
     assert r.json()["snapshot_type"] == "repo_activity_snapshot"
+
+
+def test_live_work_github_activity_ingestion_endpoint(monkeypatch):
+    fake = {"ok": True, "snapshot_type": "github_activity_snapshot", "data": {"correlation_summary": {}}}
+    with patch("routers.live_work._github_activity_ingestion_sync", return_value=fake):
+        r = _client().get("/api/live-work/ingestion/github-activity")
+    assert r.status_code == 200
+    assert r.json()["snapshot_type"] == "github_activity_snapshot"

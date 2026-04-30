@@ -8,3 +8,16 @@ repo_activity:
   include_commit_subjects: true
   max_commit_subjects: 20
   since_hours: 24
+
+github_activity:
+  enabled: true
+  repos:
+    - owner: YOUR_ORG_OR_USER
+      name: ai-lab
+      local_path: E:/Repos/ai-lab
+  include_prs: true
+  include_issues: true
+  include_closed_recent: false
+  since_days: 14
+  stale_pr_days: 7
+  max_items_per_repo: 50

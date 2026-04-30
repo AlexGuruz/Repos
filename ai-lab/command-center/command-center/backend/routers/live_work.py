@@ -92,6 +92,20 @@ def _repo_activity_ingestion_sync() -> dict:
     }
 
 
+def _github_activity_ingestion_sync() -> dict:
+    return {
+        "ok": True,
+        **_json_file_or_default(
+            "ingestion/github_activity_snapshot.json",
+            {
+                "generated_at": None,
+                "snapshot_type": "github_activity_snapshot",
+                "data": {"prs": [], "issues": [], "feature_states": [], "correlation_summary": {}},
+            },
+        ),
+    }
+
+
 @router.get("/api/live-work/status")
 async def live_work_status():
     return await asyncio.to_thread(_status_sync)
@@ -115,3 +129,8 @@ async def live_work_clickup_preview():
 @router.get("/api/live-work/ingestion/repo-activity")
 async def live_work_repo_activity_ingestion():
     return await asyncio.to_thread(_repo_activity_ingestion_sync)
+
+
+@router.get("/api/live-work/ingestion/github-activity")
+async def live_work_github_activity_ingestion():
+    return await asyncio.to_thread(_github_activity_ingestion_sync)

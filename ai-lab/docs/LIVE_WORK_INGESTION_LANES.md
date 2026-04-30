@@ -2,26 +2,30 @@
 
 This document tracks ingestion lanes that feed `live_work_orchestration` progress and planning snapshots.
 
-## Phase 11 active lane
+## Active lanes
 
 - **Local repo activity** (`brain/live_work_orchestration/ingestion/repo_activity.py`)
   - Read-only lane based on local git metadata.
   - Writes `state/live_work_orchestration/ingestion/repo_activity_snapshot.json`.
   - Feeds `daily_progress_snapshot.json` via `builders.py`.
+- **GitHub PR / issue activity** (`brain/live_work_orchestration/ingestion/github_activity.py`)
+  - Read-only lane using existing connector/`gh`/fixtures.
+  - Writes `state/live_work_orchestration/ingestion/github_activity_snapshot.json`.
+  - Correlates local activity to PR lifecycle and emits `feature_states`.
 
 ## Purpose
 
-- Improve "what was actually worked on" signals without requiring network integrations.
+- Improve "what was actually worked on" signals and connect them to remote review/rollout truth.
 - Provide structured fields that are reusable in:
-  - Phase 12: GitHub PR ingestion
+  - Phase 12: GitHub PR/issue ingestion
   - Phase 13: timetable builder
 
-## Locked future lanes (not built in Phase 11)
+## Locked future lanes (not built yet)
 
-- GitHub PRs (Phase 12)
 - Timetable builder (Phase 13)
 - Email
 - Bank/Tiller
+- Drive/Gmail
 - ClickUp intake
 - Desktop monitoring
 
