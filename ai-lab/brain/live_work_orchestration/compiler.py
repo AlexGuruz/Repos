@@ -25,6 +25,71 @@ def _load_live_snapshot(name: str) -> dict[str, Any] | None:
         return None
 
 
+def _load_ingestion_snapshot(name: str) -> dict[str, Any] | None:
+    from brain.live_work_orchestration.builders import live_work_dir
+
+    p = live_work_dir() / "ingestion" / f"{name}.json"
+    if not p.is_file():
+        return None
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def generate_project_timetable(
+    *,
+    repo_activity_snapshot: dict[str, Any] | None = None,
+    github_activity_snapshot: dict[str, Any] | None = None,
+    daily_progress_snapshot: dict[str, Any] | None = None,
+    enqueue_clarifications: bool = False,
+) -> dict[str, Any]:
+    """
+    Build a project timetable with range-based estimates and guardrails.
+    Read-only by default; optional clarification queueing uses existing ClickUp queue only.
+    """
+    from brain.live_work_orchestration.timetable.estimation import estimate_feature_effort
+    from brain.live_work_orchestration.timetable.feature_model import build_feature_states
+    from brain.live_work_orchestration.timetable.guardrails import (
+        apply_estimation_guardrails,
+        generate_timetable_clarifications,
+    )
+    from brain.live_work_orchestration.timetable.timeline_builder import build_project_timetable
+
+    repo_snap = repo_activity_snapshot or _load_ingestion_snapshot("repo_activity_snapshot") or {}
+    gh_snap = github_activity_snapshot or _load_ingestion_snapshot("github_activity_snapshot") or {}
+    prog = daily_progress_snapshot or _load_live_snapshot("daily_progress_snapshot") or {}
+
+    feature_states = build_feature_states(repo_snap, gh_snap)
+    estimates = [apply_estimation_guardrails(fs, estimate_feature_effort(fs)) for fs in feature_states]
+    timetable = build_project_timetable(feature_states, estimates, prog)
+    clarifications = generate_timetable_clarifications(feature_states, estimates)
+
+    queued: list[dict[str, Any]] = []
+    if enqueue_clarifications and clarifications:
+        from brain.live_work_orchestration.clickup_queue import queue_clarification
+
+        for c in clarifications:
+            queued.append(
+                queue_clarification(
+                    message=str(c.get("message") or ""),
+                    reason=str(c.get("reason") or "timetable_clarification"),
+                    source="project_timetable",
+                    evidence=[str(c.get("feature_name") or ""), str(c.get("repo_name") or "")],
+                    target_list="Agent Clarifications",
+                )
+            )
+
+    return {
+        "feature_states": feature_states,
+        "estimates": estimates,
+        "timetable": timetable,
+        "clarifications": clarifications,
+        "queued_clarifications": queued,
+        "status": "read_only",
+    }
+
+
 def generate_clickup_action_recommendations(
     plan_preview: dict[str, Any],
     snapshots: dict[str, Any],
@@ -158,6 +223,12 @@ def compile_daily_plan_preview(
     proposed: list[dict[str, Any]] = []
     pending_clar: list[dict[str, Any]] = []
     rec: dict[str, Any] | None = None
+    timetable = generate_project_timetable(
+        repo_activity_snapshot=_load_ingestion_snapshot("repo_activity_snapshot"),
+        github_activity_snapshot=_load_ingestion_snapshot("github_activity_snapshot"),
+        daily_progress_snapshot=pr,
+        enqueue_clarifications=False,
+    )
     if include_action_recommendations:
         rec = generate_clickup_action_recommendations(
             plan_for_rec,
@@ -189,6 +260,9 @@ def compile_daily_plan_preview(
         pending_clarifications=pending_clar,
     )
     out = preview.to_dict()
+    out["project_timetable"] = timetable.get("timetable")
+    out["timetable_estimates"] = timetable.get("estimates")
+    out["timetable_clarifications"] = timetable.get("clarifications")
     if include_action_recommendations and rec is not None:
         out["clickup_action_recommendations"] = rec
     return out

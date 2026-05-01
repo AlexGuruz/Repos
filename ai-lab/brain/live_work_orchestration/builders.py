@@ -415,6 +415,25 @@ def build_clickup_action_snapshot() -> dict[str, Any]:
     return snap
 
 
+def build_timetable_snapshot() -> dict[str, Any]:
+    """Optional Phase 13 timetable snapshot derived from local + GitHub ingestion."""
+    from brain.live_work_orchestration.compiler import generate_project_timetable
+
+    payload = generate_project_timetable(enqueue_clarifications=False)
+    snap = _wrap(
+        "timetable_snapshot",
+        data=payload,
+        missing_sources=[],
+        evidence_items=[_evidence("Project timetable", "Range-based feature estimates with guardrails")],
+        confidence=0.7,
+        sources=["ingestion/repo_activity_snapshot.json", "ingestion/github_activity_snapshot.json"],
+        summary_short="Project timetable snapshot (read-only)",
+        summary_detailed="Guardrail-enforced ranges only; unknown when evidence is insufficient.",
+    )
+    _write("timetable_snapshot", snap)
+    return snap
+
+
 def build_planning_gaps_snapshot() -> dict[str, Any]:
     wd = load_snapshot("work_demand_snapshot")  # may not exist first run — use live dir file after build order
     # This builder runs after others in build_all; still compute from prepared context
@@ -458,6 +477,7 @@ def build_live_work_index() -> dict[str, Any]:
         "clickup_action_snapshot",
         "ingestion/repo_activity_snapshot",
         "ingestion/github_activity_snapshot",
+        "timetable_snapshot",
     ]
     rows = []
     for n in names:
@@ -493,5 +513,6 @@ def build_all_live_work_snapshots() -> dict[str, Any]:
     out["communication_queue_snapshot"] = build_communication_queue_snapshot()
     out["planning_gaps_snapshot"] = build_planning_gaps_snapshot()
     out["clickup_action_snapshot"] = build_clickup_action_snapshot()
+    out["timetable_snapshot"] = build_timetable_snapshot()
     out["index"] = build_live_work_index()
     return out
