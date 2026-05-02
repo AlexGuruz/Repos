@@ -123,13 +123,14 @@ def layer2_row(
     return row
 
 
-def cash_cycle_status_from_recovery_days(days: float | None) -> str | None:
+def cash_cycle_status_from_recovery_days(days: float | None, *, target_days: float = 14.0) -> str | None:
     """Cash discipline: implied COG recovery time at recent daily unit velocity."""
     if days is None or (isinstance(days, float) and (math.isnan(days) or math.isinf(days))):
         return None
-    if days <= 14.0:
+    td = max(float(target_days), 1e-9)
+    if days <= td:
         return "SAFE"
-    if days <= 21.0:
+    if days <= td * 1.5:
         return "WARNING"
     return "CAPITAL RISK"
 
@@ -154,6 +155,8 @@ def layer2_row_buy_plan(
     recent_gross_cents: int,
     recent_cog_cents: int,
     velocity_span_inclusive_days: int,
+    avg_units_per_day_override: float | None = None,
+    units_from_allocation_override: float | None = None,
     planner_score: float | None = None,
     cash_cycle_days: float = 14.0,
 ) -> dict[str, Any]:
@@ -209,7 +212,11 @@ def layer2_row_buy_plan(
         row["recovery_bucket"] = None
         return row
 
-    row["avg_units_per_week"] = recent_units_sold / velocity_weeks
+    if avg_units_per_day_override is not None and avg_units_per_day_override > 0:
+        row["avg_units_per_day"] = float(avg_units_per_day_override)
+        row["avg_units_per_week"] = float(avg_units_per_day_override) * 7.0
+    else:
+        row["avg_units_per_week"] = recent_units_sold / velocity_weeks
     row["avg_retail_per_unit"] = gross_usd / recent_units_sold
     row["avg_cog_per_unit"] = cog_usd / recent_units_sold if cog_usd > 0 else None
 
@@ -219,11 +226,15 @@ def layer2_row_buy_plan(
     # Annualize for legacy columns (52 weeks / 12 months)
     row["avg_units_per_month"] = (row["avg_units_per_week"] or 0) * (52.0 / 12.0)
 
-    row["units_from_allocation"] = allocated_cog_usd / row["avg_cog_per_unit"]
+    if units_from_allocation_override is not None and float(units_from_allocation_override) > 0:
+        row["units_from_allocation"] = float(units_from_allocation_override)
+    else:
+        row["units_from_allocation"] = allocated_cog_usd / row["avg_cog_per_unit"]
     upw = row["avg_units_per_week"]
     acu = row["avg_cog_per_unit"]
     if upw is not None and upw > 0 and acu is not None:
-        row["avg_units_per_day"] = float(upw) / 7.0
+        if row["avg_units_per_day"] is None:
+            row["avg_units_per_day"] = float(upw) / 7.0
         ad = row["avg_units_per_day"]
         if ad is not None and ad > 0:
             row["units_needed_7d"] = ad * 7.0
@@ -248,7 +259,9 @@ def layer2_row_buy_plan(
         wst = row["weeks_to_sell_through"]
         dod = row["days_of_inventory"]
         if dod is not None:
-            row["cash_cycle_status"] = cash_cycle_status_from_recovery_days(float(dod))
+            row["cash_cycle_status"] = cash_cycle_status_from_recovery_days(
+                float(dod), target_days=float(cash_cycle_days)
+            )
             row["cover_status"] = cover_status_from_days_of_cover(float(dod))
         mcap = row.get("max_cog_allowed_usd")
         if mcap is not None and float(mcap) > 0:

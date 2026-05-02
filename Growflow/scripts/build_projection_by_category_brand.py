@@ -1,16 +1,17 @@
 """
 Build a markdown projection for a fixed pool (default **$18k**).
 
-**Default (`--allocation-mode buy-plan`):** **cash-cycle** deployment: rank by score, allocate up to
-**`--cash-cycle-days`** (default **14**) of COG at **recent daily** unit burn per line — **no** over-cap
-remainder pass; **pool may stay unallocated**. Layer2 adds **demand windows** (7/14/21 d units) and
-**cover_status** (URGENT / THIN / HEALTHY / HEAVY) alongside **cash_cycle_status** (SAFE / WARNING / CAPITAL RISK).
+**Default (`--allocation-mode buy-plan`):** either **SKU-first receipt-aware** reorder (when transfer DB
++yield non-zero SKU targets: per-`Product.objectId` receipt + sell-through, then pool split proportional to
+SKU COG targets) or legacy **cash-cycle** deployment (rank by score, cap each line at **`--cash-cycle-days`**
+of COG at recent daily burn). Layer2 adds **demand windows** (7/14/21 d units) and **cover_status** alongside
+**cash_cycle_status** (SAFE / WARNING / CAPITAL RISK).
 
 **Limits (do not “prompt away”):** Grouping is **brand × format bucket** (inferred category), not
 validated `findProductCategories` / `findProducts`. Brand labels come from order-line `Product.Brand`,
 not a normalized `findBrands` join. **One order line = one unit** (no line qty from API). Package
-/pack-size realism and transfer-adjusted demand are **not** modeled until catalog + `findTransfers`
-are confirmed from an introspection-enabled or SDL-backed schema (see docs/GROWFLOW_PLANNER_DATA_MAPPING.md).
+/pack-size realism and optional on-hand shelf-out signals are still limited (see
+`docs/GROWFLOW_PLANNER_DATA_MAPPING.md`); SKU-first uses transfer receipt **Product.objectId** + order lines.
 
 Legacy modes: **`throughput`** (top-N monthly COG pace + proportional split) and **`gross-share`**
 (split every cell by trailing gross).
@@ -37,6 +38,7 @@ import re
 import sys
 import time
 from collections import defaultdict
+from statistics import median
 import time as time_module
 from datetime import date, datetime, timedelta, timezone
 from datetime import time as dt_time
@@ -82,6 +84,43 @@ from lib.projection_layer2_recovery import (
     layer2_row_buy_plan,
     usable_cog_cents,
 )
+from lib.projection_sku_reorder import build_sku_pre_scale_buy
+
+
+def _load_latest_received_at_by_product_object_id(db_path: Path) -> dict[str, datetime]:
+    """
+    Read latest transfer receipt timestamp per Product.objectId from transfer receipts SQLite DB.
+
+    Source table: product_landed_cost_current (rebuilt by scripts/build_transfer_receipts_db.py).
+    Returns UTC-aware datetimes.
+    """
+    if not db_path.is_file():
+        return {}
+    conn = sqlite3.connect(str(db_path))
+    try:
+        cur = conn.execute(
+            "SELECT product_object_id, received_at FROM product_landed_cost_current "
+            "WHERE product_object_id IS NOT NULL AND TRIM(product_object_id) != '' "
+            "AND received_at IS NOT NULL AND TRIM(received_at) != ''"
+        )
+        out: dict[str, datetime] = {}
+        for pid, recv in cur.fetchall():
+            k = str(pid or "").strip()
+            s = str(recv or "").strip()
+            if not k or not s:
+                continue
+            try:
+                dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            except Exception:
+                continue
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            out[k] = dt.astimezone(timezone.utc)
+        return out
+    except sqlite3.Error:
+        return {}
+    finally:
+        conn.close()
 
 
 def _load_latest_unit_cost_cents_by_product_object_id(db_path: Path) -> dict[str, int]:
@@ -118,6 +157,60 @@ def _load_latest_unit_cost_cents_by_product_object_id(db_path: Path) -> dict[str
         return out
     except sqlite3.Error:
         # Missing DB/table or incompatible schema; fall back to line COG.
+        return {}
+    finally:
+        conn.close()
+
+
+def _load_latest_receipt_snapshot_by_product_object_id(db_path: Path) -> dict[str, dict[str, Any]]:
+    """
+    Read latest receipt snapshot from product_landed_cost_current.
+
+    Returns mapping:
+      product_object_id -> {
+        "received_at": UTC-aware datetime,
+        "original_qty": int | None,
+        "unit_cost_cents": int | None,
+      }
+    """
+    if not db_path.is_file():
+        return {}
+    conn = sqlite3.connect(str(db_path))
+    try:
+        cur = conn.execute(
+            "SELECT product_object_id, received_at, original_qty, unit_cost_cents "
+            "FROM product_landed_cost_current "
+            "WHERE product_object_id IS NOT NULL AND TRIM(product_object_id) != '' "
+            "AND received_at IS NOT NULL AND TRIM(received_at) != ''"
+        )
+        out: dict[str, dict[str, Any]] = {}
+        for pid, recv, oq, ucc in cur.fetchall():
+            k = str(pid or "").strip()
+            if not k:
+                continue
+            try:
+                dt = datetime.fromisoformat(str(recv).replace("Z", "+00:00"))
+            except Exception:
+                continue
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            oq_i: int | None
+            try:
+                oq_i = int(oq) if oq is not None else None
+            except Exception:
+                oq_i = None
+            ucc_i: int | None
+            try:
+                ucc_i = int(round(float(ucc))) if ucc is not None else None
+            except Exception:
+                ucc_i = None
+            out[k] = {
+                "received_at": dt.astimezone(timezone.utc),
+                "original_qty": oq_i if oq_i is None or oq_i > 0 else None,
+                "unit_cost_cents": ucc_i if ucc_i is None or ucc_i >= 0 else None,
+            }
+        return out
+    except sqlite3.Error:
         return {}
     finally:
         conn.close()
@@ -289,6 +382,9 @@ def allocate_buy_plan_pool(
     pair_gross_recent: dict[tuple[str, str], int],
     pair_cog_recent: dict[tuple[str, str], int],
     velocity_span_days: int,
+    pair_units_per_day_recent: dict[tuple[str, str], float] | None = None,
+    pair_cycle_target_units: dict[tuple[str, str], float] | None = None,
+    pair_cycle_unit_cost_cents: dict[tuple[str, str], int] | None = None,
     *,
     min_units_per_week: float,
     max_funded_rows: int,
@@ -323,7 +419,10 @@ def allocate_buy_plan_pool(
             continue
         gross_usd = g / 100.0
         cog_usd = c / 100.0
-        upw = u / velocity_weeks
+        if pair_units_per_day_recent and k in pair_units_per_day_recent:
+            upw = float(pair_units_per_day_recent[k]) * 7.0
+        else:
+            upw = u / velocity_weeks
         if upw < min_units_per_week:
             continue
         avg_cog = cog_usd / u
@@ -369,17 +468,45 @@ def allocate_buy_plan_pool(
             continue
         cog_usd = c / 100.0
         avg_cog = cog_usd / u
-        upw = u / velocity_weeks
-        avg_units_per_day = float(upw) / 7.0
+        if pair_cycle_target_units and k in pair_cycle_target_units:
+            target_units = max(0.0, float(pair_cycle_target_units[k]))
+            if pair_cycle_unit_cost_cents and k in pair_cycle_unit_cost_cents:
+                uc = max(0, int(pair_cycle_unit_cost_cents[k]))
+                max_cents_by_k[k] = int(math.ceil(target_units) * uc)
+            else:
+                max_cents_by_k[k] = int(round(target_units * avg_cog * 100.0))
+            continue
+        if pair_units_per_day_recent and k in pair_units_per_day_recent:
+            avg_units_per_day = float(pair_units_per_day_recent[k])
+        else:
+            upw = u / velocity_weeks
+            avg_units_per_day = float(upw) / 7.0
         max_units = avg_units_per_day * float(cash_cycle_days)
         max_cents_by_k[k] = int(round(max_units * avg_cog * 100.0))
 
-    remaining = pool_cents
-    for k in top_keys:
-        cap = max(0, max_cents_by_k.get(k, 0))
-        give = min(cap, remaining)
-        out[k] = give
-        remaining -= give
+    remaining = int(pool_cents)
+    cap_left: dict[tuple[str, str], int] = {k: max(0, int(max_cents_by_k.get(k, 0))) for k in top_keys}
+    active = [k for k in top_keys if cap_left.get(k, 0) > 0]
+    while remaining > 0 and active:
+        weights = [max(float(scores.get(k, 0.0)), 1e-6) for k in active]
+        tranche = allocate_pool_cents_largest_remainder(remaining, weights)
+        progressed = False
+        for i, k in enumerate(active):
+            want = int(tranche[i])
+            if want <= 0:
+                continue
+            give = min(want, cap_left[k], remaining)
+            if give <= 0:
+                continue
+            out[k] += give
+            cap_left[k] -= give
+            remaining -= give
+            progressed = True
+            if remaining <= 0:
+                break
+        if not progressed:
+            break
+        active = [k for k in active if cap_left.get(k, 0) > 0]
 
     return out, scores
 
@@ -397,6 +524,10 @@ def allocate_for_mode(
     pair_gross_recent: dict[tuple[str, str], int],
     pair_cog_recent: dict[tuple[str, str], int],
     velocity_span: int,
+    pair_units_per_day_recent: dict[tuple[str, str], float] | None = None,
+    pair_cycle_target_units: dict[tuple[str, str], float] | None = None,
+    pair_cycle_unit_cost_cents: dict[tuple[str, str], int] | None = None,
+    sku_pre_scale_cents: dict[tuple[str, str], int] | None = None,
     *,
     min_units_per_week: float,
     buy_plan_max_rows: int,
@@ -407,6 +538,35 @@ def allocate_for_mode(
     """Same pool $ and keys; mode selects allocation rule (for main run or --compare-modes)."""
     planner_scores: dict[tuple[str, str], float] = {}
     if mode == "buy-plan":
+        tot_sku = 0
+        if sku_pre_scale_cents:
+            tot_sku = sum(int(sku_pre_scale_cents.get(k, 0)) for k in keys)
+        if sku_pre_scale_cents and tot_sku > 0:
+            out: dict[tuple[str, str], int] = {k: 0 for k in keys}
+            eligible: list[tuple[tuple[str, str], int]] = []
+            for k in keys:
+                pc = int(sku_pre_scale_cents.get(k, 0))
+                if pc <= 0:
+                    continue
+                upw = (
+                    float(pair_units_per_day_recent.get(k, 0.0)) * 7.0
+                    if pair_units_per_day_recent
+                    else 0.0
+                )
+                if upw < float(min_units_per_week):
+                    continue
+                if int(pair_units_recent.get(k, 0)) <= 0:
+                    continue
+                eligible.append((k, pc))
+            eligible.sort(key=lambda x: -x[1])
+            eligible = eligible[: max(1, int(buy_plan_max_rows))]
+            if eligible:
+                rk = [t[0] for t in eligible]
+                weights = [float(sku_pre_scale_cents[k]) for k in rk]
+                alloc = allocate_pool_cents_largest_remainder(pool_cents, weights)
+                for i, k in enumerate(rk):
+                    out[k] = int(alloc[i])
+                return out, planner_scores
         pair_pool, planner_scores = allocate_buy_plan_pool(
             pool_cents,
             keys,
@@ -414,6 +574,9 @@ def allocate_for_mode(
             pair_gross_recent,
             pair_cog_recent,
             velocity_span,
+            pair_units_per_day_recent=pair_units_per_day_recent,
+            pair_cycle_target_units=pair_cycle_target_units,
+            pair_cycle_unit_cost_cents=pair_cycle_unit_cost_cents,
             min_units_per_week=float(min_units_per_week),
             max_funded_rows=max(1, int(buy_plan_max_rows)),
             min_allocated_cents=min_allocated_cents,
@@ -447,11 +610,13 @@ def build_layer2_rows_list(
     pair_gross_recent: dict[tuple[str, str], int],
     pair_cog_recent: dict[tuple[str, str], int],
     velocity_span: int,
+    pair_units_per_day_recent: dict[tuple[str, str], float] | None,
     pair_units: dict[tuple[str, str], int],
     pair_gross: dict[tuple[str, str], int],
     pair_cog: dict[tuple[str, str], int],
     span_inclusive_days: int,
     cash_cycle_days: float = CASH_CYCLE_DAYS_DEFAULT,
+    pair_buy_units_override: dict[tuple[str, str], float] | None = None,
 ) -> list[tuple[str, str, int, dict]]:
     rows: list[tuple[str, str, int, dict]] = []
     for k in keys:
@@ -460,12 +625,23 @@ def build_layer2_rows_list(
             continue
         buck, br = k
         if mode == "buy-plan":
+            uov = None
+            if pair_buy_units_override and k in pair_buy_units_override:
+                v = pair_buy_units_override.get(k)
+                if v is not None and float(v) > 0:
+                    uov = float(v)
             m = layer2_row_buy_plan(
                 allocated_cog_usd=ac / 100.0,
                 recent_units_sold=int(pair_units_recent.get(k, 0)),
                 recent_gross_cents=int(pair_gross_recent.get(k, 0)),
                 recent_cog_cents=int(pair_cog_recent.get(k, 0)),
                 velocity_span_inclusive_days=velocity_span,
+                avg_units_per_day_override=(
+                    float(pair_units_per_day_recent.get(k))
+                    if pair_units_per_day_recent and k in pair_units_per_day_recent
+                    else None
+                ),
+                units_from_allocation_override=uov,
                 planner_score=planner_scores.get(k),
                 cash_cycle_days=float(cash_cycle_days),
             )
@@ -921,8 +1097,9 @@ def append_what_buying_plan_does(
     keys: list[tuple[str, str]],
     pair_pool: dict[tuple[str, str], int],
     layer2_rows: list[tuple[str, str, int, dict]],
+    sku_first: bool = False,
 ) -> None:
-    """Plain-English decision section for buy-plan mode (cash-cycle capped)."""
+    """Plain-English decision section for buy-plan mode (cash-cycle capped or SKU-first)."""
     funded = [k for k in keys if pair_pool.get(k, 0) > 0]
     n_funded = len(funded)
     top_share = 0.0
@@ -936,30 +1113,53 @@ def append_what_buying_plan_does(
             slow_weeks += 1
     L("## What this buying plan does")
     L("")
-    L(
-        f"- **Intent:** A **velocity-driven deployment** idea for **{_usd(pool_cents)}** — **not** a historical "
-        "share-of-sales report and **not** exact SKU purchase orders. Inactive or low-velocity lines are filtered out "
-        "and get **$0**."
-    )
-    L(
-        f"- **Recent demand:** Velocity uses the last **{velocity_span}** store-local days only; "
-        f"a line must average **≥ {min_upw:g}** units/week in that window (and have usable COG) to qualify."
-    )
-    L(
-        f"- **Cash rule:** No line receives more COG than **{cash_cycle_days:g} day(s)** of sales at **recent daily** unit "
-        "velocity. Allocator walks **score order** and assigns up to that cap per line until the **pool** or **candidates** "
-        "run out. **No** extra pass piles dollars past the cap — leftover budget may stay **unallocated**."
-    )
+    if sku_first:
+        L(
+            f"- **Intent:** A **SKU-first reorder** deployment for **{_usd(pool_cents)}**: each funded "
+            "**Product.objectId** line uses its own latest transfer receipt and sell-through since receipt; "
+            "brand×category dollars are the **sum of SKU targets**, then the pool is **split in proportion** to those targets "
+            "(still **not** a vendor PO line list until you map SKUs to packs)."
+        )
+        L(
+            f"- **Recent demand:** Sell-through since receipt is measured from the receipt anchor through the last "
+            f"**{velocity_span}** store-local days; a brand×category row must still average **≥ {min_upw:g}** units/week "
+            "in that window to receive pool dollars."
+        )
+        L(
+            f"- **Sizing:** Per-SKU targets use the same **{cash_cycle_days:g}-day** shelf horizon for fast sell-through "
+            "as the buy-plan cash knob; slow movers do not shrink fast movers because math is **per product**, not blended."
+        )
+    else:
+        L(
+            f"- **Intent:** A **velocity-driven deployment** idea for **{_usd(pool_cents)}** — **not** a historical "
+            "share-of-sales report and **not** exact SKU purchase orders. Inactive or low-velocity lines are filtered out "
+            "and get **$0**."
+        )
+        L(
+            f"- **Recent demand:** Velocity uses the last **{velocity_span}** store-local days only; "
+            f"a line must average **≥ {min_upw:g}** units/week in that window (and have usable COG) to qualify."
+        )
+        L(
+            f"- **Cash rule:** No line receives more COG than **{cash_cycle_days:g} day(s)** of sales at **recent daily** unit "
+            "velocity. Allocator walks **score order** and assigns up to that cap per line until the **pool** or **candidates** "
+            "run out. **No** extra pass piles dollars past the cap — leftover budget may stay **unallocated**."
+        )
     if remaining_pool_unallocated_usd > 0.01:
         L(
             f"- **Unused pool this run:** **${remaining_pool_unallocated_usd:,.2f}** — all eligible lines hit their "
             f"**{cash_cycle_days:g}-day** COG ceiling before the full budget was placed."
         )
-    L(
-        f"- **Concentration:** At most **{max_funded_rows}** qualifying lines can receive funding; "
-        f"ranked by score (weekly units, weekly COG $ pace, revenue per $1 COG). **{n_funded}** lines received "
-        "dollars this run."
-    )
+    if sku_first:
+        L(
+            f"- **Concentration:** At most **{max_funded_rows}** brand×category rows receive pool dollars, chosen by "
+            f"**SKU-derived target COG** (highest targets first). **{n_funded}** lines received dollars this run."
+        )
+    else:
+        L(
+            f"- **Concentration:** At most **{max_funded_rows}** qualifying lines can receive funding; "
+            f"ranked by score (weekly units, weekly COG $ pace, revenue per $1 COG). **{n_funded}** lines received "
+            "dollars this run."
+        )
     if top_share > 0:
         L(f"- **Largest single line** absorbs about **{top_share:.0f}%** of **deployed** dollars.")
     slow_cash = sum(
@@ -1204,6 +1404,31 @@ def _usd(cents: int) -> str:
     return f"${cents / 100:,.2f}"
 
 
+def _parse_min_units_overrides(raw_values: list[str]) -> dict[tuple[str, str], int]:
+    """
+    Parse repeated --min-units-override "Brand|Category|Units" args.
+    """
+    out: dict[tuple[str, str], int] = {}
+    for raw in raw_values:
+        s = str(raw or "").strip()
+        if not s:
+            continue
+        parts = [p.strip() for p in s.split("|")]
+        if len(parts) != 3:
+            continue
+        br, buck, units_s = parts
+        if not br or not buck:
+            continue
+        try:
+            u = int(float(units_s))
+        except Exception:
+            continue
+        if u < 0:
+            continue
+        out[(buck, br)] = u
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Category x brand projection markdown (Growflow API)")
     ap.add_argument(
@@ -1289,6 +1514,34 @@ def main() -> int:
         help="Buy-plan: store-local days for recent velocity (default 49 ≈ 7 weeks); capped by --days.",
     )
     ap.add_argument(
+        "--velocity-anchor",
+        choices=("window-start", "receipt-aware"),
+        default="window-start",
+        help=(
+            "How buy-plan velocity starts per product. "
+            "window-start = legacy behavior (same trailing window for all rows). "
+            "receipt-aware = per product, velocity starts at max(window-start, latest transfer receipt date)."
+        ),
+    )
+    ap.add_argument(
+        "--cycle-growth-sensitivity",
+        type=float,
+        default=0.50,
+        help="Receipt-aware cycle model: fraction of sell-through overage applied as growth to next receipt units.",
+    )
+    ap.add_argument(
+        "--cycle-shrink-sensitivity",
+        type=float,
+        default=0.60,
+        help="Receipt-aware cycle model: fraction of under-sell applied as reduction to next receipt units.",
+    )
+    ap.add_argument(
+        "--cycle-discontinue-ratio",
+        type=float,
+        default=0.30,
+        help="Receipt-aware cycle model: if sold/receipt <= this ratio, recommendation can drop to 0 (discontinue).",
+    )
+    ap.add_argument(
         "--min-units-per-week",
         type=float,
         default=3.0,
@@ -1348,6 +1601,15 @@ def main() -> int:
         default="strict",
         help="Validation gateway mode (strict fail-closed by default).",
     )
+    ap.add_argument(
+        "--min-units-override",
+        action="append",
+        default=[],
+        help=(
+            "Repeatable floor override for buy-plan cycle targets at brand/category grain. "
+            "Format: 'Brand|Category|Units' (example: \"Stoner's Extracts|Disposables|100\")."
+        ),
+    )
     args = ap.parse_args()
 
     _load_config_flags()
@@ -1355,6 +1617,7 @@ def main() -> int:
     creds = args.growflow_credentials or _credentials_path()
     pool_cents = int(round(float(args.pool) * 100.0))
     excluded_cf = parse_brand_exclusions(args.exclude_brands)
+    min_units_override = _parse_min_units_overrides(list(args.min_units_override or []))
 
     report_end_local = datetime.now(tz).date()
     report_start_local = report_end_local - timedelta(days=args.days - 1)
@@ -1371,18 +1634,47 @@ def main() -> int:
     pair_units_recent: dict[tuple[str, str], int] = defaultdict(int)
     pair_gross_recent: dict[tuple[str, str], int] = defaultdict(int)
     pair_cog_recent: dict[tuple[str, str], int] = defaultdict(int)
+    pair_units_per_day_recent: dict[tuple[str, str], float] = defaultdict(float)
 
     landed_unit_cost: dict[str, int] = {}
+    latest_receipt_snapshot: dict[str, dict[str, Any]] = {}
     landed_mode = str(args.landed_cog or "auto").strip().lower()
     if landed_mode not in ("off", "auto", "prefer"):
         landed_mode = "auto"
     if landed_mode != "off":
         # auto: only enable if DB exists and the table is readable
-        landed_unit_cost = _load_latest_unit_cost_cents_by_product_object_id(Path(args.transfer_receipts_db))
+        latest_receipt_snapshot = _load_latest_receipt_snapshot_by_product_object_id(Path(args.transfer_receipts_db))
+        landed_unit_cost = {
+            pid: int(v["unit_cost_cents"])
+            for pid, v in latest_receipt_snapshot.items()
+            if isinstance(v.get("unit_cost_cents"), int)
+        }
         if landed_mode == "auto" and not landed_unit_cost:
             landed_mode = "off"
     landed_overrides = 0
     landed_seen = 0
+    latest_received_by_product: dict[str, datetime] = {}
+    velocity_anchor_effective = str(args.velocity_anchor)
+    if str(args.velocity_anchor) == "receipt-aware":
+        if not latest_receipt_snapshot:
+            latest_receipt_snapshot = _load_latest_receipt_snapshot_by_product_object_id(Path(args.transfer_receipts_db))
+        latest_received_by_product = {
+            pid: v["received_at"]
+            for pid, v in latest_receipt_snapshot.items()
+            if isinstance(v.get("received_at"), datetime)
+        }
+        if not latest_received_by_product:
+            velocity_anchor_effective = "window-start"
+            print(
+                "NOTE: --velocity-anchor receipt-aware requested, but no transfer receipt anchors found; "
+                "falling back to window-start.",
+                flush=True,
+            )
+    # For receipt-aware mode, compute per-(bucket,brand,product) units and denominators.
+    prod_units_recent: dict[tuple[tuple[str, str], str], int] = defaultdict(int)
+    prod_den_days_recent: dict[tuple[tuple[str, str], str], int] = {}
+    prod_units_since_receipt: dict[tuple[tuple[str, str], str], int] = defaultdict(int)
+    pair_cycle_unit_cost_samples: dict[tuple[str, str], list[int]] = defaultdict(list)
 
     oi_query = ORDER_ITEMS_QUERY
     seen: set[str] = set()
@@ -1457,7 +1749,31 @@ def main() -> int:
                         cog_line = int(ucc)
                         landed_overrides += 1
             pair_cog[key_bc] += cog_line
-            if ld >= recent_start_local:
+            include_recent = False
+            if velocity_anchor_effective == "receipt-aware":
+                prod = n.get("Product") if isinstance(n.get("Product"), dict) else {}
+                pid = str(prod.get("objectId") or "").strip() or "(no_product_id)"
+                anchor_local = recent_start_local
+                recv_dt = latest_received_by_product.get(pid)
+                if recv_dt is not None:
+                    recv_local = recv_dt.astimezone(tz).date()
+                    if recv_local > anchor_local:
+                        anchor_local = recv_local
+                if ld >= anchor_local:
+                    include_recent = True
+                    pkey = (key_bc, pid)
+                    prod_units_recent[pkey] += 1
+                    prod_units_since_receipt[pkey] += 1
+                    snap = latest_receipt_snapshot.get(pid) if latest_receipt_snapshot else None
+                    if isinstance(snap, dict) and isinstance(snap.get("unit_cost_cents"), int):
+                        pair_cycle_unit_cost_samples[key_bc].append(int(snap["unit_cost_cents"]))
+                    if pkey not in prod_den_days_recent:
+                        den = (report_end_local - anchor_local).days + 1
+                        prod_den_days_recent[pkey] = max(1, den)
+            else:
+                include_recent = ld >= recent_start_local
+
+            if include_recent:
                 pair_units_recent[key_bc] += 1
                 pair_gross_recent[key_bc] += gp
                 pair_cog_recent[key_bc] += cog_line
@@ -1466,6 +1782,80 @@ def main() -> int:
             biweek_by_brand[bidx][b] += gp
 
     total_fmt = sum(pair_gross.values())
+    if velocity_anchor_effective == "receipt-aware":
+        # Sum product-level per-day rates into each brand×bucket row.
+        for (key_bc, _pid), units in prod_units_recent.items():
+            den = int(prod_den_days_recent.get((key_bc, _pid), max(1, velocity_span)))
+            pair_units_per_day_recent[key_bc] += float(units) / float(max(1, den))
+    else:
+        for k, u in pair_units_recent.items():
+            pair_units_per_day_recent[k] = float(u) / float(max(1, velocity_span))
+    pair_sku_pre_cents: dict[tuple[str, str], int] = {}
+    pair_sku_pre_units: dict[tuple[str, str], int] = {}
+    if args.allocation_mode == "buy-plan" and velocity_anchor_effective == "receipt-aware" and latest_receipt_snapshot:
+        pair_sku_pre_cents, pair_sku_pre_units = build_sku_pre_scale_buy(
+            prod_units_since_receipt=prod_units_since_receipt,
+            prod_den_days_recent=prod_den_days_recent,
+            latest_receipt_snapshot=latest_receipt_snapshot,
+            velocity_span=velocity_span,
+            growth_sensitivity=float(args.cycle_growth_sensitivity),
+            shrink_sensitivity=float(args.cycle_shrink_sensitivity),
+            discontinue_ratio=float(args.cycle_discontinue_ratio),
+            shelf_days=float(args.cash_cycle_days),
+            on_hand_by_product_id=None,
+        )
+        if min_units_override:
+            for k, min_u in min_units_override.items():
+                pu = int(pair_sku_pre_units.get(k, 0))
+                pc = int(pair_sku_pre_cents.get(k, 0))
+                avg_uc = pc // pu if pu > 0 else 0
+                need = max(0, int(min_u) - pu)
+                if need > 0 and avg_uc > 0:
+                    pair_sku_pre_units[k] = pu + need
+                    pair_sku_pre_cents[k] = pc + need * int(avg_uc)
+
+    pair_cycle_target_units: dict[tuple[str, str], float] = {}
+    pair_cycle_unit_cost_cents: dict[tuple[str, str], int] = {}
+    _sku_pre_total = sum(int(pair_sku_pre_cents.get(k, 0)) for k in pair_sku_pre_cents) if pair_sku_pre_cents else 0
+    if (
+        args.allocation_mode == "buy-plan"
+        and velocity_anchor_effective == "receipt-aware"
+        and _sku_pre_total <= 0
+    ):
+        for (key_bc, pid), sold_u in prod_units_since_receipt.items():
+            snap = latest_receipt_snapshot.get(pid) if latest_receipt_snapshot else None
+            receipt_qty = int(snap.get("original_qty")) if isinstance(snap, dict) and snap.get("original_qty") else None
+            if receipt_qty is None or receipt_qty <= 0:
+                pair_cycle_target_units[key_bc] = pair_cycle_target_units.get(key_bc, 0.0) + float(max(0, sold_u))
+                continue
+            ratio = float(sold_u) / float(receipt_qty)
+            if ratio <= float(args.cycle_discontinue_ratio):
+                target_u = 0.0
+            elif ratio >= 1.0:
+                growth = 1.0 + float(args.cycle_growth_sensitivity) * (ratio - 1.0)
+                target_u = float(receipt_qty) * growth
+            else:
+                shrink = 1.0 - float(args.cycle_shrink_sensitivity) * (1.0 - ratio)
+                target_u = float(receipt_qty) * max(0.0, shrink)
+            if ratio >= 0.95:
+                den_days = int(prod_den_days_recent.get((key_bc, pid), max(1, velocity_span)))
+                daily_prod = float(sold_u) / float(max(1, den_days))
+                demand_target = daily_prod * float(args.cash_cycle_days)
+                if demand_target > target_u:
+                    target_u = demand_target
+            pair_cycle_target_units[key_bc] = pair_cycle_target_units.get(key_bc, 0.0) + max(0.0, float(target_u))
+        for k, vals in pair_cycle_unit_cost_samples.items():
+            if not vals:
+                continue
+            try:
+                pair_cycle_unit_cost_cents[k] = int(round(float(median(vals))))
+            except Exception:
+                continue
+        if min_units_override:
+            for k, min_u in min_units_override.items():
+                curr = float(pair_cycle_target_units.get(k, 0.0))
+                if float(min_u) > curr:
+                    pair_cycle_target_units[k] = float(min_u)
     validation = validate_and_normalize(
         metric_id="projection_by_category_brand",
         template_id="order_items_projection_buy_plan_v1",
@@ -1517,6 +1907,10 @@ def main() -> int:
         pair_gross_recent,
         pair_cog_recent,
         velocity_span,
+        pair_units_per_day_recent=pair_units_per_day_recent,
+        pair_cycle_target_units=pair_cycle_target_units,
+        pair_cycle_unit_cost_cents=pair_cycle_unit_cost_cents,
+        sku_pre_scale_cents=pair_sku_pre_cents,
         min_units_per_week=float(args.min_units_per_week),
         buy_plan_max_rows=max(1, int(args.buy_plan_max_rows)),
         min_allocated_cents=min_cents,
@@ -1543,6 +1937,22 @@ def main() -> int:
             return 1
         print("WARNING:", issues, flush=True)
 
+    pair_buy_units_override: dict[tuple[str, str], float] = {}
+    if pair_sku_pre_cents and sum(int(pair_sku_pre_cents.get(k, 0)) for k in keys) > 0:
+        for k in keys:
+            ac = int(pair_pool.get(k, 0))
+            pu = int(pair_sku_pre_units.get(k, 0))
+            pc = int(pair_sku_pre_cents.get(k, 0))
+            if ac > 0 and pu > 0 and pc > 0:
+                pair_buy_units_override[k] = float(ac) * float(pu) / float(pc)
+
+    buy_plan_sku_first_active = (
+        args.allocation_mode == "buy-plan"
+        and velocity_anchor_effective == "receipt-aware"
+        and bool(pair_sku_pre_cents)
+        and sum(int(pair_sku_pre_cents.get(k, 0)) for k in pair_sku_pre_cents) > 0
+    )
+
     layer2_rows: list[tuple[str, str, int, dict]] = []
     if not args.no_layer2:
         layer2_rows = build_layer2_rows_list(
@@ -1554,11 +1964,13 @@ def main() -> int:
             pair_gross_recent,
             pair_cog_recent,
             velocity_span,
+            pair_units_per_day_recent,
             pair_units,
             pair_gross,
             pair_cog,
             span_inclusive_days,
             cash_cycle_days=float(args.cash_cycle_days),
+            pair_buy_units_override=pair_buy_units_override or None,
         )
 
     remaining_pool_unallocated_usd = max(0.0, (pool_cents - sum_alloc_cents) / 100.0)
@@ -1613,12 +2025,21 @@ def main() -> int:
     L(f"- **Pool:** **{_usd(pool_cents)}** total")
     L(f"- **Allocation mode:** **{args.allocation_mode}**")
     if args.allocation_mode == "buy-plan":
-        L(
-            f"- **Buy plan (cash cycle):** **≤ {float(args.cash_cycle_days):g} day(s)** COG recovery per line at recent daily burn; "
-            f"score-ranked fill until pool or caps exhausted. Recent velocity = last **{velocity_span}** days (~**{velocity_span / 7.0:.1f} wks**); "
-            f"require **≥ {float(args.min_units_per_week):g}** avg units/week; **≤ {int(args.buy_plan_max_rows)}** candidate lines. "
-            f"**Deployed:** **{_usd(sum_alloc_cents)}**; **unused:** **${remaining_pool_unallocated_usd:,.2f}** if caps bind first."
-        )
+        if buy_plan_sku_first_active:
+            L(
+                f"- **Buy plan (SKU-first, receipt-aware):** reorder targets are built **per Product.objectId** from "
+                f"latest transfer receipt + sell-through since receipt (fast SKUs not averaged with slow siblings); "
+                f"the **{_usd(pool_cents)}** pool is split **in proportion to those SKU-derived COG targets** among "
+                f"eligible brand×category rows (min **{float(args.min_units_per_week):g}** units/week; top **{int(args.buy_plan_max_rows)}** by target). "
+                f"**Deployed:** **{_usd(sum_alloc_cents)}**; **unused:** **${remaining_pool_unallocated_usd:,.2f}**."
+            )
+        else:
+            L(
+                f"- **Buy plan (cash cycle):** **≤ {float(args.cash_cycle_days):g} day(s)** COG recovery per line at recent daily burn; "
+                f"score-ranked fill until pool or caps exhausted. Recent velocity = last **{velocity_span}** days (~**{velocity_span / 7.0:.1f} wks**); "
+                f"require **≥ {float(args.min_units_per_week):g}** avg units/week; **≤ {int(args.buy_plan_max_rows)}** candidate lines. "
+                f"**Deployed:** **{_usd(sum_alloc_cents)}**; **unused:** **${remaining_pool_unallocated_usd:,.2f}** if caps bind first."
+            )
     elif args.allocation_mode == "throughput":
         n_top = int(args.pool_top_n) if int(args.pool_top_n) > 0 else 15
         L(
@@ -1680,11 +2101,21 @@ def main() -> int:
         f"- **velocity_window_days_run (CSV column):** `{velocity_span}` for **buy-plan** (recent velocity); "
         f"`{span_inclusive_days}` for **throughput** / **gross-share** (full `--days` window underlying layer2 trailing metrics)."
     )
+    if args.allocation_mode == "buy-plan":
+        L(
+            f"- **velocity_anchor:** `{velocity_anchor_effective}` "
+            "(receipt-aware uses max(window-start, latest transfer receipt date per Product.objectId))."
+        )
+        L(
+            f"- **buy_plan_engine:** `{'sku_pre_scale' if buy_plan_sku_first_active else 'score_capped_velocity'}` "
+            "(SKU-first uses `lib/projection_sku_reorder.py` when receipt data + sell-through produce non-zero targets)."
+        )
     L("")
     L(
         "**Caveats:** Product/category/brand accuracy is limited to order-line and title-inference rules until "
         "`findProducts` / `findProductCategories` / `findBrands` are validated. Units ≈ order-line count (not pack qty). "
-        "Transfers are not modeled — see `docs/GROWFLOW_PLANNER_DATA_MAPPING.md`."
+        "Receipt-aware SKU costs come from the transfer receipts SQLite DB when enabled; optional `findPackages` on-hand "
+        "feeds for shelf-out boosts are not wired in this script yet — see `docs/GROWFLOW_PLANNER_DATA_MAPPING.md`."
     )
     L("")
     if args.allocation_mode == "buy-plan" and layer2_rows:
@@ -1699,6 +2130,7 @@ def main() -> int:
             keys=keys,
             pair_pool=pair_pool,
             layer2_rows=layer2_rows,
+            sku_first=buy_plan_sku_first_active,
         )
     L("## How to read this")
     L("")
@@ -1918,6 +2350,7 @@ def main() -> int:
                 pair_gross_recent,
                 pair_cog_recent,
                 velocity_span,
+                pair_units_per_day_recent=pair_units_per_day_recent,
                 min_units_per_week=float(args.min_units_per_week),
                 buy_plan_max_rows=max(1, int(args.buy_plan_max_rows)),
                 min_allocated_cents=min_cents,
@@ -1933,6 +2366,7 @@ def main() -> int:
                 pair_gross_recent,
                 pair_cog_recent,
                 velocity_span,
+                pair_units_per_day_recent,
                 pair_units,
                 pair_gross,
                 pair_cog,

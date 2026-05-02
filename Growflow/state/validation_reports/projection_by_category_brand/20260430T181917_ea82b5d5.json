@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "metric_id": "projection_by_category_brand",
+  "template_id": "order_items_projection_buy_plan_v1",
+  "request_id": "20260430T181917_ea82b5d5",
+  "mode": "warning",
+  "requested_date_range": {
+    "from": "2026-04-10T05:00:00Z",
+    "to": "2026-05-01T04:59:59.999999Z"
+  },
+  "response_date_range_detected": {
+    "from": "2026-04-10T00:16:02.892000Z",
+    "to": "2026-04-30T17:37:18.964000Z"
+  },
+  "expected_root_found": true,
+  "missing_required_fields": [],
+  "type_errors": [],
+  "empty_result_status": "ok",
+  "duplicate_count": 0,
+  "sanity_warnings": [],
+  "target_alignment_warnings": [
+    "Response contains rows earlier than requested date range."
+  ],
+  "parser_warnings": [],
+  "schema_drift_warnings": [],
+  "schema_verification": {
+    "baseline_exists": false,
+    "drift": null,
+    "baseline_updated": false,
+    "schema_drift_warnings": []
+  },
+  "normalized_row_count": 2843,
+  "confidence": "medium",
+  "confidence_score": 0.935,
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "ProductCategory.Name": "confirmed",
+    "COG": "inferred",
+    "Product.Brand.Name": "unstable",
+    "Product.objectId": "confirmed",
+    "SKU": "inferred"
+  },
+  "field_confidence_counts": {
+    "confirmed": 5,
+    "inferred": 2,
+    "unstable": 1
+  },
+  "hard_failures": [],
+  "raw_saved_path": "E:\\Repos\\Growflow\\state\\raw_responses\\projection_by_category_brand\\20260430T181917_ea82b5d5.json",
+  "normalized_output_path": "E:\\Repos\\Growflow\\state\\trusted_outputs\\projection_by_category_brand\\20260430T181917_ea82b5d5.json",
+  "generated_at": "2026-04-30T18:19:18Z"
+}

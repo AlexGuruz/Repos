@@ -1,0 +1,4954 @@
+{
+  "data": {
+    "findTransfers": {
+      "nodes": [
+        {
+          "objectId": "LLgUZY9HTD",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-28T17:29:41.000Z",
+          "createdAt": "2026-04-28T17:29:50.965Z",
+          "updatedAt": "2026-04-28T17:32:31.361Z",
+          "FromName": "710 Empire LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "CspjZvPO8L",
+              "SKU": "274365112",
+              "OriginalQty": 69,
+              "CurrentQty": 69,
+              "Cost": 129375,
+              "Product": {
+                "objectId": "07S5AQOJV0",
+                "Name": "PP 3.5g (I) INTERSTELLAR",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "YcjPln1crO",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-28T14:15:21.000Z",
+          "createdAt": "2026-04-28T14:15:41.186Z",
+          "updatedAt": "2026-04-28T14:19:38.833Z",
+          "FromName": "710 Empire LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "A9rukFeA7S",
+              "SKU": "274353561",
+              "OriginalQty": 101,
+              "CurrentQty": 101,
+              "Cost": 161600,
+              "Product": {
+                "objectId": "W6cYzibyXw",
+                "Name": "PP 3.5G (H) BANANA DADDY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "GXWq8rvzaS",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-23T22:03:31.000Z",
+          "createdAt": "2026-04-23T22:13:37.907Z",
+          "updatedAt": "2026-04-28T17:29:52.290Z",
+          "FromName": "Operating Mfg, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "dKs6kLanWX",
+              "SKU": "273950055",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "WO1SbzXAAd",
+                "Name": "NK 100 MG FULL SPEC GUMMIES (H) CHERRY APPLE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "NATURE'S KEY"
+                }
+              }
+            },
+            {
+              "objectId": "nlv8jrQCMY",
+              "SKU": "273951072",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "PTExCP8JOQ",
+                "Name": "NK 100MG FULL SPEC GUMMIES (H) BLUEBERRY PEACH",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "SbNd2z7cjR",
+              "SKU": "273951593",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "xkvNResrpR",
+                "Name": "NK 2000MG FULL SPEC NANO GUMMIES (I) GRAPE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "NATURE'S KEY"
+                }
+              }
+            },
+            {
+              "objectId": "euvgRnTFr8",
+              "SKU": "273951618",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "d6iM08pApL",
+                "Name": "NK 2000MG FULL SPEC NANO GUMMIES (S) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "NATURE'S KEY"
+                }
+              }
+            },
+            {
+              "objectId": "VtAzA2ozvV",
+              "SKU": "273951791",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 30000,
+              "Product": {
+                "objectId": "hyru7SMdaN",
+                "Name": "NK 6000MG FULL SPEC NANO GUMMY VARIETY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "NATURE'S KEY"
+                }
+              }
+            },
+            {
+              "objectId": "tIjbWP0hwv",
+              "SKU": "273952247",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "fPnhHBgQzk",
+                "Name": "EK 1G LIVE RESIN DISPOSABLE (H) BUBBLEGUM BISCOTTI",
+                "SKU": null,
+                "Brand": {
+                  "Name": "EARTHKEY EXTRACTS"
+                }
+              }
+            },
+            {
+              "objectId": "VM7sRfyU8b",
+              "SKU": "273952283",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "q1dyNDDUzG",
+                "Name": "EK 1G LIVE RESIN DISPOSABLE (S) PURPLE GELONADE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "EARTHKEY EXTRACTS"
+                }
+              }
+            },
+            {
+              "objectId": "WYEM5VaNAH",
+              "SKU": "273952482",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "mFXuAebX1k",
+                "Name": "EK 1G LIVE RESIN DISPOSABLE (I) ZEREALZ",
+                "SKU": null,
+                "Brand": {
+                  "Name": "EARTHKEY EXTRACTS"
+                }
+              }
+            },
+            {
+              "objectId": "G8vKewF7Th",
+              "SKU": "273952862",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "IGfSGsS1MS",
+                "Name": "NK 100MG 25:5 VEGAN GUMMIES (H) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "NATURE'S KEY"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "WEvXNxUwnp",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-23T20:45:11.000Z",
+          "createdAt": "2026-04-23T20:45:26.671Z",
+          "updatedAt": "2026-04-28T14:15:42.450Z",
+          "FromName": "710 Empire LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "IhEc1NosqZ",
+              "SKU": "273944807",
+              "OriginalQty": 97,
+              "CurrentQty": 97,
+              "Cost": 213400,
+              "Product": {
+                "objectId": "QbUOY7DcSk",
+                "Name": "PP 3.5G (I) BAKERS MAN",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            },
+            {
+              "objectId": "YmFGOY7Mmh",
+              "SKU": "273944871",
+              "OriginalQty": 102,
+              "CurrentQty": 102,
+              "Cost": 163200,
+              "Product": {
+                "objectId": "SgURBAUDMQ",
+                "Name": "PP 3.5G (S) MIMOSA EVO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "PAc58JGxM0",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-21T19:23:21.000Z",
+          "createdAt": "2026-04-21T19:23:40.153Z",
+          "updatedAt": "2026-04-28T17:29:52.754Z",
+          "FromName": "Clone To Grown, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "648c5RtPLB",
+              "SKU": "273773768",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 24000,
+              "Product": {
+                "objectId": "GgL7IobE6C",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (H) KIMBO KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "in1rt0GguM",
+              "SKU": "273773993",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 18000,
+              "Product": {
+                "objectId": "mSqeOFZCsT",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (H) NORTHERN WONDER",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "sMHYnDoXDh",
+              "SKU": "273774086",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 24000,
+              "Product": {
+                "objectId": "sCpoIEFKbl",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (H) SCARFACE OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "SCNATL0WKn",
+              "SKU": "273774438",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 24000,
+              "Product": {
+                "objectId": "X2cSoGujPQ",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (I) JELLY ROLL",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "zsUUvKlhtu",
+              "SKU": "273774627",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 24000,
+              "Product": {
+                "objectId": "uQvXROQ1f4",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (I) PANHANDLE PURPS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "d0LrcrAhWv",
+              "SKU": "273774694",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 18000,
+              "Product": {
+                "objectId": "UiR6S0Bo26",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (S) APRICOT JELLY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "iHzSGDgtAp",
+              "SKU": "273774864",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 2400,
+              "Product": {
+                "objectId": "31KsRYPsnY",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (S) DREAM'N SOUR",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "O5ciZBtkVM",
+              "SKU": "273774920",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "GAKET9CHUM",
+                "Name": "CARTEL 3G LIVE RESIN DISPO (H) CATARACT KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "qms1Y7YRy8",
+              "SKU": "273775419",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "WnD6TUbhj8",
+                "Name": "CARTEL 3G LIVE RES DISPO (I) COMATOSE OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "qoZPrDJi8D",
+              "SKU": "273775533",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 20000,
+              "Product": {
+                "objectId": "IgSd2Yf7C6",
+                "Name": "CARTEL 3G LIVE RES DISPO (I) GHOST RIDER OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "KqnHgt9vFt",
+              "SKU": "273775621",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "4GeuBABTPR",
+                "Name": "CARTEL 3G LIVE RES DISPO (I) MARTIAN MUFFINS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "AMbwKMWLpL",
+              "SKU": "273775714",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "zrZsVmZIpI",
+                "Name": "CARTEL 3G LIVE RES DISPO (I) MELLOW FELLOW",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "5CL5X6zjYy",
+              "SKU": "273775828",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "VIzlSDQvjy",
+                "Name": "CARTEL 3G LIVE RES DISPO (S) DIESEL DRIFT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "FqpJa0q724",
+              "SKU": "273775906",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "xg7MU1YiVl",
+                "Name": "CARTEL 3G LIVE RES DISPO (S) MEGALODON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "t6mn3snVzI",
+              "SKU": "273775995",
+              "OriginalQty": 13,
+              "CurrentQty": 13,
+              "Cost": 15600,
+              "Product": {
+                "objectId": "31KsRYPsnY",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (S) DREAM'N SOUR",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "9dGVX5A0EC",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-20T22:17:19.000Z",
+          "createdAt": "2026-04-20T22:17:29.605Z",
+          "updatedAt": "2026-04-28T14:15:43.671Z",
+          "FromName": "710 Empire LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "YbCMy7t5eG",
+              "SKU": "273830518",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 51200,
+              "Product": {
+                "objectId": "W6cYzibyXw",
+                "Name": "PP 3.5G (H) BANANA DADDY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            },
+            {
+              "objectId": "wVOsivWKi0",
+              "SKU": "273831853",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 51200,
+              "Product": {
+                "objectId": "RkFfz6k5SH",
+                "Name": "PP 3.5G (I) BANANA PUNCH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "eX9lQ6zfaI",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-20T19:26:01.000Z",
+          "createdAt": "2026-04-20T19:28:36.781Z",
+          "updatedAt": "2026-04-28T14:15:43.322Z",
+          "FromName": "710 Empire LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "fyFXwU02bT",
+              "SKU": "273681302",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 89600,
+              "Product": {
+                "objectId": "07S5AQOJV0",
+                "Name": "PP 3.5g (I) INTERSTELLAR",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            },
+            {
+              "objectId": "ZzufgQjBc2",
+              "SKU": "273681446",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 70400,
+              "Product": {
+                "objectId": "QbUOY7DcSk",
+                "Name": "PP 3.5G (I) BAKERS MAN",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            },
+            {
+              "objectId": "HZwaVaiyp4",
+              "SKU": "273681524",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 51200,
+              "Product": {
+                "objectId": "NJR6fg2lEu",
+                "Name": "PP 3.5G (I) BLACK CHERRY GELATO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            },
+            {
+              "objectId": "3G1Loc8JEx",
+              "SKU": "273681528",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 102400,
+              "Product": {
+                "objectId": "WBDqgTgw4C",
+                "Name": "PP 3.5G (I) MADE IN HEAVEN",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            },
+            {
+              "objectId": "e7DgIAcFmg",
+              "SKU": "273681658",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 51200,
+              "Product": {
+                "objectId": "SgURBAUDMQ",
+                "Name": "PP 3.5G (S) MIMOSA EVO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Puffin Pure"
+                }
+              }
+            },
+            {
+              "objectId": "jTqxBT9dPF",
+              "SKU": "273681638",
+              "OriginalQty": 43,
+              "CurrentQty": 43,
+              "Cost": 21543,
+              "Product": {
+                "objectId": "JZgUYfD2kA",
+                "Name": "RR 3.5G (S) LEMON GAS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "ROOTED RIGHT FARMS"
+                }
+              }
+            },
+            {
+              "objectId": "lVa4TEHxot",
+              "SKU": "273681653",
+              "OriginalQty": 44,
+              "CurrentQty": 44,
+              "Cost": 22044,
+              "Product": {
+                "objectId": "25K9C9vndS",
+                "Name": "RR 3.5G (I) Z NERDS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "ROOTED RIGHT FARMS"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "GmlVtPCixI",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-20T14:53:42.000Z",
+          "createdAt": "2026-04-20T15:29:23.671Z",
+          "updatedAt": "2026-04-28T14:15:44.030Z",
+          "FromName": "710 Empire LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "0DKXMIypm7",
+              "SKU": "273666764",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10020,
+              "Product": {
+                "objectId": "JZgUYfD2kA",
+                "Name": "RR 3.5G (S) LEMON GAS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "ROOTED RIGHT FARMS"
+                }
+              }
+            },
+            {
+              "objectId": "WWDwOu7MLE",
+              "SKU": "273666788",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10020,
+              "Product": {
+                "objectId": "UMrEDGVNKp",
+                "Name": "RR 3.5G (H) SUPER BOOF",
+                "SKU": null,
+                "Brand": {
+                  "Name": "ROOTED RIGHT FARMS"
+                }
+              }
+            },
+            {
+              "objectId": "lJ9nvlWxQg",
+              "SKU": "273666798",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10020,
+              "Product": {
+                "objectId": "25K9C9vndS",
+                "Name": "RR 3.5G (I) Z NERDS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "ROOTED RIGHT FARMS"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "Q85AAMBNPt",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-18T23:13:57.000Z",
+          "createdAt": "2026-04-18T23:14:57.002Z",
+          "updatedAt": "2026-04-20T22:17:31.947Z",
+          "FromName": "Big Country Investment Group Corp.",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "Pg62XMJW0s",
+              "SKU": "273521834",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5,
+              "Product": {
+                "objectId": "PJeRwa2kjE",
+                "Name": "BC CC 0.5G INFU PREROLL (H) BERRIES H",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "V5aFOF46OR",
+              "SKU": "273521901",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5,
+              "Product": {
+                "objectId": "NK8gIyW2uf",
+                "Name": "BC CC 0.5G INFU PREROLL (S) STRAWBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "BKnG6QZfD0",
+              "SKU": "273521950",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5,
+              "Product": {
+                "objectId": "jiBPqXGjrI",
+                "Name": "BC CC 0.5G INFU PREROLL (I) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "1pyvBda09P",
+              "SKU": "273521961",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 2,
+              "Product": {
+                "objectId": "uYl8sU3Aer",
+                "Name": "BC CC SUCKER BLUEBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "WdrwNplw51",
+              "SKU": "273521966",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 2,
+              "Product": {
+                "objectId": "ZvApnzG8yU",
+                "Name": "BC CC SUCKER CHERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "kWkjaAjLXz",
+              "SKU": "273521970",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 2,
+              "Product": {
+                "objectId": "sBwUS1NIjK",
+                "Name": "BC CC SUCKER STRAWMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "qTe0KNkBZC",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-17T17:41:53.000Z",
+          "createdAt": "2026-04-17T17:42:16.220Z",
+          "updatedAt": "2026-04-21T19:23:40.021Z",
+          "FromName": "Cannasseur Extractions LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "Ad4FUKkIga",
+              "SKU": "273522551",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10,
+              "Product": {
+                "objectId": "8X1q8Gh0Mm",
+                "Name": "MOR 3G DISPO STRAWNANA X WATERMELON OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "5Q3GoQkf02",
+              "SKU": "273522711",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10,
+              "Product": {
+                "objectId": "u2AxKfqkfg",
+                "Name": "MOR 3G DISPO SKYWALKER OG X BLACKBERRY TART",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "gakeCFewIv",
+              "SKU": "273522754",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10,
+              "Product": {
+                "objectId": "FHcn0ok3PV",
+                "Name": "MOR 3G DISPO MANGO TANGO X PINK PANTIES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "mRJwEG3hSG",
+              "SKU": "273522796",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10,
+              "Product": {
+                "objectId": "YtSaFJeoZE",
+                "Name": "MOR 3G DISPO GREEN GUSHERS X GMO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "1rQEEJDLVU",
+              "SKU": "273522802",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10,
+              "Product": {
+                "objectId": "ddEuuM1eaL",
+                "Name": "MOR 3G DISPO SUPER LEMON HAZE X TROP CHERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "oEqBsu44ja",
+              "SKU": "273522917",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5,
+              "Product": {
+                "objectId": "VKSNHXaqHn",
+                "Name": "SP 2G CART BLUE RAZZ",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "a3a6B03DwB",
+              "SKU": "273523005",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5,
+              "Product": {
+                "objectId": "9wZrfAYgoQ",
+                "Name": "SP 2G CART PEACH COBBLER",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SESH PACK"
+                }
+              }
+            },
+            {
+              "objectId": "HDrPE4fIyE",
+              "SKU": "273523120",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5,
+              "Product": {
+                "objectId": "D18atEy1hG",
+                "Name": "SP 2G CART SOUR APPLE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SESH PACK"
+                }
+              }
+            },
+            {
+              "objectId": "COamMJpWIT",
+              "SKU": "273523230",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5,
+              "Product": {
+                "objectId": "yVKN4Gwt0t",
+                "Name": "GC 4G PREPACK FLOWER JUICY J",
+                "SKU": null,
+                "Brand": {
+                  "Name": "GRAM CANNABIS"
+                }
+              }
+            },
+            {
+              "objectId": "qFgMeDJRj1",
+              "SKU": "273523250",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 25,
+              "Product": {
+                "objectId": "yVKN4Gwt0t",
+                "Name": "GC 4G PREPACK FLOWER JUICY J",
+                "SKU": null,
+                "Brand": {
+                  "Name": "GRAM CANNABIS"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "cv2KZWUVyi",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-16T20:45:36.000Z",
+          "createdAt": "2026-04-16T20:45:54.345Z",
+          "updatedAt": "2026-04-28T14:15:44.576Z",
+          "FromName": "Alora 1112, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "012flgTeir",
+              "SKU": "273340265",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "UjN6m9VIQX",
+                "Name": "KK 1G CART (S) ALIEN MARMALADE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "bjWfLbrJa5",
+              "SKU": "273340693",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "ABtXBawj0w",
+                "Name": "KK 1G CART (H) BANANA TAFFY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "JWH5YbytCm",
+              "SKU": "273340827",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "gmZFmtDg7y",
+                "Name": "KK 1G CART (I) COSMIC ORCHARD",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "GgKZ0wyxua",
+              "SKU": "273340927",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "SVf93CmoCH",
+                "Name": "KK 1G CART (I) GOLDEN AFTERGLOW",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "9OVlBO0t9L",
+              "SKU": "273340941",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "iUZg7IMpkA",
+                "Name": "KK 1G CART (S) HAWAIIN DAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "RPkkdyYAn3",
+              "SKU": "273340976",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "jKZBJtA8cx",
+                "Name": "KK 1G CART (I) PAPAYA PUNCH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "4ZUq7OC7pR",
+              "SKU": "273340988",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "gE5XGq42tm",
+                "Name": "KK 1G CART (H) PEACH MANGO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "FveRJJO7Li",
+              "SKU": "273341019",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 27500,
+              "Product": {
+                "objectId": "8qHjkXKob7",
+                "Name": "KK 28G (H) PREROLL VARIETY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "Zj3M545amu",
+              "SKU": "273341060",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 27500,
+              "Product": {
+                "objectId": "y2YxaX2sxO",
+                "Name": "KK 28G (I) PREROLL VARIETY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "KuawAurMwL",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-16T01:13:02.000Z",
+          "createdAt": "2026-04-16T01:13:12.409Z",
+          "updatedAt": "2026-04-28T17:29:53.110Z",
+          "FromName": "SAP Xtrax LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "8AF8H8bpg4",
+              "SKU": "273270136",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5190,
+              "Product": {
+                "objectId": "jZcBfTCkXz",
+                "Name": "SAP STIX 1G INFUSED PREROLL (H) 2 SMOOTH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "fPvpCvHu37",
+              "SKU": "273270234",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10380,
+              "Product": {
+                "objectId": "n7UVGnTJJ8",
+                "Name": "SAP STIX 1G INFUSED BLUNT (H) BERRY KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "0AtgZdSbBl",
+              "SKU": "273270316",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10380,
+              "Product": {
+                "objectId": "AmODYH1Ela",
+                "Name": "SAP STIX 1G INFUSED PREROLL (H) CHERRY PIE FACE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "NBiCxxcpRB",
+              "SKU": "273270350",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10380,
+              "Product": {
+                "objectId": "W09dZ7VCbM",
+                "Name": "SAP STIX 1G INFUSED BLUNT (I) FUNK",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "vMXB1sspnt",
+              "SKU": "273270358",
+              "OriginalQty": 14,
+              "CurrentQty": 14,
+              "Cost": 7266,
+              "Product": {
+                "objectId": "kEZ6XB7UgQ",
+                "Name": "SAP STIX 1G INFUSED BLUNT (S) GOGO BOOTS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "0Er1AKaGG4",
+              "SKU": "273270372",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10380,
+              "Product": {
+                "objectId": "U1xxILzUGJ",
+                "Name": "SAP STIX 1G INFUSED PREROLL (I) GRANDPA BREATH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "HDIpmQn6ed",
+              "SKU": "273270375",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5190,
+              "Product": {
+                "objectId": "Il6087lLIo",
+                "Name": "SAP STIX 1G INFUSED PREROLL (I) HEAD AND SHOULDERS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "a85RRTTvy5",
+              "SKU": "273270384",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5190,
+              "Product": {
+                "objectId": "t97xHiBbjx",
+                "Name": "SAP STIX 1G INFUSED PREROLL (I) LEMON GARLIC",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "Ci2PAbBAW0",
+              "SKU": "273270392",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5190,
+              "Product": {
+                "objectId": "BBqDyTWmKx",
+                "Name": "SAP STIX 1G INFUSED PREROLL (S) LEMON SORBET",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "GHVuTGidI3",
+              "SKU": "273270400",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10380,
+              "Product": {
+                "objectId": "gzsikYCFrk",
+                "Name": "SAP STIX 1G INFUSED PREROLL (I) RAINWATER",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "EDpNcBmBJL",
+              "SKU": "273270409",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 10380,
+              "Product": {
+                "objectId": "GJEGXHM99h",
+                "Name": "SAP STIX 1G INFUSED PREROLL (S) STRAWBERRY SHORTCAKE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "ln7Oq5EGdc",
+              "SKU": "273270416",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5190,
+              "Product": {
+                "objectId": "FknGxyxuMv",
+                "Name": "SAP STIX 1G INFUSED BLUNT (H) SWEET HEAT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "TeYKsLTuxn",
+              "SKU": "273270423",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1,
+              "Product": {
+                "objectId": "9WE1PVVM6A",
+                "Name": "SAP STIX 1G INFUSED PREROLL (S) OLE JACK",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "i8Fdvjrmeb",
+              "SKU": "273270707",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1,
+              "Product": {
+                "objectId": "UmSuRi9AVO",
+                "Name": "SAP STIX 1G INFUSED PREROLL (I) SUPER 8",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            },
+            {
+              "objectId": "GKOHVoxEvn",
+              "SKU": "273270712",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1,
+              "Product": {
+                "objectId": "KzYv77UumM",
+                "Name": "SAP STIX 1G INFUSED PREROLL (H) WIFI",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAP STIX"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "oAzDvs2T4c",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-14T20:03:49.000Z",
+          "createdAt": "2026-04-14T20:05:30.777Z",
+          "updatedAt": "2026-04-28T14:15:46.218Z",
+          "FromName": "Big Country Investment Group Corp.",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "besp7DGFYw",
+              "SKU": "273164779",
+              "OriginalQty": 4,
+              "CurrentQty": 4,
+              "Cost": 1200,
+              "Product": {
+                "objectId": "hMntIvQoNx",
+                "Name": "BC CC 1G INFU PREROLL (I) BANANA OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "k42HNiBiC8",
+              "SKU": "273164850",
+              "OriginalQty": 6,
+              "CurrentQty": 6,
+              "Cost": 1800,
+              "Product": {
+                "objectId": "hMntIvQoNx",
+                "Name": "BC CC 1G INFU PREROLL (I) BANANA OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "AgnaxcdrP3",
+              "SKU": "273165028",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "1ILVomzu2e",
+                "Name": "BC CC 2G 5CT MINI'S (I) BANANA OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "BZ2AYVTR93",
+              "SKU": "273165035",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "swfdRe4HCr",
+                "Name": "BC CC 2.5G INFU BLUNT (I) BANANA OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "ZUIZ2WblXD",
+              "SKU": "273165071",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "P7Btm2H84V",
+                "Name": "BC CC 1G INFU PREROLL (I) BLACKBERRY KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "Vdspxp89WX",
+              "SKU": "273165115",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "5VNTBBC1l7",
+                "Name": "BC CC 2G 5CT MINI'S (I) BLACKBERRY KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "0Kj6WOtdyV",
+              "SKU": "273165121",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "nVLVDC9w8W",
+                "Name": "BC CC 2.5G INFU BLUNT (I) BLACKBERRY KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "fz2ZLx2TsE",
+              "SKU": "273165163",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "rOec3kS0w7",
+                "Name": "BC CC 1G INFU PREROLL (H) BLUEBERRY LEMONADE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "g1tbab44DJ",
+              "SKU": "273165226",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "XwWHBEmmE9",
+                "Name": "BC CC 2G 5CT MINI'S (H) BLUEBERRY LEMONADE",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "7VEi7RDMzt",
+              "SKU": "273165344",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "DJEw8AUS3B",
+                "Name": "BC CC 2.5G INFU BLUNT (H) BLUEBERRY LEMONADE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "tRSGEdGqxs",
+              "SKU": "273165366",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "WVeJtNxv3c",
+                "Name": "BC CC 1G DIAM INFU PREROLL (I) BLUEBERRY MUFFIN",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "PEePHLLLca",
+              "SKU": "273166106",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "SWweXp1KRx",
+                "Name": "BC CC 1G INFU PREROLL (H) BOYSENBERRY WAFFLE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "ouyUwMUSEZ",
+              "SKU": "273166121",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "7n5jRPIFUJ",
+                "Name": "BC CC 2G 5CT MINI'S (H) BOYSENBERRY WAFFLE",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "FYTOxBFxPb",
+              "SKU": "273166152",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "lPjDEYEBbT",
+                "Name": "BC CC 1G INFU PREROLL (S) CANTALOUPE HAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "B1Ihl0wzRS",
+              "SKU": "273166162",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "kLjBuxn4cu",
+                "Name": "BC CC 2G 5CT MINI'S (S) CANTALOUPE HAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "JarM6zB28M",
+              "SKU": "273166229",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "PTFg9e8dcm",
+                "Name": "BC CC 2.5G INFU BLUNT (S) CANTALOUPE HAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "a0b7t6Hs0s",
+              "SKU": "273166239",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "EuOKE9JhFv",
+                "Name": "BC CC 1G INFU PREROLL (S) DRAGON FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "c65yVxXmRp",
+              "SKU": "273166247",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "Su3pY7HTcI",
+                "Name": "BC CC 2G 5CT MINI'S (S) DRAGON FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "dk5ZkV2X49",
+              "SKU": "273166276",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "nGfkaJBQhg",
+                "Name": "BC CC 2.5G INFU BLUNT (S) DRAGON FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "DAhZnCeS0s",
+              "SKU": "273166298",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "KoXBeX4Wuz",
+                "Name": "BC CC 1G INFU PREROLL (I) FORBIDDEN FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "sfeBML0ZJM",
+              "SKU": "273166309",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "yFuPZvoOy4",
+                "Name": "BC CC 2G 5CT MINI'S (I) FORBIDDEN FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "S0oNyiFkQU",
+              "SKU": "273166331",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "6SNbtBwzIY",
+                "Name": "BC CC 2.5G INFU BLUNT (I) FORBIDDEN FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "BreL0bpkng",
+              "SKU": "273166359",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "49GbVMFMPK",
+                "Name": "BC CC 1G INFU PREROLL (I) GRAPE OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "kjV99q9CPY",
+              "SKU": "273166370",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "NVINVxxmbk",
+                "Name": "BC CC 2G 5CT MINI'S (I) GRAPE OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "CvRfLBdDGi",
+              "SKU": "273166395",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "TFiZnWl1Ey",
+                "Name": "BC CC 2.5G INFU BLUNT (I) GRAPE OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "MD1COOoOLM",
+              "SKU": "273166417",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "MW08aewPxr",
+                "Name": "BC CC 1G INFU PREROLL (H) HUCKLEBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "TtFhypnXzo",
+              "SKU": "273166439",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "6IChl1FRDr",
+                "Name": "BC CC 2G 5CT MINI'S (H) HUCKLEBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "gK4L29XoJH",
+              "SKU": "273166476",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "wQKvUML0Qy",
+                "Name": "BC CC 2.5G INFU BLUNT (H) HUCKLEBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "KPeCADJovV",
+              "SKU": "273166497",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 7500,
+              "Product": {
+                "objectId": "o4TmteTNQZ",
+                "Name": "BC CC 1G DIAM INFU PREROLL (S) ISLAND PUNCH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "XJMs1gH12R",
+              "SKU": "273166547",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "nVkzlj36EC",
+                "Name": "BC CC 1G INFU PREROLL (H) MAUI WOWIE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "VvdTdBSObP",
+              "SKU": "273166660",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "MCu5xH6vHQ",
+                "Name": "BC CC 1G DIAM INFU PREROLL (H) ORANGE OASIS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "w3x1sz7Azs",
+              "SKU": "273166690",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "5vqo9cm5iJ",
+                "Name": "BC CC 1G INFU PREROLL (S) PINEAPPLE EXPRESS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "sQoAl8WP87",
+              "SKU": "273166699",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "z5x6DeAXwW",
+                "Name": "BC CC 2G 5CT MINI'S (S) PINEAPPLE EX",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "TiktrAkHB6",
+              "SKU": "273166719",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "tcBycubtwf",
+                "Name": "BC CC 2.5G INFU BLUNT (S) PINEAPPLE EXPRESS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "hrDOLewaQj",
+              "SKU": "273166742",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "aDboyMDnNm",
+                "Name": "BC CC 1G INFU PREROLL (S) STRAWBERRY COUGH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "8Sh0XRIkDB",
+              "SKU": "273166752",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "BreLjJMt0o",
+                "Name": "BC CC 2G 5CT MINI'S (S) STRAWBERRY COUGH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "OUQGm6qXr9",
+              "SKU": "273166789",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "Ogclop8qaK",
+                "Name": "BC CC 2.5G INFU BLUNT (S) STRAWBERRY COUGH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "OEIU3rLkK2",
+              "SKU": "273166816",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "ZiEvucFyKv",
+                "Name": "BC CC 1G INFU PREROLL (I) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "dYO7FIbMkc",
+              "SKU": "273166833",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "U9FMuK9MnZ",
+                "Name": "BC CC 2G 5CT MINI'S (I) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "ge80bwc1HT",
+              "SKU": "273166857",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 4000,
+              "Product": {
+                "objectId": "V7acwK8FI6",
+                "Name": "BC CC 2.5G INFU BLUNT (I) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            },
+            {
+              "objectId": "wngJXVGQJt",
+              "SKU": "273166883",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 17500,
+              "Product": {
+                "objectId": "yKErHCnUrf",
+                "Name": "BC CC 500MG 5PK CARAMELS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Country Cannabis"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "0YBNJbXDVK",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-13T21:47:35.000Z",
+          "createdAt": "2026-04-13T21:48:25.351Z",
+          "updatedAt": "2026-04-28T17:29:53.789Z",
+          "FromName": "Cannasseur Extractions LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "Hd4MhjQVa2",
+              "SKU": "1A40E01000284ED000026994",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "IFK5kgznBQ",
+                "Name": "CI 2G DISPO (H) BIG KIWI",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "4pIXDPzQgS",
+              "SKU": "273085323",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "FV02Wo70yV",
+                "Name": "CI 2G DISPO (H) BLUEBERRY COOKIES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cure Injoy"
+                }
+              }
+            },
+            {
+              "objectId": "kUhsGzoEbQ",
+              "SKU": "273085332",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "ruOoVR3p1M",
+                "Name": "CI 2G DISPO (H) GEORGIA PEACH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "27YpBL7faG",
+              "SKU": "273085335",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "aBMP1TfwjF",
+                "Name": "CI 2G DISPO (H) MANGO TANGO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "UEoCOen1ru",
+              "SKU": "273085337",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "EfQ8r4RFnE",
+                "Name": "CI 2G DISPO (I) GUAVA LAVA CAKE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "A3hGlm5lpG",
+              "SKU": "273085338",
+              "OriginalQty": 10,
+              "CurrentQty": 0,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "9TzoWrkDfQ",
+                "Name": "CI 2G DISPO (I) PINK PANTIES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "K4efdCBLdA",
+              "SKU": "273086046",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "v0WhWQlIt1",
+                "Name": "CI 2G DISPO (I) SKYWALKER OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "LOFBcfj3Bc",
+              "SKU": "273085344",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "jip4DUaic1",
+                "Name": "CI 2G DISPO (I) WATERMELON OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "EBaDk4j8SF",
+              "SKU": "273085345",
+              "OriginalQty": 10,
+              "CurrentQty": 0,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "1wZsLi5iF3",
+                "Name": "CI 2G DISPO (S) GREEN GUSHERS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "bMz5zZgBo9",
+              "SKU": "273085346",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "piyIfTAHZd",
+                "Name": "CI 2G DISPO (S) STRAWNANA",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            },
+            {
+              "objectId": "FNsvek2gkG",
+              "SKU": "273086297",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "MtEVTwmDIH",
+                "Name": "CI 2G DISPO (S) TROP CHERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "CURE INJOY"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "ZcaaSc5rbS",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-13T21:41:03.000Z",
+          "createdAt": "2026-04-13T21:48:24.575Z",
+          "updatedAt": "2026-04-28T14:15:46.901Z",
+          "FromName": "Doc Ferguson, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "8cyuqE139k",
+              "SKU": "273087043",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 2,
+              "Product": {
+                "objectId": "1O3Bkjo1cN",
+                "Name": "RANCID RAINBOW | LIVE RESIN | MLT | 2G",
+                "SKU": null,
+                "Brand": {
+                  "Name": "MELTIES"
+                }
+              }
+            },
+            {
+              "objectId": "Krg5Izh7YZ",
+              "SKU": "273087228",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 15000,
+              "Product": {
+                "objectId": "m7jBB7lUJh",
+                "Name": "DDD 2G LIVE RES DISPO (H) CHEM STYLE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Double Down Dabs"
+                }
+              }
+            },
+            {
+              "objectId": "Bz0gep46vr",
+              "SKU": "273087451",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 15000,
+              "Product": {
+                "objectId": "0Hm6htWbmE",
+                "Name": "DDD 2G LIVE RES DISPO (S) CHERRI RAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Double Down Dabs"
+                }
+              }
+            },
+            {
+              "objectId": "r86XCcBGGC",
+              "SKU": "273087510",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 15000,
+              "Product": {
+                "objectId": "0tvrZBOhpj",
+                "Name": "DDD 2G LIVE RES DISPO (I) RANCID RAINBOW",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Double Down Dabs"
+                }
+              }
+            },
+            {
+              "objectId": "iUUHKeII0I",
+              "SKU": "273087562",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "8M8aoG6Tib",
+                "Name": "MLT 2G LIVE RESIN (H) LEMON BERRY FLARE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "MELTIES"
+                }
+              }
+            },
+            {
+              "objectId": "VWY2SwO4UH",
+              "SKU": "273087633",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "TnFg93wO7S",
+                "Name": "MLT 2G LIVE RESIN (I) RANCID RAINBOW",
+                "SKU": null,
+                "Brand": {
+                  "Name": "MELTIES"
+                }
+              }
+            },
+            {
+              "objectId": "v5WOr4BJIi",
+              "SKU": "273087693",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "bFkvTCCvng",
+                "Name": "MLT 2G LIVE RESIN (H) TROPICAL G&T",
+                "SKU": null,
+                "Brand": {
+                  "Name": "MELTIES"
+                }
+              }
+            },
+            {
+              "objectId": "zAOu1wPONa",
+              "SKU": "273087796",
+              "OriginalQty": 2,
+              "CurrentQty": 0,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "0bF4iJebcR",
+                "Name": "DDD 28G WAX (H) AMERICAN GOLD",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Double Down Dabs"
+                }
+              }
+            },
+            {
+              "objectId": "DIomCtmKFF",
+              "SKU": "273087923",
+              "OriginalQty": 2,
+              "CurrentQty": 0,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "9F7t2elyNF",
+                "Name": "DDD 28G BUDDER (H) DAILY GRAPE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Double Down Dabs"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "pmTeXuZBgO",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-13T19:20:30.000Z",
+          "createdAt": "2026-04-13T19:26:38.943Z",
+          "updatedAt": "2026-04-28T17:29:53.467Z",
+          "FromName": "OK KIND CONNECTION PROCESSING LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "mmSb0BuLyE",
+              "SKU": "273076096",
+              "OriginalQty": 10,
+              "CurrentQty": 0,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "Ezk9nlF0iJ",
+                "Name": "SE 2G DISPOSABLE (S) BLUE NERDS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Stoner's Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "RSnKrpU06e",
+              "SKU": "273076125",
+              "OriginalQty": 10,
+              "CurrentQty": 0,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "uqlreRVtHH",
+                "Name": "SE 2G DISPOSABLE (S) CHERRY CRUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Stoner's Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "zA1KwhEHsQ",
+              "SKU": "273076756",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "kfL0MTJbVn",
+                "Name": "SE 2G DISPOSABLE (I) GRAPE GUSHERS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Stoner's Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "wIRUj2cY1Y",
+              "SKU": "273077020",
+              "OriginalQty": 9.9999,
+              "CurrentQty": 0,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "6R938HCxtg",
+                "Name": "SE 2G DISPOSABLE (H) MARSHMALLOW",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Stoner's Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "gKblde9YQo",
+              "SKU": "273077128",
+              "OriginalQty": 10,
+              "CurrentQty": 0,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "aMLSkq1Igm",
+                "Name": "SE 2G DISPOSABLE (H) PINK PUSH POP",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Stoner's Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "SXW41sAqu8",
+              "SKU": "273077266",
+              "OriginalQty": 10,
+              "CurrentQty": 0,
+              "Cost": 9000,
+              "Product": {
+                "objectId": "v1yeZ4Ktp6",
+                "Name": "SE 2G DISPOSABLE (I) POMERGRANATE PUNCH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Stoner's Extracts"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "CqYmrlYf3e",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-13T01:21:21.000Z",
+          "createdAt": "2026-04-13T19:26:42.149Z",
+          "updatedAt": "2026-04-13T19:27:15.420Z",
+          "FromName": "Alora 1112, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "ymAkQBLglv",
+              "SKU": null,
+              "OriginalQty": 1,
+              "CurrentQty": null,
+              "Cost": null,
+              "Product": null
+            }
+          ]
+        },
+        {
+          "objectId": "PJaNdcbBqI",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-11T01:39:04.000Z",
+          "createdAt": "2026-04-11T01:43:59.627Z",
+          "updatedAt": "2026-04-28T17:29:54.184Z",
+          "FromName": "Vice Capital Extraction, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "uyJFGugILk",
+              "SKU": "272881353",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 4400,
+              "Product": {
+                "objectId": "3lwBTsEbHI",
+                "Name": "DC 10,000MG 40CT GUMMIES JUICY WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "60ymVK2POs",
+              "SKU": "272882139",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 8800,
+              "Product": {
+                "objectId": "59Ik5afCNe",
+                "Name": "DC 10,000MG 40CT GUMMIES RAZZLE BERRY CREAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "jKwdqFQDWI",
+              "SKU": "272882594",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 4400,
+              "Product": {
+                "objectId": "5PFShzKYlf",
+                "Name": "DC 10,000MG 40CT 1 TO 1 GUMMIES (H) STRAWBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "ARq2EF62aJ",
+              "SKU": "272882604",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 1500,
+              "Product": {
+                "objectId": "sUuKjD3yKg",
+                "Name": "DC 250MG SINGLE 1 TO 1 GUMMY (H) STRAWBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "JaOl8dk9pz",
+              "SKU": "272882627",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 1500,
+              "Product": {
+                "objectId": "5EQdPhtLjt",
+                "Name": "DC 250MG SINGLE GUMMY (H) OCEAN BREEZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "hQFccZlYS7",
+              "SKU": "272882639",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 16500,
+              "Product": {
+                "objectId": "jGUxLOrwMa",
+                "Name": "DC 2500MG FULL SPEC GUMMIES (H) MANGO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "ytxPY0nrFH",
+              "SKU": "272883070",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 16500,
+              "Product": {
+                "objectId": "7I7TPC40iA",
+                "Name": "DC 2500MG GUMMIES (H) OCEAN BREEZE",
+                "SKU": "DCOCEANBREEZE",
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "UG3AATjb08",
+              "SKU": "272883093",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 16500,
+              "Product": {
+                "objectId": "XBS68riutm",
+                "Name": "DC 2500MG GUMMIES (I) RAZZLE BERRY CREAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "4x70qHwOHb",
+              "SKU": "272883153",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 5500,
+              "Product": {
+                "objectId": "ojlND6JkIC",
+                "Name": "DC 2500MG 1 TO 1 GUMMIES (H) STRAWBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "yHumPwFGZo",
+              "SKU": "272883178",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 16500,
+              "Product": {
+                "objectId": "a4flwtx7kP",
+                "Name": "DC 2500MG GUMMIES (S) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Day Changers"
+                }
+              }
+            },
+            {
+              "objectId": "PCfW7fxAln",
+              "SKU": "272883185",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2375,
+              "Product": {
+                "objectId": "8m0XmMApMk",
+                "Name": "EDIFY 1000MG DARK CHOCOLATE MINT BAR",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Edify"
+                }
+              }
+            },
+            {
+              "objectId": "4EiMPAiGSP",
+              "SKU": "272883212",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "m1khTZBZk8",
+                "Name": "ROCKSTARS 1G PREROLL (I) CROSSROAD BLUES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "ynMk7zB4YN",
+              "SKU": "272884048",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "gIIA9iAfUJ",
+                "Name": "ROCKSTARS 1G PREROLL (H) DEADHEAD DREAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "P0YvRuKby0",
+              "SKU": "272884117",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "0NAnHjaxBc",
+                "Name": "ROCKSTARS 1G PREROLL (I) GMO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "sIMvKHSr0R",
+              "SKU": "272884614",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "tC8oPuCZLS",
+                "Name": "ROCKSTARS 1G PREROLL (I) GRAPE APE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "3MJNBOv1jb",
+              "SKU": "272886029",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "5AgcEdewz9",
+                "Name": "ROCKSTARS 1G PREROLL (S) MOSH PIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "WVpKSq49QY",
+              "SKU": "272886128",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "mbKv36V1UA",
+                "Name": "ROCKSTARS 1G PREROLL (I) MOTEL OKLAHOMA",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "ydnYic3C0O",
+              "SKU": "272886240",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "X34PxlOHBL",
+                "Name": "ROCKSTARS 1G PREROLL (I) PEACH CRESCENDO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "26tW71vikz",
+              "SKU": "272886306",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "sJd4a9jbeC",
+                "Name": "ROCKSTARS 1G PREROLL (H) PEANUT BUTTER BREATH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "DtM5cRFA9d",
+              "SKU": "272886471",
+              "OriginalQty": 30,
+              "CurrentQty": 30,
+              "Cost": 2370,
+              "Product": {
+                "objectId": "ncG1vydH0E",
+                "Name": "ROCKSTARS 1G PREROLL (S) TANGIE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "CjLnpkI9dP",
+              "SKU": "272886596",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "EoRV0zlKVo",
+                "Name": "ROCKSTARS 1G PREROLL (S) TROPICANA COOKIES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "kG4XTWD4mY",
+              "SKU": "272886666",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "ipwobxcQpE",
+                "Name": "ROCKSTARS 1G PREROLL (H) STAGE DIVE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "m90KukSCzZ",
+              "SKU": "272886712",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "PO9GbXifHL",
+                "Name": "ROCKSTARS 1G PREROLL (S) STRAWBERRY COUGH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "j1ociYQNgz",
+              "SKU": "272886772",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "77qpbaIBkt",
+                "Name": "ROCKSTARS 1G PREROLL (H) THREEE LITTLE BIRDS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "0l9k5jF11n",
+              "SKU": "272886835",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "wXRDDe8BXG",
+                "Name": "ROCKSTARS 1G PREROLL (I) WEDDING CAKE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "thIEPMr3sv",
+              "SKU": "272886892",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "uEdARt4uCd",
+                "Name": "ROCKSTARS 1G PREROLL (H) WOODSTOCKS WONDER",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "VoWe4ctEnN",
+              "SKU": "272886964",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "KbA9Lu1elt",
+                "Name": "ROCKSTARS 28G SHAKE (I) BACKSTAGE PASS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "NyBt3f82u8",
+              "SKU": "272887060",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "SOH2RpXkJZ",
+                "Name": "ROCKSTARS 28G SHAKE (H) CLASSIC VINYL",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "3xmHisAEan",
+              "SKU": "272887127",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "8ubeA3w3kC",
+                "Name": "ROCKSTARS 28G SHAKE (I) TOUR BUS OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "EMPjBb44Ri",
+              "SKU": "272887190",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10990,
+              "Product": {
+                "objectId": "ZZmJ6xDgAd",
+                "Name": "ROCKSTARS 28CT PREROLL PACK GMO COOKIES (I)",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "1HFT9ACoud",
+              "SKU": "272887219",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10990,
+              "Product": {
+                "objectId": "TwYavlLwVX",
+                "Name": "ROCKSTARS STAGE DIVE (H) 28CT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "WKuaKUoTN6",
+              "SKU": "272887316",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "HWn2P22lNP",
+                "Name": "ROCKSTARS 28G SHAKE (H) BLUE DREAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "L1zcpVHHPi",
+              "SKU": "272888142",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "AejlktF4LG",
+                "Name": "ROCKSTARS 28G SHAKE (H) CAP JUNKY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "sMgwK74Vre",
+              "SKU": "272888383",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "U5OZSzMrB6",
+                "Name": "ROCKSTARS 28G SHAKE (H) GG4",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "YrMaJRfxXZ",
+              "SKU": "272888910",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "oiHgYlnHUq",
+                "Name": "ROCKSTARS 28G SHAKE (H) OG KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "JpdqVVALNU",
+              "SKU": "272888972",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "f1X4EKUCnW",
+                "Name": "ROCKSTARS 28G SHAKE (H) POISON GUSHERS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "EESEgXGoze",
+              "SKU": "272889029",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "94paQnFMLn",
+                "Name": "ROCKSTARS 28G SHAKE (H) TAGALONGZ",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "3nRnCAx4wh",
+              "SKU": "272889090",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "QljGqmC6NP",
+                "Name": "ROCKSTARS 28G SHAKE (I) STICKY GLUE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "gth9eCswME",
+              "SKU": "272889146",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "XHD93ejXaD",
+                "Name": "ROCKSTARS 28G SHAKE (S) SUPER SILVER HAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "j5ZCTvDoC8",
+              "SKU": "272889193",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2950,
+              "Product": {
+                "objectId": "6uONKWPnfJ",
+                "Name": "ROCKSTARS 28G SHAKE (S) WAR HEADZ",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "OpDx5Bplwu",
+              "SKU": "272889234",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "Ghb2WBsonB",
+                "Name": "ROCKSTARS 1G PREROLL (H) CEREAL MILK",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "b5lWG0BaWz",
+              "SKU": "272889973",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 10990,
+              "Product": {
+                "objectId": "wUjYUlaC4c",
+                "Name": "ROCKSTARS 28CT PREROLL (I) NORTHERN LIGHTS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "vqONJgPhAL",
+              "SKU": "272890125",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 1580,
+              "Product": {
+                "objectId": "YlVmop7ihx",
+                "Name": "ROCKSTARS 1G PREROLL (S) RUNTZ N' ROSES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Rockstars"
+                }
+              }
+            },
+            {
+              "objectId": "OPgvZScsCM",
+              "SKU": "272890371",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "2X1HLoXstQ",
+                "Name": "SMACK! 1000MG 10CT LIVE RESIN BLACK CHERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smack"
+                }
+              }
+            },
+            {
+              "objectId": "niXPQC14Eq",
+              "SKU": "272890400",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "CQqIa4p3wF",
+                "Name": "SMACK! 1000MG 10CT LIVE RESIN GUMMY STRAWBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smack"
+                }
+              }
+            },
+            {
+              "objectId": "JmLdsVc8g0",
+              "SKU": "272890411",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "UpSJlpv70n",
+                "Name": "SMACK! 1000MG 10CT LIVE RESIN GUMMY WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Entourage Effect"
+                }
+              }
+            },
+            {
+              "objectId": "Cp6CHd46mU",
+              "SKU": "272890418",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "UpSJlpv70n",
+                "Name": "SMACK! 1000MG 10CT LIVE RESIN GUMMY WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Entourage Effect"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "qd62QGpNjB",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-10T19:45:51.000Z",
+          "createdAt": "2026-04-10T19:46:20.228Z",
+          "updatedAt": "2026-04-28T17:29:54.717Z",
+          "FromName": "Alora 1112, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "eYUCx2WmH4",
+              "SKU": "272818378",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "ABtXBawj0w",
+                "Name": "KK 1G CART (H) BANANA TAFFY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "hmfEtrMYkB",
+              "SKU": "272818534",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "iUZg7IMpkA",
+                "Name": "KK 1G CART (S) HAWAIIN DAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "HOzNRQsw02",
+              "SKU": "272818747",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "5up5utoU6x",
+                "Name": "KK 1G CART (S) LIMONCELLO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "F9DAojnHCO",
+              "SKU": "272818909",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "jKZBJtA8cx",
+                "Name": "KK 1G CART (I) PAPAYA PUNCH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "yEHnFJh2dz",
+              "SKU": "272819621",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 4500,
+              "Product": {
+                "objectId": "gE5XGq42tm",
+                "Name": "KK 1G CART (H) PEACH MANGO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "e2Wdfm3rsi",
+              "SKU": "272819648",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "WlulNGbRJI",
+                "Name": "KK FROOT LOOPS 1G (H) INFUSED PREROLL",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "E4W565p6zb",
+              "SKU": "272819669",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 2000,
+              "Product": {
+                "objectId": "QiCO6GkSsC",
+                "Name": "KK HERCULES HAPPINESS 1G (H) INFUSED PREROLL",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "DY9pdLtZk3",
+              "SKU": "272819690",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 2000,
+              "Product": {
+                "objectId": "UjBuX0GIFf",
+                "Name": "KK 1G INFUSED PREROLL (H) MIDNIGHT BERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "pfuaPOe8Wk",
+              "SKU": "272819715",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "zfLvJNv0oC",
+                "Name": "KK 1G INFUSED PREROLL (H) BLACKBERRY COOKIES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAPPHIRE ICE"
+                }
+              }
+            },
+            {
+              "objectId": "zM5LTZPmB5",
+              "SKU": "272819738",
+              "OriginalQty": 15,
+              "CurrentQty": 15,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "G9QRKHoruA",
+                "Name": "KK CANDY CANE COOKIES 1G PREROLL (H)",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SAPPHIRE ICE"
+                }
+              }
+            },
+            {
+              "objectId": "dRvyPjpxuH",
+              "SKU": "272819761",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 2000,
+              "Product": {
+                "objectId": "ynX5R2GayE",
+                "Name": "KK 1G INFUSED PREROLL (H) GIRL SCOUT COOKIES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "XjaX8zDmnG",
+              "SKU": "272820259",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 2000,
+              "Product": {
+                "objectId": "bitgOiHBWM",
+                "Name": "GLIZZY 1G PREROLL (S) JACK HERER",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "OPbdd5nvcD",
+              "SKU": "272820384",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 2000,
+              "Product": {
+                "objectId": "ZADMOnYYox",
+                "Name": "GLIZZY 1G PREROLL (I) KANDY KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "TDG6pgKOWX",
+              "SKU": "272820500",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 2000,
+              "Product": {
+                "objectId": "q0NiBG2n8W",
+                "Name": "GLIZZY 1G PREROLL (I) PURPLE PANTIES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "N2G4z7A6vz",
+              "SKU": "272820732",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 32500,
+              "Product": {
+                "objectId": "zF4A5miH90",
+                "Name": "KK 28G (S) PREROLL VARIETY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "KSOv12OEyr",
+              "SKU": "272820858",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 2000,
+              "Product": {
+                "objectId": "NuUGtlSL9Z",
+                "Name": "GLIZZY 1G PREROLL (S) SUPER LEMON HAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "olalvIoHdK",
+              "SKU": "272822454",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 8000,
+              "Product": {
+                "objectId": "R2tFANzDdE",
+                "Name": "KK 1G FECO (H)",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            },
+            {
+              "objectId": "PaE4yZybOp",
+              "SKU": "1A40E01000058B3000056032",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1,
+              "Product": {
+                "objectId": "PovJk54yN0",
+                "Name": "KK CAMFIRES CANDY BAR",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Korporate Kush"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "bfiGbEnIEk",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-10T14:59:00.000Z",
+          "createdAt": "2026-04-10T15:04:17.520Z",
+          "updatedAt": "2026-04-28T17:29:55.374Z",
+          "FromName": "SHI Company LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "Lg2tFDDCop",
+              "SKU": "272806793",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 7330,
+              "Product": {
+                "objectId": "wqmTw9lLu9",
+                "Name": "SMOKIEZ 250MG THC GUMMIES (I) SOUR BLUE RASPBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "mBjZ1vBnH4",
+              "SKU": "272806822",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 7000,
+              "Product": {
+                "objectId": "8RlyYF3vPz",
+                "Name": "SMOKIEZ 100MG THC CBG CBN (I) DREAMY BB",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "9tjDVX3cpq",
+              "SKU": "272807073",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 16000,
+              "Product": {
+                "objectId": "ZXGFebO4Tb",
+                "Name": "SMOKIEZ 1000MG THC GUMMIES (H) SOUR PASSION FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "Gwwbg5czMZ",
+              "SKU": "272807141",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 7330,
+              "Product": {
+                "objectId": "kyCC0f3FQG",
+                "Name": "SMOKIEZ 250MG THC & 25 MG CBD FRUIT CHEWS (S) SOUR PEACH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "jZA6x3hu7n",
+              "SKU": "272807472",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 7000,
+              "Product": {
+                "objectId": "m91cVf4zKC",
+                "Name": "SMOKIEZ 50MG THC 100MG CBD CBN (I) BLISSFUL WM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "sh7TwUP0A8",
+              "SKU": "272807662",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 16000,
+              "Product": {
+                "objectId": "AlrxnYHECC",
+                "Name": "SMOKIEZ SOUR WATERMELON FRUIT CHEWS (H) 1000MG 20CT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "qiGwftS6Vr",
+              "SKU": "272807758",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "mVU34PvAtX",
+                "Name": "SMOKIEZ 100MG THC & 10MG CBD FRUIT CHEWS (H) SOUR WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "O0klkhCU0h",
+              "SKU": "272808096",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 16000,
+              "Product": {
+                "objectId": "iPWpVCOVU6",
+                "Name": "SMOKIEZ SWEET PEACH FRUIT CHEWS (S) 1000MG 20CT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "faDPemXZqr",
+              "SKU": "272808296",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "od7OL3GiCT",
+                "Name": "SMOKIEZ 100MG THC 10MG CBD FRUIT CHEWS (H) WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            },
+            {
+              "objectId": "ZMWEKrEZYn",
+              "SKU": "272808466",
+              "OriginalQty": 30,
+              "CurrentQty": 30,
+              "Cost": 30,
+              "Product": {
+                "objectId": "gQajUjOrkG",
+                "Name": "SMOKIEZ 50MG SINGLE SERVE GUMMY (H) SOUR WATERMELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Smokiez"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "G5w2uK3rpa",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-10T02:50:43.589Z",
+          "createdAt": "2026-04-10T00:39:47.503Z",
+          "updatedAt": "2026-04-10T02:52:57.673Z",
+          "FromName": null,
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "9zkiBVInjJ",
+              "SKU": "272749192",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1599,
+              "Product": {
+                "objectId": "wlpf207soH",
+                "Name": "ALEAF GLASS 6.5\" ALIEN BONG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "ALEAF"
+                }
+              }
+            },
+            {
+              "objectId": "AvPkpmW9ee",
+              "SKU": "272750814",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1900,
+              "Product": {
+                "objectId": "UScrq9F9QH",
+                "Name": "GLASS SHOWER WATER PIPE",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "4xq6FPvp8D",
+              "SKU": "272751041",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 2499,
+              "Product": {
+                "objectId": "C5akj5oQv2",
+                "Name": "CLOVER GLASS RECYCLER",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "JYHxczRqbU",
+              "SKU": "272751149",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 2499,
+              "Product": {
+                "objectId": "vj8Ag0TOx0",
+                "Name": "ALEAF GLASS CRYSTA BEAKER 7.5\"",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "d5L3ay2R45",
+              "SKU": "272751614",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1799,
+              "Product": {
+                "objectId": "G8VFnr2td1",
+                "Name": "SILO GLASS 6\" QUAD MONSTER RIG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SILO"
+                }
+              }
+            },
+            {
+              "objectId": "wCHNsWF33L",
+              "SKU": "272751919",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 5998,
+              "Product": {
+                "objectId": "LOjgzj1Eq8",
+                "Name": "EAGLE WOODEN BONG",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "BbYKYcDKa4",
+              "SKU": "272752882",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1699,
+              "Product": {
+                "objectId": "7vgRAiv8vy",
+                "Name": "14\" ABSTRACT ART BONG",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "83C4mhwJaM",
+              "SKU": "272753382",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 2299,
+              "Product": {
+                "objectId": "eILcNBWT3v",
+                "Name": "CLOVER GLASS MINT GREEN BONG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Clover"
+                }
+              }
+            },
+            {
+              "objectId": "Fbn1fgriX9",
+              "SKU": "272753603",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1299,
+              "Product": {
+                "objectId": "kSJKbLK12e",
+                "Name": "SILO GLASS 4.5\" STARFISH (SPONGE BOB)",
+                "SKU": null,
+                "Brand": {
+                  "Name": "SILO"
+                }
+              }
+            },
+            {
+              "objectId": "CbANpFIoVd",
+              "SKU": "272753729",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 2400,
+              "Product": {
+                "objectId": "uHkXIj64ii",
+                "Name": "CLOVER GLASS COBALT BLUE BUG BONG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Clover"
+                }
+              }
+            },
+            {
+              "objectId": "QMFAhyBdLq",
+              "SKU": "272753836",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1800,
+              "Product": {
+                "objectId": "ClIKE1PXUq",
+                "Name": "SILIC MOOSE BONG",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "Xe05kIKEG3",
+              "SKU": "272753883",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 2500,
+              "Product": {
+                "objectId": "HAHOvDvm9K",
+                "Name": "GLASS BACON & EGG BONG",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "UfkETUi2uL",
+              "SKU": "272754102",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 1899,
+              "Product": {
+                "objectId": "CrmOBqe6Hy",
+                "Name": "ALEAF GLASS REX HEAD",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "12GwEGSg9x",
+              "SKU": "272754167",
+              "OriginalQty": 4,
+              "CurrentQty": 4,
+              "Cost": 796,
+              "Product": {
+                "objectId": "Np7EzCNbq3",
+                "Name": "BOWL 14 MM MALE",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "EXBUpTadYf",
+              "SKU": "272754224",
+              "OriginalQty": 6,
+              "CurrentQty": 6,
+              "Cost": 1200,
+              "Product": {
+                "objectId": "FKH1VPixvq",
+                "Name": "GLASS ONE HITER ASSORTED",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "L6hDjDqi9r",
+              "SKU": "272755869",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 600,
+              "Product": {
+                "objectId": "sqvbtkYtBS",
+                "Name": "GLASS FLOWER BOWL",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "cndYGpP1Wy",
+              "SKU": "272755894",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "XYG6yqbomL",
+                "Name": "LOOKAH GUITAR 510",
+                "SKU": "810134120549",
+                "Brand": {
+                  "Name": "Lookah"
+                }
+              }
+            },
+            {
+              "objectId": "9zrbYghfbb",
+              "SKU": "272755913",
+              "OriginalQty": 1,
+              "CurrentQty": 1,
+              "Cost": 2500,
+              "Product": {
+                "objectId": "O8GZKNEIqS",
+                "Name": "TERP PEN SPECTRUM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "TERP PEN"
+                }
+              }
+            },
+            {
+              "objectId": "jLChK1ghzt",
+              "SKU": "272756068",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 1875,
+              "Product": {
+                "objectId": "FB90RbVZA1",
+                "Name": "VERTEX BATTERY 1100MAH KIT",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "8toHjdeHJm",
+              "SKU": "819436015829",
+              "OriginalQty": 25,
+              "CurrentQty": 25,
+              "Cost": 3500,
+              "Product": {
+                "objectId": "4yMWk7lPoM",
+                "Name": "WHITE RHINO CHILLUM",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "T5OcD3xzad",
+              "SKU": "272756254",
+              "OriginalQty": 30,
+              "CurrentQty": 30,
+              "Cost": 6750,
+              "Product": {
+                "objectId": "lesiTlxOgW",
+                "Name": "3.5\" GLASS HAND PIPE ASSORTED",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "AY2NRG4vGM",
+              "SKU": "810134920323",
+              "OriginalQty": 50,
+              "CurrentQty": 50,
+              "Cost": 3800,
+              "Product": {
+                "objectId": "rPDnU2Gug1",
+                "Name": "BLAZY SUSAN KING SLIM PURPLE PAPERS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Blazy Susan"
+                }
+              }
+            },
+            {
+              "objectId": "BrE9V0aaZx",
+              "SKU": "71616517868",
+              "OriginalQty": 24,
+              "CurrentQty": 24,
+              "Cost": 2999,
+              "Product": {
+                "objectId": "DBlZ50egPT",
+                "Name": "JUICY JAY 1 1/4 RASPBERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Juicy"
+                }
+              }
+            },
+            {
+              "objectId": "7XyCEzhyYX",
+              "SKU": "077170120128",
+              "OriginalQty": 32,
+              "CurrentQty": 32,
+              "Cost": 4360,
+              "Product": {
+                "objectId": "zXTe1nqdew",
+                "Name": "OCB 6CT 1 1/4 UNBLEACHED CONES",
+                "SKU": null,
+                "Brand": {
+                  "Name": "TRIFECTA"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "BMaBmjDNmT",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-09T21:25:28.000Z",
+          "createdAt": "2026-04-09T21:26:04.873Z",
+          "updatedAt": "2026-04-28T17:29:55.037Z",
+          "FromName": "Clone To Grown, LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "1UEgIs5DBw",
+              "SKU": "272737988",
+              "OriginalQty": 9,
+              "CurrentQty": 9,
+              "Cost": 10800,
+              "Product": {
+                "objectId": "cIXyjg83UU",
+                "Name": "CARTEL 7PK INFU PREROLLS (S) G WAGON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "5oy7Uqw8Gk",
+              "SKU": "272738165",
+              "OriginalQty": 4,
+              "CurrentQty": 4,
+              "Cost": 4800,
+              "Product": {
+                "objectId": "gjOxBDghvH",
+                "Name": "CARTEL 7PK INFU PREROLLS (I) STRAWBERRY CHEESECAKE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "SCor9W6UON",
+              "SKU": "272738752",
+              "OriginalQty": 13,
+              "CurrentQty": 13,
+              "Cost": 15600,
+              "Product": {
+                "objectId": "74iLgGt8Bn",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (I) BLACK MAMBA",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "3KnJ17GehK",
+              "SKU": "272738895",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "TdH1RTEppC",
+                "Name": "CARTEL 3G DISPO (I) MK ULTRA",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "FCReg7mq7r",
+              "SKU": "272739121",
+              "OriginalQty": 30,
+              "CurrentQty": 30,
+              "Cost": 7500,
+              "Product": {
+                "objectId": "kjPP5c2Cuq",
+                "Name": "CARTEL 1.2G INFU PREROLL (H) CLOUD 9",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "xQh0OfxDmY",
+              "SKU": "272739300",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "nvf366QRYJ",
+                "Name": "CARTEL 1.2G INFU PREROLL (H) HATERADE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "SCPKCRt6EB",
+              "SKU": "272739806",
+              "OriginalQty": 30,
+              "CurrentQty": 30,
+              "Cost": 7500,
+              "Product": {
+                "objectId": "GdzWREZuw1",
+                "Name": "CARTEL 1.2G INFU PREROLL (H) MAC MELON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "I6PUWx9h3J",
+              "SKU": "272740470",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 2500,
+              "Product": {
+                "objectId": "6POnSfYpAz",
+                "Name": "CARTEL 1.2G INFU PREROLL (H) MENDOCINO PURPS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "1aEWu1EerX",
+              "SKU": "272740511",
+              "OriginalQty": 30,
+              "CurrentQty": 30,
+              "Cost": 7500,
+              "Product": {
+                "objectId": "QVmjFn4814",
+                "Name": "CARTEL 1.2G INFU PREROLL (I) GOD'S TREAT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "72Bl776uyo",
+              "SKU": "272740701",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "BQfzZyf4IR",
+                "Name": "CARTEL 1.2G INFU PREROLL (I) PINK CHAMPAGNE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "Vi1CS1YMO7",
+              "SKU": "272743026",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 2500,
+              "Product": {
+                "objectId": "mLQ0UL6RH4",
+                "Name": "CARTEL 1.2G INFU PREROLL (I) PITBULL",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "NHIFPxgwXg",
+              "SKU": "272743172",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "aRJHhd7nnC",
+                "Name": "CARTEL 1.2G INFU PREROLL (I) PLUTO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "RcPVmz8ke8",
+              "SKU": "272743367",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 2500,
+              "Product": {
+                "objectId": "SPRprdLHq2",
+                "Name": "CARTEL 1.2G INFU PREROLL (S) MANGO DREAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "E7etVDQNIG",
+              "SKU": "272743446",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "Z5tEGzG3qf",
+                "Name": "CARTEL 1.2G INFU PREROLL (S) RED HEADED STRANGER",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "qza9FhWub4",
+              "SKU": "272744293",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 2500,
+              "Product": {
+                "objectId": "5QKPLfTVmR",
+                "Name": "CARTEL 1.2G INFU PREROLL (S) WHITE DURBAN",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "oTjHipmDDH",
+              "SKU": "272744541",
+              "OriginalQty": 2,
+              "CurrentQty": 2,
+              "Cost": 3000,
+              "Product": {
+                "objectId": "OmU3ZEF5pL",
+                "Name": "CARTEL 5PK ROS INFU PREROLLS (S) ZOMBIE SALSA X DANTES INFERNO",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "1u47KqJQ0F",
+              "SKU": "272744556",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "sDqDapvTJi",
+                "Name": "CARTEL 7PK DIAM INFU PREROLL (H) DIRTY BIRD",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "PsVPmOAs5w",
+              "SKU": "272744683",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "W6QsfcjkUj",
+                "Name": "CARTEL 7PK INFU PREROLLS (S) TITAN EXPRESS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "L1xJDFxzkA",
+              "SKU": "272744988",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "zD0WghhrNv",
+                "Name": "CARTEL 7PK INFU PREROLLS (I) STRAWBERRY CAKE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "y00nTJWYD2",
+              "SKU": "272745148",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "B5YFiHehLe",
+                "Name": "CARTEL 7PK DIAM INFU PREROLLS (I) BUBBA BERRY",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "tdJuiGA3XB",
+              "SKU": "272745295",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "XNDjL4nDiN",
+                "Name": "CARTEL 1.2G DIAM INFU PREROLL (H) GOLDEN GOAT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "dCwjd1uVRd",
+              "SKU": "272745323",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "GHkkoP7Zoh",
+                "Name": "CARTEL 1.2G DIAM INFU PREROLL (I) AFTERGLOW",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "qaN2tYS9Ry",
+              "SKU": "272745341",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "F73hjHTVvD",
+                "Name": "CARTEL 1.2G DIAM INFU PREROLL (I) RED POP",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "5qYbP1pHuz",
+              "SKU": "272745753",
+              "OriginalQty": 20,
+              "CurrentQty": 20,
+              "Cost": 5000,
+              "Product": {
+                "objectId": "fdc7J3jhrP",
+                "Name": "CARTEL 1.2G DIAM INFU PREROLL (I) SUGAR MAMA",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "Fry0LQEWxx",
+              "SKU": "272745815",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "AgOCDaiCqC",
+                "Name": "CARTEL 3G DISPO (I) BLACKBERRY KUSH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "F9Za3QPONE",
+              "SKU": "272745849",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "vU5NZN9SFS",
+                "Name": "CARTEL 3G DISPO (I) HAMMERHEAD",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "Q14ydFNhy1",
+              "SKU": "272745931",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "flOUGJhwwW",
+                "Name": "CARTEL 3G DISPO (I) KING LOUIS XIII",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "tYmXXs6coe",
+              "SKU": "272745966",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "JBszTomwKO",
+                "Name": "CARTEL 3G DISPO (S) GREEN CRACK",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "yLtcR4Vyq7",
+              "SKU": "272746077",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 10000,
+              "Product": {
+                "objectId": "jqxdoGGuv6",
+                "Name": "CARTEL 3G DISPO (S) PINK RUNTZ",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "Du1gOMW7PZ",
+              "SKU": "272746071",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "GxDXAGVr7M",
+                "Name": "CARTEL 7PK INFU PREROLLS (H) RAINBOW SHERBET",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "IAnWXLoV5Y",
+              "SKU": "272747642",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "f1DM4ucP1M",
+                "Name": "CARTEL 7PK INFU PREROLLS (I) DEVIL FRUIT",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "oKm9GcKwz6",
+              "SKU": "272747645",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "m6k35l4Cl3",
+                "Name": "CARTEL 7PK INFU PREROLLS (I) MAGNIFICENT MILE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "wwkRYSgxwy",
+              "SKU": "272748068",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 12000,
+              "Product": {
+                "objectId": "iNrzSGV88F",
+                "Name": "CARTEL 7PK INFU PREROLLS (I) MATARO BLUE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "6RZ2y15gJs",
+              "SKU": "272748211",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "DbHOCFr2nz",
+                "Name": "CARTEL 7PK INFU PREROLLS (S) ALPHA EXPRESS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            },
+            {
+              "objectId": "1socS5tcCm",
+              "SKU": "272748292",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6000,
+              "Product": {
+                "objectId": "bcsEPZIA0s",
+                "Name": "CARTEL 7PK INFU PREROLLS (S) JACK SMACK",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Cartel"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "m5d1Efk9ga",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-09T20:17:35.000Z",
+          "createdAt": "2026-04-09T20:17:43.270Z",
+          "updatedAt": "2026-04-28T14:15:49.178Z",
+          "FromName": "Sunday Extracts LLC",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "dmxb8dBfLx",
+              "SKU": "272733499",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "4CGIdiGYcX",
+                "Name": "Sunday Blue Dream Distillate Cartridge 1g",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "7RG2TSU8fM",
+              "SKU": "272733559",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "LLQW61jMEA",
+                "Name": "SUNDAY 1G CARTRIDGE DURBAN POISON",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "NAhqptODYm",
+              "SKU": "272733612",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "UbySIkfjtR",
+                "Name": "SUNDAY 1G CARTRIDGE HARLEQUIN",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "IlH9kmQkP3",
+              "SKU": "272733663",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "lAxBB1htdA",
+                "Name": "SUNDAY LA POP ROCKS DISTILLATE CARTRIDGE 1g",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "YUh8A0qBOf",
+              "SKU": "272733683",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "tkDZOkpwTO",
+                "Name": "SUNDAY 1G CART (H) NOW N LATER",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "EfdDKJ9cjG",
+              "SKU": "272733725",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "YMyWZA0J2R",
+                "Name": "SUNDAY RUNTZ CART 1g",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "yGqJeOImxk",
+              "SKU": "272733796",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "Tf1IkNCddJ",
+                "Name": "SUNDAY 1G CART (I) PACIFIC PEACH",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "w5dVXiYxUF",
+              "SKU": "272734047",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "kkGosjTJlt",
+                "Name": "SUNDAY 2G DISPOSABLE (S) BAJA BLAST",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "gulOtr4tu0",
+              "SKU": "272734079",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "73bE1YilAa",
+                "Name": "SUNDAY 2G DISPOSABLE CART (S) BLUE DREAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "InjlNCDiBk",
+              "SKU": "272734107",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "2Ocdyezcvz",
+                "Name": "SUNDAY GRANDADDY PURPLE DISPOSABLE 2G (I)",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "u3RPp0Ej2m",
+              "SKU": "272734415",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "WwoXXFErFI",
+                "Name": "SUNDAY 2G DISPOSABLE (S) GREEN CRACK",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "3v37AGzaxH",
+              "SKU": "272734437",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "gmUtOjdDxG",
+                "Name": "SUNDAY 2G DISPO (I) PURPLE NERDS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "OFnLG53cXr",
+              "SKU": "272734460",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "pgApO22vF8",
+                "Name": "SUNDAY 2G DISPO (I) WEDDING CAKE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "xk3bXLh2Pd",
+              "SKU": "272734487",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "QH1ea5Tw3C",
+                "Name": "Sunday Purple Nerds Tropical Flavor Cart 1g",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "UkhViJDlpQ",
+              "SKU": "272734579",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "VBgjg5stJn",
+                "Name": "SUNDAY 1G CART (S) APPLE JACK",
+                "SKU": null,
+                "Brand": null
+              }
+            },
+            {
+              "objectId": "0frieCkAqd",
+              "SKU": "272734595",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 2985,
+              "Product": {
+                "objectId": "CLy0drkbsk",
+                "Name": "SUNDAY MAUI WOWIE DISTILLATE CARTRIDGE 1g",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "FC1A0X2E0i",
+              "SKU": "272734628",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "OEnrGFDi47",
+                "Name": "SUNDAY 2G DISPOSABLE (H) LEMON DROP",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "MUHiJd01wK",
+              "SKU": "272734654",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "wtzk5yIPMC",
+                "Name": "SUNDAY 2G (I) LA POP ROCKS",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            },
+            {
+              "objectId": "5IU4weJJMO",
+              "SKU": "272734697",
+              "OriginalQty": 5,
+              "CurrentQty": 5,
+              "Cost": 6485,
+              "Product": {
+                "objectId": "ildlKWaKrM",
+                "Name": "SUNDAY NOW N LATER DISPOSABLE (H) 2G",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Sunday Extracts"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "objectId": "uhTHMLsc3p",
+          "Status": "Accepted",
+          "ReceivedAt": "2026-04-09T19:58:42.000Z",
+          "createdAt": "2026-04-09T20:01:20.020Z",
+          "updatedAt": "2026-04-28T14:15:50.152Z",
+          "FromName": "Paragon Extracts Inc.",
+          "Store": {
+            "objectId": "LAaRiZ5VU4",
+            "Name": "Nugz Dispensary"
+          },
+          "ReceivingStore": null,
+          "Packages": [
+            {
+              "objectId": "KuyXbgx4JG",
+              "SKU": "272732629",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "HBKvJEFVuz",
+                "Name": "DI 2G DISPO (I) BLACKBERRY OG",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            },
+            {
+              "objectId": "9SdmnMECP5",
+              "SKU": "272732670",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "OCbzOsSjq5",
+                "Name": "DI 2G DISPO (S) BLUEBERRY LEMON HAZE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            },
+            {
+              "objectId": "y34YwqAiSp",
+              "SKU": "272732701",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "EaymZPbJZd",
+                "Name": "DI 2G DISPO (S) CANTALOUPE DREAM",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            },
+            {
+              "objectId": "CiPzUTnIeL",
+              "SKU": "272732736",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "Wpj8i1Wdpo",
+                "Name": "DI 2G DISPO (S) MANGO DIESEL",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            },
+            {
+              "objectId": "fZ0GIz5Phh",
+              "SKU": "272732783",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "thWO8XDI7S",
+                "Name": "DI 2G DISPO (H) PINK ROSE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            },
+            {
+              "objectId": "LgXdMayG5A",
+              "SKU": "272732814",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "4pVtMKUW6e",
+                "Name": "DI 2G DISPO (S) STRAWBERRY COUGH",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            },
+            {
+              "objectId": "YKBZnfGcE6",
+              "SKU": "272732893",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "oYpxk8H1pc",
+                "Name": "DI 2G DISPO (H) TROPICAL KIWI",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            },
+            {
+              "objectId": "gpUroYWPwr",
+              "SKU": "272732938",
+              "OriginalQty": 10,
+              "CurrentQty": 10,
+              "Cost": 14950,
+              "Product": {
+                "objectId": "cfGvwJBDc5",
+                "Name": "DI 2G DISPO (H) WEDDING CAKE",
+                "SKU": null,
+                "Brand": {
+                  "Name": "Dime Industries"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

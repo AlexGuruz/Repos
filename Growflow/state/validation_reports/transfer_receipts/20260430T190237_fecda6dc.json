@@ -1,0 +1,53 @@
+{
+  "ok": false,
+  "metric_id": "transfer_receipts",
+  "template_id": "transfer_receipts_accepted_v1",
+  "request_id": "20260430T190237_fecda6dc",
+  "mode": "discovery",
+  "requested_date_range": {
+    "from": "2026-01-01T00:00:00Z",
+    "to": null
+  },
+  "response_date_range_detected": {
+    "from": "2026-01-01T01:47:06Z",
+    "to": "2026-04-30T18:38:48Z"
+  },
+  "expected_root_found": true,
+  "missing_required_fields": [],
+  "type_errors": [],
+  "empty_result_status": "ok",
+  "duplicate_count": 0,
+  "sanity_warnings": [],
+  "target_alignment_warnings": [],
+  "parser_warnings": [],
+  "schema_drift_warnings": [],
+  "schema_verification": {
+    "baseline_exists": false,
+    "drift": null,
+    "baseline_updated": false,
+    "schema_drift_warnings": []
+  },
+  "normalized_row_count": 120,
+  "confidence": "discovery",
+  "confidence_score": 0.35,
+  "field_confidence": {
+    "objectId": "confirmed",
+    "Status": "confirmed",
+    "ReceivedAt": "confirmed",
+    "FromName": "confirmed",
+    "Store.objectId": "inferred",
+    "Store.Name": "inferred",
+    "ReceivingStore.objectId": "inferred",
+    "ReceivingStore.Name": "inferred",
+    "Packages": "unstable"
+  },
+  "field_confidence_counts": {
+    "confirmed": 4,
+    "inferred": 4,
+    "unstable": 1
+  },
+  "hard_failures": [],
+  "raw_saved_path": "E:\\Repos\\Growflow\\state\\raw_responses\\transfer_receipts\\20260430T190237_fecda6dc.json",
+  "normalized_output_path": null,
+  "generated_at": "2026-04-30T19:02:38Z"
+}
