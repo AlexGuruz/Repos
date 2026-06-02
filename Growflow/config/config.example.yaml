@@ -22,6 +22,21 @@ sync:
   # How often to check for updates (minutes)
   interval_minutes: 60
 
+# Daily tax totals sheet (Register 1 close watcher)
+taxes_sheet:
+  spreadsheet_id: "1GizTKLceyoVVOVAIDrODebYbCK4hRhD5Q9jZ-s0qgIs"
+  sheet_name: "Taxes"
+  service_account_path: "E:/secrets/gcp/sa.json"
+
+register_close_notify:
+  register_name: "Register 1"
+  # Oklahoma Central (America/Chicago): ~8 PM Sunday, ~10 PM Mon-Sat closes
+  min_local_end_hour_sunday: 20
+  min_local_end_hour_mon_sat: 22
+  notify_once_per_sales_date: true
+  poll_interval_seconds: 120
+  state_path: data/register_close_taxes_state.json
+
 # COG allocation - sales CSV destination
 # Drive folder watched by cog-allocation-system drive_watcher
 google_drive:
