@@ -1,7 +1,7 @@
 """Tests for register close Telegram report helpers."""
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from lib.daily_close_report import DailyCloseReport, format_daily_close_telegram
@@ -13,6 +13,7 @@ from lib.register_shift_watch import (
     extract_closed_shifts,
     filter_notifiable_events,
     poll_window_schedule_from_config,
+    resolve_transaction_poll_since,
 )
 
 
@@ -145,6 +146,25 @@ def test_poll_window_mon_sat_starts_at_10pm():
     assert w.in_window(datetime(2026, 6, 9, 1, 30, tzinfo=tz))
     # Tuesday 2:30 AM — outside
     assert not w.in_window(datetime(2026, 6, 9, 2, 30, tzinfo=tz))
+
+
+def test_resolve_transaction_poll_since_not_last_poll_only():
+    """Shift close may not bump updatedAt; cursor must reach back before last_poll_at."""
+    tz = ZoneInfo("America/Chicago")
+    now_local = datetime(2026, 6, 2, 22, 15, tzinfo=tz)
+    now_utc = now_local.astimezone(timezone.utc)
+    last_poll = (now_utc - timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    window = PollWindowSchedule(sunday_start=20, mon_sat_start=22, window_hours=4)
+
+    since = resolve_transaction_poll_since(
+        now_utc=now_utc,
+        now_local=now_local,
+        last_poll_at=last_poll,
+        lookback_hours=36,
+        poll_window=window,
+    )
+    assert since <= now_utc - timedelta(hours=35)
+    assert since < datetime.fromisoformat(last_poll.replace("Z", "+00:00"))
 
 
 def test_poll_window_sunday_starts_at_8pm():

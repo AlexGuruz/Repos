@@ -23,6 +23,7 @@ from lib.register_shift_watch import (
     load_state,
     mark_notified,
     poll_window_schedule_from_config,
+    resolve_transaction_poll_since,
     save_state,
 )
 from lib.taxes_sheet_export import resolve_taxes_sheet_config, write_taxes_to_sheet
@@ -86,18 +87,13 @@ def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -
     state = load_state(state_path)
     now_utc = datetime.now(timezone.utc)
     now_local = now_utc.astimezone(tz)
-    candidates: list[datetime] = [now_utc - timedelta(hours=lookback_hours)]
-    if state.get("last_poll_at"):
-        try:
-            lp = str(state["last_poll_at"]).replace("Z", "+00:00")
-            candidates.append(datetime.fromisoformat(lp))
-        except ValueError:
-            pass
-    # During EOD window, always scan today's local transactions (shift close may not bump updatedAt).
-    if poll_window_schedule_from_config(cfg).in_window(now_local):
-        day_start = datetime(now_local.year, now_local.month, now_local.day, tzinfo=tz)
-        candidates.append(day_start.astimezone(timezone.utc))
-    since_dt = min(candidates)
+    since_dt = resolve_transaction_poll_since(
+        now_utc=now_utc,
+        now_local=now_local,
+        last_poll_at=state.get("last_poll_at"),
+        lookback_hours=lookback_hours,
+        poll_window=poll_window_schedule_from_config(cfg),
+    )
     since = since_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
     txs = fetch_transactions_since(since, credentials_path=cfg.get("credentials_path"))
@@ -124,7 +120,14 @@ def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -
             f"Register close shift={ev.shift_id} date={ev.sales_date} end={ev.end_time_local.isoformat()}",
             cfg,
         )
-        _export_for_date(ev.sales_date, cfg=cfg, tz=tz, shift_end_local=ev.end_time_local, dry_run=dry_run)
+        try:
+            _export_for_date(
+                ev.sales_date, cfg=cfg, tz=tz, shift_end_local=ev.end_time_local, dry_run=dry_run
+            )
+        except Exception as e:
+            _append_log(f"Export FAILED for {ev.sales_date}: {e}", cfg)
+            print(f"Export FAILED for {ev.sales_date}: {e}", file=sys.stderr, flush=True)
+            continue
         if not dry_run:
             mark_notified(state, ev)
             exported += 1

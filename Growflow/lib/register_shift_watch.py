@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -86,6 +86,38 @@ def poll_window_schedule_from_config(cfg: dict[str, Any]) -> PollWindowSchedule:
         mon_sat_start=int(mon_sat),
         window_hours=int(hours),
     )
+
+
+def resolve_transaction_poll_since(
+    *,
+    now_utc: datetime,
+    now_local: datetime,
+    last_poll_at: str | None,
+    lookback_hours: int,
+    poll_window: PollWindowSchedule | None = None,
+) -> datetime:
+    """
+    Earliest ``updatedAt`` cursor for findTransactions during register-close polling.
+
+    GrowFlow often leaves transaction ``updatedAt`` at the last sale time when a shift
+    closes, so using only ``last_poll_at`` can skip the closed shift on the next poll.
+    """
+    if now_utc.tzinfo is None:
+        now_utc = now_utc.replace(tzinfo=timezone.utc)
+    candidates: list[datetime] = [now_utc - timedelta(hours=lookback_hours)]
+    if last_poll_at:
+        try:
+            lp = str(last_poll_at).replace("Z", "+00:00")
+            candidates.append(datetime.fromisoformat(lp))
+        except ValueError:
+            pass
+    window = poll_window or PollWindowSchedule()
+    if window.in_window(now_local):
+        day_start = datetime(
+            now_local.year, now_local.month, now_local.day, tzinfo=now_local.tzinfo
+        )
+        candidates.append(day_start.astimezone(timezone.utc))
+    return min(candidates)
 
 
 @dataclass(frozen=True)
