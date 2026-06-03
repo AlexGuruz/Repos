@@ -84,12 +84,21 @@ def _append_log(message: str, cfg: dict) -> None:
 def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -> int:
     state_path = Path(str(cfg.get("state_path")))
     state = load_state(state_path)
-    last_poll = state.get("last_poll_at")
-    if last_poll:
-        since = last_poll
-    else:
-        since_dt = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
-        since = since_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    now_utc = datetime.now(timezone.utc)
+    now_local = now_utc.astimezone(tz)
+    candidates: list[datetime] = [now_utc - timedelta(hours=lookback_hours)]
+    if state.get("last_poll_at"):
+        try:
+            lp = str(state["last_poll_at"]).replace("Z", "+00:00")
+            candidates.append(datetime.fromisoformat(lp))
+        except ValueError:
+            pass
+    # During EOD window, always scan today's local transactions (shift close may not bump updatedAt).
+    if poll_window_schedule_from_config(cfg).in_window(now_local):
+        day_start = datetime(now_local.year, now_local.month, now_local.day, tzinfo=tz)
+        candidates.append(day_start.astimezone(timezone.utc))
+    since_dt = min(candidates)
+    since = since_dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
     txs = fetch_transactions_since(since, credentials_path=cfg.get("credentials_path"))
     events = extract_closed_shifts(
