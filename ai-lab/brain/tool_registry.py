@@ -101,6 +101,24 @@ _DEFAULT_TOOLS: list[dict[str, Any]] = [
         "risk_level": "medium",
         "output_shape": "script execution result",
     },
+    {
+        "name": "bank_vendor_cleaner_pipeline",
+        "description": "Clean bank transaction labels and city/state via scripts/sheet_label_pipeline.py. Default invocation is dry-run preview.",
+        "args": {"spreadsheet_id": "optional", "dry_run": "bool", "approved": "bool"},
+        "side_effects": "read_only when dry_run=true; writes Google Sheet columns C/D when dry_run=false",
+        "approval_required": False,
+        "risk_level": "low",
+        "output_shape": "run report JSON with rows_processed and preview",
+    },
+    {
+        "name": "bank_vendor_lookup_worker",
+        "description": "Propose candidate merchant labels for unknown rows via scripts/vendor_lookup_worker.py. Never writes sheet C/D.",
+        "args": {"raw_input": "string", "city_hint": "optional", "state_hint": "optional", "dry_run": "bool"},
+        "side_effects": "read_only; may append pending cache and review queue when not dry_run",
+        "approval_required": True,
+        "risk_level": "medium",
+        "output_shape": "candidate label/location JSON with confidence and decision",
+    },
 ]
 
 

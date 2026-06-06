@@ -1,0 +1,18 @@
+version: 1
+entries:
+  - raw_pattern: "kraken 8888378818 *n tx"
+    canonical_label: "Kraken"
+    city: ""
+    state: "TX"
+    confidence: high
+    source: web_lookup
+    approved: true
+    last_reviewed_at: "2026-06-06"
+pending:
+  - raw_pattern: "abc*p 07320 pf terre 812-235-5001 in 05/29"
+    candidate_label: "ABC Store"
+    candidate_city: "Terre Haute"
+    candidate_state: "IN"
+    confidence: low
+    source: web_lookup
+    approved: false

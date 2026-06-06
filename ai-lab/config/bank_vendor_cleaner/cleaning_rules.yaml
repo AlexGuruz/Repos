@@ -1,0 +1,57 @@
+version: 1
+
+normalization:
+  trim: true
+  collapse_whitespace: true
+  case_rules:
+    input_match_case: lower
+    output_case: title_case_preserve_brand_style
+  punctuation_rules:
+    - strip_trailing_commas
+    - strip_trailing_colons
+    - normalize_multiple_spaces
+  strip_prefixes:
+    - "pos purchase"
+    - "recur payment"
+    - "payment to"
+    - "online payment"
+    - "internet payment"
+    - "reverse charge:"
+    - "atm withdrawal"
+    - "atm deposit"
+  strip_suffixes:
+    - "seq#"
+    - "transaction#"
+    - "store #"
+    - "inside"
+    - "outside"
+  forbidden_characters:
+    - "\t"
+    - "\r"
+  replacements:
+    - {from: "wal-mart", to: "walmart", case_sensitive: false}
+    - {from: "wm supercenter us", to: "walmart", case_sensitive: false}
+    - {from: "murphy7440atwalmart", to: "murphy", case_sensitive: false}
+    - {from: "murphy7440atwalm", to: "murphy", case_sensitive: false}
+    - {from: "etoro viatrustly", to: "etoro", case_sensitive: false}
+    - {from: "coinbase inc.", to: "coinbase", case_sensitive: false}
+    - {from: "okgov", to: "ok gov", case_sensitive: false}
+
+row_order_rules:
+  process_top_to_bottom: true
+  skip_if_column_c_blank: true
+  skip_if_already_clean: false
+  preserve_row_numbers: true
+
+write_boundary_rules:
+  stop_at_last_nonblank_row_in_column: "C"
+  never_write_below_boundary: true
+  never_write_columns_outside: ["C", "D"]
+  batch_size: 200
+  dry_run_mode: "compute only; no writes"
+
+single_sheet_scope_rules:
+  allowed_spreadsheet_id: "1AltaqtCXrld_zgTK52oRz0YwkWie2h8FX0JWqgoxHNY"
+  allowed_source_sheet_name: "transaction tab sheet"
+  allowed_dest_sheet_name: "CLEANED TRANSACTIONS-TAB SHEET"
+  abort_if_wrong_sheet: true

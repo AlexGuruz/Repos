@@ -35,6 +35,13 @@ def test_classify_sales_today_fluid_phrasing():
         assert params.get("tool_hint") == "growflow_sales_today", phrase
 
 
+def test_classify_bank_vendor_cleaner():
+    intent, params = classify_intent("run bank vendor cleaner")
+    assert intent == "run"
+    assert params.get("tool_hint") == "bank_vendor_cleaner_pipeline"
+    assert params.get("args", {}).get("dry-run") == "true"
+
+
 def test_classify_approval():
     intent, _ = classify_intent("approve abc-123")
     assert intent == "approval"

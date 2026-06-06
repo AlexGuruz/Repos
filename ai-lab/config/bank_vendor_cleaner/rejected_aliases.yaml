@@ -1,0 +1,8 @@
+version: 1
+description: "Raw patterns that must never be auto-mapped or written as formulas"
+
+rejected_patterns:
+  - "^=$"
+  - "^=LET\\("
+  - "^=ARRAYFORMULA\\("
+  - "^=REGEX"

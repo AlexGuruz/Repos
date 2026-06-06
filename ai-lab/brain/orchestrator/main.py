@@ -162,6 +162,25 @@ def _is_short_social_greeting(normalized: str) -> bool:
 
 
 def _run_tool(tool_name: str, args: dict | None) -> RunResult:
+    if tool_name == "bank_vendor_cleaner_pipeline":
+        from brain.execution import run_bank_vendor_cleaner
+
+        params: dict = {}
+        if args:
+            if "dry_run" in args:
+                params["dry_run"] = args["dry_run"]
+            elif "dry-run" in args:
+                v = args["dry-run"]
+                params["dry_run"] = (
+                    v if isinstance(v, bool) else str(v).lower() in ("true", "1", "yes")
+                )
+            if "spreadsheet_id" in args:
+                params["spreadsheet_id"] = args["spreadsheet_id"]
+            if "source_sheet_name" in args:
+                params["source_sheet_name"] = args["source_sheet_name"]
+            if "dest_sheet_name" in args:
+                params["dest_sheet_name"] = args["dest_sheet_name"]
+        return run_bank_vendor_cleaner(params)
     return execution_run(tool_name, args or {})
 
 

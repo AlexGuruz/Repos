@@ -41,6 +41,25 @@ def classify_intent(message: str) -> tuple[str, dict]:
         return "approval", {}
     if "run" in msg and "script" in msg:
         return "run", {}
+    # Bank vendor cleaner (Google Sheets label pipeline)
+    if any(
+        phrase in msg
+        for phrase in (
+            "clean sheet labels",
+            "run label pipeline",
+            "run bank vendor cleaner",
+            "bank vendor cleaner",
+            "backfill cleaned transactions",
+            "rerun transaction cleaner",
+            "clean columns c and d",
+            "update city state column",
+        )
+    ):
+        return "run", {
+            "tool_hint": "bank_vendor_cleaner_pipeline",
+            "args": {"dry-run": "true"},
+        }
+
     # Growflow sales: "sales today", "growflow sales", "my sales", "what's my sales", "sales for today"
     if "growflow" in msg and "sales" in msg:
         return "run", {"tool_hint": "growflow_sales_today", "args": {"date": "today"}}

@@ -50,6 +50,20 @@ def _find_tool(tool_name: str) -> dict | None:
     return None
 
 
+def _cli_args_from_dict(args: dict[str, Any]) -> list[str]:
+    """Build script argv: underscores → dashes; bool True → flag only."""
+    argv: list[str] = []
+    for key, value in (args or {}).items():
+        flag = f"--{str(key).replace('_', '-')}"
+        if value is True:
+            argv.append(flag)
+        elif value is False or value is None:
+            continue
+        else:
+            argv.extend([flag, str(value)])
+    return argv
+
+
 def _resolve_path(entry: dict) -> Path | None:
     """Resolve script path. Prefer repo-relative from E:\\Repos if repo given."""
     path = entry.get("path")
@@ -117,14 +131,14 @@ def run(
             cmd = [os.environ.get("PYTHON", "python"), str(script_path)]
         else:
             cmd = [str(script_path)]
-        for k, v in (args or {}).items():
-            cmd.extend([f"--{k}", str(v)])
+        cmd.extend(_cli_args_from_dict(args))
+        cwd = str(AI_LAB_ROOT) if entry.get("repo") == "ai-lab" else str(script_path.parent)
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=timeout_sec,
-            cwd=str(script_path.parent),
+            cwd=cwd,
         )
         duration = time.perf_counter() - start
         out = RunResult(
@@ -150,3 +164,81 @@ def run(
     with open(log_path, "w") as f:
         json.dump({"tool_name": tool_name, "args": args, "result": out.to_dict()}, f, indent=2)
     return out
+
+
+def run_bank_vendor_cleaner(
+    params: dict[str, Any] | None = None,
+    *,
+    approval_context: dict[str, Any] | None = None,
+    timeout_sec: int = 300,
+) -> RunResult:
+    """
+    Run bank_vendor_cleaner_pipeline (scripts/sheet_label_pipeline.py).
+    Defaults to dry-run preview unless params['dry_run'] is False and approval granted.
+    """
+    from brain.bank_vendor_cleaner.loader import load_manifest
+
+    params = dict(params or {})
+    manifest = load_manifest()
+    scope = manifest.get("single_sheet_scope") or {}
+    spreadsheet_id = (
+        params.get("spreadsheet_id")
+        or os.environ.get("SPREADSHEET_ID")
+        or scope.get("spreadsheet_id")
+        or ""
+    )
+    dry_run = params.get("dry_run", True)
+    if isinstance(dry_run, str):
+        dry_run = dry_run.strip().lower() in {"1", "true", "yes", "on"}
+
+    cli_args: dict[str, Any] = {}
+    if spreadsheet_id:
+        cli_args["spreadsheet_id"] = spreadsheet_id
+    if params.get("source_sheet_name"):
+        cli_args["source_sheet_name"] = params["source_sheet_name"]
+    if params.get("dest_sheet_name"):
+        cli_args["dest_sheet_name"] = params["dest_sheet_name"]
+
+    if dry_run:
+        cli_args["dry_run"] = True
+    else:
+        cli_args["no_dry_run"] = True
+        if approval_context and approval_context.get("approved"):
+            cli_args["approved"] = True
+
+    return run(
+        "bank_vendor_cleaner_pipeline",
+        cli_args,
+        timeout_sec=timeout_sec,
+        approval_context=approval_context,
+    )
+
+
+def run_bank_vendor_lookup_worker(
+    params: dict[str, Any] | None = None,
+    *,
+    approval_context: dict[str, Any] | None = None,
+    timeout_sec: int = 120,
+) -> RunResult:
+    """Run bank_vendor_lookup_worker (scripts/vendor_lookup_worker.py). No sheet writes."""
+    params = dict(params or {})
+    cli_args: dict[str, Any] = {}
+    if params.get("raw_input"):
+        cli_args["raw_input"] = params["raw_input"]
+    if params.get("city_hint"):
+        cli_args["city_hint"] = params["city_hint"]
+    if params.get("state_hint"):
+        cli_args["state_hint"] = params["state_hint"]
+    dry_run = params.get("dry_run", True)
+    if isinstance(dry_run, str):
+        dry_run = dry_run.strip().lower() in {"1", "true", "yes", "on"}
+    if dry_run:
+        cli_args["dry_run"] = True
+    else:
+        cli_args["no_dry_run"] = True
+    return run(
+        "bank_vendor_lookup_worker",
+        cli_args,
+        timeout_sec=timeout_sec,
+        approval_context=approval_context,
+    )

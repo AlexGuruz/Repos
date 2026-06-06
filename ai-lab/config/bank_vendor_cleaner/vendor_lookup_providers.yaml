@@ -1,0 +1,13 @@
+version: 1
+providers:
+  local_cache:
+    enabled: true
+    path: "config/bank_vendor_cleaner/vendor_lookup_cache.yaml"
+  mcp_web_search:
+    enabled: true
+    tool_name: "vendor_lookup_search"
+    timeout_seconds: 10
+    max_results: 5
+  manual_review:
+    enabled: true
+    queue_path: "reports/vendor_lookup_review_queue.json"
