@@ -27,5 +27,14 @@
   },
   "auth_requirements": ["google_sheets_read", "google_sheets_write"],
   "risk_level": "medium",
-  "approval_required_for_writes": true
+  "approval_required_for_writes": true,
+  "local_model_policy": {
+    "qwen_operating_prompt": "docs/bank_vendor_cleaner/QWEN_OPERATING_PROMPT.md",
+    "runtime_policy": "docs/bank_vendor_cleaner/RUNTIME_POLICY.md",
+    "agent_instructions": "docs/bank_vendor_cleaner/AGENT_INSTRUCTIONS.md",
+    "memory_buckets": "config/bank_vendor_cleaner/memory_buckets.yaml",
+    "orchestrator_injection": "brain/bank_vendor_cleaner/llm_context.py",
+    "model_may_write_sheet": false,
+    "model_may_suggest_aliases": true
+  }
 }

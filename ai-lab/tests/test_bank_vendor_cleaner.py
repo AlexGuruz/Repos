@@ -74,6 +74,10 @@ def test_manifest_and_config_files_exist() -> None:
         "scripts/sheet_label_pipeline.py",
         "runbooks/bank_vendor_cleaner_pipeline_spec.md",
         "docs/bank_vendor_cleaner/AGENT_INSTRUCTIONS.md",
+        "docs/bank_vendor_cleaner/RUNTIME_POLICY.md",
+        "docs/bank_vendor_cleaner/QWEN_OPERATING_PROMPT.md",
+        "brain/prompts/bank_vendor_qwen_operating.txt",
+        "config/bank_vendor_cleaner/memory_buckets.yaml",
         "config/bank_vendor_cleaner/settings.example.env",
         "reports/.gitkeep",
     ):

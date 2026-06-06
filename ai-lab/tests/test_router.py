@@ -42,6 +42,18 @@ def test_classify_bank_vendor_cleaner():
     assert params.get("args", {}).get("dry-run") == "true"
 
 
+def test_classify_bank_vendor_lookup_worker():
+    intent, params = classify_intent("run vendor lookup")
+    assert intent == "run"
+    assert params.get("tool_hint") == "bank_vendor_lookup_worker"
+
+
+def test_classify_bank_vendor_qa():
+    intent, params = classify_intent("what canonical label for unknown merchant?")
+    assert intent == "bank_vendor_qa"
+    assert params == {}
+
+
 def test_classify_approval():
     intent, _ = classify_intent("approve abc-123")
     assert intent == "approval"

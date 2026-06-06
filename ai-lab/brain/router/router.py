@@ -59,6 +59,32 @@ def classify_intent(message: str) -> tuple[str, dict]:
             "tool_hint": "bank_vendor_cleaner_pipeline",
             "args": {"dry-run": "true"},
         }
+    if any(
+        phrase in msg
+        for phrase in (
+            "run vendor lookup",
+            "vendor lookup worker",
+            "lookup unknown merchants",
+        )
+    ):
+        return "run", {"tool_hint": "bank_vendor_lookup_worker", "args": {}}
+    # Bank vendor Q&A — policy injected in orchestrator LLM system prompt
+    if any(
+        phrase in msg
+        for phrase in (
+            "bank vendor",
+            "vendor cleaner",
+            "transaction cleaner",
+            "canonical label",
+            "vendor lookup",
+            "unknown merchant",
+            "alias map",
+            "memory alias",
+            "city state column",
+            "cleaned transactions",
+        )
+    ) and not any(run_word in msg for run_word in ("run ", "rerun ", "backfill ", "trigger ")):
+        return "bank_vendor_qa", {}
 
     # Growflow sales: "sales today", "growflow sales", "my sales", "what's my sales", "sales for today"
     if "growflow" in msg and "sales" in msg:

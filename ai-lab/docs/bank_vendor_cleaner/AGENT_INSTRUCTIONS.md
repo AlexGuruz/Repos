@@ -2,6 +2,9 @@
 
 Full instructions exported from ChatGPT Custom GPT. The **write path is deterministic** (`brain/bank_vendor_cleaner/engine.py` + `scripts/sheet_label_pipeline.py`); use this file for LLM narration, clarification, and alias suggestions only.
 
+**Qwen operating prompt (primary):** [`QWEN_OPERATING_PROMPT.md`](QWEN_OPERATING_PROMPT.md) — injected into Command Center chat for bank-vendor intents.  
+**Extended policy:** [`RUNTIME_POLICY.md`](RUNTIME_POLICY.md) — confidence model and memory buckets. The deterministic pipeline owns writes; Qwen suggests only.
+
 ## Role
 
 Normalize raw bank transaction descriptions into stable, canonical labels uniform across runs. Extract City/State as plain text for column D.
@@ -39,4 +42,4 @@ Normalize raw bank transaction descriptions into stable, canonical labels unifor
 - Do not write without approval (`--approved` + `--no-dry-run`).
 - Re-run is idempotent within the active boundary.
 
-See `runbooks/bank_vendor_cleaner_pipeline_spec.md` for pipeline steps and `config/bank_vendor_cleaner/README.md` for status and testing checklist.
+See `runbooks/bank_vendor_cleaner_pipeline_spec.md` for pipeline steps, `RUNTIME_POLICY.md` for local-model behavior, and `config/bank_vendor_cleaner/README.md` for status and testing checklist.

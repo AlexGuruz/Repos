@@ -181,6 +181,10 @@ def _run_tool(tool_name: str, args: dict | None) -> RunResult:
             if "dest_sheet_name" in args:
                 params["dest_sheet_name"] = args["dest_sheet_name"]
         return run_bank_vendor_cleaner(params)
+    if tool_name == "bank_vendor_lookup_worker":
+        from brain.execution import run_bank_vendor_lookup_worker
+
+        return run_bank_vendor_lookup_worker(args or {})
     return execution_run(tool_name, args or {})
 
 
@@ -1060,6 +1064,10 @@ def run(
             tool=tool_name,
         )
         if result.success:
+            if tool_name in ("bank_vendor_cleaner_pipeline", "bank_vendor_lookup_worker"):
+                from brain.bank_vendor_cleaner.llm_context import BANK_VENDOR_ACTIVE_TOPIC
+
+                session_state.update_active_topic(session_id, BANK_VENDOR_ACTIVE_TOPIC)
             reply = f"Ran **{tool_name}**. Output:\n```\n{result.stdout or '(no output)'}\n```"
         else:
             session_state.update_after_tool(
@@ -1823,6 +1831,18 @@ def run(
             pass
         if rr_context:
             system_content += "\n\n" + rr_context
+        try:
+            from brain.bank_vendor_cleaner.llm_context import append_to_system_prompt
+
+            system_content = append_to_system_prompt(
+                system_content,
+                msg,
+                session_id=session_id,
+                intent=intent,
+                params=params,
+            )
+        except Exception:
+            pass
         user_content = message + evidence_block
         messages = [
             {"role": "system", "content": system_content},

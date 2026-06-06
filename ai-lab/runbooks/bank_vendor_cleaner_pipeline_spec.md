@@ -29,13 +29,17 @@ Copy `config/bank_vendor_cleaner/settings.example.env` and set paths/secrets.
 
 ## Algorithm
 
+Full decision order and priority ladder: `docs/bank_vendor_cleaner/RUNTIME_POLICY.md`.
+
 1. Load config + manifest; assert spreadsheet/sheet scope.
 2. Open spreadsheet; read source column C from `START_ROW`.
 3. Boundary = last nonblank row in source C.
 4. For each row (top to bottom):
-   - alias lookup (`memory_alias_map.yaml`)
-   - ordered canonical rules (`cleaning_rules.yaml` + engine)
-   - deterministic city/state extraction
+   - boundary + blank-row checks
+   - alias lookup (`memory_alias_map.yaml`) — exact + normalized
+   - deterministic label classification (`CANONICAL_RULES` + fallback)
+   - location extraction on raw string before destructive cleanup
+   - recovery pass (alias-location, trailing patterns, state-only)
 5. Build plain-text write payloads for destination C and D.
 6. Abort if payloads look like formulas (`=` prefix).
 7. If `DRY_RUN=true`: print preview + write report JSON; stop.

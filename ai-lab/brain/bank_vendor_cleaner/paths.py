@@ -41,6 +41,18 @@ def agent_instructions_path() -> Path:
     return docs_dir() / "AGENT_INSTRUCTIONS.md"
 
 
+def runtime_policy_path() -> Path:
+    return docs_dir() / "RUNTIME_POLICY.md"
+
+
+def qwen_operating_prompt_path() -> Path:
+    return docs_dir() / "QWEN_OPERATING_PROMPT.md"
+
+
+def memory_buckets_path() -> Path:
+    return config_dir() / "memory_buckets.yaml"
+
+
 def pipeline_spec_path() -> Path:
     return _AI_LAB_ROOT / "runbooks" / "bank_vendor_cleaner_pipeline_spec.md"
 

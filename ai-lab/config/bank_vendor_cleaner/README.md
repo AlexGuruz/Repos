@@ -67,6 +67,16 @@ Optional unknown-merchant research — **never writes C/D**.
 - Runbook: `runbooks/bank_vendor_cleaner_vendor_lookup.md`
 - Pipeline flag: `--vendor-lookup`
 
+## Local model policy
+
+- **Qwen operating prompt (primary):** `docs/bank_vendor_cleaner/QWEN_OPERATING_PROMPT.md`
+- **Runtime policy (extended):** `docs/bank_vendor_cleaner/RUNTIME_POLICY.md`
+- **Memory buckets:** `config/bank_vendor_cleaner/memory_buckets.yaml`
+- **Command Center:** orchestrator injects `QWEN_OPERATING_PROMPT.md` via `brain/bank_vendor_cleaner/llm_context.py` for `bank_vendor_qa` and active-topic follow-ups
+- **LM Studio stub:** `brain/prompts/bank_vendor_qwen_operating.txt` (pair with operating prompt when calling Qwen outside orchestrator)
+
+Deterministic code owns writes. Qwen (or any local LLM) suggests aliases and interprets vendor lookup only; approved results promote into `memory_alias_map.yaml`.
+
 ## Notes
 
 The Python script + YAML rules are the source of truth.
