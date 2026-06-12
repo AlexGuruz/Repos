@@ -86,3 +86,38 @@ def test_resolve_approval_returns_error_for_missing_id():
     assert response.json()["ok"] is False
     assert "not found" in response.json()["error"]
     assert publish.await_count == 0
+
+
+def test_permanent_rule_endpoint_derives_scoped_match_from_approval(tmp_path, monkeypatch):
+    monkeypatch.setenv("AI_LAB_PERMANENT_ALLOWLIST_PATH", str(tmp_path / "rules.json"))
+    pending = {
+        "action_type": "run_approved",
+        "file_path": "registry/safe_report.py",
+        "reason": "scheduled report",
+    }
+    with patch.object(events, "list_pending", return_value=[("approval-1", pending)]), \
+         patch.object(events.bus, "publish") as publish:
+        client = _client()
+        response = client.post("/api/approvals/permanent", json={"approval_id": "approval-1"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ok"] is True
+    assert body["rule"]["action"] == "run_approved"
+    assert body["rule"]["match"]["file_path"] == "registry/safe_report.py"
+    assert publish.await_count == 1
+
+    assert client.get("/api/approvals/permanent").json()["rules"][0]["id"] == body["rule"]["id"]
+
+
+def test_permanent_rule_endpoint_rejects_forbidden_actions(tmp_path, monkeypatch):
+    monkeypatch.setenv("AI_LAB_PERMANENT_ALLOWLIST_PATH", str(tmp_path / "rules.json"))
+    client = _client()
+
+    response = client.post(
+        "/api/approvals/permanent",
+        json={"action": "restart_service", "match": {"target": "worker"}},
+    )
+
+    assert response.status_code == 400
+    assert "cannot be permanently allowlisted" in response.json()["detail"]
