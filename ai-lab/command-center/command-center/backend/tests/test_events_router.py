@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from routers import events
+from services import supervisor_bridge
 
 
 class _ExecutionResult:
@@ -86,3 +87,39 @@ def test_resolve_approval_returns_error_for_missing_id():
     assert response.json()["ok"] is False
     assert "not found" in response.json()["error"]
     assert publish.await_count == 0
+
+
+def test_resolve_supervisor_apr_executes_pending_controlled_payload():
+    supervisor_bridge._PENDING_CONTROLLED_APPROVALS.clear()
+    supervisor_bridge._PENDING_CONTROLLED_APPROVALS["APR-3"] = {
+        "agent": "command-center",
+        "action": "run_approved",
+        "payload": {"tool_name": "safe_tool"},
+        "created_at": "2026-03-16T00:00:00Z",
+    }
+    try:
+        with patch.object(events, "list_pending", return_value=[]), \
+             patch.object(events, "_resolve_queue", return_value=False), \
+             patch.object(events.bus, "publish") as publish, \
+             patch.object(
+                 supervisor_bridge,
+                 "execute_approved",
+                 new=AsyncMock(return_value={"ok": True, "act_id": "ACT-3", "apr_id": "APR-3"}),
+             ) as execute_approved:
+            client = _client()
+            response = client.post("/api/approvals/resolve", json={"id": "APR-3", "resolution": "approved"})
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["ok"] is True
+        assert body["act_id"] == "ACT-3"
+        assert publish.await_count == 1
+        execute_approved.assert_awaited_once_with(
+            "APR-3",
+            "command-center",
+            "run_approved",
+            {"tool_name": "safe_tool"},
+        )
+        assert "APR-3" not in supervisor_bridge._PENDING_CONTROLLED_APPROVALS
+    finally:
+        supervisor_bridge._PENDING_CONTROLLED_APPROVALS.clear()

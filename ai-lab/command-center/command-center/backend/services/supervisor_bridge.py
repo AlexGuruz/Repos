@@ -13,7 +13,7 @@ No direct shell execution. No file writes. All wrappers only.
 import uuid
 import httpx
 from datetime import datetime
-from typing import Literal
+from typing import Any
 from core.config import settings
 from core.models import ApprovalEvent, ActionEvent
 from services.feed_bus import bus
@@ -77,6 +77,8 @@ CONTROLLED_OPS = {
     "run_approved", "submit_approval", "write_sheet",
     "restart_service", "modify_registry",
 }
+
+_PENDING_CONTROLLED_APPROVALS: dict[str, dict[str, Any]] = {}
 
 
 # Long-running worker ops (Chroma build, atomic promote) share the same httpx budget.
@@ -185,30 +187,8 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
     """
     act_id = f"ACT-{uuid.uuid4().hex[:6].upper()}"
 
-    # Read-only → forward to worker
-    if op in effective_allowlisted_read_ops():
-        await bus.publish("feed", {
-            "agent": agent, "op": "rag" if "search" in op or "retrieve" in op or "embed" in op else "read",
-            "detail": f"{op} → {payload.get('target', payload.get('repo_path', '?'))}",
-            "bytes": None, "timestamp": datetime.utcnow().isoformat(),
-        })
-        try:
-            result = await _worker_call(op, payload)
-            await _log_action(act_id, agent, op, f"{op} completed ({settings.worker_tunnel_url})")
-            return {"ok": True, "act_id": act_id, "result": result}
-        except httpx.ConnectError as e:
-            msg = f"{op} FAILED: cannot connect to worker tunnel ({settings.worker_tunnel_url}). {e}"
-            await _log_action(act_id, agent, op, msg, status="error")
-            return {"ok": False, "act_id": act_id, "error": msg}
-        except httpx.TimeoutException as e:
-            msg = f"{op} FAILED: timeout calling worker ({e})."
-            await _log_action(act_id, agent, op, msg, status="error")
-            return {"ok": False, "act_id": act_id, "error": msg}
-        except Exception as e:
-            await _log_action(act_id, agent, op, f"{op} FAILED: {e}", status="error")
-            return {"ok": False, "act_id": act_id, "error": str(e)}
-
-    # State-changing → permanent rule may auto-execute; else approval card
+    # State-changing ops must stay approval-gated even if an env var adds the
+    # same name to WORKER_READ_OPS_EXTRA.
     if op in CONTROLLED_OPS:
         _ensure_brain_path()
         match_payload: dict = {}
@@ -250,8 +230,37 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
             catalog_context=_catalog_attachment_from_payload(payload),
             payload=match_payload or None,
         )
+        _PENDING_CONTROLLED_APPROVALS[apr.id] = {
+            "agent": agent,
+            "action": op,
+            "payload": dict(payload or {}),
+            "created_at": apr.timestamp.isoformat(),
+        }
         await bus.publish("approval", apr.model_dump(mode="json"))
         return {"ok": True, "queued": True, "apr_id": apr.id, "status": "pending"}
+
+    # Read-only → forward to worker
+    if op in effective_allowlisted_read_ops():
+        await bus.publish("feed", {
+            "agent": agent, "op": "rag" if "search" in op or "retrieve" in op or "embed" in op else "read",
+            "detail": f"{op} → {payload.get('target', payload.get('repo_path', '?'))}",
+            "bytes": None, "timestamp": datetime.utcnow().isoformat(),
+        })
+        try:
+            result = await _worker_call(op, payload)
+            await _log_action(act_id, agent, op, f"{op} completed ({settings.worker_tunnel_url})")
+            return {"ok": True, "act_id": act_id, "result": result}
+        except httpx.ConnectError as e:
+            msg = f"{op} FAILED: cannot connect to worker tunnel ({settings.worker_tunnel_url}). {e}"
+            await _log_action(act_id, agent, op, msg, status="error")
+            return {"ok": False, "act_id": act_id, "error": msg}
+        except httpx.TimeoutException as e:
+            msg = f"{op} FAILED: timeout calling worker ({e})."
+            await _log_action(act_id, agent, op, msg, status="error")
+            return {"ok": False, "act_id": act_id, "error": msg}
+        except Exception as e:
+            await _log_action(act_id, agent, op, f"{op} FAILED: {e}", status="error")
+            return {"ok": False, "act_id": act_id, "error": str(e)}
 
     # Unknown op — reject with discoverability hints
     return {
@@ -263,6 +272,10 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
             f"Extend reads via WORKER_READ_OPS_EXTRA in .env."
         ),
     }
+
+
+def pop_pending_controlled_approval(apr_id: str) -> dict[str, Any] | None:
+    return _PENDING_CONTROLLED_APPROVALS.pop(str(apr_id).strip(), None)
 
 
 async def execute_approved(apr_id: str, agent: str, action: str, payload: dict) -> dict:
