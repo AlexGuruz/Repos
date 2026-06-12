@@ -80,9 +80,26 @@ def test_resolve_approval_returns_error_for_missing_id():
          patch.object(events, "_resolve_queue", return_value=False), \
          patch.object(events.bus, "publish") as publish:
         client = _client()
-        response = client.post("/api/approvals/resolve", json={"id": "APR-missing", "resolution": "approved"})
+        response = client.post("/api/approvals/resolve", json={"id": "approval-missing", "resolution": "approved"})
 
     assert response.status_code == 200
     assert response.json()["ok"] is False
     assert "not found" in response.json()["error"]
     assert publish.await_count == 0
+
+
+def test_resolve_approval_dismisses_missing_ui_apr_id():
+    with patch.object(events, "list_pending", return_value=[]), \
+         patch.object(events, "_resolve_queue", return_value=False), \
+         patch.object(events.bus, "publish") as publish:
+        client = _client()
+        response = client.post("/api/approvals/resolve", json={"id": "APR-missing", "resolution": "approved"})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "ok": True,
+        "id": "APR-missing",
+        "resolution": "approved",
+        "dismissed_only": True,
+    }
+    assert publish.await_count == 1
