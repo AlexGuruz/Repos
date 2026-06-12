@@ -104,14 +104,29 @@ async def resolve_approval(body: ApprovalResolution):
     apr = pending_lookup.get(aid)
     ok = await _resolve_queue(aid, body.resolution == "approved")
     if not ok:
-        # Supervisor / UI-only APRs (e.g. APR-xxxxx) are not in the brain queue — still clear the sidebar.
         if aid.upper().startswith("APR-"):
+            from services.supervisor_bridge import execute_approved as execute_supervisor_approved
+            from services.supervisor_bridge import pop_pending_controlled_approval
+
+            supervisor_apr = pop_pending_controlled_approval(aid)
+            if not supervisor_apr:
+                log_error("approvals", "resolve_missing", approval_id=aid, resolution=body.resolution)
+                return {"ok": False, "error": f"Approval '{aid}' not found in queue."}
             await bus.publish(
                 "approval_resolution",
                 {"id": aid, "resolution": body.resolution, "status": body.resolution},
             )
-            log_api("approvals", "resolve_dismiss_ui", approval_id=aid, resolution=body.resolution)
-            return {"ok": True, "id": aid, "resolution": body.resolution, "dismissed_only": True}
+            if body.resolution == "approved":
+                result = await execute_supervisor_approved(
+                    aid,
+                    str(supervisor_apr.get("agent") or "command-center"),
+                    str(supervisor_apr.get("action") or "run_approved"),
+                    dict(supervisor_apr.get("payload") or {}),
+                )
+                log_api("approvals", "resolve_supervisor_result", approval_id=aid, resolution=body.resolution, executed=True)
+                return {"ok": True, **result}
+            log_api("approvals", "resolve_supervisor_result", approval_id=aid, resolution=body.resolution, executed=False)
+            return {"ok": True, "id": aid, "resolution": body.resolution}
         log_error("approvals", "resolve_missing", approval_id=aid, resolution=body.resolution)
         return {"ok": False, "error": f"Approval '{aid}' not found in queue."}
 
