@@ -73,7 +73,7 @@ async def create_permanent_rule(body: AddPermanentRuleBody):
             "timestamp": datetime.utcnow().isoformat(),
         },
     )
-    log_api("approvals", "permanent_add", rule_id=rule["id"], action=action)
+    log_api("approvals", "permanent_add", rule_id=rule["id"], rule_action=action)
     return {"ok": True, "rule": rule}
 
 
