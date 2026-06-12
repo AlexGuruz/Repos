@@ -80,7 +80,7 @@ def test_resolve_approval_returns_error_for_missing_id():
          patch.object(events, "_resolve_queue", return_value=False), \
          patch.object(events.bus, "publish") as publish:
         client = _client()
-        response = client.post("/api/approvals/resolve", json={"id": "APR-missing", "resolution": "approved"})
+        response = client.post("/api/approvals/resolve", json={"id": "approval-missing", "resolution": "approved"})
 
     assert response.status_code == 200
     assert response.json()["ok"] is False
