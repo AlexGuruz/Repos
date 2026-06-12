@@ -212,11 +212,13 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
     if op in CONTROLLED_OPS:
         _ensure_brain_path()
         match_payload: dict = {}
+        payload_subset: dict = {}
         rule = None
         try:
             from brain.permanent_allowlist import approval_payload_subset, find_matching_rule
 
-            match_payload = approval_payload_subset(payload)
+            payload_subset = approval_payload_subset(payload)
+            match_payload = payload_subset
             rule = find_matching_rule(op, match_payload)
         except Exception:
             pass
@@ -242,13 +244,36 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
                 **exec_result,
             }
 
-        apr = ApprovalEvent(
+        try:
+            from brain.approval_queue.queue import submit
+
+            approval_id = submit(
+                {
+                    "agent": agent,
+                    "action": op,
+                    "action_type": op,
+                    "detail": payload.get("detail", str(payload)),
+                    "repo_class": "CONTROLLED",
+                    "payload": match_payload or payload_subset,
+                    "supervisor_action": op,
+                    "supervisor_payload": dict(payload or {}),
+                    "catalog_context": _catalog_attachment_from_payload(payload),
+                }
+            )
+        except Exception as e:
+            return {"ok": False, "error": f"Could not queue approval: {e}"}
+
+        apr_kwargs = dict(
             agent=agent,
             action=op,
             detail=payload.get("detail", str(payload)),
             repo_class="CONTROLLED",
             catalog_context=_catalog_attachment_from_payload(payload),
             payload=match_payload or None,
+        )
+        apr_kwargs["id"] = approval_id
+        apr = ApprovalEvent(
+            **apr_kwargs,
         )
         await bus.publish("approval", apr.model_dump(mode="json"))
         return {"ok": True, "queued": True, "apr_id": apr.id, "status": "pending"}
