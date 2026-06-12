@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from routers import events
 
@@ -73,6 +73,33 @@ def test_resolve_approval_executes_attached_tool_when_approved():
     assert body["act_id"] == "ACT-APR-2"
     assert body["result"]["success"] is True
     assert publish.await_count == 2
+
+
+def test_resolve_approval_executes_supervisor_payload_when_approved():
+    pending = {
+        "agent": "command-center",
+        "supervisor_action": "run_approved",
+        "supervisor_payload": {"script_path": "registry/foo.py"},
+        "created_at": "2026-03-16T00:00:00Z",
+    }
+    with patch.object(events, "list_pending", return_value=[("approval-7", pending)]), \
+         patch.object(events, "_resolve_queue", return_value=True), \
+         patch("services.supervisor_bridge.execute_approved", new_callable=AsyncMock) as execute, \
+         patch.object(events.bus, "publish") as publish:
+        execute.return_value = {"ok": True, "act_id": "ACT-SUP", "apr_id": "approval-7"}
+        client = _client()
+        response = client.post("/api/approvals/resolve", json={"id": "approval-7", "resolution": "approved"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body == {"ok": True, "act_id": "ACT-SUP", "apr_id": "approval-7"}
+    execute.assert_awaited_once_with(
+        "approval-7",
+        "command-center",
+        "run_approved",
+        {"script_path": "registry/foo.py"},
+    )
+    assert publish.await_count == 1
 
 
 def test_resolve_approval_returns_error_for_missing_id():
