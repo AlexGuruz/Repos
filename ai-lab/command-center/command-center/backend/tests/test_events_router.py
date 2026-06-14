@@ -80,9 +80,55 @@ def test_resolve_approval_returns_error_for_missing_id():
          patch.object(events, "_resolve_queue", return_value=False), \
          patch.object(events.bus, "publish") as publish:
         client = _client()
-        response = client.post("/api/approvals/resolve", json={"id": "APR-missing", "resolution": "approved"})
+        response = client.post("/api/approvals/resolve", json={"id": "approval-missing", "resolution": "approved"})
 
     assert response.status_code == 200
     assert response.json()["ok"] is False
     assert "not found" in response.json()["error"]
     assert publish.await_count == 0
+
+
+def test_resolve_approval_dismisses_missing_ui_only_apr():
+    with patch.object(events, "list_pending", return_value=[]), \
+         patch.object(events, "_resolve_queue", return_value=False), \
+         patch.object(events.bus, "publish") as publish:
+        client = _client()
+        response = client.post("/api/approvals/resolve", json={"id": "APR-missing", "resolution": "denied"})
+
+    assert response.status_code == 200
+    assert response.json()["dismissed_only"] is True
+    assert publish.await_count == 1
+
+
+def test_create_permanent_rule_from_approval_id(monkeypatch, tmp_path):
+    monkeypatch.setenv("AI_LAB_PERMANENT_ALLOWLIST_PATH", str(tmp_path / "rules.json"))
+    pending = {
+        "action_type": "run_approved",
+        "file_path": "registry/foo.py",
+        "reason": "run approved script",
+        "created_at": "2026-03-16T00:00:00Z",
+    }
+    with patch.object(events, "list_pending", return_value=[("approval-1", pending)]), \
+         patch.object(events.bus, "publish") as publish:
+        client = _client()
+        response = client.post("/api/approvals/permanent", json={"approval_id": "approval-1", "note": "from approval"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ok"] is True
+    assert body["rule"]["action"] == "run_approved"
+    assert body["rule"]["match"]["file_path"] == "registry/foo.py"
+    assert publish.await_count == 1
+
+
+def test_create_permanent_rule_rejects_unscoped_match(monkeypatch, tmp_path):
+    monkeypatch.setenv("AI_LAB_PERMANENT_ALLOWLIST_PATH", str(tmp_path / "rules.json"))
+    client = _client()
+
+    response = client.post(
+        "/api/approvals/permanent",
+        json={"action": "run_approved", "match": {"reason": "same wording"}},
+    )
+
+    assert response.status_code == 400
+    assert "scope key" in response.json()["detail"]
