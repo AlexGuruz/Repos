@@ -104,6 +104,8 @@ async def tools_invoke(body: ToolInvokeBody):
     op = body.op.strip()
     if not op:
         raise HTTPException(status_code=400, detail="op required")
+    if op == "promote_repo_index":
+        raise HTTPException(status_code=403, detail="promote_repo_index is restricted to the repo index coordinator")
     return await route_intent(body.agent.strip() or "command-center", op, dict(body.payload or {}))
 
 

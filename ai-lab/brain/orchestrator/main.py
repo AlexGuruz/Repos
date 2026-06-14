@@ -22,6 +22,7 @@ from brain.router.router import classify_intent
 from brain.execution import run as execution_run, RunResult
 from brain.approval_queue.queue import submit, list_pending, resolve, ApprovalSpec
 from brain.permanent_allowlist import find_matching_rule, brain_spec_match_payload
+from brain.orchestrator.approval_gate import requires_approval
 from brain.ssh_worker import get_worker_ssh_config, run_ssh_command
 from brain.llm_client import chat_completion
 from brain import session_state
@@ -525,6 +526,50 @@ def run(
         action = pending.get("action")
         args = pending.get("args") or {}
         log_event("execute_proposal", session_id=session_id, action=action, args=args)
+        tool = pending.get("tool")
+        approval_required = bool(pending.get("approval_required", False)) or requires_approval(str(action or ""), tool)
+        if approval_required:
+            reason = str(pending.get("description") or pending.get("title") or f"Approve {action}")[:500]
+            target = (
+                args.get("target")
+                or args.get("file_path")
+                or args.get("path")
+                or args.get("script_path")
+                or args.get("workflow")
+                or args.get("workflow_id")
+                or str(action or "approval")
+            )
+            spec = {
+                "agent": "orchestrator",
+                "action": action,
+                "action_type": action,
+                "tool_name": tool,
+                "args": args,
+                "file_path": str(target),
+                "reason": reason,
+                "detail": reason,
+            }
+            aid = submit(spec)
+            spec_row: dict | None = None
+            for pid, row in list_pending():
+                if pid == aid:
+                    spec_row = row
+                    break
+            session_state.clear_pending_proposal(session_id)
+            payload = brain_spec_match_payload(spec_row or spec)
+            _trace_execute(session_id, message, intent, str(action or ""), "approval_queued")
+            return {
+                "reply": f"Queued **{aid}** for `{action}`. Approve it from the sidebar or say `approve {aid}`.",
+                "approval_request": {
+                    "id": aid,
+                    "agent": "orchestrator",
+                    "action_type": action,
+                    "reason": reason,
+                    "created_at": (spec_row or {}).get("created_at") or datetime.now(timezone.utc).isoformat(),
+                    "file_path": str(target),
+                    "payload": payload,
+                },
+            }
         if action == "repo_search":
             query = args.get("query") or pending.get("query") or pending.get("target") or "sales script growflow"
             matches = repo_search_mod.search_repos(query, max_results=10)
