@@ -73,7 +73,7 @@ async def create_permanent_rule(body: AddPermanentRuleBody):
             "timestamp": datetime.utcnow().isoformat(),
         },
     )
-    log_api("approvals", "permanent_add", rule_id=rule["id"], action=action)
+    log_api("approvals", "permanent_add", rule_id=rule["id"], approval_action=action)
     return {"ok": True, "rule": rule}
 
 
@@ -104,14 +104,6 @@ async def resolve_approval(body: ApprovalResolution):
     apr = pending_lookup.get(aid)
     ok = await _resolve_queue(aid, body.resolution == "approved")
     if not ok:
-        # Supervisor / UI-only APRs (e.g. APR-xxxxx) are not in the brain queue — still clear the sidebar.
-        if aid.upper().startswith("APR-"):
-            await bus.publish(
-                "approval_resolution",
-                {"id": aid, "resolution": body.resolution, "status": body.resolution},
-            )
-            log_api("approvals", "resolve_dismiss_ui", approval_id=aid, resolution=body.resolution)
-            return {"ok": True, "id": aid, "resolution": body.resolution, "dismissed_only": True}
         log_error("approvals", "resolve_missing", approval_id=aid, resolution=body.resolution)
         return {"ok": False, "error": f"Approval '{aid}' not found in queue."}
 

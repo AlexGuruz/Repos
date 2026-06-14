@@ -13,6 +13,7 @@ No direct shell execution. No file writes. All wrappers only.
 import uuid
 import httpx
 from datetime import datetime
+from pathlib import Path
 from typing import Literal
 from core.config import settings
 from core.models import ApprovalEvent, ActionEvent
@@ -103,6 +104,41 @@ def _httpx_timeout(op: str) -> httpx.Timeout:
     return httpx.Timeout(connect=c, read=read_sec, write=min(read_sec, 120.0), pool=5.0)
 
 
+def _repos_root() -> Path:
+    from core.ai_lab import AI_LAB_ROOT
+
+    return AI_LAB_ROOT.parent.resolve()
+
+
+def _ensure_repo_path_under_root(path: Path) -> Path:
+    root = _repos_root()
+    resolved = path.resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError as e:
+        raise ValueError(f"repo_path must stay under repos root: {root}") from e
+    return resolved
+
+
+def _repo_path_from_id(repo_id: str) -> Path:
+    rid = (repo_id or "").strip()
+    if not rid:
+        raise ValueError("repo_id is required")
+    if rid in {".", ".."} or "/" in rid or "\\" in rid or ":" in rid:
+        raise ValueError("repo_id must be a single repository name")
+    return _ensure_repo_path_under_root(_repos_root() / rid)
+
+
+def _normalize_repo_path(repo_path: str) -> Path:
+    raw = (repo_path or "").strip()
+    if not raw:
+        raise ValueError("repo_path is required")
+    path = Path(raw)
+    if not path.is_absolute():
+        path = _repos_root() / path
+    return _ensure_repo_path_under_root(path)
+
+
 def _normalize_worker_post_body(op: str, payload: dict) -> dict:
     """
     Worker FastAPI handlers often require repo_path; hub coordinator sends repo_id + staging metadata.
@@ -112,16 +148,12 @@ def _normalize_worker_post_body(op: str, payload: dict) -> dict:
     if op not in ("index_repo", "promote_repo_index"):
         return body
     if body.get("repo_path"):
+        body["repo_path"] = str(_normalize_repo_path(str(body["repo_path"])))
         return body
     rid = str(body.get("repo_id") or "").strip()
     if not rid:
         return body
-    try:
-        from core.ai_lab import AI_LAB_ROOT
-
-        body["repo_path"] = str((AI_LAB_ROOT.parent / rid).resolve())
-    except Exception:
-        body["repo_path"] = rid
+    body["repo_path"] = str(_repo_path_from_id(rid))
     return body
 
 
