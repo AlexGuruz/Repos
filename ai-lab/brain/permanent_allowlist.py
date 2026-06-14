@@ -76,6 +76,10 @@ def _save_rules(rules: list[dict[str, Any]]) -> None:
 def approval_payload_subset(payload: dict[str, Any] | None) -> dict[str, str]:
     """Return the stable scalar payload fields allowed for permanent matching."""
     source = dict(payload or {})
+    nested_payload = source.get("payload")
+    if isinstance(nested_payload, dict):
+        for key, value in nested_payload.items():
+            source.setdefault(key, value)
     args = source.get("args")
     if isinstance(args, dict):
         for key, value in args.items():

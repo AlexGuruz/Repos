@@ -10,6 +10,7 @@ Flow for every intent from the UI:
 
 No direct shell execution. No file writes. All wrappers only.
 """
+import asyncio
 import uuid
 import httpx
 from datetime import datetime
@@ -268,12 +269,32 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
                 **exec_result,
             }
 
+        try:
+            from brain.approval_queue.queue import submit
+        except Exception as e:
+            await _log_action(act_id, agent, op, f"{op} FAILED: approval queue unavailable: {e}", status="error")
+            return {"ok": False, "act_id": act_id, "error": f"Approval queue unavailable: {e}"}
+
+        detail = payload.get("detail", str(payload))
+        queued_spec = {
+            "agent": agent,
+            "action": op,
+            "action_type": op,
+            "detail": detail,
+            "reason": detail,
+            "payload": dict(payload or {}),
+            "match_payload": match_payload or None,
+            "catalog_context": _catalog_attachment_from_payload(payload),
+            "supervisor_controlled": True,
+        }
+        aid = await asyncio.to_thread(submit, queued_spec)
         apr = ApprovalEvent(
+            id=aid,
             agent=agent,
             action=op,
-            detail=payload.get("detail", str(payload)),
+            detail=detail,
             repo_class="CONTROLLED",
-            catalog_context=_catalog_attachment_from_payload(payload),
+            catalog_context=queued_spec["catalog_context"],
             payload=match_payload or None,
         )
         await bus.publish("approval", apr.model_dump(mode="json"))
