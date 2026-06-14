@@ -11,11 +11,12 @@ Flow for every intent from the UI:
 No direct shell execution. No file writes. All wrappers only.
 """
 import uuid
+import asyncio
 import httpx
 from datetime import datetime
 from typing import Literal
 from core.config import settings
-from core.models import ApprovalEvent, ActionEvent
+from core.models import ActionEvent
 from services.feed_bus import bus
 
 
@@ -81,6 +82,10 @@ CONTROLLED_OPS = {
 
 # Long-running worker ops (Chroma build, atomic promote) share the same httpx budget.
 _WORKER_SLOW_OPS = frozenset({"index_repo", "promote_repo_index"})
+
+# These are only safe when called by RepoIndexCoordinator after staging,
+# validation, and approval gates have run.
+COORDINATOR_ONLY_WORKER_OPS = frozenset({"index_repo", "promote_repo_index"})
 
 
 def effective_allowlisted_read_ops() -> frozenset[str]:
@@ -242,16 +247,45 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
                 **exec_result,
             }
 
-        apr = ApprovalEvent(
-            agent=agent,
-            action=op,
-            detail=payload.get("detail", str(payload)),
-            repo_class="CONTROLLED",
-            catalog_context=_catalog_attachment_from_payload(payload),
-            payload=match_payload or None,
+        detail = str(payload.get("detail") or payload.get("target") or payload.get("script_path") or payload)
+        catalog_context = _catalog_attachment_from_payload(payload)
+        payload_subset = match_payload or approval_payload_fallback(payload)
+        try:
+            from brain.approval_queue.queue import submit
+
+            spec = {
+                "agent": agent,
+                "action": op,
+                "action_type": op,
+                "detail": detail,
+                "reason": detail,
+                "repo_class": "CONTROLLED",
+                "supervisor_action": op,
+                "payload": payload_subset,
+            }
+            if catalog_context:
+                spec["catalog_context"] = catalog_context
+            apr_id = await asyncio.to_thread(submit, spec)
+        except Exception as e:
+            await _log_action(act_id, agent, op, f"approval queue failed for {op}: {e}", status="error")
+            return {"ok": False, "act_id": act_id, "error": f"Could not queue approval: {e}"}
+
+        await bus.publish(
+            "approval",
+            {
+                "id": apr_id,
+                "type": "approval",
+                "agent": agent,
+                "action": op,
+                "detail": detail,
+                "repo_class": "CONTROLLED",
+                "catalog_context": catalog_context,
+                "payload": payload_subset or None,
+                "status": "pending",
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
-        await bus.publish("approval", apr.model_dump(mode="json"))
-        return {"ok": True, "queued": True, "apr_id": apr.id, "status": "pending"}
+        return {"ok": True, "queued": True, "apr_id": apr_id, "status": "pending"}
 
     # Unknown op — reject with discoverability hints
     return {
@@ -262,6 +296,15 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
             f"{'…' if len(effective_allowlisted_read_ops()) > 30 else ''}. "
             f"Extend reads via WORKER_READ_OPS_EXTRA in .env."
         ),
+    }
+
+
+def approval_payload_fallback(payload: dict) -> dict:
+    """Fallback when permanent_allowlist was unavailable; keep only simple scalar fields."""
+    return {
+        str(k): v
+        for k, v in dict(payload or {}).items()
+        if isinstance(v, (str, int, float, bool)) and str(v).strip()
     }
 
 

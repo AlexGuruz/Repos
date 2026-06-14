@@ -75,6 +75,26 @@ def test_resolve_approval_executes_attached_tool_when_approved():
     assert publish.await_count == 2
 
 
+def test_resolve_approval_executes_supervisor_action_when_approved():
+    pending = {
+        "agent": "command-center",
+        "supervisor_action": "run_approved",
+        "payload": {"script_path": "registry/foo.py"},
+        "created_at": "2026-03-16T00:00:00Z",
+    }
+    with patch.object(events, "list_pending", return_value=[("approval-3", pending)]), \
+         patch.object(events, "_resolve_queue", return_value=True), \
+         patch("services.supervisor_bridge.execute_approved", return_value={"ok": True, "act_id": "ACT-SUP", "apr_id": "approval-3"}) as execute:
+        client = _client()
+        response = client.post("/api/approvals/resolve", json={"id": "approval-3", "resolution": "approved"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ok"] is True
+    assert body["act_id"] == "ACT-SUP"
+    execute.assert_awaited_once_with("approval-3", "command-center", "run_approved", {"script_path": "registry/foo.py"})
+
+
 def test_resolve_approval_returns_error_for_missing_id():
     with patch.object(events, "list_pending", return_value=[]), \
          patch.object(events, "_resolve_queue", return_value=False), \

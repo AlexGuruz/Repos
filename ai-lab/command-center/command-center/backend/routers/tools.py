@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from core.ai_lab import AI_LAB_ROOT, ensure_ai_lab_root_on_path
 from core.config import settings
 from services.supervisor_bridge import (
+    COORDINATOR_ONLY_WORKER_OPS,
     CONTROLLED_OPS,
     WORKER_HTTP_GET_OPS,
     effective_allowlisted_read_ops,
@@ -104,6 +105,11 @@ async def tools_invoke(body: ToolInvokeBody):
     op = body.op.strip()
     if not op:
         raise HTTPException(status_code=400, detail="op required")
+    if op in COORDINATOR_ONLY_WORKER_OPS:
+        raise HTTPException(
+            status_code=403,
+            detail=f"{op} is restricted to the repo index coordinator.",
+        )
     return await route_intent(body.agent.strip() or "command-center", op, dict(body.payload or {}))
 
 
