@@ -242,12 +242,31 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
                 **exec_result,
             }
 
+        catalog_context = _catalog_attachment_from_payload(payload)
+        try:
+            from brain.approval_queue.queue import submit
+
+            apr_id = submit(
+                {
+                    "agent": agent,
+                    "action": op,
+                    "detail": payload.get("detail", str(payload)),
+                    "repo_class": "CONTROLLED",
+                    "catalog_context": catalog_context,
+                    "payload": match_payload,
+                }
+            )
+        except Exception as e:
+            await _log_action(act_id, agent, op, f"{op} approval queue failed: {e}", status="error")
+            return {"ok": False, "act_id": act_id, "error": f"approval queue failed: {e}"}
+
         apr = ApprovalEvent(
+            id=apr_id,
             agent=agent,
             action=op,
             detail=payload.get("detail", str(payload)),
             repo_class="CONTROLLED",
-            catalog_context=_catalog_attachment_from_payload(payload),
+            catalog_context=catalog_context,
             payload=match_payload or None,
         )
         await bus.publish("approval", apr.model_dump(mode="json"))
