@@ -86,3 +86,27 @@ def test_resolve_approval_returns_error_for_missing_id():
     assert response.json()["ok"] is False
     assert "not found" in response.json()["error"]
     assert publish.await_count == 0
+
+
+def test_resolve_approval_executes_supervisor_controlled_payload():
+    pending = {
+        "agent": "command-center",
+        "action": "restart_service",
+        "payload": {"service": "worker-assistant"},
+        "created_at": "2026-03-16T00:00:00Z",
+    }
+    with patch.object(events, "list_pending", return_value=[("approval-7", pending)]), \
+         patch.object(events, "_resolve_queue", return_value=True), \
+         patch("services.supervisor_bridge.execute_approved", return_value={"ok": True, "act_id": "ACT-supervisor"}) as execute, \
+         patch.object(events.bus, "publish"):
+        client = _client()
+        response = client.post("/api/approvals/resolve", json={"id": "approval-7", "resolution": "approved"})
+
+    assert response.status_code == 200
+    assert response.json()["act_id"] == "ACT-supervisor"
+    execute.assert_awaited_once_with(
+        "approval-7",
+        "command-center",
+        "restart_service",
+        {"service": "worker-assistant"},
+    )
