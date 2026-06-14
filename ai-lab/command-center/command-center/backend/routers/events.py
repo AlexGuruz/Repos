@@ -174,7 +174,7 @@ async def _execute_approved(approval_id: str, spec: dict):
             "approvals",
             "execute_supervisor_approved",
             approval_id=approval_id,
-            action=action,
+            approved_action=action,
             success=bool(result.get("ok")),
         )
         return result
