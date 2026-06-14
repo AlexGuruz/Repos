@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch
 
 from routers import events
+from brain.permanent_allowlist import find_matching_rule
 
 
 class _ExecutionResult:
@@ -86,3 +87,47 @@ def test_resolve_approval_returns_error_for_missing_id():
     assert response.json()["ok"] is False
     assert "not found" in response.json()["error"]
     assert publish.await_count == 0
+
+
+def test_permanent_rule_crud_and_exact_match(tmp_path, monkeypatch):
+    monkeypatch.setenv("AI_LAB_PERMANENT_ALLOWLIST_PATH", str(tmp_path / "rules.json"))
+    client = _client()
+
+    created = client.post(
+        "/api/approvals/permanent",
+        json={
+            "action": "write_sheet",
+            "match": {"repo_id": "cog-allocation-system", "detail": "daily post"},
+            "note": "test",
+        },
+    )
+
+    assert created.status_code == 200
+    rule = created.json()["rule"]
+    assert rule["match"] == {"repo_id": "cog-allocation-system", "detail": "daily post"}
+    assert find_matching_rule(
+        "write_sheet",
+        {"repo_id": "cog-allocation-system", "detail": "daily post", "extra": "ignored"},
+    )["id"] == rule["id"]
+    assert find_matching_rule("write_sheet", {"repo_id": "cog-allocation-system"}) is None
+
+    listed = client.get("/api/approvals/permanent")
+    assert listed.status_code == 200
+    assert [row["id"] for row in listed.json()["rules"]] == [rule["id"]]
+
+    deleted = client.delete(f"/api/approvals/permanent/{rule['id']}")
+    assert deleted.status_code == 200
+    assert find_matching_rule("write_sheet", {"repo_id": "cog-allocation-system", "detail": "daily post"}) is None
+
+
+def test_permanent_rule_rejects_never_permanent_actions(tmp_path, monkeypatch):
+    monkeypatch.setenv("AI_LAB_PERMANENT_ALLOWLIST_PATH", str(tmp_path / "rules.json"))
+    client = _client()
+
+    response = client.post(
+        "/api/approvals/permanent",
+        json={"action": "restart_service", "match": {"repo_id": "ai-lab"}},
+    )
+
+    assert response.status_code == 400
+    assert "cannot be permanently allowlisted" in response.json()["detail"]
