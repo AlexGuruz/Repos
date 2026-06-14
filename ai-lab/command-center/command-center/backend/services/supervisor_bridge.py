@@ -242,16 +242,41 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
                 **exec_result,
             }
 
+        catalog_context = _catalog_attachment_from_payload(payload)
+        detail = payload.get("detail", str(payload))
+        try:
+            from brain.approval_queue.queue import submit
+
+            approval_id = submit(
+                {
+                    "agent": agent,
+                    "action": op,
+                    "action_type": op,
+                    "reason": detail,
+                    "detail": detail,
+                    "repo_class": "CONTROLLED",
+                    "catalog_context": catalog_context,
+                    "payload": match_payload or None,
+                    "supervisor_action": op,
+                    "supervisor_payload": dict(payload or {}),
+                }
+            )
+        except Exception as e:
+            msg = f"{op} approval FAILED: could not persist approval request ({e})."
+            await _log_action(act_id, agent, op, msg, status="error")
+            return {"ok": False, "act_id": act_id, "error": msg}
+
         apr = ApprovalEvent(
+            id=approval_id,
             agent=agent,
             action=op,
-            detail=payload.get("detail", str(payload)),
+            detail=detail,
             repo_class="CONTROLLED",
-            catalog_context=_catalog_attachment_from_payload(payload),
+            catalog_context=catalog_context,
             payload=match_payload or None,
         )
         await bus.publish("approval", apr.model_dump(mode="json"))
-        return {"ok": True, "queued": True, "apr_id": apr.id, "status": "pending"}
+        return {"ok": True, "queued": True, "apr_id": approval_id, "status": "pending"}
 
     # Unknown op — reject with discoverability hints
     return {
