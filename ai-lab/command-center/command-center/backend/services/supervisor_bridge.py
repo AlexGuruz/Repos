@@ -10,6 +10,7 @@ Flow for every intent from the UI:
 
 No direct shell execution. No file writes. All wrappers only.
 """
+import asyncio
 import uuid
 import httpx
 from datetime import datetime
@@ -53,7 +54,6 @@ ALLOWLISTED_READ_OPS = frozenset({
     "semantic_search",
     "chunk_retrieve",
     "retrieve",
-    "promote_repo_index",
     "explain_log",
     "summarize_diff",
     "embed",
@@ -81,6 +81,7 @@ CONTROLLED_OPS = {
 
 # Long-running worker ops (Chroma build, atomic promote) share the same httpx budget.
 _WORKER_SLOW_OPS = frozenset({"index_repo", "promote_repo_index"})
+_COORDINATOR_ONLY_OPS = frozenset({"promote_repo_index"})
 
 
 def effective_allowlisted_read_ops() -> frozenset[str]:
@@ -185,6 +186,32 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
     """
     act_id = f"ACT-{uuid.uuid4().hex[:6].upper()}"
 
+    if op in _COORDINATOR_ONLY_OPS:
+        if agent != "repo_index_coordinator":
+            return {"ok": False, "act_id": act_id, "error": f"{op} is restricted to the repo index coordinator."}
+        await bus.publish("feed", {
+            "agent": agent,
+            "op": "write",
+            "detail": f"{op} → {payload.get('repo_id', payload.get('repo_path', '?'))}",
+            "bytes": None,
+            "timestamp": datetime.utcnow().isoformat(),
+        })
+        try:
+            result = await _worker_call(op, payload)
+            await _log_action(act_id, agent, op, f"{op} completed ({settings.worker_tunnel_url})")
+            return {"ok": True, "act_id": act_id, "result": result}
+        except httpx.ConnectError as e:
+            msg = f"{op} FAILED: cannot connect to worker tunnel ({settings.worker_tunnel_url}). {e}"
+            await _log_action(act_id, agent, op, msg, status="error")
+            return {"ok": False, "act_id": act_id, "error": msg}
+        except httpx.TimeoutException as e:
+            msg = f"{op} FAILED: timeout calling worker ({e})."
+            await _log_action(act_id, agent, op, msg, status="error")
+            return {"ok": False, "act_id": act_id, "error": msg}
+        except Exception as e:
+            await _log_action(act_id, agent, op, f"{op} FAILED: {e}", status="error")
+            return {"ok": False, "act_id": act_id, "error": str(e)}
+
     # Read-only → forward to worker
     if op in effective_allowlisted_read_ops():
         await bus.publish("feed", {
@@ -242,12 +269,32 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
                 **exec_result,
             }
 
+        try:
+            from brain.approval_queue.queue import submit
+        except Exception as e:
+            await _log_action(act_id, agent, op, f"{op} FAILED: approval queue unavailable: {e}", status="error")
+            return {"ok": False, "act_id": act_id, "error": f"Approval queue unavailable: {e}"}
+
+        detail = payload.get("detail", str(payload))
+        queued_spec = {
+            "agent": agent,
+            "action": op,
+            "action_type": op,
+            "detail": detail,
+            "reason": detail,
+            "payload": dict(payload or {}),
+            "match_payload": match_payload or None,
+            "catalog_context": _catalog_attachment_from_payload(payload),
+            "supervisor_controlled": True,
+        }
+        aid = await asyncio.to_thread(submit, queued_spec)
         apr = ApprovalEvent(
+            id=aid,
             agent=agent,
             action=op,
-            detail=payload.get("detail", str(payload)),
+            detail=detail,
             repo_class="CONTROLLED",
-            catalog_context=_catalog_attachment_from_payload(payload),
+            catalog_context=queued_spec["catalog_context"],
             payload=match_payload or None,
         )
         await bus.publish("approval", apr.model_dump(mode="json"))

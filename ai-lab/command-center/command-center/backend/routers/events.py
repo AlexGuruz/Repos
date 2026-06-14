@@ -104,14 +104,6 @@ async def resolve_approval(body: ApprovalResolution):
     apr = pending_lookup.get(aid)
     ok = await _resolve_queue(aid, body.resolution == "approved")
     if not ok:
-        # Supervisor / UI-only APRs (e.g. APR-xxxxx) are not in the brain queue — still clear the sidebar.
-        if aid.upper().startswith("APR-"):
-            await bus.publish(
-                "approval_resolution",
-                {"id": aid, "resolution": body.resolution, "status": body.resolution},
-            )
-            log_api("approvals", "resolve_dismiss_ui", approval_id=aid, resolution=body.resolution)
-            return {"ok": True, "id": aid, "resolution": body.resolution, "dismissed_only": True}
         log_error("approvals", "resolve_missing", approval_id=aid, resolution=body.resolution)
         return {"ok": False, "error": f"Approval '{aid}' not found in queue."}
 
@@ -167,6 +159,26 @@ async def _resolve_queue(approval_id: str, approve: bool) -> bool:
 
 
 async def _execute_approved(approval_id: str, spec: dict):
+    if spec.get("supervisor_controlled"):
+        from services.supervisor_bridge import execute_approved
+
+        action = spec.get("action") or spec.get("action_type")
+        payload = spec.get("payload") or spec.get("args") or {}
+        result = await execute_approved(
+            approval_id,
+            spec.get("agent", "command-center"),
+            action,
+            payload,
+        )
+        log_api(
+            "approvals",
+            "execute_supervisor_approved",
+            approval_id=approval_id,
+            approved_action=action,
+            success=bool(result.get("ok")),
+        )
+        return result
+
     tool_name = spec.get("tool_name")
     args = spec.get("args", {})
     if tool_name:

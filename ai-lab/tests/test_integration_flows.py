@@ -65,3 +65,38 @@ def test_do_it_without_pending_is_safe():
     out = run("do it", llm_base_url="", llm_model="", session_id="it_no_pending")
     assert "No pending action" in out["reply"]
 
+
+def test_do_it_queues_approval_required_proposal(monkeypatch):
+    submitted = []
+
+    def fake_submit(spec):
+        submitted.append(spec)
+        return "approval-42"
+
+    def fake_list_pending():
+        return [
+            (
+                "approval-42",
+                {
+                    **submitted[0],
+                    "created_at": "2026-06-14T00:00:00Z",
+                },
+            )
+        ]
+
+    import brain.orchestrator.main as orchestrator_main
+
+    monkeypatch.setattr(orchestrator_main, "submit", fake_submit)
+    monkeypatch.setattr(orchestrator_main, "list_pending", fake_list_pending)
+
+    sid = "it_approval_required_proposal"
+    proposal = run("trigger workflow nightly", llm_base_url="", llm_model="", session_id=sid)
+    assert "approval required" in proposal["reply"].lower()
+
+    out = run("do it", llm_base_url="", llm_model="", session_id=sid)
+
+    assert submitted
+    assert submitted[0]["action"] == "worker_n8n_trigger"
+    assert out["approval_request"]["id"] == "approval-42"
+    assert "Queued **approval-42**" in out["reply"]
+
