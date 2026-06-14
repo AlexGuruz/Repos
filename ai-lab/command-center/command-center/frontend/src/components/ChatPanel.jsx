@@ -80,7 +80,10 @@ function ApprovalCard({ ev }) {
     if (busy) return
     setBusy(true)
     try {
-      await api.resolveApproval(ev.id, resolution)
+      const result = await api.resolveApproval(ev.id, resolution)
+      if (result?.ok === false) {
+        throw new Error(result.error || 'Approval was not resolved')
+      }
       resolve(ev.id, resolution)
       addMsg({ role: 'ai', text: `${ev.id} ${resolution}. ${resolution === 'approved' ? 'Queued via run_approved wrapper.' : 'No state changed.'}` })
     } catch (e) {
