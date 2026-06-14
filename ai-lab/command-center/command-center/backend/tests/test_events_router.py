@@ -80,12 +80,24 @@ def test_resolve_approval_returns_error_for_missing_id():
          patch.object(events, "_resolve_queue", return_value=False), \
          patch.object(events.bus, "publish") as publish:
         client = _client()
-        response = client.post("/api/approvals/resolve", json={"id": "APR-missing", "resolution": "approved"})
+        response = client.post("/api/approvals/resolve", json={"id": "approval-missing", "resolution": "approved"})
 
     assert response.status_code == 200
     assert response.json()["ok"] is False
     assert "not found" in response.json()["error"]
     assert publish.await_count == 0
+
+
+def test_resolve_approval_dismisses_missing_ui_only_apr():
+    with patch.object(events, "list_pending", return_value=[]), \
+         patch.object(events, "_resolve_queue", return_value=False), \
+         patch.object(events.bus, "publish") as publish:
+        client = _client()
+        response = client.post("/api/approvals/resolve", json={"id": "APR-missing", "resolution": "denied"})
+
+    assert response.status_code == 200
+    assert response.json()["dismissed_only"] is True
+    assert publish.await_count == 1
 
 
 def test_create_permanent_rule_from_approval_id(monkeypatch, tmp_path):
