@@ -1,9 +1,17 @@
+import shutil
 import sys
 from datetime import date
 from pathlib import Path
 import tempfile
 
 import yt_dlp
+
+
+def _js_runtime_opts() -> dict:
+    """Enable Node.js for YouTube JS challenges when available."""
+    if shutil.which('node'):
+        return {'js_runtimes': {'node': {}}}
+    return {}
 
 
 def _format_selector(quality: str, has_ffmpeg: bool) -> str:
@@ -45,7 +53,6 @@ def download_youtube_video(url, output_dir=None, quality='720p'):
         output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    import shutil
     has_ffmpeg = shutil.which('ffmpeg') is not None
     q = (quality or '720p').lower().strip()
     if q in ('4k', '2160p'):
@@ -61,6 +68,7 @@ def download_youtube_video(url, output_dir=None, quality='720p'):
         'windowsfilenames': True,
         'quiet': False,
         'no_warnings': False,
+        **_js_runtime_opts(),
     }
     
     if not has_ffmpeg:
@@ -86,6 +94,7 @@ def download_youtube_video(url, output_dir=None, quality='720p'):
 
 def _parse_cli(argv):
     quality = '720p'
+    output_dir = None
     urls = []
     i = 0
     while i < len(argv):
@@ -95,10 +104,15 @@ def _parse_cli(argv):
         elif arg == '--quality' and i + 1 < len(argv):
             quality = argv[i + 1].strip()
             i += 1
+        elif arg.startswith('--output-dir='):
+            output_dir = Path(arg.split('=', 1)[1].strip())
+        elif arg == '--output-dir' and i + 1 < len(argv):
+            output_dir = Path(argv[i + 1].strip())
+            i += 1
         elif arg.strip():
             urls.append(arg.strip())
         i += 1
-    return quality, urls
+    return quality, output_dir, urls
 
 
 if __name__ == '__main__':
@@ -108,18 +122,18 @@ if __name__ == '__main__':
         except Exception:
             pass
 
-    quality, urls = _parse_cli(sys.argv[1:])
+    quality, cli_output_dir, urls = _parse_cli(sys.argv[1:])
     if not urls:
         print(
             'Usage: python youtube_to_mp4.py [--quality best|1080p|720p|...] '
-            '<youtube-url> [more-urls...]',
+            '[--output-dir PATH] <youtube-url> [more-urls...]',
             file=sys.stderr,
         )
         sys.exit(1)
 
     script_dir = Path(__file__).resolve().parent
     day = date.today().isoformat()
-    output_dir = script_dir.parent / 'Youtube' / day
+    output_dir = cli_output_dir or (script_dir.parent / 'Youtube' / day)
 
     print('=' * 60)
     print(f'YouTube to MP4 Converter - quality: {quality}')

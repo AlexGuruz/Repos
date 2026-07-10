@@ -197,7 +197,11 @@ function Update-RepoStructureSection {
     } else {
         $content = $content + "`n`n## Repo Structure`n" + $newBlock
     }
-    [System.IO.File]::WriteAllText($NotePath, $content, [System.Text.UTF8Encoding]::new($false))
+    try {
+        [System.IO.File]::WriteAllText($NotePath, $content, [System.Text.UTF8Encoding]::new($false))
+    } catch {
+        Write-Warning "[repo_obsidian_sync] Could not update repo structure (file locked?): $NotePath - $_"
+    }
 }
 
 # ---------------------------------------------------------------------------
@@ -227,6 +231,14 @@ function Add-SubfolderNote {
 
     if (-not (Test-Path $newNotePath)) {
         $titlePart = $RelativePath -replace '/', ' / '
+        $hubLink = ($ObsidianNotePath -replace '\.md$', '') -replace '\\', '/'
+        $parentRel = Split-Path $RelativePath -Parent
+        $parentLink = if ($parentRel) { "$ObsidianProject/$parentRel" -replace '\\', '/' } else { $null }
+        $relatedLines = "- [[$hubLink|$ProjectName]]"
+        if ($parentLink) {
+            $parentName = Split-Path $parentLink -Leaf
+            $relatedLines += "`n- [[$parentLink|$parentName]]"
+        }
         $noteContent = @"
 ---
 project: $ProjectName
@@ -244,21 +256,53 @@ Folder in $ProjectName repo.
 **Repo path:** ``$fullRepoPath``
 
 ## Related
-- [[$ProjectName|Project Hub]]
+$relatedLines
 "@
         [System.IO.File]::WriteAllText($newNotePath, $noteContent, [System.Text.UTF8Encoding]::new($false))
         Write-Host "[repo_obsidian_sync] Created note: $noteRelPath"
     }
 
-    # Add link to Project Notes section - use Obsidian link format
+    # Add top-level link on project hub; nested folders link from parent ## Subfolders via repair_brain_links
     $linkNote = $noteRelPath -replace '\.md$', ''
     $linkNote = $linkNote -replace [regex]::Escape([System.IO.Path]::DirectorySeparatorChar), '/'
-    if (Test-Path $projectNotePath) {
+    $hubLink = ($ObsidianNotePath -replace '\.md$', '') -replace '\\', '/'
+    $isTopLevel = ($linkNote -replace [regex]::Escape($hubLink + '/'), '') -notmatch '/'
+    if ($isTopLevel -and (Test-Path $projectNotePath)) {
         $content = Get-Content $projectNotePath -Raw -Encoding UTF8
         $link = "[[$linkNote]]"
         if ($content -notmatch [regex]::Escape($link)) {
             $content = $content -replace "(?m)(## Project Notes\s*\r?\n(?:<!--.*?-->)?)\s*", "`$1`n- $link`n"
-            [System.IO.File]::WriteAllText($projectNotePath, $content, [System.Text.UTF8Encoding]::new($false))
+            try {
+                [System.IO.File]::WriteAllText($projectNotePath, $content, [System.Text.UTF8Encoding]::new($false))
+            } catch {
+                Write-Warning "[repo_obsidian_sync] Could not update project hub (file locked?): $projectNotePath - $_"
+            }
+        }
+    }
+
+    # Refresh parent ## Subfolders when a child note is added
+    $parentRel = Split-Path $RelativePath -Parent
+    if ($parentRel) {
+        $parentNoteRel = Get-ObsidianNotePath -ObsidianProject $ObsidianProject -RelativePath $parentRel -NoteNaming $NoteNaming
+        if ($parentNoteRel) {
+            $parentNotePath = Join-Path $VaultPath $parentNoteRel
+            if (Test-Path $parentNotePath) {
+                $childName = Split-Path $linkNote -Leaf
+                $parentContent = Get-Content $parentNotePath -Raw -Encoding UTF8
+                $childLink = "- [[$linkNote|$childName]]"
+                if ($parentContent -notmatch [regex]::Escape("[[$(($linkNote -replace '/','/'))]]")) {
+                    if ($parentContent -match '(?ms)^## Subfolders\s*\r?\n') {
+                        $parentContent = $parentContent -replace '(?ms)(^## Subfolders\s*\r?\n)', "`$1$childLink`n"
+                    } else {
+                        $parentContent = $parentContent.TrimEnd() + "`n`n## Subfolders`n$childLink`n"
+                    }
+                    try {
+                        [System.IO.File]::WriteAllText($parentNotePath, $parentContent, [System.Text.UTF8Encoding]::new($false))
+                    } catch {
+                        Write-Warning "[repo_obsidian_sync] Could not update parent subfolders: $parentNotePath - $_"
+                    }
+                }
+            }
         }
     }
 }
