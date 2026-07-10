@@ -284,7 +284,11 @@ def brand_excluded(brand_label: str, excluded_casefold: frozenset[str]) -> bool:
 
 
 def implied_monthly_cog_throughput_usd(
-    units: int, cog_cents: int, span_inclusive_days: int
+    units: int,
+    cog_cents: int,
+    span_inclusive_days: int,
+    *,
+    cog_bearing_units: int | None = None,
 ) -> float | None:
     """
     Expected **dollars of COG sold per month** at the cell's trailing velocity and mix.
@@ -292,10 +296,13 @@ def implied_monthly_cog_throughput_usd(
     """
     if units <= 0 or cog_cents <= 0:
         return None
+    cog_u = cog_bearing_units if cog_bearing_units is not None else units
+    if cog_u <= 0:
+        return None
     aum = avg_monthly_units_sold(units, span_inclusive_days)
     if aum is None or aum <= 0:
         return None
-    acu_usd = (cog_cents / 100.0) / units
+    acu_usd = (cog_cents / 100.0) / cog_u
     if acu_usd <= 0:
         return None
     return float(aum * acu_usd)
@@ -309,6 +316,7 @@ def allocate_pool_top_n_by_recovery_throughput(
     pair_units: dict[tuple[str, str], int],
     pair_cog: dict[tuple[str, str], int],
     span_inclusive_days: int,
+    pair_units_with_cog: dict[tuple[str, str], int] | None = None,
 ) -> dict[tuple[str, str], int]:
     """
     Assign the full pool to at most ``pool_top_n`` cells: rank by implied monthly COG throughput,
@@ -323,7 +331,14 @@ def allocate_pool_top_n_by_recovery_throughput(
     scored: list[tuple[tuple[str, str], float]] = []
     for k in keys:
         t = implied_monthly_cog_throughput_usd(
-            pair_units[k], pair_cog[k], span_inclusive_days
+            pair_units[k],
+            pair_cog[k],
+            span_inclusive_days,
+            cog_bearing_units=(
+                int(pair_units_with_cog[k])
+                if pair_units_with_cog and k in pair_units_with_cog
+                else None
+            ),
         )
         if t is not None and t > 0:
             scored.append((k, t))
@@ -357,7 +372,14 @@ def allocate_pool_top_n_by_recovery_throughput(
     weights: list[float] = []
     for k in picked:
         t = implied_monthly_cog_throughput_usd(
-            pair_units[k], pair_cog[k], span_inclusive_days
+            pair_units[k],
+            pair_cog[k],
+            span_inclusive_days,
+            cog_bearing_units=(
+                int(pair_units_with_cog[k])
+                if pair_units_with_cog and k in pair_units_with_cog
+                else None
+            ),
         )
         if t is not None and t > 0:
             weights.append(t)
@@ -382,6 +404,7 @@ def allocate_buy_plan_pool(
     pair_gross_recent: dict[tuple[str, str], int],
     pair_cog_recent: dict[tuple[str, str], int],
     velocity_span_days: int,
+    pair_units_with_cog_recent: dict[tuple[str, str], int] | None = None,
     pair_units_per_day_recent: dict[tuple[str, str], float] | None = None,
     pair_cycle_target_units: dict[tuple[str, str], float] | None = None,
     pair_cycle_unit_cost_cents: dict[tuple[str, str], int] | None = None,
@@ -415,7 +438,12 @@ def allocate_buy_plan_pool(
         u = int(pair_units_recent.get(k, 0))
         g = int(pair_gross_recent.get(k, 0))
         c = int(pair_cog_recent.get(k, 0))
-        if u <= 0 or c <= 0:
+        cog_u = (
+            int(pair_units_with_cog_recent.get(k, 0))
+            if pair_units_with_cog_recent
+            else u
+        )
+        if u <= 0 or c <= 0 or cog_u <= 0:
             continue
         gross_usd = g / 100.0
         cog_usd = c / 100.0
@@ -425,7 +453,7 @@ def allocate_buy_plan_pool(
             upw = u / velocity_weeks
         if upw < min_units_per_week:
             continue
-        avg_cog = cog_usd / u
+        avg_cog = cog_usd / cog_u
         avg_ret = gross_usd / u
         if avg_cog <= 0:
             continue
@@ -463,11 +491,16 @@ def allocate_buy_plan_pool(
     for k in top_keys:
         u = int(pair_units_recent.get(k, 0))
         c = int(pair_cog_recent.get(k, 0))
-        if u <= 0 or c <= 0:
+        cog_u = (
+            int(pair_units_with_cog_recent.get(k, 0))
+            if pair_units_with_cog_recent
+            else u
+        )
+        if u <= 0 or c <= 0 or cog_u <= 0:
             max_cents_by_k[k] = 0
             continue
         cog_usd = c / 100.0
-        avg_cog = cog_usd / u
+        avg_cog = cog_usd / cog_u
         if pair_cycle_target_units and k in pair_cycle_target_units:
             target_units = max(0.0, float(pair_cycle_target_units[k]))
             if pair_cycle_unit_cost_cents and k in pair_cycle_unit_cost_cents:
@@ -524,6 +557,8 @@ def allocate_for_mode(
     pair_gross_recent: dict[tuple[str, str], int],
     pair_cog_recent: dict[tuple[str, str], int],
     velocity_span: int,
+    pair_units_with_cog: dict[tuple[str, str], int] | None = None,
+    pair_units_with_cog_recent: dict[tuple[str, str], int] | None = None,
     pair_units_per_day_recent: dict[tuple[str, str], float] | None = None,
     pair_cycle_target_units: dict[tuple[str, str], float] | None = None,
     pair_cycle_unit_cost_cents: dict[tuple[str, str], int] | None = None,
@@ -574,6 +609,7 @@ def allocate_for_mode(
             pair_gross_recent,
             pair_cog_recent,
             velocity_span,
+            pair_units_with_cog_recent=pair_units_with_cog_recent,
             pair_units_per_day_recent=pair_units_per_day_recent,
             pair_cycle_target_units=pair_cycle_target_units,
             pair_cycle_unit_cost_cents=pair_cycle_unit_cost_cents,
@@ -593,6 +629,7 @@ def allocate_for_mode(
             pair_units,
             pair_cog,
             span_inclusive_days,
+            pair_units_with_cog=pair_units_with_cog,
         )
         return pair_pool, planner_scores
     weights = [pair_gross[k] / total_fmt for k in keys]
@@ -615,6 +652,8 @@ def build_layer2_rows_list(
     pair_gross: dict[tuple[str, str], int],
     pair_cog: dict[tuple[str, str], int],
     span_inclusive_days: int,
+    pair_units_with_cog: dict[tuple[str, str], int] | None = None,
+    pair_units_with_cog_recent: dict[tuple[str, str], int] | None = None,
     cash_cycle_days: float = CASH_CYCLE_DAYS_DEFAULT,
     pair_buy_units_override: dict[tuple[str, str], float] | None = None,
 ) -> list[tuple[str, str, int, dict]]:
@@ -644,6 +683,11 @@ def build_layer2_rows_list(
                 units_from_allocation_override=uov,
                 planner_score=planner_scores.get(k),
                 cash_cycle_days=float(cash_cycle_days),
+                cog_bearing_units=(
+                    int(pair_units_with_cog_recent.get(k, 0))
+                    if pair_units_with_cog_recent and k in pair_units_with_cog_recent
+                    else None
+                ),
             )
         else:
             m = layer2_row(
@@ -652,6 +696,11 @@ def build_layer2_rows_list(
                 gross_cents=pair_gross[k],
                 cog_cents=pair_cog[k],
                 span_inclusive_days=span_inclusive_days,
+                cog_bearing_units=(
+                    int(pair_units_with_cog.get(k, 0))
+                    if pair_units_with_cog and k in pair_units_with_cog
+                    else None
+                ),
             )
         rows.append((br, buck, ac, m))
     rows.sort(key=lambda t: -t[2])
@@ -1632,6 +1681,7 @@ def main() -> int:
         )
     recent_start_local = report_end_local - timedelta(days=velocity_span - 1)
     pair_units_recent: dict[tuple[str, str], int] = defaultdict(int)
+    pair_units_with_cog_recent: dict[tuple[str, str], int] = defaultdict(int)
     pair_gross_recent: dict[tuple[str, str], int] = defaultdict(int)
     pair_cog_recent: dict[tuple[str, str], int] = defaultdict(int)
     pair_units_per_day_recent: dict[tuple[str, str], float] = defaultdict(float)
@@ -1682,6 +1732,7 @@ def main() -> int:
     pair_gross: dict[tuple[str, str], int] = defaultdict(int)
     # One unit per order line (API has no line quantity in our queries).
     pair_units: dict[tuple[str, str], int] = defaultdict(int)
+    pair_units_with_cog: dict[tuple[str, str], int] = defaultdict(int)
     pair_cog: dict[tuple[str, str], int] = defaultdict(int)
     other_gross = 0
     excluded_focus_gross = 0  # excluded brands, bucket != Other (not in pool denominator)
@@ -1706,14 +1757,13 @@ def main() -> int:
             k = order_item_key(n)
             if k in seen:
                 continue
-            seen.add(k)
-            validation_rows.append(n)
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
                 continue
             ld = sold.astimezone(tz).date()
             if ld < report_start_local or ld > report_end_local:
                 continue
+            validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
             b = brand_label_from_line(n)
@@ -1749,6 +1799,8 @@ def main() -> int:
                         cog_line = int(ucc)
                         landed_overrides += 1
             pair_cog[key_bc] += cog_line
+            if cog_line > 0:
+                pair_units_with_cog[key_bc] += 1
             include_recent = False
             if velocity_anchor_effective == "receipt-aware":
                 prod = n.get("Product") if isinstance(n.get("Product"), dict) else {}
@@ -1777,6 +1829,8 @@ def main() -> int:
                 pair_units_recent[key_bc] += 1
                 pair_gross_recent[key_bc] += gp
                 pair_cog_recent[key_bc] += cog_line
+                if cog_line > 0:
+                    pair_units_with_cog_recent[key_bc] += 1
             off = (ld - report_start_local).days
             bidx = off // max(1, args.biweek_days)
             biweek_by_brand[bidx][b] += gp
@@ -1907,6 +1961,8 @@ def main() -> int:
         pair_gross_recent,
         pair_cog_recent,
         velocity_span,
+        pair_units_with_cog=pair_units_with_cog,
+        pair_units_with_cog_recent=pair_units_with_cog_recent,
         pair_units_per_day_recent=pair_units_per_day_recent,
         pair_cycle_target_units=pair_cycle_target_units,
         pair_cycle_unit_cost_cents=pair_cycle_unit_cost_cents,
@@ -1969,6 +2025,8 @@ def main() -> int:
             pair_gross,
             pair_cog,
             span_inclusive_days,
+            pair_units_with_cog=pair_units_with_cog,
+            pair_units_with_cog_recent=pair_units_with_cog_recent,
             cash_cycle_days=float(args.cash_cycle_days),
             pair_buy_units_override=pair_buy_units_override or None,
         )
@@ -2053,7 +2111,7 @@ def main() -> int:
             "- **Layer 2:** Buy/velocity metrics and ranked lists (below); CSV `*_layer2_recovery.csv`. "
             "Pass `--no-layer2` to omit."
         )
-    L(f"- **Unique order lines counted:** {len(seen):,}")
+    L(f"- **Unique order lines counted:** {len(validation_rows):,}")
     if excluded_cf:
         shown = ", ".join(sorted({s for s in (args.exclude_brands or "").split(",") if s.strip()}))
         L(f"- **Brands excluded from pool split:** {shown}")
@@ -2350,6 +2408,8 @@ def main() -> int:
                 pair_gross_recent,
                 pair_cog_recent,
                 velocity_span,
+                pair_units_with_cog=pair_units_with_cog,
+                pair_units_with_cog_recent=pair_units_with_cog_recent,
                 pair_units_per_day_recent=pair_units_per_day_recent,
                 min_units_per_week=float(args.min_units_per_week),
                 buy_plan_max_rows=max(1, int(args.buy_plan_max_rows)),
@@ -2371,6 +2431,8 @@ def main() -> int:
                 pair_gross,
                 pair_cog,
                 span_inclusive_days,
+                pair_units_with_cog=pair_units_with_cog,
+                pair_units_with_cog_recent=pair_units_with_cog_recent,
                 cash_cycle_days=float(args.cash_cycle_days),
             )
             cmp_results.append((mode, rows_m, compare_allocation_modes_metrics(mode, rows_m)))

@@ -145,6 +145,91 @@ def cartel_reorder_pace_bucket(name: str, brand_name: str = "") -> str:
     return CARTEL_PACE_OTHER
 
 
+# Transfer sell-through reporting: format only (no strain/SKU split).
+TRANSFER_FORMAT_7PK = "7pk 8.4g"
+TRANSFER_FORMAT_5PK = "5pk"
+TRANSFER_FORMAT_14PK = "14pk"
+TRANSFER_FORMAT_SINGLE = "Single 1.2g"
+TRANSFER_FORMAT_BLUNT = "Blunt"
+TRANSFER_FORMAT_DISPOSABLES = "Disposables"
+TRANSFER_FORMAT_CARTRIDGES = "Cartridges"
+TRANSFER_FORMAT_CONCENTRATES = "Concentrates"
+TRANSFER_FORMAT_OTHER = "Other"
+
+TRANSFER_FORMAT_BUCKET_ORDER: tuple[str, ...] = (
+    TRANSFER_FORMAT_7PK,
+    TRANSFER_FORMAT_5PK,
+    TRANSFER_FORMAT_14PK,
+    TRANSFER_FORMAT_SINGLE,
+    TRANSFER_FORMAT_BLUNT,
+    TRANSFER_FORMAT_DISPOSABLES,
+    TRANSFER_FORMAT_CARTRIDGES,
+    TRANSFER_FORMAT_CONCENTRATES,
+    TRANSFER_FORMAT_OTHER,
+)
+
+_CARTEL_PACE_TO_TRANSFER_FORMAT: dict[str, str] = {
+    CARTEL_PACE_7PK: TRANSFER_FORMAT_7PK,
+    CARTEL_PACE_5PK: TRANSFER_FORMAT_5PK,
+    CARTEL_PACE_14PK: TRANSFER_FORMAT_14PK,
+    CARTEL_PACE_SINGLE_12G: TRANSFER_FORMAT_SINGLE,
+    CARTEL_PACE_BLUNTS: TRANSFER_FORMAT_BLUNT,
+}
+
+
+def transfer_cohort_format_bucket(
+    product_name: str,
+    *,
+    brand_name: str = "",
+    category_name: str = "",
+) -> str:
+    """
+    Single reporting bucket for transfer cohort sell-through — format only, not strain/SKU.
+
+    Cartel prerolls: 7pk 8.4g, 5pk, Single 1.2g, Blunt.
+    Vape / concentrate lines: Disposables, Cartridges, Concentrates (from category + name).
+    """
+    cat = (category_name or "").strip().lower()
+    if "disposable" in cat:
+        return TRANSFER_FORMAT_DISPOSABLES
+    if "cartridge" in cat:
+        return TRANSFER_FORMAT_CARTRIDGES
+    if "concentrate" in cat or "extract" in cat:
+        return TRANSFER_FORMAT_CONCENTRATES
+
+    # Lazy import avoids circular deps with brand_merit_pool.
+    from lib.brand_merit_pool import product_format_bucket
+
+    vape = product_format_bucket(category_name, product_name)
+    if vape == "Disposables":
+        return TRANSFER_FORMAT_DISPOSABLES
+    if vape == "Cartridges":
+        return TRANSFER_FORMAT_CARTRIDGES
+
+    cartel = cartel_reorder_pace_bucket(product_name, brand_name)
+    if cartel in _CARTEL_PACE_TO_TRANSFER_FORMAT:
+        return _CARTEL_PACE_TO_TRANSFER_FORMAT[cartel]
+
+    if _RX_BLUNT.search(product_name or ""):
+        return TRANSFER_FORMAT_BLUNT
+
+    return TRANSFER_FORMAT_OTHER if cartel in (CARTEL_PACE_OTHER, CARTEL_PACE_UNIDENTIFIED) else cartel
+
+
+def format_bucket_menu_otd_label(prices_cents: set[int]) -> str:
+    """Human menu OTD label for a format bucket (e.g. ``$9/$10/$11`` or ``$37``)."""
+    if not prices_cents:
+        return "n/a"
+    dollars = sorted({c / 100 for c in prices_cents if c > 0})
+    if not dollars:
+        return "n/a"
+    if len(dollars) == 1:
+        d = dollars[0]
+        return f"${d:.0f}" if d == int(d) else f"${d:.2f}"
+    parts = [f"${d:.0f}" if d == int(d) else f"${d:.2f}" for d in dollars]
+    return "/".join(parts)
+
+
 def is_cartel_7pk_product_name(
     name: str,
     *,

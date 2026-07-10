@@ -40,6 +40,16 @@ def iter_sold_at_date_chunks(
         cur = chunk_last + timedelta(days=1)
 
 
+def order_item_package_object_id(node: dict[str, Any]) -> str:
+    """Inventory package line id from findOrderItems (not OriginId / compliance tag)."""
+    pkg = node.get("Package")
+    if isinstance(pkg, dict):
+        oid = pkg.get("objectId")
+        if oid is not None and str(oid).strip():
+            return str(oid).strip()
+    return ""
+
+
 def order_item_key(node: dict[str, Any]) -> str:
     """Stable id for dedupe; GrowFlow may expose objectId or id."""
     for k in ("objectId", "id"):

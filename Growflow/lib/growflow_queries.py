@@ -35,6 +35,7 @@ query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
         COG
         SKU
         OriginId
+        Package { objectId }
         ProductCategory { Name }
         Product {
           objectId
@@ -72,12 +73,50 @@ query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
         COG
         SKU
         OriginId
+        Package { objectId }
         ProductCategory { Name }
         Product {
           objectId
           Name
           SKU
           createdAt
+        }
+        NetWeight
+        NetWeightUOM
+        UnitWeight
+        UnitWeightUOM
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    count
+  }
+}
+"""
+
+# Same as ORDER_ITEMS_QUERY but without Package (older Retail schema).
+ORDER_ITEMS_QUERY_NO_PACKAGE = """
+query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
+  findOrderItems(first: $first, after: $after, where: $where) {
+    edges {
+      node {
+        id
+        objectId
+        SoldAt
+        GrossPrice
+        NetPrice
+        COG
+        SKU
+        OriginId
+        ProductCategory { Name }
+        Product {
+          objectId
+          Name
+          SKU
+          createdAt
+          Brand { Name }
         }
         NetWeight
         NetWeightUOM
@@ -144,6 +183,7 @@ query OrdersWithItems($first: Int, $after: String) {
             COG
             SKU
             OriginId
+            Package { objectId }
             Product {
               objectId
               Name
@@ -200,6 +240,250 @@ def date_range_to_where(field: str, from_iso: str, to_iso: str) -> dict[str, Any
             "lessThanOrEqualTo": to_iso,
         }
     }
+
+
+# Menu OTD / collected revenue: OriginalPrice, Taxes, Product.SalesPrice (see lib/growflow_line_pricing.py).
+ORDER_ITEMS_PRICING_QUERY = """
+query OrderItemsPricing($first: Int, $after: String, $where: OrderItemsWhereInput) {
+  findOrderItems(first: $first, after: $after, where: $where) {
+    edges {
+      node {
+        id
+        objectId
+        SoldAt
+        GrossPrice
+        NetPrice
+        COG
+        Price
+        OriginalPrice
+        Package { objectId }
+        Product {
+          objectId
+          Name
+          SalesPrice
+          Brand { Name }
+          ProductCategory { Name }
+        }
+        Taxes { ... on Element { value } }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+"""
+
+
+def fetch_order_items_pricing(
+    base_variables: dict[str, Any],
+    *,
+    credentials_path: str | None = None,
+) -> list[dict[str, Any]]:
+    """Paginate findOrderItems with menu OTD and tax fields for revenue reporting."""
+    return fetch_paginated(
+        "findOrderItems",
+        ORDER_ITEMS_PRICING_QUERY,
+        base_variables,
+        credentials_path=credentials_path,
+    )
+
+
+# Retail dashboard / fact ingest: pricing + Store + Orders union (budtender User).
+ORDER_ITEMS_RETAIL_DASHBOARD_QUERY = """
+query OrderItemsRetailDashboard($first: Int, $after: String, $where: OrderItemsWhereInput) {
+  findOrderItems(first: $first, after: $after, where: $where) {
+    edges {
+      node {
+        id
+        objectId
+        SoldAt
+        GrossPrice
+        NetPrice
+        COG
+        Price
+        OriginalPrice
+        Package { objectId }
+        ProductCategory { Name }
+        Store { objectId Name }
+        Product {
+          objectId
+          Name
+          SKU
+          SalesPrice
+          Brand { Name }
+          ProductCategory { Name }
+        }
+        Taxes { ... on Element { value } }
+        Orders {
+          ... on Orders {
+            objectId
+            CompletedAt
+            Total
+            Subtotal
+            Discounts
+            Type
+            Status
+            PreOrderType
+            User { objectId username FullName }
+            Store { objectId Name }
+          }
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    count
+  }
+}
+"""
+
+
+def fetch_order_items_retail_dashboard(
+    base_variables: dict[str, Any],
+    *,
+    credentials_path: str | None = None,
+) -> list[dict[str, Any]]:
+    """Paginate findOrderItems with retail dashboard field superset."""
+    return fetch_paginated(
+        "findOrderItems",
+        ORDER_ITEMS_RETAIL_DASHBOARD_QUERY,
+        base_variables,
+        credentials_path=credentials_path,
+    )
+
+
+ORDERS_RETAIL_DASHBOARD_QUERY = """
+query OrdersRetailDashboard($first: Int, $after: String, $where: OrdersWhereInput) {
+  findOrders(first: $first, after: $after, where: $where) {
+    edges {
+      node {
+        objectId
+        CompletedAt
+        Total
+        Subtotal
+        Discounts
+        Type
+        Status
+        PreOrderType
+        User { objectId username FullName }
+        Store { objectId Name }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+"""
+
+
+def fetch_orders_retail_dashboard(
+    base_variables: dict[str, Any],
+    *,
+    credentials_path: str | None = None,
+) -> list[dict[str, Any]]:
+    return fetch_paginated(
+        "findOrders",
+        ORDERS_RETAIL_DASHBOARD_QUERY,
+        base_variables,
+        credentials_path=credentials_path,
+    )
+
+
+PRODUCTS_CATALOG_QUERY = """
+query ProductsCatalog($first: Int, $after: String) {
+  findProducts(first: $first, after: $after) {
+    edges {
+      node {
+        objectId
+        Name
+        SKU
+        SalesPrice
+        Brand { objectId Name }
+        ProductCategory { objectId Name }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+"""
+
+
+def fetch_products_catalog(
+    base_variables: dict[str, Any] | None = None,
+    *,
+    credentials_path: str | None = None,
+) -> list[dict[str, Any]]:
+    return fetch_paginated(
+        "findProducts",
+        PRODUCTS_CATALOG_QUERY,
+        base_variables or {"first": PAGE_SIZE},
+        credentials_path=credentials_path,
+    )
+
+
+STORES_QUERY = """
+query Stores($first: Int, $after: String) {
+  findStores(first: $first, after: $after) {
+    edges {
+      node {
+        objectId
+        Name
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+"""
+
+
+def fetch_stores(
+    *,
+    credentials_path: str | None = None,
+) -> list[dict[str, Any]]:
+    return fetch_paginated("findStores", STORES_QUERY, {"first": PAGE_SIZE}, credentials_path=credentials_path)
+
+
+def fetch_order_items(
+    base_variables: dict[str, Any],
+    *,
+    credentials_path: str | None = None,
+) -> list[dict[str, Any]]:
+    """
+    Paginate findOrderItems with Brand + Package on the line.
+
+    Falls back to ORDER_ITEMS_QUERY_NO_BRAND, then ORDER_ITEMS_QUERY_NO_PACKAGE if the schema
+    rejects those fields.
+    """
+    queries = (ORDER_ITEMS_QUERY, ORDER_ITEMS_QUERY_NO_BRAND, ORDER_ITEMS_QUERY_NO_PACKAGE)
+    last_err: RuntimeError | None = None
+    for q in queries:
+        try:
+            return fetch_paginated(
+                "findOrderItems", q, base_variables, credentials_path=credentials_path
+            )
+        except RuntimeError as e:
+            last_err = e
+            msg = str(e)
+            if q is ORDER_ITEMS_QUERY and "Brand" in msg:
+                continue
+            if q in (ORDER_ITEMS_QUERY, ORDER_ITEMS_QUERY_NO_BRAND) and "Package" in msg:
+                continue
+            raise
+    if last_err:
+        raise last_err
+    return []
 
 
 def fetch_paginated(

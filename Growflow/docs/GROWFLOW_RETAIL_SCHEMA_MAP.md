@@ -38,6 +38,7 @@ query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
         COG
         SKU
         OriginId
+        Package { objectId }
         ProductCategory { Name }
         Product {
           objectId
@@ -76,6 +77,7 @@ query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
         COG
         SKU
         OriginId
+        Package { objectId }
         ProductCategory { Name }
         Product {
           objectId
@@ -169,6 +171,32 @@ query Packages($first: Int, $after: String, $where: PackagesWhereInput) {
   }
 }
 ```
+
+### Order line ↔ inventory package
+
+| Field | Use |
+| --- | --- |
+| **`Package.objectId`** on `OrderItems` | Join to **`Packages.objectId`** on a transfer receipt for cohort sell-through (`scripts/transfer_cohort_sellthrough.py`). |
+| **`OriginId`** on `OrderItems` | Compliance / source tag (e.g. Metrc-style `1A40E…`); **not** the Retail package `objectId`. |
+
+### Menu / out-the-door pricing (tax-inclusive shelf)
+
+Nugz menu prices are **tax-inclusive** (flat OTD on the shelf). **`GrossPrice` alone is not the menu price.**
+
+| Field | Type | Meaning (validated 2026-06) |
+| --- | --- | --- |
+| **`findProducts.SalesPrice`** | cents | Catalog **menu OTD** (7pk = 3700 → **$37**, 5pk = **$42**, blunt = **$18**, singles **$9–$12**) |
+| **`OrderItems.OriginalPrice`** | cents | Menu OTD at sale time; matches **`Product.SalesPrice`** on standard rings |
+| **`OrderItems.GrossPrice`** | cents | **Pre-tax** portion rung on the line (e.g. 7pk ≈ **$31.62**) |
+| **`OrderItems.Price`** | cents | Pre-tax charge after promos; can be below menu-derived pre-tax |
+| **`OrderItems.Taxes`** | `Element.value` JSON | Per-line taxes; use **`taxAmount`** (see `lib/growflow_line_pricing.py`) |
+| **Customer OTD collected** | derived | **`GrossPrice` + sum(`taxAmount`)** ≈ menu when no discount |
+
+**Repo helpers:** `lib/growflow_line_pricing.py` — `menu_price_cents()`, `collected_otd_cents()`, `line_tax_cents()`.
+
+**Probe script:** `PYTHONPATH=. python scripts/probe_growflow_retail_price_fields.py`
+
+**Do not use for menu OTD:** `GrossPrice` alone, `NetPrice` (different slice; not shelf OTD).
 
 ---
 

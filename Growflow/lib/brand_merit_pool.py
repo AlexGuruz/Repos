@@ -117,6 +117,63 @@ def package_format_bucket(pkg: dict[str, Any]) -> str:
     return product_format_bucket(package_product_category_name(pkg), package_product_name(pkg))
 
 
+# Flower / concentrate / shake categories beyond the format-product substring list.
+EXTRA_MJ_CATEGORY_SUBSTRINGS: tuple[str, ...] = (
+    "flower",
+    "concentrate",
+    "extract",
+    "rosin",
+    "hash",
+    "prepack",
+    "pre-pack",
+    "prepackaged",
+    "bulk flower",
+    "shake",
+    "trim",
+    "kief",
+    "infused",
+    "moonrock",
+    "blunt",
+    "rso",
+    "feco",
+    "thc-a",
+    "delta 8",
+    "cbd",
+)
+
+
+NON_MJ_INVENTORY_CATEGORIES: frozenset[str] = frozenset(
+    {
+        "Accessories",
+        "Nicotine Vape",
+        "KRATOM",
+        "MUSHROOM CAPSULE",
+        "FOOD AND DRINK NON THC",
+        "Energy Drink",
+        "Jewelry",
+        "BONG",
+        "BONG/PIPE",
+        "HAND PIPE",
+        "Battery Pack",
+        "Soap",
+        "Baked Goods",
+    }
+)
+
+
+def is_mj_package(pkg: dict[str, Any]) -> bool:
+    """True when package category/name matches repo MJ inventory/sales filters."""
+    cat = package_product_category_name(pkg)
+    if cat in NON_MJ_INVENTORY_CATEGORIES:
+        return False
+    cat_lower = cat.lower()
+    if "nicotine" in cat_lower or "kratom" in cat_lower:
+        return False
+    if package_in_format_product_pool(pkg):
+        return True
+    return category_matches_format_substrings(cat, EXTRA_MJ_CATEGORY_SUBSTRINGS)
+
+
 _NON_DISPOSABLE_RE = re.compile(r"non[- ]disposable", re.IGNORECASE)
 _DISPO_WORD_RE = re.compile(r"\bdispo\b", re.IGNORECASE)
 

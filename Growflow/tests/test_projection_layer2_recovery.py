@@ -47,6 +47,20 @@ class TestLayer2Row(unittest.TestCase):
         self.assertIsNone(r["units_from_allocation"])
         self.assertIsNotNone(r["avg_retail_per_unit"])
 
+    def test_partial_cog_coverage_uses_cog_bearing_units(self) -> None:
+        # 10 units sold, COG on 5 lines only ($5 total) => $1/unit COG, not $0.50
+        r = layer2_row(
+            allocated_cog_usd=50.0,
+            units_sold=10,
+            gross_cents=2000,
+            cog_cents=500,
+            span_inclusive_days=365,
+            cog_bearing_units=5,
+        )
+        self.assertAlmostEqual(r["avg_cog_per_unit"], 1.0)
+        self.assertAlmostEqual(r["units_from_allocation"], 50.0)
+        self.assertAlmostEqual(r["projected_gross_profit_usd"], 50.0)
+
     def test_happy_path_365_day_window(self) -> None:
         # 10 units, $5 COG total => $0.50/unit; $20 gross => $2 retail/unit
         r = layer2_row(

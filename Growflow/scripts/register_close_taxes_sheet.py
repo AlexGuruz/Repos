@@ -85,6 +85,7 @@ def _append_log(message: str, cfg: dict) -> None:
 def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -> int:
     state_path = Path(str(cfg.get("state_path")))
     state = load_state(state_path)
+    _append_log("poll start", cfg)
     now_utc = datetime.now(timezone.utc)
     now_local = now_utc.astimezone(tz)
     since_dt = resolve_transaction_poll_since(
@@ -136,6 +137,7 @@ def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -
     state["last_poll_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     if not dry_run:
         save_state(state_path, state)
+    _append_log(f"poll ok exported={exported}", cfg)
     return exported
 
 
@@ -175,7 +177,12 @@ def main() -> int:
         if not window.in_window(now_local) and not args.dry_run:
             # Outside EOD poll window — exit quietly (Task Scheduler only fires in-window anyway).
             return 0
-        _poll_once(cfg, tz, dry_run=args.dry_run, lookback_hours=args.lookback_hours)
+        try:
+            _poll_once(cfg, tz, dry_run=args.dry_run, lookback_hours=args.lookback_hours)
+        except Exception as e:
+            _append_log(f"poll ERROR: {e}", cfg)
+            print(f"Poll error: {e}", file=sys.stderr, flush=True)
+            return 1
         return 0
 
     schedule = end_hour_schedule_from_config(cfg)

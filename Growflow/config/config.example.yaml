@@ -28,6 +28,20 @@ taxes_sheet:
   sheet_name: "Taxes"
   service_account_path: "E:/secrets/gcp/sa.json"
 
+# Balance and Misc tab snapshots (duplicate tab + local JSON; schedule via install script)
+balance_misc_snapshot:
+  spreadsheet_id: "YOUR_SPREADSHEET_ID"
+  sheet_name: "Balance and Misc"
+  sheet_id: 0
+  service_account_path: "E:/secrets/gcp/stashbox.json"
+  snapshot_tab_prefix: "SNAP Balance and Misc"
+  timezone: America/Chicago
+  max_snapshots: 28
+  local_snapshot_dir: data/balance_misc_snapshots
+  write_local_json: true
+  change_log_dir: logs/balance_misc_changes
+  max_change_log_days: 28
+
 register_close_notify:
   register_name: "Register 1"
   # Oklahoma Central (America/Chicago): ~8 PM Sunday, ~10 PM Mon-Sat closes

@@ -43,6 +43,8 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
         "taxes_sheet_service_account_path": None,
         "google_sheets": {},
         "taxes_sheet": {},
+        "balance_misc_snapshot": {},
+        "petty_cash_snapshot": {},
     }
     if not p.is_file():
         return out
@@ -50,6 +52,8 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
     gf = _yaml_block(text, "growflow")
     gs = _yaml_block(text, "google_sheets")
     ts = _yaml_block(text, "taxes_sheet")
+    bms = _yaml_block(text, "balance_misc_snapshot")
+    pcs = _yaml_block(text, "petty_cash_snapshot")
     rc = _yaml_block(text, "register_close_notify")
 
     out["credentials_path"] = _yaml_scalar(text, "credentials_path") or _yaml_scalar(gf, "credentials_path")
@@ -68,6 +72,34 @@ def load_config(path: Path | None = None) -> dict[str, Any]:
     out["taxes_spreadsheet_id"] = out["taxes_sheet"].get("spreadsheet_id")
     out["taxes_sheet_name"] = out["taxes_sheet"].get("sheet_name")
     out["taxes_sheet_service_account_path"] = out["taxes_sheet"].get("service_account_path")
+
+    out["balance_misc_snapshot"] = {
+        "spreadsheet_id": _yaml_scalar(bms, "spreadsheet_id"),
+        "sheet_name": _yaml_scalar(bms, "sheet_name") or "Balance and Misc",
+        "sheet_id": _yaml_scalar(bms, "sheet_id"),
+        "service_account_path": _yaml_scalar(bms, "service_account_path"),
+        "snapshot_tab_prefix": _yaml_scalar(bms, "snapshot_tab_prefix"),
+        "timezone": _yaml_scalar(bms, "timezone"),
+        "max_snapshots": _yaml_scalar(bms, "max_snapshots"),
+        "local_snapshot_dir": _yaml_scalar(bms, "local_snapshot_dir"),
+        "write_local_json": _yaml_scalar(bms, "write_local_json"),
+        "change_log_dir": _yaml_scalar(bms, "change_log_dir"),
+        "max_change_log_days": _yaml_scalar(bms, "max_change_log_days"),
+    }
+
+    out["petty_cash_snapshot"] = {
+        "spreadsheet_id": _yaml_scalar(pcs, "spreadsheet_id"),
+        "sheet_name": _yaml_scalar(pcs, "sheet_name") or "PETTY CASH",
+        "sheet_id": _yaml_scalar(pcs, "sheet_id"),
+        "service_account_path": _yaml_scalar(pcs, "service_account_path"),
+        "snapshot_tab_prefix": _yaml_scalar(pcs, "snapshot_tab_prefix"),
+        "timezone": _yaml_scalar(pcs, "timezone"),
+        "max_snapshots": _yaml_scalar(pcs, "max_snapshots"),
+        "local_snapshot_dir": _yaml_scalar(pcs, "local_snapshot_dir"),
+        "write_local_json": _yaml_scalar(pcs, "write_local_json"),
+        "change_log_dir": _yaml_scalar(pcs, "change_log_dir"),
+        "max_change_log_days": _yaml_scalar(pcs, "max_change_log_days"),
+    }
 
     out["register_name"] = _yaml_scalar(rc, "register_name") or out["register_name"]
     out["register_object_id"] = _yaml_scalar(rc, "register_object_id")

@@ -96,6 +96,57 @@
     "status": "active"
   },
   {
+    "template_id": "order_items_retail_dashboard_v1",
+    "metric_id": "growflow_fact_ingest",
+    "graphql_operation_name": "OrderItemsRetailDashboard",
+    "query_source": "lib/growflow_queries.py:ORDER_ITEMS_RETAIL_DASHBOARD_QUERY",
+    "required_variables": ["first", "where.SoldAt.greaterThanOrEqualTo", "where.SoldAt.lessThanOrEqualTo"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findOrderItems",
+    "allowed_date_window_rules": "multi-chunk trailing SoldAt UTC window",
+    "known_schema_assumptions": [
+      "Budtender from Orders { ... on Orders { User { FullName } } }",
+      "Channel proxy via Orders.PreOrderType"
+    ],
+    "status": "active"
+  },
+  {
+    "template_id": "orders_retail_dashboard_v1",
+    "metric_id": "retail_dashboard",
+    "graphql_operation_name": "OrdersRetailDashboard",
+    "query_source": "lib/growflow_queries.py:ORDERS_RETAIL_DASHBOARD_QUERY",
+    "required_variables": ["first"],
+    "optional_variables": ["after", "where"],
+    "expected_response_root": "data.findOrders",
+    "allowed_date_window_rules": "optional CompletedAt filter",
+    "known_schema_assumptions": ["Supplemental order-level returns/discount probes"],
+    "status": "active"
+  },
+  {
+    "template_id": "products_catalog_v1",
+    "metric_id": "growflow_fact_ingest",
+    "graphql_operation_name": "ProductsCatalog",
+    "query_source": "lib/growflow_queries.py:PRODUCTS_CATALOG_QUERY",
+    "required_variables": ["first"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findProducts",
+    "allowed_date_window_rules": "none",
+    "known_schema_assumptions": ["Catalog dimension refresh during ingest"],
+    "status": "active"
+  },
+  {
+    "template_id": "stores_v1",
+    "metric_id": "growflow_fact_ingest",
+    "graphql_operation_name": "Stores",
+    "query_source": "lib/growflow_queries.py:STORES_QUERY",
+    "required_variables": ["first"],
+    "optional_variables": ["after"],
+    "expected_response_root": "data.findStores",
+    "allowed_date_window_rules": "none",
+    "known_schema_assumptions": ["Store dimension for filters"],
+    "status": "active"
+  },
+  {
     "template_id": "schema_discovery_runner_v1",
     "metric_id": "schema_discovery",
     "graphql_operation_name": "discover_*",

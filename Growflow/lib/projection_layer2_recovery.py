@@ -62,6 +62,7 @@ def layer2_row(
     gross_cents: int,
     cog_cents: int,
     span_inclusive_days: int,
+    cog_bearing_units: int | None = None,
 ) -> dict[str, Any]:
     """
     Compute second-layer fields for one brand × category cell.
@@ -95,7 +96,8 @@ def layer2_row(
 
     row["avg_units_per_month"] = avg_monthly_units_sold(units_sold, span_inclusive_days)
     row["avg_retail_per_unit"] = gross_usd / units_sold
-    row["avg_cog_per_unit"] = cog_usd / units_sold if cog_usd > 0 else None
+    cog_u = cog_bearing_units if cog_bearing_units is not None else units_sold
+    row["avg_cog_per_unit"] = cog_usd / cog_u if cog_usd > 0 and cog_u > 0 else None
 
     if row["avg_cog_per_unit"] is None or row["avg_cog_per_unit"] <= 0:
         return row
@@ -159,6 +161,7 @@ def layer2_row_buy_plan(
     units_from_allocation_override: float | None = None,
     planner_score: float | None = None,
     cash_cycle_days: float = 14.0,
+    cog_bearing_units: int | None = None,
 ) -> dict[str, Any]:
     """
     Buy-plan metrics from **recent** velocity only.
@@ -218,7 +221,8 @@ def layer2_row_buy_plan(
     else:
         row["avg_units_per_week"] = recent_units_sold / velocity_weeks
     row["avg_retail_per_unit"] = gross_usd / recent_units_sold
-    row["avg_cog_per_unit"] = cog_usd / recent_units_sold if cog_usd > 0 else None
+    cog_u = cog_bearing_units if cog_bearing_units is not None else recent_units_sold
+    row["avg_cog_per_unit"] = cog_usd / cog_u if cog_usd > 0 and cog_u > 0 else None
 
     if row["avg_cog_per_unit"] is None or row["avg_cog_per_unit"] <= 0:
         return row

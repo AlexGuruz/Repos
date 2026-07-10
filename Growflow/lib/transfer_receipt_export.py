@@ -8,9 +8,11 @@ Each row is one **transfer package line** with:
 - ``received_at_epoch_ms`` / ``received_date_local`` — convenience for spreadsheets, Kylo ETL, and
   aligning to **store calendar** (from ``sales_timezone`` / ``GROWFLOW_SALES_TZ``).
 
-**Joining to sales (Growflow repo):** match on ``product_object_id`` when present, else
-``product_name`` + ``brand_name``. **Do not** treat ``OrderItems.OriginId`` as package ``objectId``
-(compliance tag; see ``scripts/_cartel_7pk_first_receipt_sellout.py`` docstring).
+**Joining to sales (Growflow repo):** for receipt-cohort sell-through, match
+``OrderItems.Package.objectId`` to transfer ``Packages.objectId`` (see
+``scripts/transfer_cohort_sellthrough.py``). Product-level joins use ``product_object_id`` when
+present, else ``product_name`` + ``brand_name``. **Do not** treat ``OrderItems.OriginId`` as package
+``objectId`` (compliance tag; see ``scripts/_cartel_7pk_first_receipt_sellout.py`` docstring).
 
 **Kylo / company_bi:** use ``received_date_local`` or UTC day buckets to align trailing COG with
 cash expense timing (Sheets / ``KYLO_GLOBAL_DSN`` paths described in ``company_bi/docs``).

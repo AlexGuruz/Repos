@@ -411,7 +411,7 @@ def build_dashboard_value_grid(
     if rec_d:
         # Buy-plan cash_recovery_days is intentionally ~flat at the cash-cycle cap; show velocity instead.
         fast_headers[3] = "Avg units / day"
-        fast_cols = (2, 3, 4, 6, 5, 8)  # use avg_units_per_day (col G) instead of recovery (col G/H mismatch avoided)
+        fast_cols = (2, 3, 4, 7, 6, 8)  # col 7 = avg_units_per_day in FAST_RECOVERY spill (A:H)
         fast_title = f"Fastest sell velocity (Allocated COG ≥ ${MEANINGFUL_USD:g}; ranked by avg units/day)"
     _rank(
         "fast_recovery",

@@ -6,6 +6,7 @@ config/*.json
 
 # Data and exports
 data/
+company_bi/db/*.db
 *.csv
 *.xlsx
 
