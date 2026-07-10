@@ -425,6 +425,11 @@ def _batch_read_headers(service, spreadsheet_id: str, tabs: List[str], header_ro
     return out
 
 
+def _is_source_txn_posted(txn: dict, *, ignore_posted: bool) -> bool:
+    """Return True when an intake row should not receive new posted/notes updates."""
+    return (not ignore_posted) and bool(txn.get("posted_flag"))
+
+
 def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, rules_changed: bool = False):
     cfg = load_config()
     companies = cfg.get("sheets.companies") or []
@@ -771,8 +776,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             except Exception:
                 return str(name)
 
-        # Collect per-transaction targets to resolve to exact cells
-        pending_writes: List[Tuple[str, str, str, int, str, int, str, str]] = []  # (tab, header, date_key, amount_cents, src_tab, row_idx0, txn_uid, source_sid)
+        # All rule-matched transactions (posted + unposted) for full target-cell totals.
+        # Last tuple field: for_marking — True only for rows that still need posted/notes updates.
+        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool]] = []
         # NOTE: We store the resolved target A1 range per source row so we only mark
         # rows as posted when their target cell is confirmed written (or already correct).
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
@@ -791,34 +797,25 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         skipped_posted = 0
         skipped_wrong_company = 0
         
-        # Pre-check: if most transactions are marked as posted (>90%), auto-enable reprocessing
-        # This handles cases where transactions were incorrectly marked as posted
-        if not ignore_posted and total_txns > 0:
-            posted_count = sum(1 for t in txns_for_target if bool(t.get("posted_flag")))
-            posted_pct = (posted_count / total_txns * 100) if total_txns > 0 else 0
-            if posted_pct >= 90.0:
-                print(f"[DIAG] {posted_count}/{total_txns} ({posted_pct:.1f}%) transactions are marked as posted. Auto-enabling reprocess mode...")
-                ignore_posted = True
-
         for t in txns_for_target:
             company_id = (t.get("company_id") or "").strip().upper()
             source_tab = str(t.get("source_tab") or "").strip()
             source_sid = str(t.get("source_spreadsheet_id") or "").strip()
             row_idx = t.get("row_index_0based", 0)
 
-            # Skip rows already posted (column F TRUE on source sheet)
-            # IMPORTANT: If user clears Column F (Posted) or Column G (Notes), the CSV checksum changes,
-            # triggering a re-run. Rows with Column F = empty/FALSE will be reprocessed here.
-            # Can be overridden with KYLO_IGNORE_POSTED_FLAG=1 or KYLO_REPROCESS_POSTED=1
-            if not ignore_posted and bool(t.get("posted_flag")):
+            # Rows already posted (column F TRUE) are excluded from mark/notes updates but
+            # still contribute to target-cell totals so writes overwrite with the full projection.
+            # IMPORTANT: If user clears Column F (Posted), the CSV checksum changes and the row
+            # is reprocessed. Override with KYLO_IGNORE_POSTED_FLAG=1 or --reprocess-posted.
+            is_posted = _is_source_txn_posted(t, ignore_posted=ignore_posted)
+            if is_posted:
                 skipped_posted += 1
-                continue
             if company_id != company_upper:
                 skipped_wrong_company += 1
                 continue
 
             try:
-                if str(t.get("source_tab", "")).strip().lower() == "credit cards":
+                if (not is_posted) and str(t.get("source_tab", "")).strip().lower() == "credit cards":
                     credit_cards_rows.append((source_sid, str(t.get("source_tab") or "CREDIT CARDS"), int(t.get("row_index_0based") or 0)))
             except Exception:
                 pass
@@ -842,12 +839,14 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     date_key = ""
             else:
                 date_key = ""
-            append_rows.append([date_key, company_id, src, amt])
+            if not is_posted:
+                append_rows.append([date_key, company_id, src, amt])
 
             txn_uid = str(t.get("txn_uid") or "").strip()
             if not txn_uid:
                 txn_uid = f"LEGACY|{company_upper}|{t.get('source_tab') or 'TRANSACTIONS'}|{int(t.get('row_index_0based') or 0)}|{amount_cents}"
-            processed_txn_uids.add(txn_uid)
+            if not is_posted:
+                processed_txn_uids.add(txn_uid)
 
             # Matching policy per company
             rule = None
@@ -869,140 +868,64 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 rule_company_upper = rule.company_id.strip().upper()
                 if rule_company_upper and rule_company_upper != company_upper:
                     rule = None
-                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule company_id '{rule_company_upper}' doesn't match '{company_upper}'"))
-                    skipped_txn_uids_no_rule.add(txn_uid)
+                    if not is_posted:
+                        skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule company_id '{rule_company_upper}' doesn't match '{company_upper}'"))
+                        skipped_txn_uids_no_rule.add(txn_uid)
 
             if not rule:
-                skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"No rule match for: '{src_trim[:50]}'"))
-                skipped_txn_uids_no_rule.add(txn_uid)
+                if not is_posted:
+                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"No rule match for: '{src_trim[:50]}'"))
+                    skipped_txn_uids_no_rule.add(txn_uid)
                 continue
             if not rule.approved:
-                skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule found but not approved: '{src_trim[:50]}'"))
-                skipped_txn_uids_no_rule.add(txn_uid)
+                if not is_posted:
+                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule found but not approved: '{src_trim[:50]}'"))
+                    skipped_txn_uids_no_rule.add(txn_uid)
                 continue
             if not rule.target_sheet:
-                skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule approved but missing target_sheet: '{src_trim[:50]}'"))
-                skipped_txn_uids_no_rule.add(txn_uid)
+                if not is_posted:
+                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule approved but missing target_sheet: '{src_trim[:50]}'"))
+                    skipped_txn_uids_no_rule.add(txn_uid)
                 continue
             if not rule.target_header:
-                skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule approved but missing target_header: '{src_trim[:50]}'"))
-                skipped_txn_uids_no_rule.add(txn_uid)
+                if not is_posted:
+                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule approved but missing target_header: '{src_trim[:50]}'"))
+                    skipped_txn_uids_no_rule.add(txn_uid)
                 continue
             if not date_key:
-                skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), "Date not available"))
+                if not is_posted:
+                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), "Date not available"))
                 continue
 
             resolved_tab = title_map.get(_norm_tab_key(str(rule.target_sheet)))
             if not resolved_tab:
                 skipped_tab_not_found.append(str(rule.target_sheet))
-                skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Target tab not found: {rule.target_sheet}"))
+                if not is_posted:
+                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Target tab not found: {rule.target_sheet}"))
                 continue
 
-            pending_writes.append((resolved_tab, rule.target_header, date_key, int(amount_cents), source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), txn_uid, source_sid))
+            matched_writes.append(
+                (
+                    resolved_tab,
+                    rule.target_header,
+                    date_key,
+                    int(amount_cents),
+                    source_tab or "TRANSACTIONS",
+                    int(t.get("row_index_0based") or 0),
+                    txn_uid,
+                    source_sid,
+                    not is_posted,
+                )
+            )
 
         # Print diagnostic summary
+        pending_writes = [w for w in matched_writes if w[8]]
         print(f"[DIAG] Total transactions: {total_txns}")
         print(f"[DIAG] Skipped (already posted): {skipped_posted}")
         print(f"[DIAG] Skipped (wrong company): {skipped_wrong_company}")
         print(f"[DIAG] Processed for matching: {total_txns - skipped_posted - skipped_wrong_company}")
-        print(f"[DIAG] Matched to rules: {len(pending_writes)}")
-        
-        # Auto-reprocess if all transactions are marked as posted but nothing matched
-        # This handles the case where transactions were incorrectly marked as posted
-        if not ignore_posted and skipped_posted > 0 and len(pending_writes) == 0 and (total_txns - skipped_wrong_company) == skipped_posted:
-            print(f"[DIAG] WARN: All {skipped_posted} transactions are marked as posted but none matched rules.")
-            print(f"[DIAG] Auto-enabling reprocess mode to check if posting actually occurred...")
-            ignore_posted = True
-            # Re-process with ignore_posted enabled
-            skipped_posted = 0
-            pending_writes = []
-            skipped_rows = []
-            skipped_tab_not_found = []
-            skipped_txn_uids_no_rule = set()
-            
-            for t in txns_for_target:
-                company_id = (t.get("company_id") or "").strip().upper()
-                source_tab = str(t.get("source_tab") or "").strip()
-                source_sid = str(t.get("source_spreadsheet_id") or "").strip()
-                row_idx = t.get("row_index_0based", 0)
-                
-                if company_id != company_upper:
-                    continue
-                
-                src = t.get("description") or ""
-                src_trim = src.strip()
-                try:
-                    amount_cents = int(t.get("amount_cents", 0))
-                except Exception:
-                    amount_cents = int(round(float(t.get("amount_cents") or 0)))
-                dt = t.get("posted_date")
-                if dt:
-                    try:
-                        y, m, d = str(dt).split("-")
-                        yy = int(y) % 100
-                        mm = int(m)
-                        dd = int(d)
-                        date_key = f"{mm}/{dd}/{yy:02d}"
-                    except Exception:
-                        date_key = ""
-                else:
-                    date_key = ""
-                
-                txn_uid = str(t.get("txn_uid") or "").strip()
-                if not txn_uid:
-                    txn_uid = f"LEGACY|{company_upper}|{t.get('source_tab') or 'TRANSACTIONS'}|{int(t.get('row_index_0based') or 0)}|{amount_cents}"
-                
-                rule = None
-                if company_upper in relaxed_companies:
-                    best = None
-                    best_len = -1
-                    for r in approved_rules:
-                        s = _normalize_text((r.source or "").strip())
-                        if not s:
-                            continue
-                        if s.lower() in _normalize_text(src_trim).lower() and len(s) > best_len:
-                            best = r
-                            best_len = len(s)
-                    rule = best or rules_by_trim.get(src_trim) or rules.get(src)
-                else:
-                    rule = rules_by_trim.get(src_trim) or rules_by_trim_upper.get(src_trim.upper()) or rules.get(src)
-                
-                if rule and rule.company_id:
-                    rule_company_upper = rule.company_id.strip().upper()
-                    if rule_company_upper and rule_company_upper != company_upper:
-                        rule = None
-                        skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule company_id '{rule_company_upper}' doesn't match '{company_upper}'"))
-                        skipped_txn_uids_no_rule.add(txn_uid)
-                
-                if not rule:
-                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"No rule match for: '{src_trim[:50]}'"))
-                    skipped_txn_uids_no_rule.add(txn_uid)
-                    continue
-                if not rule.approved:
-                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule found but not approved: '{src_trim[:50]}'"))
-                    skipped_txn_uids_no_rule.add(txn_uid)
-                    continue
-                if not rule.target_sheet:
-                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule approved but missing target_sheet: '{src_trim[:50]}'"))
-                    skipped_txn_uids_no_rule.add(txn_uid)
-                    continue
-                if not rule.target_header:
-                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Rule approved but missing target_header: '{src_trim[:50]}'"))
-                    skipped_txn_uids_no_rule.add(txn_uid)
-                    continue
-                if not date_key:
-                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), "Date not available"))
-                    continue
-                
-                resolved_tab = title_map.get(_norm_tab_key(str(rule.target_sheet)))
-                if not resolved_tab:
-                    skipped_tab_not_found.append(str(rule.target_sheet))
-                    skipped_rows.append((source_sid, source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), f"Target tab not found: {rule.target_sheet}"))
-                    continue
-                
-                pending_writes.append((resolved_tab, rule.target_header, date_key, int(amount_cents), source_tab or "TRANSACTIONS", int(t.get("row_index_0based") or 0), txn_uid, source_sid))
-            
-            print(f"[DIAG] After reprocess: {len(pending_writes)} transactions matched to rules")
+        print(f"[DIAG] Matched to rules (all): {len(matched_writes)}")
+        print(f"[DIAG] New/unposted to mark: {len(pending_writes)}")
         
         if skipped_txn_uids_no_rule:
             print(f"[RULES] WARN: {len(skipped_txn_uids_no_rule)} transactions did not match any rules for {company_upper}")
@@ -1011,7 +934,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # Resolve writes to exact A1 cells
         data: List[Dict[str, object]] = []
-        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid) in pending_writes})
+        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _mark) in matched_writes})
         headers_map = _batch_read_headers(service, target_sid, unique_tabs, header_row)
         cell_totals: Dict[str, int] = {}
         cell_txns: Dict[str, Set[str]] = defaultdict(set)
@@ -1093,7 +1016,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return actual
             return static_row
 
-        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid) in pending_writes:
+        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid, for_marking) in matched_writes:
             headers = headers_map.get(tab) or []
             norm = [str(h).strip().lower() for h in headers]
             wanted = (header or "").strip().lower()
@@ -1104,15 +1027,17 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                         col_index = i
                         break
             if col_index < 0:
-                skipped_header_date += 1
-                skipped_rows.append((source_sid, src_tab, row0, f"Header not found: {header}"))
+                if for_marking:
+                    skipped_header_date += 1
+                    skipped_rows.append((source_sid, src_tab, row0, f"Header not found: {header}"))
                 continue
             col_a1 = _col_to_a1(col_index)
             # Resolve date row with static mapping, then correct using Column A lookup.
             row_index = _resolve_date_row(tab, date_key, dates_to_row.get(date_key))
             if row_index is None:
-                skipped_header_date += 1
-                skipped_rows.append((source_sid, src_tab, row0, f"Date not found: {date_key}"))
+                if for_marking:
+                    skipped_header_date += 1
+                    skipped_rows.append((source_sid, src_tab, row0, f"Date not found: {date_key}"))
                 continue
 
             a1 = f"{_quote_tab_a1(tab)}!{col_a1}{row_index}"
@@ -1125,12 +1050,13 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 cell_source_tabs[a1].add("TRANSACTIONS")
             cell_meta[a1] = (tab, header, date_key)
             tabs_touched.add(tab)
-            success_rows.append((source_sid, src_tab, row0, a1))
-            try:
-                note_msg = f"Posted {amount_cents / 100.0:.2f} -> {tab}/{header} {date_key}"
-            except Exception:
-                note_msg = "Posted"
-            success_notes.append((source_sid, src_tab, row0, note_msg, a1))
+            if for_marking:
+                success_rows.append((source_sid, src_tab, row0, a1))
+                try:
+                    note_msg = f"Posted {amount_cents / 100.0:.2f} -> {tab}/{header} {date_key}"
+                except Exception:
+                    note_msg = "Posted"
+                success_notes.append((source_sid, src_tab, row0, note_msg, a1))
 
         updated_ranges: Set[str] = set()
         update_entries: List[Dict[str, object]] = []

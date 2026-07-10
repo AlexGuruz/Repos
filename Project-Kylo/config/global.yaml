@@ -1,6 +1,7 @@
 version: 1
 
 runtime:
+  mode: audit
   dry_run: false
   log_level: INFO
   timezone: America/Chicago
@@ -16,8 +17,8 @@ database:
 
 posting:
   sheets:
-    apply: true
-  mark_posted: true  # Enable marking rows as posted and writing notes
+    apply: false
+  mark_posted: false
   # After a successful target value write, tint cells by intake tab (background only).
   # Disable with posting.source_tab_fill.enabled: false or env KYLO_SOURCE_TAB_FILL=0.
   source_tab_fill:
