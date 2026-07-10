@@ -1,0 +1,50 @@
+{
+  "metric_id": "transfer_units",
+  "description": "Transfer package-line unit and landed cost rows derived from findTransfers.Packages.",
+  "business_question": "How many package units were received and at what landed cost by transfer/product?",
+  "allowed_query_template_ids": ["transfer_units_from_receipts_v1", "transfer_receipts_accepted_v1"],
+  "expected_root_path": "data.findTransfers",
+  "required_fields": ["objectId", "Status", "ReceivedAt", "Packages"],
+  "optional_fields": ["FromName", "Store.objectId", "ReceivingStore.objectId"],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "Status": "confirmed",
+    "ReceivedAt": "confirmed",
+    "FromName": "confirmed",
+    "Packages": "unstable",
+    "Packages[].objectId": "confirmed",
+    "Packages[].OriginalQty": "confirmed",
+    "Packages[].Cost": "confirmed",
+    "Packages[].Product.objectId": "inferred",
+    "Packages[].Product.Brand.Name": "unstable"
+  },
+  "field_types": {
+    "objectId": "str",
+    "Status": "str",
+    "ReceivedAt": "iso_datetime",
+    "Packages": "list"
+  },
+  "date_field_expectations": {
+    "date_fields": ["ReceivedAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": true,
+    "source_of_truth": "request_context.requested_store_or_org"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_optional": true
+  },
+  "empty_result_policy": "warn",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["transfer_object_id", "package_object_id"],
+    "non_negative_field": "original_qty"
+  },
+  "downstream_outputs_allowed": ["dashboard", "prepared_context", "par_logic", "ai_answer"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Residual risk isolated to unstable/inferred field_confidence entries until SDL-backed validation."
+  ]
+}

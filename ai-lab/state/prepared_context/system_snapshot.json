@@ -1,0 +1,204 @@
+{
+  "snapshot_type": "system_snapshot",
+  "generated_at": "2026-04-28T03:01:44Z",
+  "freshness_seconds": 900,
+  "source_files_or_tools": [
+    "ops_registry.get_ops_summary_text_cached",
+    "brain/session_store",
+    "brain/worker_health"
+  ],
+  "confidence": 0.86,
+  "stale": false,
+  "errors": [],
+  "data": {
+    "ops_summary": "# Operations registry summary\n\n## Systems\n- **ai-lab**: Command center and local assistant; grounded reasoning, repo scan, hardware observability; repo=ai-lab; workers=['main-brain']\n- **kylo**: Finance and operations automation; repo=Greg-Kylo; workers=['main-brain', 'worker-rig-01']\n- **geomapper**: Geo mapping and document ingestion; repo=geomapper app; workers=['main-brain']\n- **company_bi**: Business BI \u2014 sales, inventory, expenses, payroll (GrowFlow + Sheets). Summary fed to local AI for inference.; repo=Growflow; workers=['main-brain']\n\n## Workers\n- **main-brain**: Orchestrator, chat, repo scan, hardware snapshot, evidence fusion; capabilities=['repo_scan', 'repo_search', 'hardware_snapshot', 'grounded_answer']\n- **worker-rig-01**: Autonomous worker for Worker Assistant, n8n workflows, and Ollama inference; capabilities=['repo_indexing', 'log_summarization', 'scheduled_scripts']\n\n## Automations\n- **repo-docs**: Scan repos, update docs/summaries, flag missing runbooks; status=planned\n- **file-lineage**: Classify and map files; log lineage; flag orphans; status=planned\n- **health-monitor**: Service status, disk, log growth, failed jobs, daily summary; status=planned\n- **receipt-bill-intake**: Pull bills/receipts, classify, extract, budget-ready records; status=planned\n",
+    "active_systems": [
+      "ai-lab",
+      "kylo",
+      "geomapper",
+      "company_bi"
+    ],
+    "known_services": [
+      "repo-docs",
+      "file-lineage",
+      "health-monitor",
+      "receipt-bill-intake"
+    ],
+    "active_repos": [
+      "ai-lab",
+      "Greg-Kylo",
+      "geomapper app",
+      "Growflow"
+    ],
+    "command_center_status": {
+      "configured": true,
+      "backend_router": "command-center/backend/main.py"
+    },
+    "last_successful_checks": {
+      "ops_registry_loaded_at": "2026-04-28T03:01:40Z"
+    },
+    "worker_health": {
+      "worker_name": "worker-rig-01",
+      "ssh_configured": false,
+      "all_ok": false,
+      "services": [
+        {
+          "name": "worker_assistant",
+          "ok": false,
+          "url": "http://127.0.0.1:8765/health",
+          "status_code": null,
+          "detail": "timed out",
+          "latency_ms": null
+        },
+        {
+          "name": "n8n",
+          "ok": false,
+          "url": "http://127.0.0.1:5678/",
+          "status_code": null,
+          "detail": "timed out",
+          "latency_ms": null
+        },
+        {
+          "name": "ollama",
+          "ok": false,
+          "url": "http://127.0.0.1:11434/api/tags",
+          "status_code": null,
+          "detail": "timed out",
+          "latency_ms": null
+        }
+      ],
+      "checked_at": "2026-04-28T03:01:40Z",
+      "timeout_budget_ms": 2000,
+      "worker_status": "offline_or_unreachable",
+      "last_known_status": {
+        "checked_at": "2026-04-28T03:01:22Z",
+        "worker_status": "offline_or_unreachable",
+        "all_ok": false,
+        "services": [
+          {
+            "name": "worker_assistant",
+            "ok": false,
+            "url": "http://127.0.0.1:8765/health",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          },
+          {
+            "name": "n8n",
+            "ok": false,
+            "url": "http://127.0.0.1:5678/",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          },
+          {
+            "name": "ollama",
+            "ok": false,
+            "url": "http://127.0.0.1:11434/api/tags",
+            "status_code": null,
+            "detail": "timed out",
+            "latency_ms": null
+          }
+        ],
+        "tunnel_status": {
+          "worker_name": "worker-rig-01",
+          "expected_ports": [
+            8765,
+            5678,
+            11434
+          ],
+          "reachable_ports": [],
+          "missing_ports": [
+            8765,
+            11434,
+            5678
+          ],
+          "likely_up": false,
+          "detail": "Missing tunnel ports: [8765, 11434, 5678]. Start tunnel or check worker."
+        }
+      },
+      "tunnel_status": {
+        "worker_name": "worker-rig-01",
+        "expected_ports": [
+          8765,
+          5678,
+          11434
+        ],
+        "reachable_ports": [],
+        "missing_ports": [
+          11434,
+          8765,
+          5678
+        ],
+        "likely_up": false,
+        "detail": "Missing tunnel ports: [11434, 8765, 5678]. Start tunnel or check worker."
+      }
+    },
+    "worker_summary": {
+      "worker_status": "offline_or_unreachable",
+      "services": [
+        "worker_assistant",
+        "n8n",
+        "ollama"
+      ]
+    },
+    "recent_errors": [
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "who won the super bowl in 2024?"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "who won the super bowl in 2024?"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "who won the super bowl in 2024?"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "another turn"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "something else"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "what did the last scan find?"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "another turn"
+      },
+      {
+        "fallback_reason": "insufficient_evidence_hard_stop",
+        "message": "something else"
+      }
+    ]
+  },
+  "summary_short": "Systems snapshot with ops + worker health.",
+  "summary_detailed": "Prepared snapshot for system status questions (active systems, running/broken services, worker/tunnel state).",
+  "suggested_questions": [
+    "what systems are active?",
+    "what is running?",
+    "what is broken?",
+    "check system status"
+  ],
+  "evidence_items": [
+    {
+      "title": "Ops registry summary",
+      "source_path_or_tool": "ops_registry.get_ops_summary_text_cached",
+      "observed_at": "2026-04-28T03:01:40Z",
+      "summary": "Loaded systems/workers/automations registries.",
+      "confidence": 0.9
+    },
+    {
+      "title": "Worker health snapshot",
+      "source_path_or_tool": "brain.worker_health.get_worker_health_snapshot",
+      "observed_at": "2026-04-28T03:01:40Z",
+      "summary": "worker_status=offline_or_unreachable",
+      "confidence": 0.9
+    }
+  ]
+}

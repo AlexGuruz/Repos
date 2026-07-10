@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,6 +31,13 @@ from brain.schemas.proposals import ProposalRecord
 from brain import source_selection
 from brain import web_tool
 from brain.telemetry import log_event
+from brain.approval_enforcement import evaluate_action
+from brain.orchestrator.response_trace import (
+    StageTimer,
+    append_response_trace,
+    first_token_tracker,
+    new_request_id,
+)
 
 
 def _load_registry() -> list:
@@ -154,6 +162,29 @@ def _is_short_social_greeting(normalized: str) -> bool:
 
 
 def _run_tool(tool_name: str, args: dict | None) -> RunResult:
+    if tool_name == "bank_vendor_cleaner_pipeline":
+        from brain.execution import run_bank_vendor_cleaner
+
+        params: dict = {}
+        if args:
+            if "dry_run" in args:
+                params["dry_run"] = args["dry_run"]
+            elif "dry-run" in args:
+                v = args["dry-run"]
+                params["dry_run"] = (
+                    v if isinstance(v, bool) else str(v).lower() in ("true", "1", "yes")
+                )
+            if "spreadsheet_id" in args:
+                params["spreadsheet_id"] = args["spreadsheet_id"]
+            if "source_sheet_name" in args:
+                params["source_sheet_name"] = args["source_sheet_name"]
+            if "dest_sheet_name" in args:
+                params["dest_sheet_name"] = args["dest_sheet_name"]
+        return run_bank_vendor_cleaner(params)
+    if tool_name == "bank_vendor_lookup_worker":
+        from brain.execution import run_bank_vendor_lookup_worker
+
+        return run_bank_vendor_lookup_worker(args or {})
     return execution_run(tool_name, args or {})
 
 
@@ -189,8 +220,11 @@ def build_grounded_response(
 
     session = session_state.get(session_id)
     entities = entities or []
+    st = StageTimer()
     freshness = detect_freshness(message)
+    st.segment("detect_freshness")
     resolved = resolve_session_references(message, session)
+    st.segment("session_resolution")
     decision = route_sources(
         message=message,
         intent=intent,
@@ -199,10 +233,13 @@ def build_grounded_response(
         freshness=freshness,
         resolved=resolved,
     )
+    st.segment("route_sources")
     evidence = load_evidence(decision, session_id)
+    st.segment("load_evidence")
     fused = fuse_evidence(message=message, intent=intent, decision=decision, evidence=evidence)
     proposals = build_proposals(fused)
     answer_style = choose_answer_style(fused)
+    st.segment("fuse_evidence_and_proposals")
 
     _cat = ""
     try:
@@ -211,8 +248,6 @@ def build_grounded_response(
         _cat = format_catalog_grounding_for_message(message) or ""
     except Exception:
         _cat = ""
-    if _cat and answer_style == "insufficient_evidence":
-        answer_style = "direct_status"
 
     # Structured FusedContext → prompt (PDR Phase 2.75)
     def _format_evidence(items, max_items: int, max_chars_per: int) -> str:
@@ -247,6 +282,7 @@ def build_grounded_response(
             f"Constraints: {constraints_text}\n"
             f"Answer style: {answer_style}"
         )
+    st.segment("format_prompt_block")
 
     if _cat:
         evidence_block = _cat + "\n\n" + evidence_block
@@ -266,12 +302,21 @@ def build_grounded_response(
         "reason": decision.reason,
     })
 
+    source_types: list[str] = []
+    for it in evidence.local_evidence + evidence.web_evidence:
+        source_types.append(it.source_type)
+    if evidence.time_context:
+        source_types.append("time_context")
+
     return {
         "evidence_block": evidence_block,
         "proposals_suffix": proposals_suffix,
         "answer_style": answer_style,
         "routing_reason": decision.reason,
         "proposals": proposals,
+        "stage_timings_ms": dict(st.segments_ms),
+        "evidence_count": len(evidence.local_evidence) + len(evidence.web_evidence) + (1 if evidence.time_context else 0),
+        "sources_used": source_types,
     }
 
 
@@ -280,41 +325,192 @@ _DEFAULT_LLM_BASE_URL = "http://100.71.161.10:1234/v1"
 _DEFAULT_LLM_MODEL = "Qwen2.5-Coder-14B-Instruct"
 
 
+def _write_turn_trace_if_enabled(
+    *,
+    write: bool,
+    req_id: str,
+    session_id: str,
+    user_message: str,
+    route: str,
+    model: str,
+    worker_used: bool,
+    run_timer: StageTimer,
+    extra_stage_timings_ms: dict[str, float],
+    first_token_ms: float | None,
+    first_token_wall_ms: float | None,
+    receive_wall_ms: float | None,
+    client_submit_epoch_ms: float | None,
+    evidence_count: int,
+    sources_used: list[str],
+    fallback_reason: str | None,
+    final_answer_type: str,
+    reply_preview: str,
+    prepared_context_used: bool = False,
+    snapshot_types_used: list[str] | None = None,
+    snapshot_generated_at: dict[str, str] | None = None,
+    snapshot_stale: bool | None = None,
+    context_load_ms: float | None = None,
+    avoided_retrieval: bool | None = None,
+    avoided_worker_call: bool | None = None,
+    final_answer_source: str | None = None,
+    prepared_quality_score: float | None = None,
+    prepared_quality_reasons: dict | None = None,
+    prepared_quality_low: bool | None = None,
+    prepared_selection_scores: dict[str, float] | None = None,
+    prepared_selection_reasons: dict[str, Any] | None = None,
+    prepared_selection_ms: float | None = None,
+) -> None:
+    if not write:
+        return
+    total = run_timer.total_ms()
+    ft_ms = first_token_ms if first_token_ms is not None else total
+    ft_wall = first_token_wall_ms
+    if ft_wall is None and receive_wall_ms is not None:
+        ft_wall = receive_wall_ms + ft_ms
+    recv_to_first = None
+    if receive_wall_ms is not None and ft_wall is not None:
+        recv_to_first = round(ft_wall - receive_wall_ms, 2)
+    client_to_first = None
+    if client_submit_epoch_ms is not None and ft_wall is not None:
+        client_to_first = round(ft_wall - client_submit_epoch_ms, 2)
+    merged = dict(run_timer.segments_ms)
+    merged.update(extra_stage_timings_ms or {})
+    append_response_trace(
+        {
+            "request_id": req_id,
+            "session_id": session_id,
+            "user_message": (user_message or "")[:1200],
+            "route_chosen": route,
+            "model": model or "",
+            "worker_used": worker_used,
+            "stage_timings_ms": merged,
+            "first_token_ms": ft_ms,
+            "receive_to_first_token_ms": recv_to_first,
+            "client_epoch_to_first_token_ms": client_to_first,
+            "total_ms": total,
+            "evidence_count": evidence_count,
+            "sources_used": sources_used,
+            "fallback_reason": fallback_reason,
+            "final_answer_type": final_answer_type,
+            "reply_preview": (reply_preview or "")[:400],
+            "prepared_context_used": prepared_context_used,
+            "snapshot_types_used": snapshot_types_used or [],
+            "snapshot_generated_at": snapshot_generated_at or {},
+            "snapshot_stale": snapshot_stale,
+            "context_load_ms": context_load_ms,
+            "avoided_retrieval": avoided_retrieval,
+            "avoided_worker_call": avoided_worker_call,
+            "final_answer_source": final_answer_source or "unknown",
+            "prepared_quality_score": prepared_quality_score,
+            "prepared_quality_reasons": prepared_quality_reasons or {},
+            "prepared_quality_low": prepared_quality_low,
+            "prepared_context_selection_scores": prepared_selection_scores or {},
+            "prepared_context_selection_reasons": prepared_selection_reasons or {},
+            "prepared_context_selection_ms": prepared_selection_ms,
+        }
+    )
+
+
 def run(
     message: str,
     llm_base_url: str | None = None,
     llm_model: str | None = None,
     session_id: str = "default",
     stream_delta: Callable[[str], None] | None = None,
+    *,
+    request_id: str | None = None,
+    client_submit_epoch_ms: float | None = None,
+    receive_wall_ms: float | None = None,
+    write_response_trace: bool = True,
 ) -> dict:
     """
     Process user message. Returns {"reply": str, "approval_request": dict|None}.
     V1: session_id used for working memory (last scan, last failure, etc.).
+
+    request_id: optional stable id for structured traces (command-center supplies UUID).
+    client_submit_epoch_ms: optional browser Date.now() at send (epoch ms) for client↔server skew diagnostics.
+    receive_wall_ms: optional server wall ms (time.time()*1000) when HTTP handler received the message.
+    write_response_trace: append one JSON line to state/ai_response_traces.jsonl when True.
     """
+    req_id = (request_id or "").strip() or new_request_id()
+    run_timer = StageTimer()
+    mark_first_token, first_token_elapsed = first_token_tracker()
+    first_token_wall_ms: list[float | None] = [None]
+
+    def _mark_first_token() -> None:
+        mark_first_token()
+        if first_token_wall_ms[0] is None:
+            first_token_wall_ms[0] = time.time() * 1000.0
+
     msg = _sanitize_chat_input(message or "")
     # Guru §24.13: Hard early conversational gate — allowlist + short social phrases; before intent/evidence pipeline
     normalized = normalize_chat_text(msg)
+    _g_openers_t0 = time.perf_counter()
     openers = _load_conversational_openers()
+    greeting_openers_ms = round((time.perf_counter() - _g_openers_t0) * 1000.0, 2)
     if normalized in openers or _is_short_social_greeting(normalized):
         help_phrases = {"help", "what can you do"}
         if normalized in help_phrases:
             log_event("conversational_fallback", session_id=session_id, kind="capability_overview")
-            return {
-                "reply": (
-                    "I can help with:\n"
-                    "- repo scans + scan summaries\n"
-                    "- diagnosing failures from real tool output\n"
-                    "- searching repos for files/scripts\n"
-                    "- grounded answers with local + web + time evidence\n"
-                    "- proposals + approval-gated execution\n"
-                    "- hardware status (CPU/GPU/RAM) and approval-gated resource controls\n\n"
+            rep = (
+                "I can help with:\n"
+                "- repo scans + scan summaries\n"
+                "- diagnosing failures from real tool output\n"
+                "- searching repos for files/scripts\n"
+                "- grounded answers with local + web + time evidence\n"
+                "- proposals + approval-gated execution\n"
+                "- hardware status (CPU/GPU/RAM) and approval-gated resource controls\n\n"
                 "Tell me what to do (e.g. “scan my repos”, “why did that fail”, “what’s my hardware doing”)."
-                ),
-                "approval_request": None,
-            }
-        topic = session_state.get_active_topic(session_id) or "(none)"
+            )
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="greeting_help",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=0,
+                sources_used=[],
+                fallback_reason=None,
+                final_answer_type="greeting_help",
+                reply_preview=rep,
+                final_answer_source="tool",
+            )
+            return {"reply": rep, "approval_request": None}
+        _g_topic_t0 = time.perf_counter()
+        topic = session_state.peek_active_topic(session_id) or "(none)"
+        greeting_topic_lookup_ms = round((time.perf_counter() - _g_topic_t0) * 1000.0, 2)
         log_event("conversational_fallback", session_id=session_id, kind="greeting", active_topic=topic)
-        return {"reply": f"Ready. Active topic: **{topic}**. What do you want to work on?", "approval_request": None}
+        rep2 = f"Ready. Active topic: **{topic}**. What do you want to work on?"
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="greeting_shortcircuit",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=0,
+            sources_used=[],
+            fallback_reason=None,
+            final_answer_type="greeting_shortcircuit",
+            reply_preview=rep2,
+            final_answer_source="tool",
+        )
+        return {"reply": rep2, "approval_request": None}
     if msg.lower().startswith("approve ") or msg.lower().startswith("deny "):
         parts = msg.split(None, 1)
         action, id_ = parts[0].lower(), (parts[1].strip() if len(parts) > 1 else None)
@@ -330,7 +526,455 @@ def run(
         pending = list_pending()
         return {"reply": f"Unknown id or usage: approve <id> / deny <id>. Pending: {[p[0] for p in pending]}", "approval_request": None}
     intent, params = classify_intent(message)
+    run_timer.segment("intent_classification")
     log_event("intent", session_id=session_id, intent=intent, params=params)
+
+    # Prepared context fast path: answer from cached intelligence before retrieval/model.
+    if intent in ("answer", "ops_overview", "company_bi"):
+        try:
+            from brain.prepared_context.loader import try_prepared_context_answer
+
+            pctx = try_prepared_context_answer(msg, intent)
+        except Exception:
+            pctx = None
+        if pctx and pctx.get("reply"):
+            reply = pctx["reply"]
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route=intent,
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=len(pctx.get("snapshot_types_used") or []),
+                sources_used=list(pctx.get("snapshot_types_used") or []),
+                fallback_reason=None,
+                final_answer_type="prepared_context",
+                reply_preview=reply,
+                prepared_context_used=True,
+                snapshot_types_used=list(pctx.get("snapshot_types_used") or []),
+                snapshot_generated_at=dict(pctx.get("snapshot_generated_at") or {}),
+                snapshot_stale=bool(pctx.get("snapshot_stale")),
+                context_load_ms=float(pctx.get("context_load_ms") or 0.0),
+                avoided_retrieval=bool(pctx.get("avoided_retrieval")),
+                avoided_worker_call=bool(pctx.get("avoided_worker_call")),
+                final_answer_source=str(pctx.get("final_answer_source") or "prepared_context"),
+                prepared_quality_score=float(pctx.get("prepared_quality_score") or 0.0),
+                prepared_quality_reasons=dict(pctx.get("prepared_quality_reasons") or {}),
+                prepared_quality_low=bool(pctx.get("prepared_quality_low")),
+                prepared_selection_scores=dict(pctx.get("prepared_context_selection_scores") or {}),
+                prepared_selection_reasons=dict(pctx.get("prepared_context_selection_reasons") or {}),
+                prepared_selection_ms=float(pctx.get("prepared_context_selection_ms") or 0.0),
+            )
+            return {"reply": reply, "approval_request": None}
+
+    if intent == "docs_status":
+        from brain.repo_docs_maintainer import analyze_repo_docs_status
+
+        status = analyze_repo_docs_status(message=msg)
+        findings = list(status.get("findings") or [])
+        lines = [
+            "### repo_documentation_status",
+            "- source_snapshot: `repo_pulse`",
+            f"- generated_at: `{status.get('generated_at')}`",
+            f"- stale: `{status.get('stale')}`",
+            f"- confidence: `{round(float(status.get('confidence') or 0.0), 3)}`",
+            f"- findings_count: `{len(findings)}`",
+        ]
+        if status.get("source_paths"):
+            lines.append(f"- source_paths: {list(status.get('source_paths') or [])[:8]}")
+        if status.get("missing_data"):
+            lines.append(f"- missing_data: {list(status.get('missing_data') or [])}")
+        rv = list(status.get("readme_validations") or [])
+        if rv:
+            lines.append(f"- readme_validations_sample: `{len(rv)}` repos checked (deterministic policy)")
+            for entry in rv[:3]:
+                if entry.get("skipped"):
+                    lines.append(f"  - {entry.get('repo')}: skipped ({entry.get('reason')})")
+                else:
+                    lines.append(
+                        f"  - {entry.get('repo')}: valid={entry.get('is_valid')} "
+                        f"missing={entry.get('missing_sections')} weak={entry.get('weak_sections')}"
+                    )
+        for f in findings[:8]:
+            lines.append(
+                f"- {f.get('repo')}: `{f.get('doc_file')}` — {f.get('issue')} "
+                f"(risk={f.get('risk_level')}, approval_required={f.get('approval_required')})"
+            )
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="docs_status",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse"],
+            fallback_reason=None,
+            final_answer_type="docs_status",
+            reply_preview=reply,
+            final_answer_source="prepared_context",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "docs_cleanup_plan":
+        from brain.repo_docs_maintainer import build_docs_cleanup_plan
+
+        plan = build_docs_cleanup_plan(message=msg, max_items=10)
+        items = list(plan.get("plan_items") or [])
+        lines = [
+            "### docs_cleanup_plan",
+            f"- generated_at: `{plan.get('generated_at')}`",
+            f"- stale: `{plan.get('stale')}`",
+            f"- confidence: `{round(float(plan.get('confidence') or 0.0), 3)}`",
+            f"- items: `{len(items)}`",
+        ]
+        if plan.get("missing_data"):
+            lines.append(f"- missing_data: {list(plan.get('missing_data') or [])}")
+        for i in items[:10]:
+            vr = i.get("readme_validation") or {}
+            pol_hint = ""
+            if vr:
+                pol_hint = (
+                    f" priority_score={i.get('priority_score')} "
+                    f"policy_missing={vr.get('missing_sections')} policy_weak={vr.get('weak_sections')}"
+                )
+            lines.append(
+                f"- repo={i.get('repo')} file=`{i.get('doc_file')}` issue={i.get('issue_found')} "
+                f"update={i.get('recommended_update')} risk={i.get('risk_level')} "
+                f"approval_required={i.get('approval_required')} verify={i.get('suggested_verification')}"
+                f"{pol_hint}"
+            )
+        if not items:
+            lines.append("- No actionable plan items from current snapshot; refresh repo_pulse or request deeper scan.")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="docs_cleanup_plan",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse"],
+            fallback_reason=None,
+            final_answer_type="docs_cleanup_plan",
+            reply_preview=reply,
+            final_answer_source="prepared_context",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "docs_update_proposal":
+        from brain.repo_docs_maintainer import create_docs_update_proposal
+
+        proposal = create_docs_update_proposal(message=msg)
+        compat = proposal.get("approval_request_compatible") or {}
+        aid = submit(
+            ApprovalSpec(
+                file_path=str(compat.get("file_path") or "README.md"),
+                action_type=str(compat.get("action_type") or "write_docs_update"),
+                reason=str(compat.get("reason") or "repo docs update proposal"),
+                diff_preview=str(proposal.get("patch_preview") or "")[:4000],
+                risk_level=str(compat.get("risk_level") or "medium"),
+            )
+        )
+        lines = [
+            "### docs_update_proposal",
+            f"- title: {proposal.get('title')}",
+            f"- target_file: `{proposal.get('target_file')}`",
+            f"- reason: {proposal.get('reason')}",
+            f"- proposed_change_summary: {proposal.get('proposed_change_summary')}",
+            f"- issues: {proposal.get('issues') or []}",
+            f"- missing_sections: {proposal.get('missing_sections') or []}",
+            f"- proposed_sections_count: `{len(proposal.get('proposed_sections') or [])}`",
+            f"- approval_required: `{proposal.get('approval_required')}`",
+            f"- action_classification: `{proposal.get('action_classification')}`",
+            f"- approval_request_id: `{aid}`",
+            "- patch_preview:",
+            f"{proposal.get('patch_preview')}",
+            "- verification_steps:",
+        ]
+        for step in list(proposal.get("verification_steps") or []):
+            lines.append(f"  - {step}")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="docs_update_proposal",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse"],
+            fallback_reason=None,
+            final_answer_type="docs_update_proposal",
+            reply_preview=reply,
+            final_answer_source="proposal",
+        )
+        return {"reply": reply, "approval_request": {"id": aid}}
+
+    if intent == "repo_docs_score":
+        from brain.repo_docs_repo_level import assess_repo_documentation, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = (
+                "### repo_documentation_score\n"
+                f"- error: `{err}`\n"
+                "- hint: name a repo from **repo_pulse**, include a repo path, or say **ai-lab** for this workspace."
+            )
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="repo_docs_score",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=0,
+                sources_used=[],
+                fallback_reason=err,
+                final_answer_type="repo_docs_score",
+                reply_preview=reply,
+                final_answer_source="local_docs_scan",
+            )
+            return {"reply": reply, "approval_request": None}
+
+        a = assess_repo_documentation(path, repo_id=rid)
+        lines = [
+            "### repo_documentation_score",
+            f"- repo_path: `{a.get('repo_path')}`",
+            f"- score: `{a.get('score_0_to_100')}` / 100",
+            f"- grade: `{a.get('grade')}`",
+            f"- risk_level: `{a.get('risk_level')}`",
+            f"- missing_docs: {a.get('missing_docs') or []}",
+            f"- invalid_docs: {len(a.get('invalid_docs') or [])} file(s)",
+            f"- consistency_issues: `{len(a.get('consistency_issues') or [])}`",
+            "- top_recommendations:",
+        ]
+        for r in (a.get("top_recommendations") or [])[:5]:
+            lines.append(f"  - {r}")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_score",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse", "local_readme_scan"],
+            fallback_reason=None,
+            final_answer_type="repo_docs_score",
+            reply_preview=reply,
+            final_answer_source="local_docs_scan",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "repo_docs_consistency":
+        from brain.repo_docs_repo_level import check_repo_docs_consistency, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = "### repo_docs_consistency\n" f"- error: `{err}`"
+        else:
+            c = check_repo_docs_consistency(path)
+            lines = [
+                "### repo_docs_consistency",
+                f"- repo_path: `{c.get('repo_path')}`",
+                f"- issue_count: `{len(c.get('issues') or [])}`",
+            ]
+            for it in (c.get("issues") or [])[:12]:
+                lines.append(
+                    f"- [{it.get('type')}] {it.get('source_file')}: {it.get('detail', it.get('reference'))}"
+                )
+            reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_consistency",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["local_docs_scan"],
+            fallback_reason=err if path is None else None,
+            final_answer_type="repo_docs_consistency",
+            reply_preview=reply,
+            final_answer_source="local_docs_scan",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "repo_docs_workplan":
+        from brain.repo_docs_repo_level import build_repo_docs_workplan, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = "### repo_docs_workplan\n" f"- error: `{err}`"
+        else:
+            wp = build_repo_docs_workplan(path, repo_id=rid)
+            tasks = list(wp.get("ordered_tasks") or [])
+            lines = [
+                "### repo_docs_workplan",
+                f"- repo_path: `{wp.get('repo_path')}`",
+                f"- task_count: `{len(tasks)}`",
+            ]
+            for t in tasks[:12]:
+                lines.append(
+                    f"- `{t.get('task_id')}` files={t.get('affected_files')} type={t.get('issue_type')} "
+                    f"effort={t.get('estimated_effort')} risk={t.get('risk_level')} approval_required={t.get('approval_required')}"
+                )
+            reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_workplan",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["repo_pulse", "local_docs_scan"],
+            fallback_reason=err if path is None else None,
+            final_answer_type="repo_docs_workplan",
+            reply_preview=reply,
+            final_answer_source="local_docs_scan",
+        )
+        return {"reply": reply, "approval_request": None}
+
+    if intent == "repo_docs_batch_proposal":
+        from brain.repo_docs_repo_level import create_repo_docs_batch_proposal, resolve_repo_docs_target
+
+        path, rid, err = resolve_repo_docs_target(msg, default_root=_root)
+        if path is None or not path.is_dir():
+            reply = "### repo_docs_batch_proposal\n" f"- error: `{err}`"
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="repo_docs_batch_proposal",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=0,
+                sources_used=[],
+                fallback_reason=err,
+                final_answer_type="repo_docs_batch_proposal",
+                reply_preview=reply,
+                final_answer_source="proposal",
+            )
+            return {"reply": reply, "approval_request": None}
+
+        batch = create_repo_docs_batch_proposal(path, repo_id=rid)
+        targets = list(batch.get("target_files") or [])
+        primary = targets[0] if targets else str(path / "README.md")
+        preview = json.dumps(batch.get("proposed_changes") or [], ensure_ascii=False)[:3800]
+        aid = submit(
+            ApprovalSpec(
+                file_path=primary,
+                action_type="write_docs_update",
+                reason=f"batch docs proposal {batch.get('proposal_id')} ({len(targets)} files)",
+                diff_preview=preview,
+                risk_level=str(batch.get("risk_level") or "medium"),
+            )
+        )
+        lines = [
+            "### repo_docs_batch_proposal",
+            f"- proposal_id: `{batch.get('proposal_id')}`",
+            f"- target_files: {targets[:12]}{'…' if len(targets) > 12 else ''}",
+            f"- task_count: `{batch.get('task_count')}`",
+            f"- risk_level: `{batch.get('risk_level')}`",
+            f"- approval_required: `{batch.get('approval_required')}`",
+            f"- no_direct_write_performed: `{batch.get('no_direct_write_performed')}`",
+            f"- approval_request_id: `{aid}`",
+            "- verification_steps:",
+        ]
+        for step in list(batch.get("verification_steps") or []):
+            lines.append(f"  - {step}")
+        reply = "\n".join(lines)
+        _write_turn_trace_if_enabled(
+            write=write_response_trace,
+            req_id=req_id,
+            session_id=session_id,
+            user_message=msg,
+            route="repo_docs_batch_proposal",
+            model="",
+            worker_used=False,
+            run_timer=run_timer,
+            extra_stage_timings_ms={},
+            first_token_ms=first_token_elapsed(),
+            first_token_wall_ms=first_token_wall_ms[0],
+            receive_wall_ms=receive_wall_ms,
+            client_submit_epoch_ms=client_submit_epoch_ms,
+            evidence_count=1,
+            sources_used=["local_docs_scan"],
+            fallback_reason=None,
+            final_answer_type="repo_docs_batch_proposal",
+            reply_preview=reply,
+            final_answer_source="proposal",
+        )
+        return {"reply": reply, "approval_request": {"id": aid}}
 
     if intent == "enqueue_approval":
         pending_prop = session_state.get_pending_proposal(session_id)
@@ -420,6 +1064,10 @@ def run(
             tool=tool_name,
         )
         if result.success:
+            if tool_name in ("bank_vendor_cleaner_pipeline", "bank_vendor_lookup_worker"):
+                from brain.bank_vendor_cleaner.llm_context import BANK_VENDOR_ACTIVE_TOPIC
+
+                session_state.update_active_topic(session_id, BANK_VENDOR_ACTIVE_TOPIC)
             reply = f"Ran **{tool_name}**. Output:\n```\n{result.stdout or '(no output)'}\n```"
         else:
             session_state.update_after_tool(
@@ -525,6 +1173,29 @@ def run(
         action = pending.get("action")
         args = pending.get("args") or {}
         log_event("execute_proposal", session_id=session_id, action=action, args=args)
+        action_guard = evaluate_action(
+            action=str(action or ""),
+            tool_name=str(pending.get("tool") or ""),
+            approved=False,
+            fail_closed_on_missing_metadata=True,
+        )
+        if action_guard.requires_approval:
+            session_state.clear_pending_proposal(session_id)
+            _trace_execute(session_id, message, intent, str(action or ""), "approval_required")
+            return {
+                "reply": (
+                    f"Action `{action}` is approval-gated and cannot execute via `do it` without an approval record. "
+                    "Use the approval flow (`approve <id>`) or queue a controlled approval first."
+                ),
+                "approval_request": None,
+            }
+        if not action_guard.allowed:
+            session_state.clear_pending_proposal(session_id)
+            _trace_execute(session_id, message, intent, str(action or ""), "blocked")
+            return {
+                "reply": f"Blocked by approval policy: {action_guard.reason}.",
+                "approval_request": None,
+            }
         if action == "repo_search":
             query = args.get("query") or pending.get("query") or pending.get("target") or "sales script growflow"
             matches = repo_search_mod.search_repos(query, max_results=10)
@@ -783,24 +1454,103 @@ def run(
         reply += "\n\n**Suggested next steps:**\n1. Search repos for a script (e.g. \"search repos for growflow\").\n2. Update registry or fix findings above."
         return {"reply": reply, "approval_request": None}
 
-    # Worker health (Guru §26)
+    # Worker health (Guru §26): prefer cached worker_snapshot prepared context before live probes.
     if intent == "worker_health":
         try:
-            from brain.worker_health import get_worker_health_snapshot, worker_health_snapshot_to_dict
-            from brain.worker_tunnel import get_tunnel_status
-            snap = get_worker_health_snapshot("worker-rig-01")
-            tunnel = get_tunnel_status("worker-rig-01")
+            from brain.prepared_context.loader import try_prepared_context_answer
+
+            pctx_wh = try_prepared_context_answer(msg, intent)
+        except Exception:
+            pctx_wh = None
+        if pctx_wh and pctx_wh.get("reply"):
+            reply = pctx_wh["reply"]
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="worker_health",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=len(pctx_wh.get("snapshot_types_used") or []),
+                sources_used=list(pctx_wh.get("snapshot_types_used") or []),
+                fallback_reason=None,
+                final_answer_type="prepared_context",
+                reply_preview=reply,
+                prepared_context_used=True,
+                snapshot_types_used=list(pctx_wh.get("snapshot_types_used") or []),
+                snapshot_generated_at=dict(pctx_wh.get("snapshot_generated_at") or {}),
+                snapshot_stale=bool(pctx_wh.get("snapshot_stale")),
+                context_load_ms=float(pctx_wh.get("context_load_ms") or 0.0),
+                avoided_retrieval=bool(pctx_wh.get("avoided_retrieval")),
+                avoided_worker_call=True,
+                final_answer_source=str(pctx_wh.get("final_answer_source") or "prepared_context"),
+                prepared_quality_score=float(pctx_wh.get("prepared_quality_score") or 0.0),
+                prepared_quality_reasons=dict(pctx_wh.get("prepared_quality_reasons") or {}),
+                prepared_quality_low=bool(pctx_wh.get("prepared_quality_low")),
+                prepared_selection_scores=dict(pctx_wh.get("prepared_context_selection_scores") or {}),
+                prepared_selection_reasons=dict(pctx_wh.get("prepared_context_selection_reasons") or {}),
+                prepared_selection_ms=float(pctx_wh.get("prepared_context_selection_ms") or 0.0),
+            )
+            return {"reply": reply, "approval_request": None}
+
+        try:
+            from brain.worker_health import get_worker_health_snapshot
+
+            timeout_budget_ms = 2000
+            snap = get_worker_health_snapshot(
+                "worker-rig-01",
+                timeout_budget_ms=timeout_budget_ms,
+                interactive=True,
+            )
             log_event("worker_health_check", session_id=session_id, all_ok=snap.all_ok, services=[s.name for s in snap.services])
+            tunnel = snap.tunnel_status or {}
             if snap.all_ok and tunnel.get("likely_up"):
                 reply = f"Worker **{snap.worker_name}** is up through the current local tunnel. Worker Assistant is healthy, n8n is reachable, and Ollama is responding."
             elif snap.all_ok:
                 reply = f"Worker **{snap.worker_name}** services are responding. Tunnel status: {tunnel.get('detail', 'unknown')}."
             else:
-                parts = [f"Worker **{snap.worker_name}** is partially available."]
+                parts = [
+                    f"Worker **{snap.worker_name}** is unreachable/degraded for interactive budget checks.",
+                    "",
+                    f"- `worker_status`: `{snap.worker_status or 'offline_or_unreachable'}`",
+                    f"- `checked_at`: `{snap.checked_at}`",
+                    f"- `timeout_budget_ms`: `{snap.timeout_budget_ms or timeout_budget_ms}`",
+                ]
+                if snap.last_known_status:
+                    parts.append(f"- `last_known_status`: `{snap.last_known_status.get('worker_status', 'unknown')}` at `{snap.last_known_status.get('checked_at', 'unknown')}`")
                 for s in snap.services:
                     parts.append(f"- **{s.name}**: {'ok' if s.ok else s.detail}")
                 parts.append("\nLikely causes: tunnel down for some ports, or worker services not running. Check the tunnel command, then run the worker validation script.")
                 reply = "\n".join(parts)
+            run_timer.segment("worker_health")
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="worker_health",
+                model="",
+                worker_used=True,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=0,
+                sources_used=["worker_health_snapshot"],
+                fallback_reason=None,
+                final_answer_type="worker_health",
+                reply_preview=reply,
+                final_answer_source="tool",
+            )
             return {"reply": reply, "approval_request": None}
         except Exception as e:
             log_event("worker_health_check", session_id=session_id, all_ok=False, error=str(e))
@@ -847,9 +1597,45 @@ def run(
         ))
         return {"reply": f"Proposed: trigger n8n workflow **{workflow_id}** on the worker. Say **do it** to run (approval required).", "approval_request": None}
 
+    # Ops overview (Guru §23) — deterministic local answer (no LLM required)
+    if intent == "ops_overview":
+        try:
+            from brain import ops_registry
+
+            text = ops_registry.get_ops_summary_text_cached()
+            reply = "### Operations registry (systems / workers / automations)\n\n" + text
+            run_timer.segment("ops_overview")
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route="ops_overview",
+                model="",
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms={},
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=1,
+                sources_used=["ops_registry"],
+                fallback_reason=None,
+                final_answer_type="ops_overview",
+                reply_preview=reply,
+                final_answer_source="tool",
+            )
+            return {"reply": reply, "approval_request": None}
+        except Exception as e:
+            return {"reply": f"Could not load ops registry: {e}", "approval_request": None}
+
     # Default: answer — use grounded response pipeline (Guru §21) when available
     base_url = (llm_base_url or os.environ.get("LLM_BASE_URL") or _DEFAULT_LLM_BASE_URL).strip()
     model = (llm_model or os.environ.get("LLM_MODEL") or _DEFAULT_LLM_MODEL).strip()
+    # Benchmark / CI: skip remote LLM calls (set AI_LAB_ORCH_NO_LLM=1).
+    if os.environ.get("AI_LAB_ORCH_NO_LLM", "").strip() == "1":
+        base_url = ""
     rules = _load_workflow_rules()
     rr_context = ""
     if rules:
@@ -861,6 +1647,10 @@ def run(
     routing_reason = ""
     answer_style = ""
     proposals_list: list = []
+    g_timings: dict[str, float] = {}
+    ev_count = 0
+    src_used: list[str] = []
+    llm_extra: dict[str, float] = {}
     try:
         grounded = build_grounded_response(
             session_id=session_id,
@@ -868,14 +1658,19 @@ def run(
             intent=intent,
             entities=[],
         )
+        run_timer.segment("build_grounded_response_total")
         evidence_block = grounded.get("evidence_block", "")
         proposals_suffix = grounded.get("proposals_suffix", "")
         proposals_list = grounded.get("proposals") or []
         answer_style = grounded.get("answer_style", "")
         routing_reason = grounded.get("routing_reason", "") or ""
+        g_timings = grounded.get("stage_timings_ms") or {}
+        ev_count = int(grounded.get("evidence_count") or 0)
+        src_used = list(grounded.get("sources_used") or [])
         # Hard insufficient_evidence override (Guru §24.13): do not call LLM; return fixed no-evidence reply.
-        # Exception: system catalog prepended to evidence_block counts as in-session authoritative evidence.
-        if answer_style == "insufficient_evidence" and "## Lab system catalog" not in (evidence_block or ""):
+        # Catalog may still be prepended to evidence_block for the model path, but it is not proof of session facts—
+        # do not skip this stop based on catalog text alone (that led to empty LLM + generic [Orchestrator] fallback).
+        if answer_style == "insufficient_evidence":
             log_event("insufficient_evidence_override", session_id=session_id, intent=intent)
             log_event(
                 "turn_trace",
@@ -887,9 +1682,45 @@ def run(
                 execution_attempted=False,
                 outcome="insufficient_evidence",
             )
-            reply = "I don't have any evidence in this session to answer that. Run a scan, ask about something we've already done, or ask a general question I can answer from context."
+            cat_hint = ""
+            try:
+                from brain.catalog_loader import format_catalog_grounding_for_message
+
+                cat_hint = format_catalog_grounding_for_message(message) or ""
+            except Exception:
+                cat_hint = ""
+            reply = (
+                "I don’t have **session-specific evidence** loaded for that yet (no recent scan output, "
+                "registry snapshot, or tool result in memory).\n\n"
+                "**What you can do next:** try **ops overview** / **what systems are active?**, run **scan my repos**, "
+                "or ask **check worker health**. For factual POS numbers, use **sales today** or Growflow scripts.\n\n"
+                "If this was meant as a general question, rephrase without requiring private data."
+            )
+            if cat_hint:
+                reply = cat_hint + "\n\n---\n\n" + reply
             if proposals_suffix:
                 reply = reply + proposals_suffix
+            _write_turn_trace_if_enabled(
+                write=write_response_trace,
+                req_id=req_id,
+                session_id=session_id,
+                user_message=msg,
+                route=intent,
+                model=model,
+                worker_used=False,
+                run_timer=run_timer,
+                extra_stage_timings_ms=dict(g_timings),
+                first_token_ms=first_token_elapsed(),
+                first_token_wall_ms=first_token_wall_ms[0],
+                receive_wall_ms=receive_wall_ms,
+                client_submit_epoch_ms=client_submit_epoch_ms,
+                evidence_count=ev_count,
+                sources_used=src_used,
+                fallback_reason="insufficient_evidence_hard_stop",
+                final_answer_type="insufficient_evidence",
+                reply_preview=reply,
+                final_answer_source="retrieval",
+            )
             return {"reply": reply, "approval_request": None}
         # Set pending proposal for first executable hardware control so "do it" works (Guru §25)
         for p in proposals_list:
@@ -928,7 +1759,7 @@ def run(
         elif "web" in sources:
             words = [w for w in msg.split() if len(w) > 2][:5]
             query = " ".join(words) if words else msg[:80]
-            web_results = web_tool.web_search(query, max_results=5)
+            web_results = web_tool.web_search(query, max_results=5, timeout_sec=6.0)
             if web_results:
                 evidence_block += "\n\nWeb search results:\n---\n" + "\n".join(
                     f"- [{r.get('title', '')}]({r.get('url', '')}): {r.get('snippet', '')[:200]}" for r in web_results
@@ -985,7 +1816,10 @@ def run(
             "(e.g. sales today, scan a repo, run a script), we do it automatically—reply naturally and "
             "confirm what was done; don't ask them to use a specific phrase. "
             "If the user asks about the result of a script, scan, report, or artifact: do not answer from general knowledge. "
-            "Only use the evidence provided in this conversation (e.g. scan output below). If no evidence was provided, say so plainly and do not invent findings."
+            "Only use the evidence provided in this conversation (e.g. scan output below). "
+            "If key evidence is **(none)** or clearly insufficient for a precise factual claim, still give a **short useful reply**: "
+            "what is missing, 1–3 concrete next actions (e.g. run scan, ops overview, check worker), and what you *can* say safely. "
+            "Do **not** refuse the whole question with a generic 'insufficient evidence' unless the user demands exact numbers or secrets you truly lack."
         )
         try:
             from brain.catalog_loader import format_catalog_grounding_for_message
@@ -997,12 +1831,34 @@ def run(
             pass
         if rr_context:
             system_content += "\n\n" + rr_context
+        try:
+            from brain.bank_vendor_cleaner.llm_context import append_to_system_prompt
+
+            system_content = append_to_system_prompt(
+                system_content,
+                msg,
+                session_id=session_id,
+                intent=intent,
+                params=params,
+            )
+        except Exception:
+            pass
         user_content = message + evidence_block
         messages = [
             {"role": "system", "content": system_content},
             {"role": "user", "content": user_content},
         ]
-        model_reply = chat_completion(base_url, model, messages, stream_delta=stream_delta)
+        run_timer.segment("before_llm_call")
+        llm_timer = StageTimer()
+        model_reply = chat_completion(
+            base_url,
+            model,
+            messages,
+            stream_delta=stream_delta,
+            on_first_token=_mark_first_token,
+        )
+        llm_timer.segment("llm_call_complete")
+        llm_extra = dict(llm_timer.segments_ms)
         if model_reply:
             reply = model_reply
             # Local LLMs often ignore catalog grounding and still refuse; substitute facts.
@@ -1022,6 +1878,18 @@ def run(
                             log_event("catalog_reply_substitution", session_id=session_id, components=[c.get("id") for c in comps[:4]])
                     except Exception:
                         pass
+    # Note: grounded templates legitimately contain "(none)" for topic/secondary; do not scan the whole header for that substring.
+    if (
+        not base_url
+        and intent == "answer"
+        and evidence_block
+        and len(evidence_block.strip()) > 120
+        and "\nKey Evidence:\n(none)" not in evidence_block
+    ):
+        reply = (
+            "_No LLM configured (`LLM_BASE_URL` empty or `AI_LAB_ORCH_NO_LLM=1`) — **local evidence only**:_\n\n"
+            + evidence_block[:14000]
+        )
     if reply == fallback:
         try:
             from brain.catalog_loader import format_catalog_grounding_for_message
@@ -1050,6 +1918,39 @@ def run(
         proposal_actions=[getattr(p, "action", None) for p in proposals_list[:5]] if proposals_list else [],
         execution_attempted=False,
         outcome="answer",
+    )
+
+    merged_timings = dict(g_timings)
+    merged_timings.update(llm_extra)
+    fb = "orchestrator_fallback" if reply.strip().startswith("[Orchestrator]") else None
+    if fb:
+        final_src = "orchestrator_fallback"
+    elif base_url:
+        final_src = "model"
+    elif evidence_block and "\nKey Evidence:\n(none)" not in evidence_block:
+        final_src = "retrieval"
+    else:
+        final_src = "tool"
+    _write_turn_trace_if_enabled(
+        write=write_response_trace,
+        req_id=req_id,
+        session_id=session_id,
+        user_message=msg,
+        route=intent,
+        model=model,
+        worker_used=False,
+        run_timer=run_timer,
+        extra_stage_timings_ms=merged_timings,
+        first_token_ms=first_token_elapsed(),
+        first_token_wall_ms=first_token_wall_ms[0],
+        receive_wall_ms=receive_wall_ms,
+        client_submit_epoch_ms=client_submit_epoch_ms,
+        evidence_count=ev_count,
+        sources_used=src_used,
+        fallback_reason=fb,
+        final_answer_type=(answer_style or "llm_answer")[:80],
+        reply_preview=reply,
+        final_answer_source=final_src,
     )
 
     return {

@@ -8,6 +8,7 @@ import os
 import queue as sync_queue
 import threading
 import time
+import uuid
 from datetime import datetime
 
 from fastapi import APIRouter
@@ -30,6 +31,8 @@ class ChatRequest(BaseModel):
     message: str
     history: list[dict] = []
     session_id: str = "default"
+    request_id: str | None = None
+    client_submit_epoch_ms: float | None = None
 
 
 class ChatResponse(BaseModel):
@@ -100,6 +103,8 @@ async def chat(req: ChatRequest):
         },
     )
     t0 = time.perf_counter()
+    recv_wall = time.time() * 1000.0
+    rid = (req.request_id or "").strip() or str(uuid.uuid4())
     try:
         _apply_chat_env()
         result = await asyncio.to_thread(
@@ -108,6 +113,9 @@ async def chat(req: ChatRequest):
             llm_base_url=settings.llm_base_url,
             llm_model=settings.llm_model,
             session_id=req.session_id,
+            request_id=rid,
+            client_submit_epoch_ms=req.client_submit_epoch_ms,
+            receive_wall_ms=recv_wall,
         )
     except Exception as exc:
         duration_ms = int((time.perf_counter() - t0) * 1000)
@@ -156,6 +164,8 @@ async def chat_stream(req: ChatRequest):
         sq: sync_queue.Queue = sync_queue.Queue()
         result_h: dict = {}
         err_h: dict = {}
+        recv_wall = time.time() * 1000.0
+        rid = (req.request_id or "").strip() or str(uuid.uuid4())
 
         def push_delta(t: str) -> None:
             if t:
@@ -170,6 +180,9 @@ async def chat_stream(req: ChatRequest):
                     llm_model=settings.llm_model,
                     session_id=req.session_id,
                     stream_delta=push_delta,
+                    request_id=rid,
+                    client_submit_epoch_ms=req.client_submit_epoch_ms,
+                    receive_wall_ms=recv_wall,
                 )
             except Exception as e:
                 err_h["e"] = str(e)

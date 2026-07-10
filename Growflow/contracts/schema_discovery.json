@@ -1,0 +1,35 @@
+{
+  "metric_id": "schema_discovery",
+  "description": "Discovery query outcomes used to validate available GraphQL roots/fields.",
+  "business_question": "What schema fields and root operations are currently available and stable?",
+  "allowed_query_template_ids": ["schema_discovery_runner_v1"],
+  "expected_root_path": "data",
+  "required_fields": [],
+  "optional_fields": [],
+  "field_types": {},
+  "field_confidence": {},
+  "date_field_expectations": {
+    "date_fields": [],
+    "must_overlap_requested_range": false
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": false,
+    "source_of_truth": "n/a"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_optional": true
+  },
+  "empty_result_policy": "allow",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": [],
+    "non_negative_field": ""
+  },
+  "downstream_outputs_allowed": ["discovery_only"],
+  "confidence_level": "discovery",
+  "known_schema_risks": [
+    "Production Retail endpoint often blocks introspection.",
+    "Discovery query success can vary by org token permissions."
+  ]
+}

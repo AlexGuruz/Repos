@@ -1,0 +1,49 @@
+{
+  "metric_id": "inventory_on_hand",
+  "description": "On-hand package inventory from findPackages.CurrentQty.",
+  "business_question": "What package quantity is currently on hand by brand/category?",
+  "allowed_query_template_ids": ["packages_on_hand_v1"],
+  "expected_root_path": "data.findPackages",
+  "required_fields": ["objectId", "CurrentQty", "Product.Name", "Product.ProductCategory.Name"],
+  "optional_fields": ["OriginalQty", "Cost", "createdAt", "Product.Brand.Name", "Product.objectId"],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "CurrentQty": "confirmed",
+    "OriginalQty": "inferred",
+    "Cost": "inferred",
+    "createdAt": "confirmed",
+    "Product.Name": "confirmed",
+    "Product.ProductCategory.Name": "confirmed",
+    "Product.Brand.Name": "unstable",
+    "Product.objectId": "confirmed"
+  },
+  "field_types": {
+    "objectId": "str",
+    "CurrentQty": "int",
+    "Product.Name": "str",
+    "Product.ProductCategory.Name": "str"
+  },
+  "date_field_expectations": {
+    "date_fields": ["createdAt"],
+    "must_overlap_requested_range": false
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": true,
+    "source_of_truth": "request_context.requested_store_or_org"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_required": true
+  },
+  "empty_result_policy": "warn",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["package_object_id"],
+    "non_negative_field": "current_qty"
+  },
+  "downstream_outputs_allowed": ["dashboard", "prepared_context", "par_logic"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "On-hand windowing via createdAt vs CurrentQty-only queries is documented in matrix; Brand selection unstable without validated join."
+  ]
+}

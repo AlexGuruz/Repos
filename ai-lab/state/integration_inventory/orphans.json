@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-28T00:02:59Z",
+  "orphans": [
+    {
+      "path": "scripts/analyze_trace_sessions.py",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/benchmark_ai_response.py",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "medium"
+    },
+    {
+      "path": "scripts/generate_growflow_runners_json.py",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "medium"
+    },
+    {
+      "path": "scripts/generate_integration_inventory.py",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/generate_invoice_pdf.py",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/maintain_worker_tunnel.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/personal_ops_worker_ollama_calendar.py",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "medium"
+    },
+    {
+      "path": "scripts/refresh_prepared_context_all.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/refresh_prepared_context_growflow.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/refresh_prepared_context_personal_ops.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/refresh_prepared_context_project_agenda.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/refresh_prepared_context_repo_pulse.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/refresh_prepared_context_system.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/refresh_prepared_context_worker.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/remove_prepared_context_tasks.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/restart.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/run_trace_sessions.py",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/setup_prepared_context_tasks.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/setup_worker_tunnel_task.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/start-background.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/start.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/start_worker_tunnel.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/stop.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/worker_ai/validate_m1_checklist.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    },
+    {
+      "path": "scripts/worker_visible_ollama_demo.ps1",
+      "reason": "no_cross_refs_no_registry_no_ps1_chain",
+      "recommended_action": "needs_review",
+      "risk_level": "low"
+    }
+  ]
+}

@@ -73,16 +73,19 @@ async function get(path) {
  * SSE chat: token deltas via data: {"delta":"..."} then data: {"done":true,"text",...}
  */
 export async function chatStream(message, history = [], opts = {}) {
-  const { onDelta, onDone, onError, sessionId = 'default' } = opts
+  const { onDelta, onDone, onError, sessionId = 'default', clientSubmitEpochMs = null, requestId = null } = opts
   const timeoutMs = 180000
   const ctrl = new AbortController()
   const tid = setTimeout(() => ctrl.abort(), timeoutMs)
   let r
   try {
+    const body = { message, history, session_id: sessionId }
+    if (clientSubmitEpochMs != null) body.client_submit_epoch_ms = clientSubmitEpochMs
+    if (requestId) body.request_id = requestId
     r = await fetch(`${BASE}/api/chat/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-      body: JSON.stringify({ message, history, session_id: sessionId }),
+      body: JSON.stringify(body),
       signal: ctrl.signal,
     })
   } catch (e) {
@@ -167,4 +170,9 @@ export const api = {
   toolsWorkerReachable: () => get('/api/tools/worker-reachable'),
   toolsInvoke: (op, payload = {}, agent = 'command-center') =>
     post('/api/tools/invoke', { op, agent, payload }),
+  preparedContext: () => get('/api/prepared-context'),
+  preparedContextByType: (snapshotType) => get(`/api/prepared-context/${encodeURIComponent(snapshotType)}`),
+  refreshPreparedContext: (snapshotType) => post(`/api/prepared-context/refresh/${encodeURIComponent(snapshotType)}`, {}),
+  preparedContextRefresherStatus: () => get('/api/prepared-context/status/refresher'),
+  growflowValidationStatus: () => get('/api/growflow/validation-status'),
 }

@@ -1,0 +1,82 @@
+{
+  "cases": [
+    {
+      "id": "vl_001",
+      "raw_input": "abc*p 07320 pf terre 812-235-5001 in 05/29",
+      "deterministic_label": "Abc*p Pf Terre",
+      "label_source": "fallback",
+      "city_hint": "",
+      "state_hint": "IN",
+      "expect_trigger": true,
+      "expect_decision": "manual_review",
+      "expect_no_sheet_write": true
+    },
+    {
+      "id": "vl_002",
+      "raw_input": "Deposit",
+      "deterministic_label": "Cash Deposit",
+      "label_source": "rule",
+      "expect_trigger": false,
+      "expect_decision": "reject"
+    },
+    {
+      "id": "vl_003",
+      "raw_input": "Wal-mart #1043 Pauls Valley Ok 125400 06/03",
+      "deterministic_label": "Walmart",
+      "label_source": "rule",
+      "expect_trigger": false,
+      "expect_decision": "reject"
+    },
+    {
+      "id": "vl_004",
+      "raw_input": "",
+      "deterministic_label": "",
+      "label_source": "blank",
+      "expect_trigger": false,
+      "expect_decision": "reject"
+    },
+    {
+      "id": "vl_005",
+      "raw_input": "kraken 8888378818 *n tx",
+      "deterministic_label": "Kraken",
+      "label_source": "rule",
+      "expect_trigger": false,
+      "expect_decision": "reject"
+    },
+    {
+      "id": "vl_006",
+      "raw_input": "xyzunknownmerchant 999-555-1212 ok",
+      "deterministic_label": "Xyzunknownmerchant",
+      "label_source": "fallback",
+      "expect_trigger": true,
+      "expect_decision": "manual_review",
+      "expect_no_sheet_write": true
+    },
+    {
+      "id": "vl_007",
+      "raw_input": "Amazon Mktplace 800-123-9999",
+      "deterministic_label": "Amazon",
+      "label_source": "rule",
+      "expect_trigger": false,
+      "expect_decision": "reject"
+    },
+    {
+      "id": "vl_008",
+      "raw_input": "pos purchase ok purcell unknownshop seq# 123 9917",
+      "deterministic_label": "Unknownshop",
+      "label_source": "fallback",
+      "deterministic_location": "Purcell, OK",
+      "city_hint": "Purcell",
+      "state_hint": "OK",
+      "expect_trigger": true,
+      "expect_no_sheet_write": true
+    }
+  ],
+  "processor_cleanup": [
+    {
+      "id": "vl_pc_001",
+      "raw_input": "POS PURCHASE OK PURCELL SEQ# 9917 NOISE MERCHANT",
+      "normalized_query_should_not_contain": ["seq#", "9917"]
+    }
+  ]
+}

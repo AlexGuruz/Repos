@@ -1,0 +1,374 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-28T00:02:59Z",
+  "triggers": [
+    {
+      "trigger_name": "fastapi_lifespan_background",
+      "trigger_type": "backend_lifespan",
+      "target_path_or_function": "command-center/command-center/backend/main.py:lifespan",
+      "interval_if_known": "startup + shutdown hooks",
+      "last_run_visible": true,
+      "output_consumed_by": [
+        "services/repo_watcher.py",
+        "services/nvidia_poller.py",
+        "services/prepared_context_refresher.py",
+        "services/repo_index_coordinator.py"
+      ],
+      "status": "wired",
+      "reasons": [
+        "Declared in FastAPI lifespan context manager"
+      ]
+    },
+    {
+      "trigger_name": "prepared_context_policy_loop",
+      "trigger_type": "backend_lifespan",
+      "target_path_or_function": "services/prepared_context_refresher.py:run_prepared_context_refresher",
+      "interval_if_known": "20s loop; per-type intervals in POLICIES (10\u20131440 min)",
+      "last_run_visible": true,
+      "output_consumed_by": [
+        "state/prepared_context/*.json",
+        "routers/prepared_context.py"
+      ],
+      "status": "wired",
+      "reasons": [
+        "POLICIES tuple drives snapshot refresh cadence"
+      ]
+    },
+    {
+      "trigger_name": "n8n_worker_automation_assumption",
+      "trigger_type": "n8n_assumption",
+      "target_path_or_function": "worker tunnel + n8n_trigger / worker_n8n_trigger tools",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "assumption",
+      "reasons": [
+        "Not statically traced in this inventory; confirm in ops"
+      ]
+    },
+    {
+      "trigger_name": "start.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/start.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/start.ps1"
+      ]
+    },
+    {
+      "trigger_name": "stop.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/stop.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/stop.ps1"
+      ]
+    },
+    {
+      "trigger_name": "restart.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/restart.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/restart.ps1"
+      ]
+    },
+    {
+      "trigger_name": "start-background.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/start-background.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/start-background.ps1"
+      ]
+    },
+    {
+      "trigger_name": "worker_visible_ollama_demo.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/worker_visible_ollama_demo.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/worker_visible_ollama_demo.ps1"
+      ]
+    },
+    {
+      "trigger_name": "maintain_worker_tunnel.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/maintain_worker_tunnel.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/maintain_worker_tunnel.ps1"
+      ]
+    },
+    {
+      "trigger_name": "setup_worker_tunnel_task.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/setup_worker_tunnel_task.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/setup_worker_tunnel_task.ps1"
+      ]
+    },
+    {
+      "trigger_name": "start_worker_tunnel.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/check_worker_connectivity.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/start_worker_tunnel.ps1"
+      ]
+    },
+    {
+      "trigger_name": "refresh_prepared_context_all.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "E:/Repos/ai-lab/scripts/build_prepared_context.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/refresh_prepared_context_all.ps1"
+      ]
+    },
+    {
+      "trigger_name": "refresh_prepared_context_system.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "E:/Repos/ai-lab/scripts/build_prepared_context.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/refresh_prepared_context_system.ps1"
+      ]
+    },
+    {
+      "trigger_name": "refresh_prepared_context_repo_pulse.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "E:/Repos/ai-lab/scripts/build_prepared_context.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/refresh_prepared_context_repo_pulse.ps1"
+      ]
+    },
+    {
+      "trigger_name": "refresh_prepared_context_personal_ops.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "E:/Repos/ai-lab/scripts/build_prepared_context.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/refresh_prepared_context_personal_ops.ps1"
+      ]
+    },
+    {
+      "trigger_name": "refresh_prepared_context_worker.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "E:/Repos/ai-lab/scripts/build_prepared_context.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/refresh_prepared_context_worker.ps1"
+      ]
+    },
+    {
+      "trigger_name": "refresh_prepared_context_growflow.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "E:/Repos/ai-lab/scripts/build_prepared_context.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/refresh_prepared_context_growflow.ps1"
+      ]
+    },
+    {
+      "trigger_name": "refresh_prepared_context_project_agenda.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "E:/Repos/ai-lab/scripts/build_prepared_context.py",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "partial",
+      "reasons": [
+        "resolved_from=scripts/refresh_prepared_context_project_agenda.ps1"
+      ]
+    },
+    {
+      "trigger_name": "setup_prepared_context_tasks.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/setup_prepared_context_tasks.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/setup_prepared_context_tasks.ps1"
+      ]
+    },
+    {
+      "trigger_name": "remove_prepared_context_tasks.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/remove_prepared_context_tasks.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/remove_prepared_context_tasks.ps1"
+      ]
+    },
+    {
+      "trigger_name": "validate_m1_checklist.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "scripts/worker_ai/validate_m1_checklist.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=scripts/worker_ai/validate_m1_checklist.ps1"
+      ]
+    },
+    {
+      "trigger_name": "deps.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "command-center/command-center/scripts/deps.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=command-center/command-center/scripts/deps.ps1"
+      ]
+    },
+    {
+      "trigger_name": "bootstrap.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "command-center/command-center/scripts/bootstrap.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=command-center/command-center/scripts/bootstrap.ps1"
+      ]
+    },
+    {
+      "trigger_name": "restart.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "command-center/command-center/scripts/restart.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=command-center/command-center/scripts/restart.ps1"
+      ]
+    },
+    {
+      "trigger_name": "start-background.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "command-center/command-center/scripts/start-background.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=command-center/command-center/scripts/start-background.ps1"
+      ]
+    },
+    {
+      "trigger_name": "run-backend.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "command-center/command-center/scripts/run-backend.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=command-center/command-center/scripts/run-backend.ps1"
+      ]
+    },
+    {
+      "trigger_name": "start.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "command-center/command-center/scripts/start.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=command-center/command-center/scripts/start.ps1"
+      ]
+    },
+    {
+      "trigger_name": "stop.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "command-center/command-center/scripts/stop.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=command-center/command-center/scripts/stop.ps1"
+      ]
+    },
+    {
+      "trigger_name": "run_backfill_apply.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "email_sorter/scripts/run_backfill_apply.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=email_sorter/scripts/run_backfill_apply.ps1"
+      ]
+    },
+    {
+      "trigger_name": "install_email_sorter_schedule_old_rig.ps1",
+      "trigger_type": "powershell_wrapper",
+      "target_path_or_function": "email_sorter/scripts/install_email_sorter_schedule_old_rig.ps1",
+      "interval_if_known": null,
+      "last_run_visible": false,
+      "output_consumed_by": [],
+      "status": "missing_visibility",
+      "reasons": [
+        "resolved_from=email_sorter/scripts/install_email_sorter_schedule_old_rig.ps1"
+      ]
+    }
+  ]
+}

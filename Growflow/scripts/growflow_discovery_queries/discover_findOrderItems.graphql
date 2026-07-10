@@ -1,0 +1,16 @@
+# Minimal smoke — same root as lib/growflow_queries.py (expand node to match production query).
+query DiscoverFindOrderItems {
+  findOrderItems(first: 2) {
+    count
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        id
+        objectId
+      }
+    }
+  }
+}

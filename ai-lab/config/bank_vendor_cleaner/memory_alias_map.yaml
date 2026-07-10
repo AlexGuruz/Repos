@@ -1,0 +1,238 @@
+version: 1
+description: "Portable replacement for ChatGPT editor Memory — bank vendor cleaner"
+
+aliases:
+  - id: alias_001
+    raw_inputs:
+      - "Wal-mart #1043 Pauls Valley Ok 125400 06/03"
+      - "Pos Purchase Ok Purcell Wm Supercenter Us Seq# 675865 9917"
+      - "Pos Purchase Ok Pauls Valley Wm Supercenter Us Seq# 095554 9917"
+      - "Wal-mart #0139 2015 S Green Ave Purcell - 000000573745"
+    canonical_label: "Walmart"
+    city: ""
+    state: ""
+    notes: "All Walmart variants collapse to Walmart."
+    source: "instruction|example"
+    confidence: high
+
+  - id: alias_002
+    raw_inputs:
+      - "Murphy7440atwalmart Pauls Valley Ok 120925 06/02"
+      - "Murphy7440atwalm 2010 W Grant St Pauls V - 615100702249"
+    canonical_label: "Murphy"
+    city: "Pauls Valley"
+    state: "OK"
+    notes: "Murphy-at-Walmart fuel rows."
+    source: "memory|example"
+    confidence: high
+
+  - id: alias_003
+    raw_inputs:
+      - "Recur Payment NY 877-7781161 Spotify Usa Seq# 083021 9917"
+    canonical_label: "Spotify"
+    city: ""
+    state: ""
+    notes: "Recurring Spotify descriptors; state NY from payment prefix."
+    source: "instruction|example"
+    confidence: high
+
+  - id: alias_004
+    raw_inputs:
+      - "Pos Purchase Ok Ardmore Py *hteao Seq# 097665 9917"
+    canonical_label: "HTeaO"
+    city: "Ardmore"
+    state: "OK"
+    source: "example"
+    confidence: high
+
+  - id: alias_005
+    raw_inputs:
+      - "Qt 1047 Inside Blacksburg SC - 615521405304"
+    canonical_label: "QT"
+    city: "Blacksburg"
+    state: "SC"
+    confidence: medium
+
+  - id: alias_006
+    raw_inputs:
+      - "The Wooden Spoon Ardmore Ok - 615523900015"
+    canonical_label: "Wooden Spoon"
+    city: "Ardmore"
+    state: "OK"
+    confidence: medium
+
+  - id: alias_007
+    raw_inputs:
+      - "Super 8 Motels Poplar Bluff MO"
+      - "Super 8 Motels 573-7278344 MO"
+    canonical_label: "Super 8"
+    city: "Poplar Bluff"
+    state: "MO"
+    notes: "Phone variant may not always carry city."
+    confidence: medium
+
+  - id: alias_008
+    raw_inputs:
+      - "Maverik #5129 Paragould AR"
+    canonical_label: "Maverik"
+    city: "Paragould"
+    state: "AR"
+    confidence: high
+
+  - id: alias_009
+    raw_inputs:
+      - "Gas & Dash #27182 Van Buren AR"
+    canonical_label: "Gas & Dash"
+    city: "Van Buren"
+    state: "AR"
+    confidence: high
+
+  - id: alias_010
+    raw_inputs:
+      - "Kroger Fuel #5386 Poplar Bluff MO"
+    canonical_label: "Kroger Fuel"
+    city: "Poplar Bluff"
+    state: "MO"
+    confidence: high
+
+  - id: alias_011
+    raw_inputs:
+      - "Citi Card Online Payment 432025604207831"
+    canonical_label: "Citi Payment"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_012
+    raw_inputs:
+      - "Capital One Online Pmt Ca0eeffcf814e62"
+    canonical_label: "Capital One"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_013
+    raw_inputs:
+      - "Payment to Consumer Loans Loan x0754"
+    canonical_label: "Consumer Loan"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_014
+    raw_inputs:
+      - "Reverse Charge: Debit Plus Rewards"
+    canonical_label: "Debit Rewards Reversal"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_015
+    raw_inputs:
+      - "Atm Withdrawal Ok Ardmore 1100 North Commerce Seq# 001738 9917"
+    canonical_label: "ATM Withdrawal"
+    city: "Ardmore"
+    state: "OK"
+    confidence: high
+
+  - id: alias_016
+    raw_inputs:
+      - "Deposit"
+      - "Deposit@mobile"
+      - "Atm Deposit"
+    canonical_label: "Cash Deposit"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_017
+    raw_inputs:
+      - "Online Transfer from Chk ...2969 transaction#: 29445536869"
+      - "390049 Internet Transfer From Acct 8787578 on 1/01/25 at 20:26"
+    canonical_label: "Transfer In"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_018
+    raw_inputs:
+      - "931603 Internet Transfer to Acct 8787578 on 1/05/25 at 22:30"
+      - "Usaa Funds Transfer Db"
+    canonical_label: "Transfer Out"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_019
+    raw_inputs:
+      - "Usaa Funds Transfer Cr"
+    canonical_label: "Transfer In"
+    city: ""
+    state: ""
+    confidence: medium
+
+  - id: alias_020
+    raw_inputs:
+      - "Kraken 8888378818 *N TX"
+      - "Kraken 8888378818 Kraken TX"
+    canonical_label: "Kraken"
+    city: ""
+    state: "TX"
+    confidence: high
+
+  - id: alias_021
+    raw_inputs:
+      - "EToro Viatrustly *"
+    canonical_label: "eToro"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_022
+    raw_inputs:
+      - "Coinbase Inc. 8889087930 *P33Z"
+      - "Coinbase Inc. 8889087930 *BYLZ"
+    canonical_label: "Coinbase"
+    city: ""
+    state: ""
+    confidence: high
+
+  - id: alias_023
+    raw_inputs:
+      - "Okgov Okgov *3468"
+    canonical_label: "OK Gov"
+    city: ""
+    state: "OK"
+    confidence: high
+
+  - id: alias_024
+    raw_inputs:
+      - "Omma License *1062"
+    canonical_label: "OMMA License"
+    city: ""
+    state: "OK"
+    confidence: high
+
+  - id: alias_025
+    raw_inputs:
+      - "City of Purcell Utilities"
+    canonical_label: "City of Purcell Utilities"
+    city: "Purcell"
+    state: "OK"
+    confidence: high
+
+  - id: alias_026
+    raw_inputs:
+      - "Amazon"
+    canonical_label: "Amazon"
+    city: ""
+    state: ""
+    confidence: high
+
+overrides: []
+
+do_not_apply:
+  - "^=$"
+  - "^=LET\\("
+  - "^=ARRAYFORMULA\\("
+  - "^=REGEX"

@@ -97,7 +97,7 @@ def load_evidence(decision: RoutingDecision, session_id: str) -> LoadedEvidence:
         elif target.kind == "ops_registry":
             try:
                 from brain import ops_registry
-                summary = ops_registry.get_ops_summary_text()
+                summary = ops_registry.get_ops_summary_text_cached()
                 out.local_evidence.append(EvidenceItem(
                     source_type="ops_registry",
                     title="Operations registry",
@@ -144,7 +144,7 @@ def load_evidence(decision: RoutingDecision, session_id: str) -> LoadedEvidence:
     if decision.web_queries:
         from brain import web_tool
         for q in decision.web_queries[:2]:
-            results = web_tool.web_search(q, max_results=5)
+            results = web_tool.web_search(q, max_results=5, timeout_sec=6.0)
             for r in results:
                 out.web_evidence.append(EvidenceItem(
                     source_type="web",

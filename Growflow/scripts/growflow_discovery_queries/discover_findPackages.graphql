@@ -1,0 +1,16 @@
+# Minimal smoke — same root as lib/growflow_queries.py.
+query DiscoverFindPackages {
+  findPackages(first: 2) {
+    count
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        objectId
+        id
+      }
+    }
+  }
+}

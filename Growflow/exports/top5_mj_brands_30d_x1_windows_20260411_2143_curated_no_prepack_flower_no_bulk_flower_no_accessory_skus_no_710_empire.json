@@ -1,0 +1,96 @@
+{
+  "generated_at_store_local": "2026-04-11T21:43:43.124323-05:00",
+  "growflow_org": "nugzdispensary",
+  "period_store_local_start": "2026-03-13",
+  "period_store_local_end": "2026-04-11",
+  "total_days": 30,
+  "window_days": 30,
+  "num_windows": 1,
+  "top_k": 5,
+  "rank_primary": "gross_usd_desc_then_lines_desc_then_brand_az",
+  "timezone": "America/Chicago",
+  "filters": {
+    "evaluation_preset": true,
+    "exclude_prepackaged_flower": true,
+    "exclude_bulk_flower": true,
+    "exclude_non_cannabis_accessories": true,
+    "excluded_brands_normalized": [
+      "710 empire"
+    ],
+    "non_cannabis_substrings_documented": [
+      "accessories",
+      "accessory",
+      "apparel",
+      "clothing",
+      "merchandise",
+      "gift card",
+      "rolling tray",
+      "rolling papers",
+      "ashtray",
+      "grinder",
+      "hemp wick",
+      "t-shirt",
+      "tee shirt",
+      "sticker",
+      "mug",
+      "lighter",
+      "scale"
+    ]
+  },
+  "windows": [
+    {
+      "window_index": 0,
+      "window_start": "2026-03-13",
+      "window_end": "2026-04-11",
+      "window_label": "2026-03-13..2026-04-11",
+      "brand_count_in_window": 32,
+      "top_brands": [
+        {
+          "rank": 1,
+          "brand": "Arctic Extracts",
+          "gross_usd": 8707.8,
+          "gross_cents": 870780,
+          "lines": 572,
+          "margin_usd": 5058.3,
+          "margin_cents": 505830
+        },
+        {
+          "rank": 2,
+          "brand": "CURE INJOY",
+          "gross_usd": 4936.69,
+          "gross_cents": 493669,
+          "lines": 206,
+          "margin_usd": 2464.69,
+          "margin_cents": 246469
+        },
+        {
+          "rank": 3,
+          "brand": "Cartel",
+          "gross_usd": 4934.04,
+          "gross_cents": 493404,
+          "lines": 177,
+          "margin_usd": 2617.54,
+          "margin_cents": 261754
+        },
+        {
+          "rank": 4,
+          "brand": "Day Changers",
+          "gross_usd": 3806.99,
+          "gross_cents": 380699,
+          "lines": 171,
+          "margin_usd": 2081.99,
+          "margin_cents": 208199
+        },
+        {
+          "rank": 5,
+          "brand": "Korporate Kush",
+          "gross_usd": 3730.63,
+          "gross_cents": 373063,
+          "lines": 268,
+          "margin_usd": 2600.23,
+          "margin_cents": 260023
+        }
+      ]
+    }
+  ]
+}

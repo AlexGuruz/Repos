@@ -16,6 +16,8 @@ def choose_answer_style(fused: FusedContext) -> str:
     if fused.recommended_answer_style:
         return fused.recommended_answer_style
     if not fused.key_evidence and not fused.secondary_evidence:
+        if fused.time_context:
+            return "direct_status"
         return "insufficient_evidence"
     if any(e.source_type == "failure_record" for e in fused.key_evidence):
         return "failure_explanation"

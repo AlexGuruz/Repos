@@ -1,0 +1,15 @@
+# Minimal root probe — expand node fields once schema/samples exist.
+query DiscoverFindTransfers {
+  findTransfers(first: 5) {
+    count
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        objectId
+      }
+    }
+  }
+}

@@ -10,8 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings, verify_governance
 from core.ai_lab import AI_LAB_ROOT
-from routers import chat, events, guru, hardware, repo, repo_index, tools, workers
+from routers import chat, events, guru, hardware, live_work, prepared_context, repo, repo_docs, repo_index, tools, workers
 from services.nvidia_poller import nvidia_poll_loop
+from services.prepared_context_refresher import run_prepared_context_refresher
 from services.repo_watcher import start_watcher, stop_watcher, WATCH_PATHS
 from services.repo_index_coordinator import get_coordinator
 
@@ -33,6 +34,7 @@ async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()
     start_watcher(loop)
     poller_task = asyncio.create_task(nvidia_poll_loop())
+    prepared_context_task = asyncio.create_task(run_prepared_context_refresher())
     coordinator = get_coordinator()
     coordinator_task = asyncio.create_task(coordinator.run_forever())
 
@@ -40,6 +42,7 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     poller_task.cancel()
+    prepared_context_task.cancel()
     coordinator_task.cancel()
     try:
         await coordinator.stop()
@@ -70,6 +73,9 @@ app.include_router(repo.router)
 app.include_router(repo_index.router)
 app.include_router(tools.router)
 app.include_router(workers.router)
+app.include_router(prepared_context.router)
+app.include_router(repo_docs.router)
+app.include_router(live_work.router)
 
 
 @app.get("/api/llm-status")

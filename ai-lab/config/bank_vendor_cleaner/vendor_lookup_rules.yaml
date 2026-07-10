@@ -1,0 +1,14 @@
+version: 1
+enabled: true
+lookup_only_on_unknown: true
+allow_auto_promote_to_alias_map: false
+require_human_approval_for_new_aliases: true
+minimum_confidence_for_pending_cache: medium
+providers:
+  - local_cache
+  - mcp_web_search
+  - manual_review
+blocked_categories:
+  - fixed_event_labels
+  - blank_rows
+  - formula_cells

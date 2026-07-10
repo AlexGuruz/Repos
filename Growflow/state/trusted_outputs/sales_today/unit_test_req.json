@@ -1,0 +1,44 @@
+{
+  "metric_id": "sales_today",
+  "template_id": "order_items_sales_today_v1",
+  "request_id": "unit_test_req",
+  "mode": "warning",
+  "generated_at": "2026-04-27T19:40:12Z",
+  "confidence_score": 0.935,
+  "confidence_label": "medium",
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "NetPrice": "confirmed",
+    "COG": "inferred",
+    "Product.objectId": "confirmed",
+    "Product.Brand.Name": "unstable",
+    "ProductCategory.Name": "inferred"
+  },
+  "field_confidence_counts": {
+    "confirmed": 5,
+    "inferred": 2,
+    "unstable": 1
+  },
+  "schema_drift": {
+    "baseline_exists": false,
+    "drift": null,
+    "baseline_updated": false,
+    "schema_drift_warnings": []
+  },
+  "rows": [
+    {
+      "order_item_id": "row-1",
+      "sold_at": "2026-04-20T12:00:00.000Z",
+      "gross_price_cents": 1200,
+      "net_price_cents": 1100
+    },
+    {
+      "order_item_id": "row-1",
+      "sold_at": "2026-04-20T12:00:00.000Z",
+      "gross_price_cents": 1200,
+      "net_price_cents": 1100
+    }
+  ]
+}

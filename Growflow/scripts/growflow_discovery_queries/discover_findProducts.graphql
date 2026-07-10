@@ -1,0 +1,17 @@
+# Validate in playground / SDL before planner use — field names are templates only.
+query DiscoverFindProducts {
+  findProducts(first: 5) {
+    count
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        objectId
+        name
+        SKU
+      }
+    }
+  }
+}

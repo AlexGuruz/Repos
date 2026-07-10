@@ -22,6 +22,19 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Optional: scripts/worker_tunnel.local.json overrides -User / -WorkerHost when not passed on CLI
+# (e.g. office LAN IP or Tailscale name like work-node). See worker_tunnel.local.json.example.
+$_wtcPath = Join-Path $PSScriptRoot "worker_tunnel.local.json"
+if (Test-Path $_wtcPath) {
+  try {
+    $_wtc = Get-Content $_wtcPath -Raw | ConvertFrom-Json
+    if ($_wtc.workerHost -and -not $PSBoundParameters.ContainsKey("WorkerHost")) { $WorkerHost = [string]$_wtc.workerHost }
+    if ($_wtc.user -and -not $PSBoundParameters.ContainsKey("User")) { $User = [string]$_wtc.user }
+  } catch {
+    Write-Warning ("Ignoring invalid worker_tunnel.local.json: {0}" -f $_.Exception.Message)
+  }
+}
+
 $LogDir = "E:\Repos\ai-lab\logs\worker_tunnel"
 $null = New-Item -ItemType Directory -Path $LogDir -Force
 $LogFile = Join-Path $LogDir ("tunnel_watch_{0}.log" -f (Get-Date -Format "yyyyMMdd"))

@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {"id": "tv_001", "input_column_c": "Wal-mart #1043 Pauls Valley Ok 125400 06/03", "expected_column_c": "Walmart", "expected_column_d": "Pauls Valley, OK"},
+    {"id": "tv_002", "input_column_c": "Pos Purchase Ok Purcell Wm Supercenter Us Seq# 675865 9917", "expected_column_c": "Walmart", "expected_column_d": "Purcell, OK"},
+    {"id": "tv_003", "input_column_c": "Murphy7440atwalmart Pauls Valley Ok 120925 06/02", "expected_column_c": "Murphy", "expected_column_d": "Pauls Valley, OK"},
+    {"id": "tv_004", "input_column_c": "Murphy7440atwalm 2010 W Grant St Pauls V - 615100702249", "expected_column_c": "Murphy", "expected_column_d": "Pauls Valley, OK"},
+    {"id": "tv_005", "input_column_c": "Recur Payment NY 877-7781161 Spotify Usa Seq# 083021 9917", "expected_column_c": "Spotify", "expected_column_d": "NY"},
+    {"id": "tv_006", "input_column_c": "Atm Withdrawal Ok Ardmore 1100 North Commerce Seq# 001738 9917", "expected_column_c": "ATM Withdrawal", "expected_column_d": "Ardmore, OK"},
+    {"id": "tv_007", "input_column_c": "Super 8 Motels Poplar Bluff MO", "expected_column_c": "Super 8", "expected_column_d": "Poplar Bluff, MO"},
+    {"id": "tv_008", "input_column_c": "Super 8 Motels 573-7278344 MO", "expected_column_c": "Super 8", "expected_column_d": "MO"},
+    {"id": "tv_009", "input_column_c": "The Wooden Spoon Ardmore Ok - 615523900015", "expected_column_c": "Wooden Spoon", "expected_column_d": "Ardmore, OK"},
+    {"id": "tv_010", "input_column_c": "Qt 1047 Inside Blacksburg SC - 615521405304", "expected_column_c": "QT", "expected_column_d": "Blacksburg, SC"},
+    {"id": "tv_011", "input_column_c": "Pos Purchase Ok Ardmore Py *hteao Seq# 097665 9917", "expected_column_c": "HTeaO", "expected_column_d": "Ardmore, OK"},
+    {"id": "tv_012", "input_column_c": "Deposit", "expected_column_c": "Cash Deposit", "expected_column_d": ""},
+    {"id": "tv_013", "input_column_c": "Deposit@mobile", "expected_column_c": "Cash Deposit", "expected_column_d": ""},
+    {"id": "tv_014", "input_column_c": "Atm Deposit", "expected_column_c": "Cash Deposit", "expected_column_d": ""},
+    {"id": "tv_015", "input_column_c": "Citi Card Online Payment 432025604207831", "expected_column_c": "Citi Payment", "expected_column_d": ""},
+    {"id": "tv_016", "input_column_c": "Capital One Online Pmt Ca0eeffcf814e62", "expected_column_c": "Capital One", "expected_column_d": ""},
+    {"id": "tv_017", "input_column_c": "Payment to Consumer Loans Loan x0754", "expected_column_c": "Consumer Loan", "expected_column_d": ""},
+    {"id": "tv_018", "input_column_c": "Reverse Charge: Debit Plus Rewards", "expected_column_c": "Debit Rewards Reversal", "expected_column_d": ""},
+    {"id": "tv_019", "input_column_c": "Online Transfer from Chk ...2969 transaction#: 29445536869", "expected_column_c": "Transfer In", "expected_column_d": ""},
+    {"id": "tv_020", "input_column_c": "931603 Internet Transfer to Acct 8787578 on 1/05/25 at 22:30", "expected_column_c": "Transfer Out", "expected_column_d": ""},
+    {"id": "tv_021", "input_column_c": "390049 Internet Transfer From Acct 8787578 on 1/01/25 at 20:26", "expected_column_c": "Transfer In", "expected_column_d": ""},
+    {"id": "tv_022", "input_column_c": "Usaa Funds Transfer Db", "expected_column_c": "Transfer Out", "expected_column_d": ""},
+    {"id": "tv_023", "input_column_c": "Usaa Funds Transfer Cr", "expected_column_c": "Transfer In", "expected_column_d": ""},
+    {"id": "tv_024", "input_column_c": "Kraken 8888378818 *N TX", "expected_column_c": "Kraken", "expected_column_d": "TX"},
+    {"id": "tv_025", "input_column_c": "Kraken 8888378818 Kraken TX", "expected_column_c": "Kraken", "expected_column_d": "TX"},
+    {"id": "tv_026", "input_column_c": "EToro Viatrustly *", "expected_column_c": "eToro", "expected_column_d": ""},
+    {"id": "tv_027", "input_column_c": "Coinbase Inc. 8889087930 *P33Z", "expected_column_c": "Coinbase", "expected_column_d": ""},
+    {"id": "tv_028", "input_column_c": "Okgov Okgov *3468", "expected_column_c": "OK Gov", "expected_column_d": "OK"},
+    {"id": "tv_029", "input_column_c": "Omma License *1062", "expected_column_c": "OMMA License", "expected_column_d": "OK"},
+    {"id": "tv_030", "input_column_c": "Maverik #5129 Paragould AR", "expected_column_c": "Maverik", "expected_column_d": "Paragould, AR"},
+    {"id": "tv_031", "input_column_c": "Gas & Dash #27182 Van Buren AR", "expected_column_c": "Gas & Dash", "expected_column_d": "Van Buren, AR"},
+    {"id": "tv_032", "input_column_c": "Kroger Fuel #5386 Poplar Bluff MO", "expected_column_c": "Kroger Fuel", "expected_column_d": "Poplar Bluff, MO"}
+  ],
+  "edge_cases": [
+    {"id": "edge_002", "input_column_c": "Walmart", "expected_column_c": "Walmart", "expected_column_d": ""},
+    {"id": "edge_003", "input_column_c": "Amazon Mktplace 800-123-9999", "expected_column_c": "Amazon", "expected_column_d": ""}
+  ]
+}

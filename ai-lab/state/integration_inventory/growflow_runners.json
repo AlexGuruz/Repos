@@ -1,0 +1,594 @@
+{
+  "version": 1,
+  "generated_at": "2026-04-27T23:39:09Z",
+  "growflow_root": "E:\\Repos\\Growflow",
+  "classification_labels": [
+    "canonical_runner",
+    "read_safe_tool_candidate",
+    "scheduled_job_candidate",
+    "manual_diagnostic",
+    "deprecated_archive_later",
+    "unsafe_without_approval_metadata",
+    "unknown_needs_review"
+  ],
+  "counts": {
+    "canonical_runner": 14,
+    "read_safe_tool_candidate": 3,
+    "scheduled_job_candidate": 13,
+    "manual_diagnostic": 35,
+    "deprecated_archive_later": 4,
+    "unsafe_without_approval_metadata": 2,
+    "unknown_needs_review": 0,
+    "prepared_context_feeders": 5
+  },
+  "scripts": [
+    {
+      "path": "Growflow/all_categories_inventory_and_daily_rebuild.py",
+      "relative": "all_categories_inventory_and_daily_rebuild.py",
+      "category": "unsafe_without_approval_metadata",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/allocate_brand_pool_merit.py",
+      "relative": "allocate_brand_pool_merit.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/allocate_stock_pool_by_brand.py",
+      "relative": "allocate_stock_pool_by_brand.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/__init__.py",
+      "relative": "company_bi/scripts/__init__.py",
+      "category": "manual_diagnostic",
+      "notes": "package namespace marker only; not an execution entrypoint",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/audit_other_expenses.py",
+      "relative": "company_bi/scripts/audit_other_expenses.py",
+      "category": "read_safe_tool_candidate",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/ingest_growflow_to_db.py",
+      "relative": "company_bi/scripts/ingest_growflow_to_db.py",
+      "category": "unsafe_without_approval_metadata",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/list_rent_matches.py",
+      "relative": "company_bi/scripts/list_rent_matches.py",
+      "category": "manual_diagnostic",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/list_uncategorized_and_review.py",
+      "relative": "company_bi/scripts/list_uncategorized_and_review.py",
+      "category": "manual_diagnostic",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/monthly_run.py",
+      "relative": "company_bi/scripts/monthly_run.py",
+      "category": "scheduled_job_candidate",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/payroll_last_period.py",
+      "relative": "company_bi/scripts/payroll_last_period.py",
+      "category": "scheduled_job_candidate",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/recurring_bills_summary.py",
+      "relative": "company_bi/scripts/recurring_bills_summary.py",
+      "category": "scheduled_job_candidate",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/company_bi/scripts/suggest_category_rules.py",
+      "relative": "company_bi/scripts/suggest_category_rules.py",
+      "category": "manual_diagnostic",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/inventory_sales_monitor.py",
+      "relative": "inventory_sales_monitor.py",
+      "category": "scheduled_job_candidate",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/inventory_vs_sales_last_6_months.py",
+      "relative": "inventory_vs_sales_last_6_months.py",
+      "category": "manual_diagnostic",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/monthly_gross_projection_to_sheet.py",
+      "relative": "monthly_gross_projection_to_sheet.py",
+      "category": "scheduled_job_candidate",
+      "notes": "explicit classification",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_cartel_7pk_first_receipt_sellout.py",
+      "relative": "scripts/_cartel_7pk_first_receipt_sellout.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_cartel_7pk_sellout_projection.py",
+      "relative": "scripts/_cartel_7pk_sellout_projection.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_cartel_preroll_velocity_budget.py",
+      "relative": "scripts/_cartel_preroll_velocity_budget.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_check_fast_row.py",
+      "relative": "scripts/_check_fast_row.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_dashboard_audit_once.py",
+      "relative": "scripts/_dashboard_audit_once.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_dump_sheet_formulas.py",
+      "relative": "scripts/_dump_sheet_formulas.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_find_pkg_by_sku.py",
+      "relative": "scripts/_find_pkg_by_sku.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_fix_arctic_line.py",
+      "relative": "scripts/_fix_arctic_line.py",
+      "category": "deprecated_archive_later",
+      "notes": "legacy patch / one-off",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_last_accepted_transfer.py",
+      "relative": "scripts/_last_accepted_transfer.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_orderitem_product_created.py",
+      "relative": "scripts/_orderitem_product_created.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_patch_ac10.py",
+      "relative": "scripts/_patch_ac10.py",
+      "category": "deprecated_archive_later",
+      "notes": "legacy patch / one-off",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_patch_iferror_test.py",
+      "relative": "scripts/_patch_iferror_test.py",
+      "category": "deprecated_archive_later",
+      "notes": "legacy patch / one-off",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_print_pool_breakdown.py",
+      "relative": "scripts/_print_pool_breakdown.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_probe_cartel_origin.py",
+      "relative": "scripts/_probe_cartel_origin.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_probe_introspection.py",
+      "relative": "scripts/_probe_introspection.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_probe_one_pkg.py",
+      "relative": "scripts/_probe_one_pkg.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_probe_pkg_fields.py",
+      "relative": "scripts/_probe_pkg_fields.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_probe_pkg_fields2.py",
+      "relative": "scripts/_probe_pkg_fields2.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_probe_sheet_funcs.py",
+      "relative": "scripts/_probe_sheet_funcs.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_query_arctic_disposable_inventory.py",
+      "relative": "scripts/_query_arctic_disposable_inventory.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_sales_today.py",
+      "relative": "scripts/_sales_today.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_scan_orderitem_names.py",
+      "relative": "scripts/_scan_orderitem_names.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_scan_package_names.py",
+      "relative": "scripts/_scan_package_names.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_sellout_final.py",
+      "relative": "scripts/_sellout_final.py",
+      "category": "deprecated_archive_later",
+      "notes": "legacy patch / one-off",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_test_oi_product_where.py",
+      "relative": "scripts/_test_oi_product_where.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_tmp_query_transfers_db.py",
+      "relative": "scripts/_tmp_query_transfers_db.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/_weekday_sales_avg.py",
+      "relative": "scripts/_weekday_sales_avg.py",
+      "category": "manual_diagnostic",
+      "notes": "underscore / probe / ad-hoc analysis",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/build_projection_by_category_brand.py",
+      "relative": "scripts/build_projection_by_category_brand.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/build_projection_dashboard_google_sheet.py",
+      "relative": "scripts/build_projection_dashboard_google_sheet.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": true
+    },
+    {
+      "path": "Growflow/scripts/build_transfer_receipts_db.py",
+      "relative": "scripts/build_transfer_receipts_db.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": true
+    },
+    {
+      "path": "Growflow/scripts/build_trip_sheet_google_doc.py",
+      "relative": "scripts/build_trip_sheet_google_doc.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/cartel_7pk_portfolio_projection.py",
+      "relative": "scripts/cartel_7pk_portfolio_projection.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/complete_18k_projection.py",
+      "relative": "scripts/complete_18k_projection.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/diag_vape_product_buckets.py",
+      "relative": "scripts/diag_vape_product_buckets.py",
+      "category": "manual_diagnostic",
+      "notes": "diagnostic / report script",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/export_brand_suppliers_to_sheet.py",
+      "relative": "scripts/export_brand_suppliers_to_sheet.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/export_projection_dashboard_layout.py",
+      "relative": "scripts/export_projection_dashboard_layout.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": true
+    },
+    {
+      "path": "Growflow/scripts/export_top15_mj_brands_30d_windows.py",
+      "relative": "scripts/export_top15_mj_brands_30d_windows.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": true
+    },
+    {
+      "path": "Growflow/scripts/export_transfer_receipt_units.py",
+      "relative": "scripts/export_transfer_receipt_units.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": true
+    },
+    {
+      "path": "Growflow/scripts/introspect_growflow_schema.py",
+      "relative": "scripts/introspect_growflow_schema.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/list_projection_dashboard_charts.py",
+      "relative": "scripts/list_projection_dashboard_charts.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/probe_growflow_discovery_entities.py",
+      "relative": "scripts/probe_growflow_discovery_entities.py",
+      "category": "manual_diagnostic",
+      "notes": "probe script",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/probe_orderitems_field_batches.py",
+      "relative": "scripts/probe_orderitems_field_batches.py",
+      "category": "manual_diagnostic",
+      "notes": "probe script",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/projection_dashboard_to_sheet.py",
+      "relative": "scripts/projection_dashboard_to_sheet.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": true,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/projection_efficiency_distribution_report.py",
+      "relative": "scripts/projection_efficiency_distribution_report.py",
+      "category": "manual_diagnostic",
+      "notes": "diagnostic / report script",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/query_sap_stix_velocity.py",
+      "relative": "scripts/query_sap_stix_velocity.py",
+      "category": "manual_diagnostic",
+      "notes": "diagnostic / report script",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/rank_mj_brands_profit_velocity_sheet.py",
+      "relative": "scripts/rank_mj_brands_profit_velocity_sheet.py",
+      "category": "scheduled_job_candidate",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/restore_dashboard_charts_from_layout_snapshot.py",
+      "relative": "scripts/restore_dashboard_charts_from_layout_snapshot.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/run_growflow_discovery_queries.py",
+      "relative": "scripts/run_growflow_discovery_queries.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/snapshot_dashboard_chart_layout.py",
+      "relative": "scripts/snapshot_dashboard_chart_layout.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/supplier_sales_pace_by_category.py",
+      "relative": "scripts/supplier_sales_pace_by_category.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/top_allocation_velocity_scan.py",
+      "relative": "scripts/top_allocation_velocity_scan.py",
+      "category": "manual_diagnostic",
+      "notes": "diagnostic / report script",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/transfer_sellout_by_brand_category.py",
+      "relative": "scripts/transfer_sellout_by_brand_category.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/validate_cartel_7pk_projection.py",
+      "relative": "scripts/validate_cartel_7pk_projection.py",
+      "category": "read_safe_tool_candidate",
+      "notes": "read-biased; confirm side effects before tool registry",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/validate_projection_layer2_csv.py",
+      "relative": "scripts/validate_projection_layer2_csv.py",
+      "category": "read_safe_tool_candidate",
+      "notes": "read-biased; confirm side effects before tool registry",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/verify_projection_dashboard_sheet.py",
+      "relative": "scripts/verify_projection_dashboard_sheet.py",
+      "category": "canonical_runner",
+      "notes": "primary pipeline / exports",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    },
+    {
+      "path": "Growflow/scripts/worst_recovery_scan.py",
+      "relative": "scripts/worst_recovery_scan.py",
+      "category": "manual_diagnostic",
+      "notes": "diagnostic / report script",
+      "approval_required_for_tool_registry": false,
+      "prepared_context_source": false
+    }
+  ]
+}

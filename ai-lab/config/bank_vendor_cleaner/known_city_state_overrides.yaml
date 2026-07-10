@@ -1,0 +1,6 @@
+version: 1
+description: "Explicit city/state overrides beyond memory_alias_map (review before adding)"
+
+city_normalization: {}
+
+location_overrides: []

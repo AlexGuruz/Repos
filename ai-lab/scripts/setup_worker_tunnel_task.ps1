@@ -16,6 +16,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$_wtcPath = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "worker_tunnel.local.json"
+if (Test-Path $_wtcPath) {
+  try {
+    $_wtc = Get-Content $_wtcPath -Raw | ConvertFrom-Json
+    if ($_wtc.workerHost -and -not $PSBoundParameters.ContainsKey("WorkerHost")) { $WorkerHost = [string]$_wtc.workerHost }
+    if ($_wtc.user -and -not $PSBoundParameters.ContainsKey("User")) { $User = [string]$_wtc.user }
+  } catch {
+    Write-Warning ("Ignoring invalid worker_tunnel.local.json: {0}" -f $_.Exception.Message)
+  }
+}
+
 function _log([string]$msg) {
   Write-Host ("{0} {1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $msg)
 }
@@ -29,14 +40,19 @@ if (-not (Test-Path $WatchScript)) {
 
 Import-Module ScheduledTasks -ErrorAction SilentlyContinue
 
+# If worker_tunnel.local.json exists, do not pass -User/-WorkerHost on the task action so
+# maintain_worker_tunnel.ps1 can apply that file (office IP / Tailscale name).
 $argList = @(
   "-NoProfile",
   "-ExecutionPolicy", "Bypass",
   "-WindowStyle", "Hidden",
-  "-File", $WatchScript,
-  "-User", $User,
-  "-WorkerHost", $WorkerHost
+  "-File", $WatchScript
 )
+if (Test-Path $_wtcPath) {
+  _log "worker_tunnel.local.json present: scheduled task will rely on it for SSH user/host."
+} else {
+  $argList += @("-User", $User, "-WorkerHost", $WorkerHost)
+}
 
 if ($KillExisting) {
   $argList += "-KillExisting"

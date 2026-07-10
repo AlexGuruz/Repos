@@ -49,8 +49,10 @@
 
 | Metric | Formula | Source | Confidence |
 |--------|---------|--------|------------|
-| Units created (month) | Sum(OriginalQty) for packages with createdAt in month | GrowFlow findPackages | Confirmed |
-| Current stock (units) | Sum(CurrentQty) over packages | GrowFlow | Confirmed |
+| Units created (month) | Sum(**`OriginalQty`**) for packages with createdAt in month | GrowFlow findPackages | Confirmed |
+| Current stock (units) | Sum(**`CurrentQty`**) over packages (live remaining per line; not `OriginalQty`) | GrowFlow findPackages | Confirmed |
+
+**GrowFlow package rows:** **`OriginalQty`** = quantity when the package line was opened / received. **`CurrentQty`** = **live** remaining after sales and movements. UI columns named “Items” may map to either depending on the screen; default BI meaning of “on hand” is **`CurrentQty`**.
 | Units sold (month) | Count(order items) or sum(qty) in month | GrowFlow | Confirmed |
 | Inventory-related cost | Sum(expense) where category = inventory | Transactions | Confirmed |
 | Stock depletion pattern | Daily/weekly units sold from order items | GrowFlow | Confirmed |

@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-28T00:02:59Z",
+  "tools": [
+    {
+      "tool_name": "rules_sheet_apps_script",
+      "source": "registry/scripts.json",
+      "implementation_path": "scripts/RulesSheetAppsScript.js",
+      "exists": false,
+      "action_type": "registry_script",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "growflow_sales_today",
+      "source": "registry/scripts.json",
+      "implementation_path": "integrations/growflow/sales_today.py",
+      "exists": false,
+      "action_type": "registry_script",
+      "read_only": true,
+      "approval_required": false,
+      "allowlist_eligible": true,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "repo_full_rebuild_gate_a",
+      "source": "registry/scripts.json",
+      "implementation_path": "scripts/repo_full_rebuild_gate_a.py",
+      "exists": true,
+      "action_type": "registry_script",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "repo_policy_migration_gate_c",
+      "source": "registry/scripts.json",
+      "implementation_path": "scripts/repo_policy_migration_gate_c.py",
+      "exists": true,
+      "action_type": "registry_script",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "repo_search",
+      "source": "brain/tool_registry.py",
+      "implementation_path": null,
+      "exists": true,
+      "action_type": "in_process_tool",
+      "read_only": true,
+      "approval_required": false,
+      "allowlist_eligible": true,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "scan_repo",
+      "source": "brain/tool_registry.py",
+      "implementation_path": null,
+      "exists": true,
+      "action_type": "in_process_tool",
+      "read_only": false,
+      "approval_required": false,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "run_script",
+      "source": "brain/tool_registry.py",
+      "implementation_path": null,
+      "exists": true,
+      "action_type": "in_process_tool",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "set_process_priority",
+      "source": "brain/tool_registry.py",
+      "implementation_path": null,
+      "exists": true,
+      "action_type": "in_process_tool",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "n8n_trigger",
+      "source": "brain/tool_registry.py",
+      "implementation_path": null,
+      "exists": true,
+      "action_type": "in_process_tool",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "worker_n8n_trigger",
+      "source": "brain/tool_registry.py",
+      "implementation_path": null,
+      "exists": true,
+      "action_type": "in_process_tool",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": []
+    },
+    {
+      "tool_name": "supervisor_bridge:fetch_worker_repo_status",
+      "source": "supervisor_bridge",
+      "implementation_path": "command-center/command-center/backend/services/supervisor_bridge.py",
+      "exists": true,
+      "action_type": "command_center_bridge",
+      "read_only": true,
+      "approval_required": false,
+      "allowlist_eligible": true,
+      "metadata_complete": true,
+      "risks": [
+        "bridge_paths_require_governance_review"
+      ]
+    },
+    {
+      "tool_name": "supervisor_bridge:route_intent",
+      "source": "supervisor_bridge",
+      "implementation_path": "command-center/command-center/backend/services/supervisor_bridge.py",
+      "exists": true,
+      "action_type": "command_center_bridge",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": [
+        "bridge_paths_require_governance_review"
+      ]
+    },
+    {
+      "tool_name": "command_center:POST /api/tools/invoke",
+      "source": "command_center_endpoint",
+      "implementation_path": "command-center/command-center/backend/routers/tools.py",
+      "exists": true,
+      "action_type": "command_center_endpoint",
+      "read_only": false,
+      "approval_required": true,
+      "allowlist_eligible": false,
+      "metadata_complete": true,
+      "risks": [
+        "routes_supervisor_ops"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "snapshot_type": "growflow_snapshot",
+  "generated_at": "2026-04-28T03:01:14Z",
+  "freshness_seconds": 86400,
+  "source_files_or_tools": [
+    "test"
+  ],
+  "confidence": 0.8,
+  "stale": false,
+  "errors": [],
+  "data": {
+    "ok": true
+  },
+  "summary_short": "growflow_snapshot test summary",
+  "summary_detailed": "test",
+  "suggested_questions": [],
+  "evidence_items": [
+    {
+      "title": "t1",
+      "source_path_or_tool": "test://a",
+      "observed_at": "2026-04-28T03:01:14Z",
+      "summary": "s",
+      "confidence": 0.8
+    },
+    {
+      "title": "t2",
+      "source_path_or_tool": "test://b",
+      "observed_at": "2026-04-28T03:01:14Z",
+      "summary": "s2",
+      "confidence": 0.8
+    }
+  ]
+}

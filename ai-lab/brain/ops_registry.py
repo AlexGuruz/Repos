@@ -4,8 +4,12 @@ Ops registry reader (Guru §23 Phase 4). Load systems, workers, automations for 
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 from typing import Any
+
+_OPS_SUMMARY_CACHE: tuple[float, str] | None = None
+_OPS_SUMMARY_TTL_SEC = 300.0
 
 
 def get_ops_root() -> Path:
@@ -111,3 +115,14 @@ def get_ops_summary_text(ops_root: Path | None = None) -> str:
         lines.append("(No registry data found. Add ops/registry/systems.yaml, workers.yaml, automations.yaml.)")
 
     return "\n".join(lines)
+
+
+def get_ops_summary_text_cached(ops_root: Path | None = None, *, ttl_sec: float = _OPS_SUMMARY_TTL_SEC) -> str:
+    """Cached variant for hot chat paths (ops_overview / planning fast-path)."""
+    global _OPS_SUMMARY_CACHE
+    now = time.monotonic()
+    if _OPS_SUMMARY_CACHE and (now - _OPS_SUMMARY_CACHE[0]) < ttl_sec:
+        return _OPS_SUMMARY_CACHE[1]
+    text = get_ops_summary_text(ops_root)
+    _OPS_SUMMARY_CACHE = (now, text)
+    return text

@@ -1,0 +1,48 @@
+{
+  "metric_id": "sales_by_brand_category",
+  "description": "Trailing sales lines grouped downstream by Product.Brand and ProductCategory.",
+  "business_question": "How much gross and velocity do we see by brand x category?",
+  "allowed_query_template_ids": ["order_items_brand_category_v1"],
+  "expected_root_path": "data.findOrderItems",
+  "required_fields": ["objectId", "SoldAt", "GrossPrice", "ProductCategory.Name"],
+  "optional_fields": ["COG", "Product.Brand.Name", "NetPrice", "Product.objectId"],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "ProductCategory.Name": "confirmed",
+    "COG": "inferred",
+    "Product.Brand.Name": "unstable",
+    "NetPrice": "confirmed",
+    "Product.objectId": "confirmed"
+  },
+  "field_types": {
+    "objectId": "str",
+    "SoldAt": "iso_datetime",
+    "GrossPrice": "int",
+    "ProductCategory.Name": "str"
+  },
+  "date_field_expectations": {
+    "date_fields": ["SoldAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": true,
+    "source_of_truth": "request_context.requested_store_or_org"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_required": true
+  },
+  "empty_result_policy": "warn",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["order_item_id", "sold_at"],
+    "non_negative_field": "gross_price_cents"
+  },
+  "downstream_outputs_allowed": ["dashboard", "prepared_context", "ai_answer", "par_logic"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Downstream canonical brand/category uses mapping layer; API Product.Brand remains unstable on some tokens."
+  ]
+}

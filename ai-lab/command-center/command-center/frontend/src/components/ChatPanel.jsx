@@ -230,8 +230,14 @@ export default function ChatPanel() {
     addMessage({ role: 'ai', text: '', streaming: true, response_time_ms: null })
     const gen = ++chatRequestGenRef.current
     setLoading(true)
+    const clientSubmitEpochMs = Date.now()
+    const requestId =
+      typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined
     try {
       await api.chatStream(text, history, {
+        sessionId: 'default',
+        clientSubmitEpochMs,
+        requestId,
         onDelta: d => {
           if (gen !== chatRequestGenRef.current) return
           useChatStore.getState().appendAssistantDelta(d)

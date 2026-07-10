@@ -38,5 +38,27 @@
     "auth": null,
     "status": "working",
     "repo": "ai-lab"
+  },
+  {
+    "tool_name": "bank_vendor_cleaner_pipeline",
+    "path": "scripts/sheet_label_pipeline.py",
+    "purpose": "Read source transaction strings from one Google Sheet tab and write plain-text cleaned labels and City/State values to destination columns C and D.",
+    "inputs": ["spreadsheet_id", "source_sheet_name", "dest_sheet_name", "dry_run"],
+    "outputs": ["rows_processed", "rows_written_c", "rows_written_d", "report_path"],
+    "auth": "GOOGLE_APPLICATION_CREDENTIALS",
+    "status": "experimental",
+    "repo": "ai-lab",
+    "approval_required": true
+  },
+  {
+    "tool_name": "bank_vendor_lookup_worker",
+    "path": "scripts/vendor_lookup_worker.py",
+    "purpose": "Resolve unknown merchant strings into candidate canonical labels and locations without directly writing to sheet outputs.",
+    "inputs": ["raw_input", "city_hint", "state_hint", "dry_run"],
+    "outputs": ["candidate_label", "candidate_city", "candidate_state", "confidence", "decision"],
+    "auth": "MCP_OR_WEB_PROVIDER",
+    "status": "experimental",
+    "repo": "ai-lab",
+    "approval_required": true
   }
 ]

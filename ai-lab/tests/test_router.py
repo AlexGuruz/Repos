@@ -35,6 +35,25 @@ def test_classify_sales_today_fluid_phrasing():
         assert params.get("tool_hint") == "growflow_sales_today", phrase
 
 
+def test_classify_bank_vendor_cleaner():
+    intent, params = classify_intent("run bank vendor cleaner")
+    assert intent == "run"
+    assert params.get("tool_hint") == "bank_vendor_cleaner_pipeline"
+    assert params.get("args", {}).get("dry-run") == "true"
+
+
+def test_classify_bank_vendor_lookup_worker():
+    intent, params = classify_intent("run vendor lookup")
+    assert intent == "run"
+    assert params.get("tool_hint") == "bank_vendor_lookup_worker"
+
+
+def test_classify_bank_vendor_qa():
+    intent, params = classify_intent("what canonical label for unknown merchant?")
+    assert intent == "bank_vendor_qa"
+    assert params == {}
+
+
 def test_classify_approval():
     intent, _ = classify_intent("approve abc-123")
     assert intent == "approval"
@@ -118,6 +137,17 @@ def test_classify_empty_and_whitespace():
     assert intent == "answer"
     intent, params = classify_intent("   ")
     assert intent == "answer"
+
+
+def test_classify_repo_status_and_agenda_as_answer():
+    for phrase in (
+        "summarize current repo status",
+        "current repo status",
+        "open project agenda",
+        "what changed recently?",
+    ):
+        intent, _ = classify_intent(phrase)
+        assert intent == "answer", phrase
 
 
 def test_classify_worker_index():

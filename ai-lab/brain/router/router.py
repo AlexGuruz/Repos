@@ -41,6 +41,51 @@ def classify_intent(message: str) -> tuple[str, dict]:
         return "approval", {}
     if "run" in msg and "script" in msg:
         return "run", {}
+    # Bank vendor cleaner (Google Sheets label pipeline)
+    if any(
+        phrase in msg
+        for phrase in (
+            "clean sheet labels",
+            "run label pipeline",
+            "run bank vendor cleaner",
+            "bank vendor cleaner",
+            "backfill cleaned transactions",
+            "rerun transaction cleaner",
+            "clean columns c and d",
+            "update city state column",
+        )
+    ):
+        return "run", {
+            "tool_hint": "bank_vendor_cleaner_pipeline",
+            "args": {"dry-run": "true"},
+        }
+    if any(
+        phrase in msg
+        for phrase in (
+            "run vendor lookup",
+            "vendor lookup worker",
+            "lookup unknown merchants",
+        )
+    ):
+        return "run", {"tool_hint": "bank_vendor_lookup_worker", "args": {}}
+    # Bank vendor Q&A — policy injected in orchestrator LLM system prompt
+    if any(
+        phrase in msg
+        for phrase in (
+            "bank vendor",
+            "vendor cleaner",
+            "transaction cleaner",
+            "canonical label",
+            "vendor lookup",
+            "unknown merchant",
+            "alias map",
+            "memory alias",
+            "city state column",
+            "cleaned transactions",
+        )
+    ) and not any(run_word in msg for run_word in ("run ", "rerun ", "backfill ", "trigger ")):
+        return "bank_vendor_qa", {}
+
     # Growflow sales: "sales today", "growflow sales", "my sales", "what's my sales", "sales for today"
     if "growflow" in msg and "sales" in msg:
         return "run", {"tool_hint": "growflow_sales_today", "args": {"date": "today"}}
@@ -115,13 +160,56 @@ def classify_intent(message: str) -> tuple[str, dict]:
     if ("sales" in msg or "expenses" in msg or "payroll" in msg or "inventory" in msg) and any(w in msg for w in ("summary", "overview", "report", "how are we", "what's our", "our business")):
         return "company_bi", {}
 
+    # Repo Documentation Maintainer — Phase 8 (repo-level score / workplan / consistency / batch)
+    if any(w in msg for w in ("batch docs proposal", "create a batch docs proposal")):
+        return "repo_docs_batch_proposal", {}
+    if any(w in msg for w in ("repo docs workplan", "make a repo docs workplan", "what docs should be updated together")):
+        return "repo_docs_workplan", {}
+    if "check docs consistency" in msg or ("docs consistency" in msg and "check" in msg):
+        return "repo_docs_consistency", {}
+    if any(w in msg for w in ("score repo documentation", "documentation score", "docs a grade", "give ai-lab docs a grade")):
+        return "repo_docs_score", {}
+
+    # Repo Documentation Maintainer (Phase 6–7)
+    if any(w in msg for w in ("make a docs cleanup plan", "documentation cleanup plan", "plan documentation updates", "docs maintainer update first")):
+        return "docs_cleanup_plan", {}
+    if any(w in msg for w in (
+        "draft updates for readme",
+        "prepare a docs update proposal",
+        "propose updates for stale repo docs",
+        "docs update proposal",
+        "improve this repo documentation",
+    )):
+        return "docs_update_proposal", {}
+    if any(w in msg for w in (
+        "what docs need cleanup",
+        "which repos have stale docs",
+        "explain repo documentation status",
+        "what readme needs updating",
+        "which readme needs updating",
+        "validate repo documentation",
+        "what sections are missing in docs",
+        "what is wrong with this readme",
+    )):
+        return "docs_status", {}
+
     # Ops overview (Guru §23): "what systems do I have", "list my workers", "ops overview"
     if any(w in msg for w in ("ops overview", "ops fabric", "what systems", "list my workers", "what workers", "what automations", "what's in my ops", "my systems", "my workers")):
         return "ops_overview", {}
-    if "systems" in msg and ("have" in msg or "list" in msg or "what" in msg or "show" in msg):
+    if "systems" in msg and ("have" in msg or "list" in msg or "what" in msg or "show" in msg or "active" in msg):
         return "ops_overview", {}
     if "workers" in msg and ("list" in msg or "what" in msg or "show" in msg or "my " in msg):
         return "ops_overview", {}
+
+    # Keep common status-summary phrasing on answer path (fast local routing), not heavy repo scan.
+    if any(w in msg for w in (
+        "summarize current repo status",
+        "current repo status",
+        "repo status summary",
+        "open project agenda",
+        "what changed recently",
+    )):
+        return "answer", {}
 
     # Repo: "scan repo", "summarize repo", "find in repos", "search repos", "look in repo", "find it in repos"
     if "repo" in msg or "repos" in msg:

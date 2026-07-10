@@ -22,9 +22,19 @@ def fuse_evidence(
     constraints: list[str] = ["Do not invent findings beyond the provided evidence."]
     proposal_candidates: list[dict] = []
 
-    # Promote most relevant local evidence to key
+    # Promote most relevant local evidence to key (ops/hardware/failure are first-class context)
+    key_types = (
+        "markdown_summary",
+        "artifact",
+        "json_artifact",
+        "weather_forecast",
+        "ops_registry",
+        "hardware_snapshot",
+        "failure_record",
+        "config",
+    )
     for item in evidence.local_evidence:
-        if item.source_type in ("markdown_summary", "artifact", "weather_forecast") and item.content:
+        if item.source_type in key_types and item.content:
             key_evidence.append(item)
         else:
             secondary_evidence.append(item)
@@ -39,7 +49,11 @@ def fuse_evidence(
     # Answer style from decision
     style = decision.answer_style_hint or "direct_status"
     if not evidence.local_evidence and not evidence.web_evidence and intent == "answer":
-        style = "insufficient_evidence"
+        # Time-only turns (e.g. "what time is it") still have usable context — do not force insufficient_evidence
+        if evidence.time_context:
+            style = "direct_status"
+        else:
+            style = "insufficient_evidence"
 
     # Proposal candidates from structured failure diagnosis (Guru §24.14)
     for item in evidence.local_evidence:

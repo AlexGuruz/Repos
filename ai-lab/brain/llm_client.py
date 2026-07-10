@@ -186,6 +186,8 @@ def _openai_chat_completion_stream(
     timeout_sec: float,
     on_delta: Callable[[str], None],
     alt_model_ids: list[str],
+    *,
+    on_first_token: Callable[[], None] | None = None,
 ) -> str | None:
     """POST /v1/chat/completions with stream=true; emit token deltas. Returns full text or None."""
     import http.client
@@ -200,6 +202,7 @@ def _openai_chat_completion_stream(
         path = f"{path}?{u.query}"
 
     to_try = [model_eff] + [m for m in alt_model_ids if m != model_eff]
+    first_hook = on_first_token
 
     for mid in to_try:
         body = json.dumps(
@@ -246,6 +249,9 @@ def _openai_chat_completion_stream(
                 piece = (delta or {}).get("content") if isinstance(delta, dict) else None
                 if piece:
                     local.append(piece)
+                    if first_hook:
+                        first_hook()
+                        first_hook = None
                     on_delta(piece)
             conn.close()
             text = "".join(local).strip()
@@ -280,6 +286,9 @@ def chat_completion(
     messages: list[dict],
     timeout_sec: float = 60.0,
     stream_delta: Callable[[str], None] | None = None,
+    *,
+    on_first_token: Callable[[], None] | None = None,
+    skip_model_list_probe: bool | None = None,
 ) -> str | None:
     """
     POST to base_url/chat/completions (OpenAI-compatible). Returns assistant text or None on failure.
@@ -287,20 +296,43 @@ def chat_completion(
     messages: list of {"role": "system"|"user"|"assistant", "content": "..."}.
     If stream_delta is set, uses OpenAI streaming when supported; may fall back to one-shot native API
     (single delta with full text).
+
+    on_first_token: invoked once when the first model output token is produced (stream or non-stream).
+
+    skip_model_list_probe: when True, skip GET /v1/models (faster cold start). When None, env
+    AI_LAB_LLM_SKIP_MODEL_LIST_PROBE=1 enables skip.
     """
     if not base_url or not base_url.strip():
         return None
-    ids = list_openai_model_ids(base_url, timeout_sec=min(5.0, timeout_sec))
-    model_eff, _ = resolve_model_from_list(ids, model)
+    if skip_model_list_probe is None:
+        skip_model_list_probe = os.environ.get("AI_LAB_LLM_SKIP_MODEL_LIST_PROBE", "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+    if skip_model_list_probe:
+        model_eff = (model or "").strip() or "gpt-3.5-turbo"
+        ids: list[str] = []
+    else:
+        ids = list_openai_model_ids(base_url, timeout_sec=min(5.0, timeout_sec))
+        model_eff, _ = resolve_model_from_list(ids, model)
     if stream_delta:
         streamed = _openai_chat_completion_stream(
-            base_url, model_eff, messages, timeout_sec, stream_delta, ids
+            base_url,
+            model_eff,
+            messages,
+            timeout_sec,
+            stream_delta,
+            ids,
+            on_first_token=on_first_token,
         )
         if streamed is not None:
             return streamed
     # Try LM Studio native API first (POST /api/v1/chat) — matches your working curl
     reply = _try_lm_studio_native(base_url, model_eff, messages, timeout_sec)
     if reply:
+        if on_first_token:
+            on_first_token()
         if stream_delta:
             stream_delta(reply)
         return reply
@@ -325,6 +357,8 @@ def chat_completion(
             out = json.loads(resp.read().decode("utf-8"))
         reply = _parse_reply(out)
         if reply:
+            if on_first_token:
+                on_first_token()
             if stream_delta:
                 stream_delta(reply)
             return reply
@@ -342,6 +376,8 @@ def chat_completion(
                 out = json.loads(resp.read().decode("utf-8"))
             got = _parse_reply(out)
             if got:
+                if on_first_token:
+                    on_first_token()
                 if stream_delta:
                     stream_delta(got)
                 return got

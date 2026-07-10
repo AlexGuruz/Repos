@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "metric_id": "sales_today",
+  "template_id": "order_items_sales_today_v1",
+  "request_id": "unit_test_req",
+  "mode": "warning",
+  "requested_date_range": {
+    "from": "2026-04-20T00:00:00.000Z",
+    "to": "2026-04-20T23:59:59.000Z"
+  },
+  "response_date_range_detected": {
+    "from": "2026-04-20T12:00:00Z",
+    "to": "2026-04-20T12:00:00Z"
+  },
+  "expected_root_found": true,
+  "missing_required_fields": [],
+  "type_errors": [],
+  "empty_result_status": "ok",
+  "duplicate_count": 1,
+  "sanity_warnings": [
+    "Detected 1 duplicate row(s)."
+  ],
+  "target_alignment_warnings": [],
+  "parser_warnings": [],
+  "schema_drift_warnings": [],
+  "schema_verification": {
+    "baseline_exists": false,
+    "drift": null,
+    "baseline_updated": false,
+    "schema_drift_warnings": []
+  },
+  "normalized_row_count": 2,
+  "confidence": "medium",
+  "confidence_score": 0.935,
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "NetPrice": "confirmed",
+    "COG": "inferred",
+    "Product.objectId": "confirmed",
+    "Product.Brand.Name": "unstable",
+    "ProductCategory.Name": "inferred"
+  },
+  "field_confidence_counts": {
+    "confirmed": 5,
+    "inferred": 2,
+    "unstable": 1
+  },
+  "hard_failures": [],
+  "raw_saved_path": "E:\\Repos\\Growflow\\state\\raw_responses\\sales_today\\unit_test_req.json",
+  "normalized_output_path": "E:\\Repos\\Growflow\\state\\trusted_outputs\\sales_today\\unit_test_req.json",
+  "generated_at": "2026-04-27T19:40:12Z"
+}

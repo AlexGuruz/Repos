@@ -1,0 +1,42 @@
+version: 1
+description: >
+  Index of local memory buckets that replace ChatGPT Builder Memory.
+  The deterministic pipeline reads these files; the local LLM uses this map
+  to know where approved vs pending vs rejected knowledge lives.
+
+buckets:
+  canonical_aliases:
+    path: memory_alias_map.yaml
+    key: aliases
+    description: Approved raw-string → canonical label (+ optional city/state)
+    writable_by: human_approval_only
+
+  merchant_location_patterns:
+    path: memory_alias_map.yaml
+    key: aliases
+    field: canonical_label → city/state
+    supplemental:
+      - known_city_state_overrides.yaml
+    description: Default location when label is known but trailing text is noisy
+    writable_by: human_approval_only
+
+  fixed_event_labels:
+    path: brain/bank_vendor_cleaner/engine.py
+    key: CANONICAL_RULES + FIXED_EVENT_LABELS
+    supplemental:
+      - cleaning_rules.yaml
+    description: Deposits, transfers, ATM, payments, reversals — not merchants
+    writable_by: code_change_only
+
+  rejected_aliases:
+    path: rejected_aliases.yaml
+    description: Labels or mappings that must not be promoted or written
+    writable_by: human_only
+
+  manual_review_pending:
+    paths:
+      - vendor_lookup_cache.yaml
+      - reports/vendor_lookup_review_queue.json
+    description: Web lookup and model suggestions awaiting approval
+    writable_by: vendor_lookup_worker
+    promote_to: canonical_aliases

@@ -1,0 +1,40 @@
+{
+  "agent_id": "bank_vendor_cleaner",
+  "display_name": "Bank Vendor Cleaner",
+  "version": "1.0.0",
+  "purpose_one_liner": "Normalize raw bank transaction descriptions into stable canonical labels and extract City/State into plain text sheet outputs.",
+  "single_sheet_scope": {
+    "enabled": true,
+    "spreadsheet_id": "1AltaqtCXrld_zgTK52oRz0YwkWie2h8FX0JWqgoxHNY",
+    "source_tab_name": "transaction tab sheet",
+    "destination_tab_name": "CLEANED TRANSACTIONS-TAB SHEET",
+    "never_touch_other_spreadsheets": true
+  },
+  "trigger_modes": {
+    "manual": "User-triggered run that reads source column C and writes plain text outputs to destination columns C and D.",
+    "scheduled": "Not configured in ChatGPT builder; use local cron with dry_run=true until validated.",
+    "preview_vs_live": "dry_run=true for preview; dry_run=false with --approved for live writes."
+  },
+  "inputs": {
+    "read_columns": ["C"],
+    "read_start_row": 2,
+    "read_stop_rule": "last nonblank row in source column C"
+  },
+  "outputs": {
+    "write_columns": ["C", "D"],
+    "write_mode": "plain_values_only",
+    "write_stop_rule": "same as read boundary"
+  },
+  "auth_requirements": ["google_sheets_read", "google_sheets_write"],
+  "risk_level": "medium",
+  "approval_required_for_writes": true,
+  "local_model_policy": {
+    "qwen_operating_prompt": "docs/bank_vendor_cleaner/QWEN_OPERATING_PROMPT.md",
+    "runtime_policy": "docs/bank_vendor_cleaner/RUNTIME_POLICY.md",
+    "agent_instructions": "docs/bank_vendor_cleaner/AGENT_INSTRUCTIONS.md",
+    "memory_buckets": "config/bank_vendor_cleaner/memory_buckets.yaml",
+    "orchestrator_injection": "brain/bank_vendor_cleaner/llm_context.py",
+    "model_may_write_sheet": false,
+    "model_may_suggest_aliases": true
+  }
+}

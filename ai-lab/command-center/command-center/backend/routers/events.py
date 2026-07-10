@@ -170,7 +170,13 @@ async def _execute_approved(approval_id: str, spec: dict):
     tool_name = spec.get("tool_name")
     args = spec.get("args", {})
     if tool_name:
-        result = await asyncio.to_thread(execution_run, tool_name, args)
+        result = await asyncio.to_thread(
+            execution_run,
+            tool_name,
+            args,
+            300,
+            approval_context={"approved": True, "approval_id": approval_id, "source": "events.resolve_approval"},
+        )
         status = "done" if result.success else "error"
         detail = (
             f"Approved run completed for `{tool_name}`."
