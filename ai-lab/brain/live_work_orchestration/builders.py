@@ -243,6 +243,7 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
         "workers:read_only_probe",
         "ingestion:repo_activity_snapshot",
         "ingestion:github_activity_snapshot",
+        "ingestion:bills_snapshot",
     ]
     missing: list[str] = []
     ws = load_snapshot("worker_snapshot")
@@ -254,6 +255,12 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
     github_ingestion = _load_ingestion_snapshot("github_activity_snapshot")
     if not github_ingestion:
         missing.append("github_activity_snapshot")
+    bills_ingestion = _load_ingestion_snapshot("bills_snapshot")
+    if not bills_ingestion:
+        missing.append("bills_snapshot")
+    from brain.live_work_orchestration.ingestion.bills import summarize_bills_for_planning
+
+    bills_planning = summarize_bills_for_planning(bills_ingestion)
     events: list[dict[str, Any]] = []
     if isinstance(ws, dict):
         events.append(
@@ -342,6 +349,11 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
             "github_remote_summary": github_remote_summary,
             "github_blockers": github_blockers,
             "local_activity_probe": LocalActivityWorker().collect(),
+            "bills_upcoming": bills_planning.get("upcoming") or [],
+            "bills_overdue": bills_planning.get("overdue") or [],
+            "bills_high_risk": bills_planning.get("high_risk") or [],
+            "bills_warnings": bills_planning.get("warnings") or [],
+            "bills_clarification_proposals": bills_planning.get("clarifications") or [],
         },
         missing_sources=missing,
         evidence_items=[
@@ -351,16 +363,38 @@ def build_daily_progress_snapshot() -> dict[str, Any]:
                 f"{len(repo_activity_events)} repo activity signals",
                 "state/live_work_orchestration/ingestion/repo_activity_snapshot.json",
             ),
+            *[
+                _evidence(
+                    f"Repo timestamps: {row.get('repo_name')}",
+                    (
+                        f"activity_window_start={row.get('activity_window_start')} "
+                        f"activity_window_end={row.get('activity_window_end')} | "
+                        f"git_hygiene_summary={row.get('git_hygiene_summary')} | "
+                        f"commit_needed={row.get('commit_needed')} push_needed={row.get('push_needed')}"
+                    ),
+                    "state/live_work_orchestration/ingestion/repo_activity_snapshot.json",
+                )
+                for row in repo_activity_rows[:12]
+                if isinstance(row, dict)
+            ],
             _evidence(
                 "GitHub activity ingestion",
                 f"{len(github_feature_states)} feature state signals",
                 "state/live_work_orchestration/ingestion/github_activity_snapshot.json",
             ),
+            _evidence(
+                "Bills / financial obligations",
+                (bills_ingestion or {}).get("summary_detailed") or "No bills snapshot on disk",
+                "state/live_work_orchestration/ingestion/bills_snapshot.json",
+            ),
         ],
         confidence=0.72 if (repo_ingestion and github_ingestion) else (0.62 if repo_ingestion else 0.55),
         sources=sources,
-        summary_short=f"Daily progress: {len(events)} events with local+GitHub ingestion",
-        summary_detailed="Read-only progress combines worker probes, local git metadata, and GitHub PR/issue states; no completion assumptions.",
+        summary_short=f"Daily progress: {len(events)} events; bills {len(bills_planning.get('overdue') or [])} overdue",
+        summary_detailed=(
+            "Read-only progress combines worker probes, local git metadata, and GitHub PR/issue states; "
+            "financial obligations surfaced from bills_snapshot when present (no payment actions)."
+        ),
     )
     _write("daily_progress_snapshot", snap)
     return snap
@@ -498,8 +532,9 @@ def build_live_work_index() -> dict[str, Any]:
 
 
 def build_all_live_work_snapshots() -> dict[str, Any]:
-    """Build all Phase 9–12 snapshots in dependency order."""
+    """Build all Phase 9–17 snapshots in dependency order."""
     out: dict[str, Any] = {}
+    from brain.live_work_orchestration.ingestion.bills import build_bills_snapshot
     from brain.live_work_orchestration.ingestion.github_activity import build_github_activity_snapshot
     from brain.live_work_orchestration.ingestion.repo_activity import build_repo_activity_snapshot
 
@@ -507,6 +542,7 @@ def build_all_live_work_snapshots() -> dict[str, Any]:
     out["github_activity_snapshot"] = build_github_activity_snapshot(
         repo_activity_snapshot=out["repo_activity_snapshot"]
     )
+    out["bills_snapshot"] = build_bills_snapshot()
     out["work_demand_snapshot"] = build_work_demand_snapshot()
     out["time_constraints_snapshot"] = build_time_constraints_snapshot()
     out["daily_progress_snapshot"] = build_daily_progress_snapshot()

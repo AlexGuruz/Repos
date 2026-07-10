@@ -15,9 +15,9 @@ Use these files as canonical source of truth before changing any other docs:
 
 ## Current constants (synced)
 
-- **Worker SSH:** `worker@worker-node`
-- **Worker host:** `worker-node`
-- **Worker Ollama:** `http://worker-node:11434`
+- **Primary worker:** `gregw@power-1` (worker_assistant, n8n, Kylo — no Ollama)
+- **GPU worker:** `worker@worker-node` — Ollama `http://worker-node:11434` (tunnel on acheron `:11435`)
+- **Main rig Ollama:** `http://127.0.0.1:11434` (local on acheron)
 - **Main repo root:** `E:\Repos\ai-lab`
 
 ## Operating principles

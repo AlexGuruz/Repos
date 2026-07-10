@@ -71,4 +71,3 @@
 3. Trigger visibility for scheduled tasks.
 4. Personal ops canonical data source + cadence.
 5. Growflow canonical runner registry and ownership map.
-

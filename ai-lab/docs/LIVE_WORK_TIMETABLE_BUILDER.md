@@ -35,13 +35,24 @@ It is designed to avoid false precision and unsafe planning outputs.
 ## Integration points
 
 - Compiler:
-  - `generate_project_timetable(...)`
+  - `generate_project_timetable(...)` (optional `persist_derived_calibration_actuals`, `enqueue_calibration_questions`)
   - `compile_daily_plan_preview(...)` includes:
     - `project_timetable`
     - `timetable_estimates`
     - `timetable_clarifications`
 - Snapshot (optional):
   - `state/live_work_orchestration/timetable_snapshot.json`
+
+## Calibration loop (Phase 14 + Phase 15)
+
+- Calibration records are stored in:
+  - `state/live_work_orchestration/calibration/estimation_calibration.json`
+- Estimator can consume a calibration profile when sample quality is sufficient.
+- Adjustments remain conservative and range-based.
+- **Phase 15:** Each timetable row can include calibration decision fields: `calibration_source`, `actual_duration_known`, `actual_duration_confidence`, `should_request_calibration`, and `calibration_reason` (decision narrative, falling back to estimate calibration reason when absent).
+- Measured/inferred actuals are preferred over user questions. Clarification proposals are **gated** (importance + active-queue rules); see [`LIVE_WORK_MEASURED_TIME_CALIBRATION.md`](LIVE_WORK_MEASURED_TIME_CALIBRATION.md).
+
+See [`LIVE_WORK_ESTIMATION_CALIBRATION.md`](LIVE_WORK_ESTIMATION_CALIBRATION.md).
 
 ## What this phase does NOT do
 

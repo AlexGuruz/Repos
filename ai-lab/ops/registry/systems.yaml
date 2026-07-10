@@ -1,4 +1,4 @@
-# Systems registry (Guru §23 Phase 4). One canonical list of important systems.
+﻿# Systems registry (Guru Â§23 Phase 4). One canonical list of important systems.
 # Each app has: name, purpose, repo, docs, logs, runbook, services, workers, secrets.
 
 systems:
@@ -37,10 +37,21 @@ systems:
 
   company_bi:
     type: data
-    purpose: Business BI — sales, inventory, expenses, payroll (GrowFlow + Sheets). Summary fed to local AI for inference.
+    purpose: Business BI â€” sales, inventory, expenses, payroll (GrowFlow + Sheets). Summary fed to local AI for inference.
     repo: Growflow
     docs: E:/Repos/Growflow/company_bi/docs/BI_BUSINESS_SUMMARY.md
     evidence_path: E:/Repos/Growflow/company_bi/docs/BI_BUSINESS_SUMMARY.md
     refresh: "Run company_bi pipeline then update BI_BUSINESS_SUMMARY.md; or set COMPANY_BI_SUMMARY_PATH to snapshot path."
+    workers: [main-brain]
+    secrets: []
+
+  empire_ozark:
+    type: app
+    purpose: Empire Ozark project workspace
+    repo: ai-lab/Empire/Ozark
+    docs: E:/Repos/ai-lab/Empire/Ozark
+    logs: ops/logs/assistant
+    runbook: ops/runbooks/apps/empire-ozark.md
+    services: []
     workers: [main-brain]
     secrets: []

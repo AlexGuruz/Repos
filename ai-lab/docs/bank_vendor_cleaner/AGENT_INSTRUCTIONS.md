@@ -2,8 +2,8 @@
 
 Full instructions exported from ChatGPT Custom GPT. The **write path is deterministic** (`brain/bank_vendor_cleaner/engine.py` + `scripts/sheet_label_pipeline.py`); use this file for LLM narration, clarification, and alias suggestions only.
 
-**Qwen operating prompt (primary):** [`QWEN_OPERATING_PROMPT.md`](QWEN_OPERATING_PROMPT.md) — injected into Command Center chat for bank-vendor intents.  
-**Extended policy:** [`RUNTIME_POLICY.md`](RUNTIME_POLICY.md) — confidence model and memory buckets. The deterministic pipeline owns writes; Qwen suggests only.
+**Qwen operating prompt (primary):** `[QWEN_OPERATING_PROMPT.md](QWEN_OPERATING_PROMPT.md)` — injected into Command Center chat for bank-vendor intents.  
+**Extended policy:** `[RUNTIME_POLICY.md](RUNTIME_POLICY.md)` — confidence model and memory buckets. The deterministic pipeline owns writes; Qwen suggests only.
 
 ## Role
 
@@ -26,15 +26,17 @@ Normalize raw bank transaction descriptions into stable, canonical labels unifor
 
 ## Transaction-type defaults
 
-| Pattern | Canonical label |
-|---------|-----------------|
-| deposit / mobile deposit / ATM deposit | Cash Deposit |
-| ATM withdrawal | ATM Withdrawal |
-| inbound transfer | Transfer In |
-| outbound transfer | Transfer Out |
-| Citi card payment | Citi Payment |
-| consumer loan payment | Consumer Loan |
-| debit rewards reversal | Debit Rewards Reversal |
+
+| Pattern                                | Canonical label        |
+| -------------------------------------- | ---------------------- |
+| deposit / mobile deposit / ATM deposit | Cash Deposit           |
+| ATM withdrawal                         | ATM Withdrawal         |
+| inbound transfer                       | Transfer In            |
+| outbound transfer                      | Transfer Out           |
+| Citi card payment                      | Citi Payment           |
+| consumer loan payment                  | Consumer Loan          |
+| debit rewards reversal                 | Debit Rewards Reversal |
+
 
 ## Safety
 

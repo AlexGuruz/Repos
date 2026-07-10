@@ -17,13 +17,15 @@ python scripts/generate_integration_inventory.py --output-dir path/to/out --docs
 
 ## Output files (machine-readable)
 
-| File | Role |
-|------|------|
-| `state/integration_inventory/scripts.json` | Every scanned script + Growflow merge |
-| `state/integration_inventory/tools.json` | Registry + brain tools + bridge/endpoint stubs |
-| `state/integration_inventory/triggers.json` | Lifespan loops + PowerShell wrappers |
-| `state/integration_inventory/orphans.json` | `orphan_candidate` scripts only |
-| `state/integration_inventory/summary.json` | Counts + top cleanup / trigger gaps |
+
+| File                                        | Role                                           |
+| ------------------------------------------- | ---------------------------------------------- |
+| `state/integration_inventory/scripts.json`  | Every scanned script + Growflow merge          |
+| `state/integration_inventory/tools.json`    | Registry + brain tools + bridge/endpoint stubs |
+| `state/integration_inventory/triggers.json` | Lifespan loops + PowerShell wrappers           |
+| `state/integration_inventory/orphans.json`  | `orphan_candidate` scripts only                |
+| `state/integration_inventory/summary.json`  | Counts + top cleanup / trigger gaps            |
+
 
 ## Status values (scripts)
 
@@ -60,13 +62,16 @@ add references or registry entries if promoted, else **keep_manual_only**.
 ## Scan scope (important)
 
 - Trees: `scripts/`, `brain/`, `command-center/.../backend/`, `command-center/.../frontend/src/`.
-- Directory names skipped: `__pycache__`, `node_modules`, `.venv`, `tests`, etc. (noise reduction).
+- Directory names skipped: `__pycache_`_, `node_modules`, `.venv`, `tests`, etc. (noise reduction).
 - `scripts.json` merges **Growflow** rows from `growflow_runners.json` when present (`../Growflow/...`).
 
 ## `scripts.json` row fields
 
-| Field | Meaning |
-|-------|---------|
-| `classification` | Heuristic bucket (cli, diagnostic, backend, growflow merge, …). |
-| `writes_state_guess` / `approval_required_guess` | Regex heuristics — verify before trusting. |
-| `status` | `wired` / `partial` / `manual_only` / `orphan_candidate` / `unknown_needs_review`. |
+
+| Field                                            | Meaning                                                                            |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `classification`                                 | Heuristic bucket (cli, diagnostic, backend, growflow merge, …).                    |
+| `writes_state_guess` / `approval_required_guess` | Regex heuristics — verify before trusting.                                         |
+| `status`                                         | `wired` / `partial` / `manual_only` / `orphan_candidate` / `unknown_needs_review`. |
+
+

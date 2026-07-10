@@ -1,6 +1,6 @@
 {
   "snapshot_type": "personal_ops_snapshot",
-  "generated_at": "2026-04-28T02:29:04Z",
+  "generated_at": "2026-06-24T23:07:03Z",
   "freshness_seconds": 86400,
   "source_files_or_tools": [
     "E:\\Repos\\ai-lab\\config\\personal_ops.example.yaml",
@@ -21,32 +21,33 @@
       {
         "label": "AI-Lab",
         "path": "E:\\Repos",
-        "days_idle": 0.05,
-        "last_commit_iso": "2026-04-28T01:17:50+00:00",
+        "days_idle": 18.85,
+        "last_commit_iso": "2026-06-06T02:45:49+00:00",
         "error": null
       },
       {
         "label": "Project Kylo",
         "path": "E:\\Repos",
-        "days_idle": 8.12,
-        "last_commit_iso": "2026-04-19T23:35:15+00:00",
+        "days_idle": 57.85,
+        "last_commit_iso": "2026-04-28T02:43:06+00:00",
         "error": null
       }
     ],
     "stale_repo_labels": [
+      "AI-Lab",
       "Project Kylo"
     ],
     "kylo_heartbeats": [],
     "project_focus": {
       "today_focus": [
+        "Project-Kylo-feature-bank-normalizer-core-pr1",
         "geomapper app",
-        "Greg-Kylo",
-        "awesome-n8n-templates"
+        "Greg-Kylo"
       ],
       "current_priorities": [
+        "Project-Kylo-feature-bank-normalizer-core-pr1",
         "geomapper app",
-        "Greg-Kylo",
-        "awesome-n8n-templates"
+        "Greg-Kylo"
       ],
       "blocked_items": [
         "activepieces: stale/no recent updates",
@@ -59,15 +60,15 @@
         "BMAD-METHOD: refresh README/docs"
       ],
       "next_actions": [
+        "Review Project-Kylo-feature-bank-normalizer-core-pr1",
         "Review geomapper app",
-        "Review Greg-Kylo",
-        "Review awesome-n8n-templates"
+        "Review Greg-Kylo"
       ]
     },
     "project_schedule": [
+      "Review Project-Kylo-feature-bank-normalizer-core-pr1",
       "Review geomapper app",
-      "Review Greg-Kylo",
-      "Review awesome-n8n-templates"
+      "Review Greg-Kylo"
     ],
     "incomplete_planned_items": [
       "activepieces: stale/no recent updates",
@@ -86,8 +87,9 @@
       },
       {
         "kind": "stale_repos",
-        "count": 1,
+        "count": 2,
         "items": [
+          "AI-Lab",
           "Project Kylo"
         ]
       }
@@ -113,49 +115,49 @@
     {
       "title": "Personal ops config",
       "source_path_or_tool": "E:\\Repos\\ai-lab\\config\\personal_ops.example.yaml",
-      "observed_at": "2026-04-28T02:29:03Z",
+      "observed_at": "2026-06-24T23:06:57Z",
       "summary": "loaded keys=['calendar', 'kylo_heartbeats', 'repos', 'stale_warning_days']",
       "confidence": 0.82
     },
     {
       "title": "Personal ops script availability",
       "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts",
-      "observed_at": "2026-04-28T02:29:03Z",
+      "observed_at": "2026-06-24T23:06:57Z",
       "summary": "available_scripts=['personal_ops_calendar_snapshot.py', 'personal_ops_daily_digest.py', 'personal_ops_repo_pulse.py']",
       "confidence": 0.65
     },
     {
       "title": "Repo pulse (git idle)",
       "source_path_or_tool": "lib.repo_staleness.scan_repos",
-      "observed_at": "2026-04-28T02:29:04Z",
-      "summary": "repos=2 stale=1",
+      "observed_at": "2026-06-24T23:07:03Z",
+      "summary": "repos=2 stale=2",
       "confidence": 0.78
     },
     {
       "title": "Project agenda (cached)",
       "source_path_or_tool": "state/prepared_context/project_agenda.json",
-      "observed_at": "2026-04-27T01:05:52Z",
+      "observed_at": "2026-06-24T23:06:57Z",
       "summary": "Merged last-built project_agenda for planning context.",
       "confidence": 0.72
     },
     {
       "title": "Planning detail depth",
       "source_path_or_tool": "personal_ops_snapshot.project_focus",
-      "observed_at": "2026-04-28T02:29:04Z",
+      "observed_at": "2026-06-24T23:07:03Z",
       "summary": "today_focus=3 next_actions=3 blocked=3",
       "confidence": 0.74
     },
     {
       "title": "Stale repos needing attention",
       "source_path_or_tool": "lib.repo_staleness.scan_repos",
-      "observed_at": "2026-04-28T02:29:04Z",
-      "summary": "stale_repo_labels=['Project Kylo']",
+      "observed_at": "2026-06-24T23:07:03Z",
+      "summary": "stale_repo_labels=['AI-Lab', 'Project Kylo']",
       "confidence": 0.7
     },
     {
       "title": "Daily digest script available",
       "source_path_or_tool": "E:\\Repos\\ai-lab\\scripts\\personal_ops_daily_digest.py",
-      "observed_at": "2026-04-28T02:29:04Z",
+      "observed_at": "2026-06-24T23:07:03Z",
       "summary": "daily digest tool available for operator check-ins",
       "confidence": 0.62
     }

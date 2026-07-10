@@ -33,7 +33,7 @@ def _adapter_load_config() -> Any | None:
 
 LOGGER = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
-_GMAIL_SERVICE: Resource | None = None
+_GMAIL_SERVICES: dict[str, Resource] = {}
 _LABEL_NAME_TO_ID: dict[str, str] = {}
 
 _ADAPTER_ROOT = Path(__file__).resolve().parent.parent
@@ -99,15 +99,27 @@ def _candidate_token_paths(config: Any | None = None) -> list[Path]:
     return _dedupe_keep_order(candidates)
 
 
-def preflight_gmail_auth() -> dict[str, Any]:
+def preflight_gmail_auth(
+    *,
+    token_file: str | Path | None = None,
+    credentials_file: str | Path | None = None,
+) -> dict[str, Any]:
     """
     File-only preflight to fail early with clear credential paths.
 
     Does NOT perform OAuth flow or call Gmail APIs.
     """
     config = _adapter_load_config()
-    credential_candidates = _candidate_credentials_paths(config=config)
-    token_candidates = _candidate_token_paths(config=config)
+    credential_candidates = (
+        [_resolve_env_path(str(credentials_file)) or Path(credentials_file)]
+        if credentials_file is not None
+        else _candidate_credentials_paths(config=config)
+    )
+    token_candidates = (
+        [_resolve_env_path(str(token_file)) or Path(token_file)]
+        if token_file is not None
+        else _candidate_token_paths(config=config)
+    )
 
     credentials_found = [str(p) for p in credential_candidates if p.exists()]
     token_found = [str(p) for p in token_candidates if p.exists()]
@@ -127,15 +139,35 @@ def preflight_gmail_auth() -> dict[str, Any]:
     }
 
 
-def get_gmail_service() -> Resource:
-    global _GMAIL_SERVICE
-    if _GMAIL_SERVICE is not None:
-        return _GMAIL_SERVICE
+def clear_gmail_service_cache() -> None:
+    _GMAIL_SERVICES.clear()
 
+
+def get_gmail_service(
+    *,
+    token_file: str | Path | None = None,
+    credentials_file: str | Path | None = None,
+) -> Resource:
     config = _adapter_load_config()
-    creds: Credentials | None = None
     credential_candidates = _candidate_credentials_paths(config=config)
     token_candidates = _candidate_token_paths(config=config)
+
+    if credentials_file is not None:
+        credential_candidates = _dedupe_keep_order(
+            [_resolve_env_path(str(credentials_file)) or Path(credentials_file)]
+            + credential_candidates
+        )
+    if token_file is not None:
+        token_candidates = _dedupe_keep_order(
+            [_resolve_env_path(str(token_file)) or Path(token_file)] + token_candidates
+        )
+
+    cache_key = str(token_candidates[0]) if token_candidates else "default"
+    cached = _GMAIL_SERVICES.get(cache_key)
+    if cached is not None:
+        return cached
+
+    creds: Credentials | None = None
 
     # Where token.json will be written if OAuth flow is required.
     if token_candidates:
@@ -206,8 +238,9 @@ def get_gmail_service() -> Resource:
         token_file.parent.mkdir(parents=True, exist_ok=True)
         token_file.write_text(creds.to_json(), encoding="utf-8")
 
-    _GMAIL_SERVICE = build("gmail", "v1", credentials=creds)
-    return _GMAIL_SERVICE
+    service = build("gmail", "v1", credentials=creds)
+    _GMAIL_SERVICES[cache_key] = service
+    return service
 
 
 def _decode_base64_url(data: str | None) -> str:

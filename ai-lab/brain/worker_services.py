@@ -18,33 +18,51 @@ def _normalize_ollama_host(value: str) -> str:
 
 
 def get_worker_assistant_url(worker_name: str = "worker-rig-01") -> str | None:
-    """Resolve Worker Assistant base URL: env WORKER_ASSISTANT_URL else registry base_url."""
+    """Resolve Worker Assistant base URL: service env_var, legacy env, else registry base_url."""
+    svc = get_worker_service(worker_name, "worker_assistant")
+    if isinstance(svc, dict):
+        env_var = (svc.get("env_var") or "").strip()
+        if env_var:
+            url = (os.environ.get(env_var) or "").strip()
+            if url:
+                return url.rstrip("/") or None
     url = (os.environ.get("WORKER_ASSISTANT_URL") or "").strip()
     if url:
         return url.rstrip("/") or None
-    svc = get_worker_service(worker_name, "worker_assistant")
     if isinstance(svc, dict):
         return (svc.get("base_url") or "").strip().rstrip("/") or None
     return None
 
 
 def get_worker_n8n_url(worker_name: str = "worker-rig-01") -> str | None:
-    """Resolve n8n base URL: env WORKER_N8N_URL else registry base_url."""
+    """Resolve n8n base URL: service env_var, legacy env, else registry base_url."""
+    svc = get_worker_service(worker_name, "n8n")
+    if isinstance(svc, dict):
+        env_var = (svc.get("env_var") or "").strip()
+        if env_var:
+            url = (os.environ.get(env_var) or "").strip()
+            if url:
+                return url.rstrip("/") or None
     url = (os.environ.get("WORKER_N8N_URL") or "").strip()
     if url:
         return url.rstrip("/") or None
-    svc = get_worker_service(worker_name, "n8n")
     if isinstance(svc, dict):
         return (svc.get("base_url") or "").strip().rstrip("/") or None
     return None
 
 
 def get_worker_ollama_base_url(worker_name: str = "worker-rig-01") -> str | None:
-    """Resolve Ollama base URL: env OLLAMA_HOST else registry base_url. Normalized with http://."""
+    """Resolve Ollama base URL: service env_var, legacy env, else registry base_url."""
+    svc = get_worker_service(worker_name, "ollama")
+    if isinstance(svc, dict):
+        env_var = (svc.get("env_var") or "").strip()
+        if env_var:
+            url = (os.environ.get(env_var) or "").strip()
+            if url:
+                return _normalize_ollama_host(url).rstrip("/") or None
     url = (os.environ.get("OLLAMA_HOST") or "").strip()
     if url:
         return _normalize_ollama_host(url).rstrip("/") or None
-    svc = get_worker_service(worker_name, "ollama")
     if isinstance(svc, dict):
         base = (svc.get("base_url") or "").strip()
         return _normalize_ollama_host(base).rstrip("/") if base else None

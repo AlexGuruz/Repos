@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import time
 from pathlib import Path
 
 import pytest
@@ -188,6 +190,76 @@ def test_feature_name_normalizes_noisy_prefixes() -> None:
     assert out == "my-feature"
     out2 = repo_activity._normalize_feature_name("fix/bug-123", "fallback")
     assert out2 == "bug-123"
+
+
+def test_file_mtimes_captured_and_window_set(tmp_path: Path) -> None:
+    rp = tmp_path / "repo-mtime"
+    _mk_git_repo(rp)
+    f = rp / "edited.py"
+    f.write_text("v=1\n", encoding="utf-8")
+    old = time.time() - 8000
+    os.utime(f, (old, old))
+    out = repo_activity.collect_repo_activity(rp, lane={"include_file_activity": True, "max_file_timestamp_samples": 25})
+    assert out["modified_files_count"] >= 1
+    assert out.get("file_activity_window_start")
+    assert out.get("file_activity_window_end")
+    sample = out.get("modified_file_timestamps_sample") or []
+    assert sample and "mtime_iso" in sample[0]
+
+
+def test_combined_activity_window_covers_file_and_commit(tmp_path: Path) -> None:
+    rp = tmp_path / "repo-combo"
+    _mk_git_repo(rp)
+    f = rp / "a.py"
+    f.write_text("print(1)\n", encoding="utf-8")
+    t_old = time.time() - 10_000
+    os.utime(f, (t_old, t_old))
+    subprocess.run(["git", "add", "a.py"], cwd=str(rp), check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "-c", "user.name=bot", "-c", "user.email=bot@example.com", "commit", "-m", "add a"],
+        cwd=str(rp),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    (rp / "b.py").write_text("print(2)\n", encoding="utf-8")
+    out = repo_activity.collect_repo_activity(rp, lane={"include_file_activity": True, "since_hours": 720})
+    assert out.get("activity_window_start")
+    assert out.get("activity_window_end")
+    assert out.get("first_commit_time") and out.get("last_commit_time")
+
+
+def test_no_changed_files_skips_file_window(tmp_path: Path) -> None:
+    rp = tmp_path / "repo-clean"
+    _mk_git_repo(rp)
+    out = repo_activity.collect_repo_activity(rp)
+    assert out["changed_files_count"] == 0
+    assert out.get("file_activity_window_start") is None
+    assert out.get("file_activity_window_end") is None
+
+
+def test_git_hygiene_push_needed(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    rp = tmp_path / "repo-push"
+    _mk_git_repo(rp)
+    monkeypatch.setattr(repo_activity, "_git_has_remote", lambda p: True)
+    monkeypatch.setattr(repo_activity, "_git_upstream_ahead_behind", lambda p: (2, 0))
+    out = repo_activity.collect_repo_activity(rp)
+    assert out["push_needed"] is True
+    assert out["branch_ahead"] == 2
+    assert "push" in (out.get("git_hygiene_summary") or "").lower()
+
+
+def test_uncommitted_work_age_hours_with_dirty_tree(tmp_path: Path) -> None:
+    rp = tmp_path / "repo-age"
+    _mk_git_repo(rp)
+    f = rp / "dirty.py"
+    f.write_text("x=1\n", encoding="utf-8")
+    old = time.time() - 7200
+    os.utime(f, (old, old))
+    out = repo_activity.collect_repo_activity(rp, lane={"include_file_activity": True})
+    assert out.get("uncommitted_work_age_hours") is not None
+    assert float(out["uncommitted_work_age_hours"]) >= 1.0
+    assert out["commit_needed"] is True
 
 
 def test_commit_subjects_bounded_by_config(tmp_path: Path) -> None:

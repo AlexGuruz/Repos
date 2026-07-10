@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-28T02:29:06Z",
+  "generated_at": "2026-06-25T14:40:33Z",
   "snapshots": [
     {
       "snapshot_type": "system_snapshot",
-      "generated_at": "2026-04-28T02:28:58Z",
+      "generated_at": "2026-06-25T14:37:47Z",
       "freshness_seconds": 900,
       "stale": false,
       "confidence": 0.86,
@@ -12,16 +12,16 @@
     },
     {
       "snapshot_type": "repo_pulse",
-      "generated_at": "2026-04-28T02:29:01Z",
+      "generated_at": "2026-06-25T14:10:29Z",
       "freshness_seconds": 3600,
       "stale": false,
       "confidence": 0.82,
       "errors": [],
-      "summary_short": "Repo pulse built for 5 repos."
+      "summary_short": "Repo pulse built for 6 repos."
     },
     {
       "snapshot_type": "project_agenda",
-      "generated_at": "2026-04-28T02:29:03Z",
+      "generated_at": "2026-06-24T23:06:57Z",
       "freshness_seconds": 86400,
       "stale": false,
       "confidence": 0.75,
@@ -30,7 +30,7 @@
     },
     {
       "snapshot_type": "personal_ops_snapshot",
-      "generated_at": "2026-04-28T02:29:04Z",
+      "generated_at": "2026-06-24T23:07:03Z",
       "freshness_seconds": 86400,
       "stale": false,
       "confidence": 0.72,
@@ -39,7 +39,7 @@
     },
     {
       "snapshot_type": "growflow_snapshot",
-      "generated_at": "2026-04-28T02:29:04Z",
+      "generated_at": "2026-06-25T13:56:11Z",
       "freshness_seconds": 3600,
       "stale": false,
       "confidence": 0.8,
@@ -48,7 +48,7 @@
     },
     {
       "snapshot_type": "worker_snapshot",
-      "generated_at": "2026-04-28T02:29:06Z",
+      "generated_at": "2026-06-25T14:40:33Z",
       "freshness_seconds": 900,
       "stale": false,
       "confidence": 0.7,

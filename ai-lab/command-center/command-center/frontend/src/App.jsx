@@ -8,6 +8,7 @@ import FeedPanel  from './components/FeedPanel'
 import GuruPanel  from './components/GuruPanel'
 import RepoPanel  from './components/RepoPanel'
 import ToolsPanel from './components/ToolsPanel'
+import RetailPanel from './components/RetailPanel'
 import { useChatStore, useGuruStore, useUiStore } from './store'
 import { api } from './lib/api'
 
@@ -17,6 +18,7 @@ const MAIN_TABS = [
   { id: 'compute', label: 'Compute'      },
   { id: 'feed',    label: 'Live feed'    },
   { id: 'repo',    label: 'Repo' },
+  { id: 'retail',  label: 'Retail'       },
   { id: 'tools',   label: 'Tool usage'   },
   { id: 'diagnostics', label: 'Diagnostics' },
 ]
@@ -327,6 +329,7 @@ export default function App() {
             { id: 'compute', Panel: ComputePanel },
             { id: 'feed', Panel: FeedPanel },
             { id: 'repo', Panel: RepoPanel },
+            { id: 'retail', Panel: RetailPanel },
             { id: 'tools', Panel: ToolsPanel },
             { id: 'diagnostics', Panel: DiagnosticsPanel },
           ].map(({ id, Panel }) => {

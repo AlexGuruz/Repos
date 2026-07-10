@@ -1,6 +1,6 @@
 {
   "snapshot_type": "project_agenda",
-  "generated_at": "2026-04-28T02:29:03Z",
+  "generated_at": "2026-06-24T23:06:57Z",
   "freshness_seconds": 86400,
   "source_files_or_tools": [
     "repo_pulse",
@@ -11,21 +11,21 @@
   "errors": [],
   "data": {
     "active_projects": [
+      "Project-Kylo-feature-bank-normalizer-core-pr1",
       "geomapper app",
       "Greg-Kylo",
       "awesome-n8n-templates",
-      "activepieces",
-      "BMAD-METHOD"
+      "activepieces"
     ],
     "current_priorities": [
+      "Project-Kylo-feature-bank-normalizer-core-pr1",
       "geomapper app",
-      "Greg-Kylo",
-      "awesome-n8n-templates"
+      "Greg-Kylo"
     ],
     "next_actions": [
+      "Review Project-Kylo-feature-bank-normalizer-core-pr1",
       "Review geomapper app",
-      "Review Greg-Kylo",
-      "Review awesome-n8n-templates"
+      "Review Greg-Kylo"
     ],
     "blocked_items": [
       "activepieces: stale/no recent updates",
@@ -38,20 +38,20 @@
       "BMAD-METHOD: refresh README/docs"
     ],
     "today_focus": [
+      "Project-Kylo-feature-bank-normalizer-core-pr1",
       "geomapper app",
-      "Greg-Kylo",
-      "awesome-n8n-templates"
+      "Greg-Kylo"
     ],
     "tomorrow_focus": [
-      "activepieces",
-      "BMAD-METHOD"
+      "awesome-n8n-templates",
+      "activepieces"
     ],
     "project_to_repo_map": {
+      "Project-Kylo-feature-bank-normalizer-core-pr1": "Project-Kylo-feature-bank-normalizer-core-pr1",
       "geomapper app": "geomapper app",
       "Greg-Kylo": "Greg-Kylo",
       "awesome-n8n-templates": "awesome-n8n-templates",
-      "activepieces": "activepieces",
-      "BMAD-METHOD": "BMAD-METHOD"
+      "activepieces": "activepieces"
     },
     "stale_repos_needing_attention": [
       "activepieces",
@@ -78,21 +78,21 @@
     {
       "title": "Agenda from repo pulse",
       "source_path_or_tool": "prepared_context.repo_pulse",
-      "observed_at": "2026-04-28T02:29:03Z",
-      "summary": "top_focus=['geomapper app', 'Greg-Kylo', 'awesome-n8n-templates'] blocked=['activepieces', 'awesome-n8n-templates', 'BMAD-METHOD']",
+      "observed_at": "2026-06-24T23:06:57Z",
+      "summary": "top_focus=['Project-Kylo-feature-bank-normalizer-core-pr1', 'geomapper app', 'Greg-Kylo'] blocked=['activepieces', 'awesome-n8n-templates', 'BMAD-METHOD']",
       "confidence": 0.75
     },
     {
       "title": "Active projects and next actions",
       "source_path_or_tool": "prepared_context.repo_pulse.changed_repos",
-      "observed_at": "2026-04-28T02:29:03Z",
+      "observed_at": "2026-06-24T23:06:57Z",
       "summary": "active=5 priorities=3 next_actions=3",
       "confidence": 0.72
     },
     {
       "title": "Blockers and stale repos",
       "source_path_or_tool": "prepared_context.repo_pulse.stale_repos",
-      "observed_at": "2026-04-28T02:29:03Z",
+      "observed_at": "2026-06-24T23:06:57Z",
       "summary": "blocked_items=3 stale_repos_needing_attention=5",
       "confidence": 0.7
     }

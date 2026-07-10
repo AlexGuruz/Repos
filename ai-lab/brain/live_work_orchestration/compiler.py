@@ -43,6 +43,8 @@ def generate_project_timetable(
     github_activity_snapshot: dict[str, Any] | None = None,
     daily_progress_snapshot: dict[str, Any] | None = None,
     enqueue_clarifications: bool = False,
+    enqueue_calibration_questions: bool = False,
+    persist_derived_calibration_actuals: bool = False,
 ) -> dict[str, Any]:
     """
     Build a project timetable with range-based estimates and guardrails.
@@ -54,6 +56,14 @@ def generate_project_timetable(
         apply_estimation_guardrails,
         generate_timetable_clarifications,
     )
+    from brain.live_work_orchestration.timetable.calibration import (
+        _load_records,
+        build_calibration_correction_prompt,
+        build_calibration_profile,
+        decide_calibration_source,
+        record_measured_actual_if_confident,
+        summarize_calibration_health,
+    )
     from brain.live_work_orchestration.timetable.timeline_builder import build_project_timetable
 
     repo_snap = repo_activity_snapshot or _load_ingestion_snapshot("repo_activity_snapshot") or {}
@@ -61,11 +71,73 @@ def generate_project_timetable(
     prog = daily_progress_snapshot or _load_live_snapshot("daily_progress_snapshot") or {}
 
     feature_states = build_feature_states(repo_snap, gh_snap)
-    estimates = [apply_estimation_guardrails(fs, estimate_feature_effort(fs)) for fs in feature_states]
-    timetable = build_project_timetable(feature_states, estimates, prog)
+    calibration_records = _load_records()
+    calibration_profile = build_calibration_profile(calibration_records)
+    estimates = [
+        apply_estimation_guardrails(fs, estimate_feature_effort(fs, calibration_profile=calibration_profile))
+        for fs in feature_states
+    ]
+
+    calibration_decisions: list[dict[str, Any]] = []
+    for fs, est in zip(feature_states, estimates):
+        dec = decide_calibration_source(
+            str(fs.get("feature_name") or ""),
+            str(fs.get("repo_name") or ""),
+            repo_activity_snapshot=repo_snap,
+            github_activity_snapshot=gh_snap,
+            existing_records=calibration_records,
+            estimate_risk_level=str(est.get("risk_level") or ""),
+            estimate_calibration_needed=bool(est.get("calibration_needed")),
+            recently_completed_or_merged=str(fs.get("rollout_stage") or "") in ("ready_to_merge", "merged"),
+        )
+        calibration_decisions.append(dec)
+        if persist_derived_calibration_actuals and dec.get("measured_time"):
+            if dec.get("selected_source") == "measured_actual" and dec.get("confidence") == "high":
+                record_measured_actual_if_confident(
+                    str(fs.get("feature_name") or ""),
+                    str(fs.get("repo_name") or ""),
+                    dec["measured_time"],
+                )
+            elif dec.get("selected_source") == "inferred_actual" and dec.get("confidence") == "medium":
+                record_measured_actual_if_confident(
+                    str(fs.get("feature_name") or ""),
+                    str(fs.get("repo_name") or ""),
+                    dec["measured_time"],
+                )
+
+    timetable = build_project_timetable(feature_states, estimates, prog, calibration_decisions=calibration_decisions)
     clarifications = generate_timetable_clarifications(feature_states, estimates)
+    correction_prompts: list[dict[str, Any]] = []
+    for fs, est, dec in zip(feature_states, estimates, calibration_decisions):
+        p = build_calibration_correction_prompt(
+            str(fs.get("feature_name") or "unknown_feature"),
+            str(fs.get("repo_name") or "unknown_repo"),
+            decision=dec,
+        )
+        if p:
+            correction_prompts.append(p)
+
+    calibration_health_summary = summarize_calibration_health(calibration_decisions)
+    calibration_questions_needed = sum(
+        1 for d in calibration_decisions if bool(d.get("importance_for_prompt") and d.get("should_ask_user"))
+    )
+    calibration_questions_queued = 0
 
     queued: list[dict[str, Any]] = []
+    if enqueue_calibration_questions and correction_prompts:
+        from brain.live_work_orchestration.clickup_queue import queue_clarification
+
+        first = correction_prompts[0]
+        queued.append(
+            queue_clarification(
+                message=str(first.get("message") or ""),
+                reason=str(first.get("reason") or "calibration_clarification"),
+                source="calibration_question",
+                evidence=[str(first.get("feature_name") or ""), str(first.get("repo_name") or "")],
+                target_list="Agent Clarifications",
+            )
+        )
+        calibration_questions_queued = 1
     if enqueue_clarifications and clarifications:
         from brain.live_work_orchestration.clickup_queue import queue_clarification
 
@@ -85,6 +157,12 @@ def generate_project_timetable(
         "estimates": estimates,
         "timetable": timetable,
         "clarifications": clarifications,
+        "calibration_profile": calibration_profile,
+        "calibration_correction_prompts": correction_prompts,
+        "calibration_decisions": calibration_decisions,
+        "calibration_health_summary": calibration_health_summary,
+        "calibration_questions_needed": calibration_questions_needed,
+        "calibration_questions_queued": calibration_questions_queued,
         "queued_clarifications": queued,
         "status": "read_only",
     }
@@ -130,6 +208,29 @@ def compile_daily_plan_preview(
     gaps = planning_gaps_snapshot or _load_live_snapshot("planning_gaps_snapshot") or {}
     cq = communication_queue_snapshot or _load_live_snapshot("communication_queue_snapshot") or {}
 
+    from brain.live_work_orchestration.ingestion.bills import summarize_bills_for_planning
+
+    bills_snap = _load_ingestion_snapshot("bills_snapshot")
+    bills_sum = summarize_bills_for_planning(bills_snap)
+    bill_rows = [r for r in (list((bills_snap or {}).get("data") or [])) if isinstance(r, dict)]
+    due_soon_rows = [r for r in bill_rows if r.get("timing_status") in ("at_risk", "upcoming")]
+    overdue_rows = [r for r in bill_rows if r.get("status") == "overdue"]
+    at_risk_only = [r for r in bill_rows if r.get("timing_status") == "at_risk"]
+    financial_obligations = {
+        "due_soon": [
+            {"name": r.get("name"), "due_date": r.get("due_date"), "days_until_due": r.get("days_until_due")}
+            for r in due_soon_rows
+        ],
+        "overdue": [
+            {"name": r.get("name"), "due_date": r.get("due_date"), "amount": r.get("amount"), "currency": r.get("currency")}
+            for r in overdue_rows
+        ],
+        "at_risk": [
+            {"name": r.get("name"), "due_date": r.get("due_date"), "days_until_due": r.get("days_until_due")}
+            for r in at_risk_only
+        ],
+    }
+
     demands = (wd.get("data") or {}).get("demands") or []
     constraints = (tc.get("data") or {}).get("constraints") or []
     pr_data = pr.get("data") if isinstance(pr.get("data"), dict) else {}
@@ -169,6 +270,8 @@ def compile_daily_plan_preview(
     )
     if ready_to_merge:
         risk_lines.append(f"{ready_to_merge} feature(s) appear ready to merge and may need review/merge attention.")
+    for w in bills_sum.get("warnings") or []:
+        risk_lines.append(str(w))
 
     today = " — ".join(prio_lines[:5]) if prio_lines else "(No prioritized items in work demand snapshot.)"
     before_shift = "Light prep: review top priorities and calendar blocks from snapshot only."
@@ -185,6 +288,8 @@ def compile_daily_plan_preview(
             f"{github_remote_summary.get('local_without_pr', 0)} local w/o PR, "
             f"{github_remote_summary.get('open_pr_without_local_activity', 0)} stale open PR"
         )
+    if bills_sum.get("warnings"):
+        during_shift += " | Financial: " + "; ".join(str(x) for x in (bills_sum.get("warnings") or [])[:4])
     after_shift = "Capture outcomes in repo/docs or personal ops digest when available (manual)."
     top_p = "\n".join(f"- {p}" for p in prio_lines) or "- (none)"
     cons = "\n".join(f"- {c}" for c in con_lines) or "- (none — calendar may be empty)"
@@ -260,9 +365,14 @@ def compile_daily_plan_preview(
         pending_clarifications=pending_clar,
     )
     out = preview.to_dict()
+    out["financial_obligations"] = financial_obligations
+    out["financial_warnings"] = list(bills_sum.get("warnings") or [])
+    out["bills_clarification_proposals"] = list(bills_sum.get("clarifications") or [])
     out["project_timetable"] = timetable.get("timetable")
     out["timetable_estimates"] = timetable.get("estimates")
     out["timetable_clarifications"] = timetable.get("clarifications")
+    out["timetable_calibration_profile"] = timetable.get("calibration_profile")
+    out["timetable_calibration_corrections"] = timetable.get("calibration_correction_prompts")
     if include_action_recommendations and rec is not None:
         out["clickup_action_recommendations"] = rec
     return out

@@ -1,3 +1,10 @@
-{
-  "projects": []
+﻿{
+  "projects": [
+    {
+      "name": "Empire/Ozark",
+      "path": "E:/Repos/ai-lab/Empire/Ozark",
+      "status": "active",
+      "last_summary": "state/validation_summary.md"
+    }
+  ]
 }

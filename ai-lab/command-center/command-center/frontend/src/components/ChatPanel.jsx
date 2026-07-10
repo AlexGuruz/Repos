@@ -80,9 +80,25 @@ function ApprovalCard({ ev }) {
     if (busy) return
     setBusy(true)
     try {
-      await api.resolveApproval(ev.id, resolution)
-      resolve(ev.id, resolution)
-      addMsg({ role: 'ai', text: `${ev.id} ${resolution}. ${resolution === 'approved' ? 'Queued via run_approved wrapper.' : 'No state changed.'}` })
+      if (ev.action === 'retail_capital_scenario') {
+        if (resolution === 'approved') {
+          const res = await api.retailCapitalApprove(ev.id)
+          resolve(ev.id, resolution)
+          window.dispatchEvent(new CustomEvent('retail-capital-job', { detail: { job_id: res.job_id } }))
+          addMsg({
+            role: 'ai',
+            text: `${ev.id} approved. Capital scenario job **${res.job_id || 'queued'}** — Capital tab will refresh when complete.`,
+          })
+        } else {
+          await api.retailCapitalDeny(ev.id)
+          resolve(ev.id, resolution)
+          addMsg({ role: 'ai', text: `${ev.id} denied. Trusted capital payload unchanged.` })
+        }
+      } else {
+        await api.resolveApproval(ev.id, resolution)
+        resolve(ev.id, resolution)
+        addMsg({ role: 'ai', text: `${ev.id} ${resolution}. ${resolution === 'approved' ? 'Queued via run_approved wrapper.' : 'No state changed.'}` })
+      }
     } catch (e) {
       addMsg({ role: 'ai', text: `Error resolving ${ev.id}: ${e.message}` })
     } finally {
@@ -338,8 +354,10 @@ export default function ChatPanel() {
     await streamChatFromUser(text)
   }
 
-  // Inject approval cards for pending approvals
-  const pendingApprovals = events.filter(e => e.type === 'approval')
+  // Inject approval cards for pending approvals (retail capital shows inline on Capital tab).
+  const pendingApprovals = events.filter(
+    e => e.type === 'approval' && e.action !== 'retail_capital_scenario',
+  )
 
   return (
     <div className="flex flex-col flex-1 min-h-0">

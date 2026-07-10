@@ -7,6 +7,7 @@ and writes a dedicated ingestion snapshot used by daily progress synthesis.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -81,8 +82,12 @@ def _default_config() -> dict[str, Any]:
             "scan_depth": 2,
             "include_file_samples": True,
             "max_file_samples": 20,
+            "include_file_activity": True,
+            "max_file_timestamp_samples": 25,
             "include_commit_subjects": True,
             "max_commit_subjects": 20,
+            "include_commit_timestamps": True,
+            "max_commit_timestamps": 20,
             "since_hours": 24,
         }
     }
@@ -239,7 +244,122 @@ def _classify_activity(
     return docs, tests, code, activity_type, intensity
 
 
-def collect_repo_activity(repo_path: str | Path, since_hours: int | None = None) -> dict[str, Any]:
+def _lane_defaults(lane: dict[str, Any] | None) -> dict[str, Any]:
+    merged = dict(_default_config()["repo_activity"])
+    if isinstance(lane, dict):
+        merged.update(lane)
+    return merged
+
+
+def _safe_repo_path(repo: Path, rel: str) -> Path | None:
+    if not rel or rel.startswith("/"):
+        return None
+    cand = (repo / rel).resolve()
+    try:
+        cand.relative_to(repo.resolve())
+    except ValueError:
+        return None
+    return cand
+
+
+def _collect_file_mtimes(
+    repo: Path, changed_files: list[str], max_n: int
+) -> tuple[list[dict[str, Any]], datetime | None, datetime | None, int]:
+    """Stat mtimes for changed/untracked paths only (no content reads)."""
+    sample: list[dict[str, Any]] = []
+    times: list[datetime] = []
+    for rel in changed_files[:max_n]:
+        fp = _safe_repo_path(repo, rel)
+        if fp is None or not fp.is_file():
+            continue
+        try:
+            st = os.stat(fp)
+            m = datetime.fromtimestamp(st.st_mtime, tz=timezone.utc)
+        except OSError:
+            continue
+        times.append(m)
+        sample.append({"path": rel, "mtime_iso": m.replace(microsecond=0).isoformat().replace("+00:00", "Z")})
+    if not times:
+        return [], None, None, 0
+    return sample, min(times), max(times), len(times)
+
+
+def _fmt_z(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _parse_dt(s: str | None) -> datetime | None:
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+
+def _git_hygiene_summary_text(
+    *,
+    clean_ish: bool,
+    uncommitted: int,
+    ahead: int,
+    commit_needed: bool,
+    push_needed: bool,
+) -> str:
+    parts: list[str] = []
+    if push_needed:
+        parts.append("Branch ahead of remote; push recommended")
+    if commit_needed:
+        parts.append("Active local changes not committed")
+    if clean_ish and not push_needed:
+        parts.append("Working tree clean")
+    if not parts:
+        parts.append("No special hygiene flags")
+    return " | ".join(parts)
+
+
+def _merge_activity_bounds(
+    f_start: datetime | None,
+    f_end: datetime | None,
+    c_start: datetime | None,
+    c_end: datetime | None,
+) -> tuple[datetime | None, datetime | None]:
+    starts = [x for x in (f_start, c_start) if x is not None]
+    ends = [x for x in (f_end, c_end) if x is not None]
+    if not starts or not ends:
+        return None, None
+    st, en = min(starts), max(ends)
+    if en < st:
+        return None, None
+    return st, en
+
+
+def _git_has_remote(repo: Path) -> bool:
+    ok, out = _run_git(repo, ["remote", "-v"])
+    return ok and bool(out.strip())
+
+
+def _git_upstream_ahead_behind(repo: Path) -> tuple[int, int]:
+    ok, _ = _run_git(repo, ["rev-parse", "--verify", "@{upstream}"])
+    if not ok:
+        return 0, 0
+    ok2, line = _run_git(repo, ["rev-list", "--left-right", "--count", "HEAD...@{upstream}"])
+    if not ok2 or not line:
+        return 0, 0
+    parts = line.replace("\t", " ").split()
+    if len(parts) < 2:
+        return 0, 0
+    try:
+        return int(parts[0]), int(parts[1])
+    except ValueError:
+        return 0, 0
+
+
+def collect_repo_activity(
+    repo_path: str | Path,
+    since_hours: int | None = None,
+    lane: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    cfg = _lane_defaults(lane)
     p = Path(repo_path)
     observed = now_iso()
     base: dict[str, Any] = {
@@ -252,7 +372,22 @@ def collect_repo_activity(repo_path: str | Path, since_hours: int | None = None)
         "changed_files_sample": [],
         "recent_commits_count": 0,
         "recent_commit_subjects": [],
+        "first_commit_time": None,
         "last_commit_time": None,
+        "commit_timestamps": [],
+        "file_activity_window_start": None,
+        "file_activity_window_end": None,
+        "modified_file_timestamps_sample": [],
+        "modified_files_count": 0,
+        "activity_window_start": None,
+        "activity_window_end": None,
+        "uncommitted_work_age_hours": None,
+        "branch_ahead": 0,
+        "branch_behind": 0,
+        "has_remote": False,
+        "commit_needed": False,
+        "push_needed": False,
+        "git_hygiene_summary": "",
         "docs_changed": False,
         "tests_changed": False,
         "code_changed": False,
@@ -284,33 +419,81 @@ def collect_repo_activity(repo_path: str | Path, since_hours: int | None = None)
     if ok_status:
         lines = [x for x in status_out.splitlines() if x.strip()]
         for line in lines:
-            right = line[3:] if len(line) > 3 else line
-            changed_files.append(right.strip())
+            right = line[3:].strip() if len(line) > 3 else line.strip()
+            if " -> " in right:
+                right = right.split(" -> ")[-1].strip()
+            changed_files.append(right)
         base["git_status_summary"] = f"{len(lines)} changed entries"
         base["uncommitted_changes_count"] = len(lines)
         base["changed_files_count"] = len(changed_files)
-        base["changed_files_sample"] = changed_files[:20]
+        base["changed_files_sample"] = changed_files[: int(cfg.get("max_file_samples") or 20)]
     else:
         base["errors"].append(f"status:{status_out}")
 
-    log_args = ["log", "--pretty=format:%s|%cI", "-n", "20"]
+    include_file_activity = bool(cfg.get("include_file_activity", True))
+    max_file_ts = int(cfg.get("max_file_timestamp_samples") or 25)
+    if include_file_activity and changed_files:
+        sample, f0, f1, mcount = _collect_file_mtimes(p, changed_files, max_file_ts)
+        base["modified_file_timestamps_sample"] = sample
+        base["modified_files_count"] = mcount
+        if f0 is not None and f1 is not None:
+            base["file_activity_window_start"] = _fmt_z(f0)
+            base["file_activity_window_end"] = _fmt_z(f1)
+
+    max_ct = max(1, int(cfg.get("max_commit_timestamps") or 20))
+    log_args = ["log", "--pretty=format:%s|%cI", "-n", str(max_ct)]
     if since_hours and since_hours > 0:
         log_args.extend(["--since", f"{since_hours} hours ago"])
     ok_log, log_out = _run_git(p, log_args)
     commit_subjects: list[str] = []
-    last_commit_time: str | None = None
+    parsed_commit_times: list[datetime] = []
     if ok_log:
         rows = [x for x in log_out.splitlines() if x.strip()]
-        for idx, row in enumerate(rows):
+        for row in rows:
             subj, _, ts = row.partition("|")
             commit_subjects.append(subj.strip())
-            if idx == 0:
-                last_commit_time = ts.strip() or None
+            dt = _parse_dt(ts.strip())
+            if dt is not None:
+                parsed_commit_times.append(dt)
         base["recent_commits_count"] = len(rows)
-        base["recent_commit_subjects"] = commit_subjects[:20]
-        base["last_commit_time"] = last_commit_time
+        base["recent_commit_subjects"] = commit_subjects[: int(cfg.get("max_commit_subjects") or 20)]
+        if parsed_commit_times:
+            base["last_commit_time"] = _fmt_z(parsed_commit_times[0])
+            base["first_commit_time"] = _fmt_z(parsed_commit_times[-1])
+        if bool(cfg.get("include_commit_timestamps", True)) and parsed_commit_times:
+            base["commit_timestamps"] = [_fmt_z(x) for x in parsed_commit_times[:max_ct]]
     else:
         base["errors"].append(f"log:{log_out}")
+
+    fws = _parse_dt(str(base.get("file_activity_window_start") or ""))
+    fwe = _parse_dt(str(base.get("file_activity_window_end") or ""))
+    cws = _parse_dt(str(base.get("first_commit_time") or ""))
+    cwe = _parse_dt(str(base.get("last_commit_time") or ""))
+    aw0, aw1 = _merge_activity_bounds(fws, fwe, cws, cwe)
+    if aw0 is not None and aw1 is not None:
+        base["activity_window_start"] = _fmt_z(aw0)
+        base["activity_window_end"] = _fmt_z(aw1)
+
+    base["has_remote"] = _git_has_remote(p)
+    ahead, behind = _git_upstream_ahead_behind(p)
+    base["branch_ahead"] = ahead
+    base["branch_behind"] = behind
+    base["push_needed"] = bool(ahead > 0)
+    base["commit_needed"] = bool(
+        int(base.get("uncommitted_changes_count") or 0) > 0 and base.get("file_activity_window_start")
+    )
+    uwa: float | None = None
+    if fws is not None and int(base.get("uncommitted_changes_count") or 0) > 0:
+        uwa = max(0.0, (_utc_now() - fws).total_seconds() / 3600.0)
+    base["uncommitted_work_age_hours"] = round(uwa, 3) if uwa is not None else None
+    clean_ish = int(base.get("uncommitted_changes_count") or 0) == 0
+    base["git_hygiene_summary"] = _git_hygiene_summary_text(
+        clean_ish=clean_ish,
+        uncommitted=int(base.get("uncommitted_changes_count") or 0),
+        ahead=ahead,
+        commit_needed=bool(base["commit_needed"]),
+        push_needed=bool(base["push_needed"]),
+    )
 
     feature, area, stage = _infer_feature(p, str(base.get("current_branch") or ""))
     docs, tests, code, activity_type, intensity = _classify_activity(
@@ -408,8 +591,10 @@ def collect_all_repo_activity(config: dict[str, Any]) -> dict[str, Any]:
     repos = discover_local_repos(repo_roots, scan_depth)
     rows: list[dict[str, Any]] = []
     errors: list[str] = []
+    max_file_ts = int(lane.get("max_file_timestamp_samples") or 25)
+    max_ct_lane = int(lane.get("max_commit_timestamps") or 20)
     for rp in repos:
-        row = collect_repo_activity(rp, since_hours=since_hours if isinstance(since_hours, int) else None)
+        row = collect_repo_activity(rp, since_hours=since_hours if isinstance(since_hours, int) else None, lane=lane)
         if not include_files:
             row["changed_files_sample"] = []
         else:
@@ -418,6 +603,8 @@ def collect_all_repo_activity(config: dict[str, Any]) -> dict[str, Any]:
             row["recent_commit_subjects"] = []
         else:
             row["recent_commit_subjects"] = list(row.get("recent_commit_subjects") or [])[:max_commit_subjects]
+        row["modified_file_timestamps_sample"] = list(row.get("modified_file_timestamps_sample") or [])[:max_file_ts]
+        row["commit_timestamps"] = list(row.get("commit_timestamps") or [])[:max_ct_lane]
         rows.append(row)
         for e in row.get("errors") or []:
             errors.append(f"{rp.name}:{e}")
@@ -441,7 +628,13 @@ def build_repo_activity_snapshot(config: dict[str, Any] | None = None) -> dict[s
     cfg = config or load_repo_activity_config()
     collected = collect_all_repo_activity(cfg)
     generated = _utc_now()
-    source_tools = ["git status --short", "git log --pretty=format:%s|%cI", "git rev-parse --abbrev-ref HEAD"]
+    source_tools = [
+        "git status --short",
+        "git log --pretty=format:%s|%cI",
+        "git rev-parse --abbrev-ref HEAD",
+        "os.stat mtime (changed paths only)",
+        "git rev-list --left-right --count HEAD...@{upstream}",
+    ]
     freshness_seconds = 300
     summary = collected.get("summary") or {}
     details = (

@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Any
 
 
-def estimate_feature_effort(feature_state: dict[str, Any]) -> dict[str, Any]:
+def estimate_feature_effort(
+    feature_state: dict[str, Any], calibration_profile: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """
     Estimate effort as a range only.
     Returns unknown_needs_calibration when evidence is insufficient.
@@ -22,6 +24,9 @@ def estimate_feature_effort(feature_state: dict[str, Any]) -> dict[str, Any]:
             "risk_level": "high",
             "evidence": [],
             "reason": "insufficient_activity_evidence",
+            "calibration_used": False,
+            "calibration_reason": "no_estimate_possible",
+            "calibration_needed": True,
         }
 
     min_h, max_h = 2, 6
@@ -36,6 +41,21 @@ def estimate_feature_effort(feature_state: dict[str, Any]) -> dict[str, Any]:
         max_h = max(min_h + 2, int(max_h * 0.7))
     elif stage == "blocked":
         max_h = int(max_h * 1.25)
+
+    calibration_used = False
+    calibration_reason = "insufficient_history"
+    calibration_needed = True
+    if isinstance(calibration_profile, dict):
+        adj = calibration_profile.get("recommended_adjustments") if isinstance(calibration_profile.get("recommended_adjustments"), dict) else {}
+        apply_adj = bool(adj.get("apply"))
+        mult = float(adj.get("hours_multiplier") or 1.0)
+        sample_count = int(calibration_profile.get("sample_count") or 0)
+        if apply_adj and sample_count >= 5:
+            min_h = max(1, int(round(min_h * mult)))
+            max_h = max(min_h + 2, int(round(max_h * mult)))
+            calibration_used = True
+            calibration_reason = f"applied_profile_multiplier_{mult}"
+            calibration_needed = False
 
     confidence = float(feature_state.get("confidence") or 0.5)
     if changed > 0 and commits > 0:
@@ -53,5 +73,8 @@ def estimate_feature_effort(feature_state: dict[str, Any]) -> dict[str, Any]:
         "risk_level": risk,
         "evidence": evidence[:8],
         "reason": "activity_and_stage_heuristic",
+        "calibration_used": calibration_used,
+        "calibration_reason": calibration_reason,
+        "calibration_needed": calibration_needed,
     }
 

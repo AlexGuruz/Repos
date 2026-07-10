@@ -111,6 +111,11 @@ def test_generate_project_timetable_read_only() -> None:
     assert out["status"] == "read_only"
     assert isinstance(out["timetable"]["rows"], list)
     assert out["queued_clarifications"] == []
+    assert "calibration_health_summary" in out
+    assert "calibration_questions_needed" in out
+    row = out["timetable"]["rows"][0]
+    assert "calibration_source" in row
+    assert "actual_duration_known" in row
 
 
 def test_compiler_includes_timetable_signals(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

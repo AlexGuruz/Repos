@@ -72,36 +72,40 @@ The original agent is a **Daily Work Planner** connected to **Google Calendar**,
 - **Calendar guidance** (where to place focus blocks; **writes** only with approval + calendar policy).
 - **Progress tracking** model (**ProgressEvent**); replanning triggers deferred to Phase 12+.
 
-**Local Phase 9–10 realization:** `compile_daily_plan_preview()` produces a **read-only** `DailyPlanPreview` with those sections plus optional **`proposed_clickup_actions`** and **`pending_clarifications`** (preview payloads only). No external ClickUp writes from the compiler.
+**Local Phase 9–10 realization:** `compile_daily_plan_preview()` produces a **read-only** `DailyPlanPreview` with those sections plus optional `**proposed_clickup_actions`** and `**pending_clarifications**` (preview payloads only). No external ClickUp writes from the compiler.
 
 ---
 
 ## 4. Intake sources
 
-| Source | Phase 9 | Later |
-|--------|---------|--------|
-| Prepared context (`repo_pulse`, `project_agenda`, `personal_ops_snapshot`, `system_snapshot`, `worker_snapshot`) | Yes (read) | Yes |
-| Integration inventory (`state/integration_inventory/*`) | Gaps only if missing | Yes |
-| Google Calendar live API | No | Phase 10+ |
-| Gmail / Drive | No | Phase 10+ |
-| GitHub API | Partial via repo signals | Expand |
-| ClickUp API | No | Phase 10+ (read intake stub; writes approval-gated) |
-| Scheduling sheet | No | Phase 13 |
+
+| Source                                                                                                           | Phase 9                  | Later                                               |
+| ---------------------------------------------------------------------------------------------------------------- | ------------------------ | --------------------------------------------------- |
+| Prepared context (`repo_pulse`, `project_agenda`, `personal_ops_snapshot`, `system_snapshot`, `worker_snapshot`) | Yes (read)               | Yes                                                 |
+| Integration inventory (`state/integration_inventory/*`)                                                          | Gaps only if missing     | Yes                                                 |
+| Google Calendar live API                                                                                         | No                       | Phase 10+                                           |
+| Gmail / Drive                                                                                                    | No                       | Phase 10+                                           |
+| GitHub API                                                                                                       | Partial via repo signals | Expand                                              |
+| ClickUp API                                                                                                      | No                       | Phase 10+ (read intake stub; writes approval-gated) |
+| Scheduling sheet                                                                                                 | No                       | Phase 13                                            |
+
 
 ---
 
 ## 5. Worker / adapter mapping
 
-| Logical worker | Responsibility | Phase 9 |
-|----------------|----------------|---------|
-| **WorkDemandWorker** | Aggregate actionable work | Read-only probe of prepared context |
-| **TimeConstraintWorker** | Calendar + life blocks | Read-only probe |
-| **CalendarIntakeWorker** | Calendar events | Count from snapshot only |
-| **RepoActivityWorker** | Repo / pulse signals | Read `repo_pulse` |
-| **LocalActivityWorker** | Desktop / IDE activity | **Stub** (Phase 11) |
-| **EmailDriveIntakeWorker** | Gmail/Drive | **Stub** |
-| **ClickUpIntakeWorker** | ClickUp read (tasks/comments/status) | **Stub** |
-| **ProgressMonitorWorker** | Progress vs plan | Worker snapshot probe |
+
+| Logical worker             | Responsibility                       | Phase 9                             |
+| -------------------------- | ------------------------------------ | ----------------------------------- |
+| **WorkDemandWorker**       | Aggregate actionable work            | Read-only probe of prepared context |
+| **TimeConstraintWorker**   | Calendar + life blocks               | Read-only probe                     |
+| **CalendarIntakeWorker**   | Calendar events                      | Count from snapshot only            |
+| **RepoActivityWorker**     | Repo / pulse signals                 | Read `repo_pulse`                   |
+| **LocalActivityWorker**    | Desktop / IDE activity               | **Stub** (Phase 11)                 |
+| **EmailDriveIntakeWorker** | Gmail/Drive                          | **Stub**                            |
+| **ClickUpIntakeWorker**    | ClickUp read (tasks/comments/status) | **Stub**                            |
+| **ProgressMonitorWorker**  | Progress vs plan                     | Worker snapshot probe               |
+
 
 Implementations live under `brain/live_work_orchestration/workers.py` (extend, do not bypass approvals).
 
@@ -179,19 +183,21 @@ Implementations live under `brain/live_work_orchestration/workers.py` (extend, d
 
 ## 11. Memory / state files
 
-| Artifact | Role |
-|----------|------|
-| `state/live_work_orchestration/work_demand_snapshot.json` | Latest normalized demands |
-| `state/live_work_orchestration/time_constraints_snapshot.json` | Constraints / calendar slim |
-| `state/live_work_orchestration/daily_progress_snapshot.json` | Progress events / probes |
-| `state/live_work_orchestration/communication_queue_snapshot.json` | ClickUp clarification queue mirror |
-| `state/live_work_orchestration/clickup_action_snapshot.json` | Optional mirror of `clickup_action_queue.json` |
-| `state/live_work_orchestration/clickup_action_queue.json` | Proposed actions (local; not committed by default) |
-| `state/live_work_orchestration/clickup_clarification_queue.json` | One-question clarification queue |
-| `state/live_work_orchestration/clickup_action_log.jsonl` | Append-only local audit of queue events |
-| `state/live_work_orchestration/planning_gaps_snapshot.json` | Missing inputs |
-| `state/live_work_orchestration/index.json` | Index of snapshots |
-| Future: `memory/live_work/*.json` | Longer-horizon preferences (bounded, redact secrets) |
+
+| Artifact                                                          | Role                                                 |
+| ----------------------------------------------------------------- | ---------------------------------------------------- |
+| `state/live_work_orchestration/work_demand_snapshot.json`         | Latest normalized demands                            |
+| `state/live_work_orchestration/time_constraints_snapshot.json`    | Constraints / calendar slim                          |
+| `state/live_work_orchestration/daily_progress_snapshot.json`      | Progress events / probes                             |
+| `state/live_work_orchestration/communication_queue_snapshot.json` | ClickUp clarification queue mirror                   |
+| `state/live_work_orchestration/clickup_action_snapshot.json`      | Optional mirror of `clickup_action_queue.json`       |
+| `state/live_work_orchestration/clickup_action_queue.json`         | Proposed actions (local; not committed by default)   |
+| `state/live_work_orchestration/clickup_clarification_queue.json`  | One-question clarification queue                     |
+| `state/live_work_orchestration/clickup_action_log.jsonl`          | Append-only local audit of queue events              |
+| `state/live_work_orchestration/planning_gaps_snapshot.json`       | Missing inputs                                       |
+| `state/live_work_orchestration/index.json`                        | Index of snapshots                                   |
+| Future: `memory/live_work/*.json`                                 | Longer-horizon preferences (bounded, redact secrets) |
+
 
 **Rules:** no secrets in JSON; redact tokens; prefer references to vault paths.
 
@@ -222,7 +228,7 @@ Implementations live under `brain/live_work_orchestration/workers.py` (extend, d
 
 ## 14. Future phases roadmap
 
-See [`LIVE_WORK_ORCHESTRATION_PHASES.md`](LIVE_WORK_ORCHESTRATION_PHASES.md).
+See `[LIVE_WORK_ORCHESTRATION_PHASES.md](LIVE_WORK_ORCHESTRATION_PHASES.md)`.
 
 ---
 
@@ -239,14 +245,14 @@ You are the **Daily Work Planner**. Your job is to convert incoming obligations 
 1. **Collect and summarize work demands** from trusted sources.
 2. **Collect and summarize time/life constraints** (calendar and fixed boundaries).
 3. **Combine into execution structure** with:
-   - Today
-   - Before shift
-   - During shift
-   - After shift
-   - Top priorities
-   - Constraints
-   - Risks to watch
-   - A good day looks like
+  - Today
+  - Before shift
+  - During shift
+  - After shift
+  - Top priorities
+  - Constraints
+  - Risks to watch
+  - A good day looks like
 4. Surface blockers and route them through approved channels (ClickUp clarification queue and task lists, calendar guidance) according to policy.
 
 ### A.3 Source hierarchy and confidence behavior
@@ -317,13 +323,14 @@ These remain deferred until later phases with approval-aware wiring.
 
 ## Appendix B — `DailyPlanPreview` section meanings
 
-| Section | Intent |
-|---------|--------|
-| **Today** | One-line synthesis of the day’s theme from top demands. |
-| **Before shift** | Prep that fits before core working hours. |
-| **During shift** | Execution focus tied to constraints. |
-| **After shift** | Wind-down: notes, tomorrow seed, low-energy tasks. |
-| **Top priorities** | Bulleted ordered list. |
-| **Constraints** | Calendar + life + system limits. |
-| **Risks to watch** | Gaps, missing data, stale snapshots, dependency risk. |
-| **A good day looks like** | Human-readable success criteria—not metrics gaming. |
+
+| Section                   | Intent                                                  |
+| ------------------------- | ------------------------------------------------------- |
+| **Today**                 | One-line synthesis of the day’s theme from top demands. |
+| **Before shift**          | Prep that fits before core working hours.               |
+| **During shift**          | Execution focus tied to constraints.                    |
+| **After shift**           | Wind-down: notes, tomorrow seed, low-energy tasks.      |
+| **Top priorities**        | Bulleted ordered list.                                  |
+| **Constraints**           | Calendar + life + system limits.                        |
+| **Risks to watch**        | Gaps, missing data, stale snapshots, dependency risk.   |
+| **A good day looks like** | Human-readable success criteria—not metrics gaming.     |

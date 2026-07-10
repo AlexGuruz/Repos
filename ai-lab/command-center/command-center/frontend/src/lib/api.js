@@ -2,6 +2,24 @@ import { logDiagnostic } from './diagnostics'
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+async function readHttpError(r) {
+  try {
+    const text = await r.text()
+    if (!text) return `${r.status} ${r.statusText}`
+    try {
+      const j = JSON.parse(text)
+      const detail = j.detail ?? j.message ?? j.error
+      if (typeof detail === 'string') return detail
+      if (Array.isArray(detail)) return detail.map(d => d.msg || JSON.stringify(d)).join('; ')
+      return text.slice(0, 400)
+    } catch {
+      return text.slice(0, 400) || `${r.status} ${r.statusText}`
+    }
+  } catch {
+    return `${r.status} ${r.statusText}`
+  }
+}
+
 /**
  * @param {string} path
  * @param {object} body
@@ -35,8 +53,9 @@ async function post(path, body, opts = {}) {
   }
   if (tid) clearTimeout(tid)
   if (!r.ok) {
+    const msg = await readHttpError(r)
     logDiagnostic('api:error', { method: 'POST', path, status: r.status, statusText: r.statusText, duration_ms: Date.now() - startedAt })
-    throw new Error(`${r.status} ${r.statusText}`)
+    throw new Error(msg)
   }
   const data = await r.json()
   logDiagnostic('api:response', { method: 'POST', path, status: r.status, duration_ms: Date.now() - startedAt })
@@ -48,8 +67,9 @@ async function httpDelete(path) {
   const startedAt = Date.now()
   const r = await fetch(`${BASE}${path}`, { method: 'DELETE' })
   if (!r.ok) {
+    const msg = await readHttpError(r)
     logDiagnostic('api:error', { method: 'DELETE', path, status: r.status, duration_ms: Date.now() - startedAt })
-    throw new Error(`${r.status} ${r.statusText}`)
+    throw new Error(msg)
   }
   const data = await r.json()
   logDiagnostic('api:response', { method: 'DELETE', path, status: r.status, duration_ms: Date.now() - startedAt })
@@ -61,8 +81,9 @@ async function get(path) {
   const startedAt = Date.now()
   const r = await fetch(`${BASE}${path}`)
   if (!r.ok) {
+    const msg = await readHttpError(r)
     logDiagnostic('api:error', { method: 'GET', path, status: r.status, statusText: r.statusText, duration_ms: Date.now() - startedAt })
-    throw new Error(`${r.status} ${r.statusText}`)
+    throw new Error(msg)
   }
   const data = await r.json()
   logDiagnostic('api:response', { method: 'GET', path, status: r.status, duration_ms: Date.now() - startedAt })
@@ -175,4 +196,18 @@ export const api = {
   refreshPreparedContext: (snapshotType) => post(`/api/prepared-context/refresh/${encodeURIComponent(snapshotType)}`, {}),
   preparedContextRefresherStatus: () => get('/api/prepared-context/status/refresher'),
   growflowValidationStatus: () => get('/api/growflow/validation-status'),
+  retailHealth: () => get('/api/retail/health'),
+  retailDashboard: (runId) =>
+    get(runId ? `/api/retail/dashboard?run_id=${encodeURIComponent(runId)}` : '/api/retail/dashboard'),
+  retailStores: () => get('/api/retail/stores'),
+  retailRefresh: (body = {}) => post('/api/retail/refresh', body, { timeoutMs: 10000 }),
+  retailJob: (jobId) => get(`/api/retail/jobs/${encodeURIComponent(jobId)}`),
+  retailCapital: () => get('/api/retail/capital'),
+  retailCapitalScenario: (body = {}) => post('/api/retail/capital/scenario', body, { timeoutMs: 15000 }),
+  retailCapitalApprove: (approvalId) =>
+    post(`/api/retail/capital/scenario/${encodeURIComponent(approvalId)}/approve`, {}, { timeoutMs: 15000 }),
+  retailCapitalDeny: (approvalId) =>
+    post(`/api/retail/capital/scenario/${encodeURIComponent(approvalId)}/deny`, {}, { timeoutMs: 10000 }),
+  retailConsignment: () => get('/api/retail/consignment'),
+  retailReconciliation: () => get('/api/retail/reconciliation'),
 }

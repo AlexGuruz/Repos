@@ -1,6 +1,6 @@
 {
   "snapshot_type": "repo_pulse",
-  "generated_at": "2026-04-30T00:22:11Z",
+  "generated_at": "2026-06-25T14:10:29Z",
   "freshness_seconds": 3600,
   "source_files_or_tools": [
     "E:\\Repos",
@@ -14,11 +14,22 @@
   "data": {
     "changed_repos": [
       {
+        "repo": "Project-Kylo-feature-bank-normalizer-core-pr1",
+        "path": "E:\\Repos\\Project-Kylo-feature-bank-normalizer-core-pr1",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 3,
+        "recent_commits": [],
+        "last_modified_epoch": 1777564056.5,
+        "role": "unknown"
+      },
+      {
         "repo": "geomapper app",
         "path": "E:\\Repos\\geomapper app",
         "stale": true,
         "readme_present": true,
-        "readme_fresh": true,
+        "readme_fresh": false,
         "todo_fixme_count": 0,
         "recent_commits": [
           "09665ca Driver app Android project, route build scripts, and backend/driver portal updates.",
@@ -50,11 +61,7 @@
         "readme_present": true,
         "readme_fresh": false,
         "todo_fixme_count": 1,
-        "recent_commits": [
-          "12626bd Add comprehensive analysis document for Awesome n8n Templates repository",
-          "018f7d0 Merge pull request #26 from Lalimec/patch-1",
-          "6ce8d87 Merge pull request #25 from crazyyanchao/main"
-        ],
+        "recent_commits": [],
         "last_modified_epoch": 1757142568.18,
         "role": "unknown"
       },
@@ -110,11 +117,7 @@
         "readme_present": true,
         "readme_fresh": false,
         "todo_fixme_count": 1,
-        "recent_commits": [
-          "12626bd Add comprehensive analysis document for Awesome n8n Templates repository",
-          "018f7d0 Merge pull request #26 from Lalimec/patch-1",
-          "6ce8d87 Merge pull request #25 from crazyyanchao/main"
-        ],
+        "recent_commits": [],
         "last_modified_epoch": 1757142568.18,
         "role": "unknown"
       },
@@ -136,7 +139,7 @@
         "path": "E:\\Repos\\geomapper app",
         "stale": true,
         "readme_present": true,
-        "readme_fresh": true,
+        "readme_fresh": false,
         "todo_fixme_count": 0,
         "recent_commits": [
           "09665ca Driver app Android project, route build scripts, and backend/driver portal updates.",
@@ -160,20 +163,34 @@
         ],
         "last_modified_epoch": 1773120833.48,
         "role": "unknown"
+      },
+      {
+        "repo": "Project-Kylo-feature-bank-normalizer-core-pr1",
+        "path": "E:\\Repos\\Project-Kylo-feature-bank-normalizer-core-pr1",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 3,
+        "recent_commits": [],
+        "last_modified_epoch": 1777564056.5,
+        "role": "unknown"
       }
     ],
     "docs_needing_updates": [
       "activepieces",
       "awesome-n8n-templates",
       "BMAD-METHOD",
-      "Greg-Kylo"
+      "geomapper app",
+      "Greg-Kylo",
+      "Project-Kylo-feature-bank-normalizer-core-pr1"
     ],
     "readme_freshness": {
       "activepieces": false,
       "awesome-n8n-templates": false,
       "BMAD-METHOD": false,
-      "geomapper app": true,
-      "Greg-Kylo": false
+      "geomapper app": false,
+      "Greg-Kylo": false,
+      "Project-Kylo-feature-bank-normalizer-core-pr1": false
     },
     "repos": [
       {
@@ -198,11 +215,7 @@
         "readme_present": true,
         "readme_fresh": false,
         "todo_fixme_count": 1,
-        "recent_commits": [
-          "12626bd Add comprehensive analysis document for Awesome n8n Templates repository",
-          "018f7d0 Merge pull request #26 from Lalimec/patch-1",
-          "6ce8d87 Merge pull request #25 from crazyyanchao/main"
-        ],
+        "recent_commits": [],
         "last_modified_epoch": 1757142568.18,
         "role": "unknown"
       },
@@ -224,7 +237,7 @@
         "path": "E:\\Repos\\geomapper app",
         "stale": true,
         "readme_present": true,
-        "readme_fresh": true,
+        "readme_fresh": false,
         "todo_fixme_count": 0,
         "recent_commits": [
           "09665ca Driver app Android project, route build scripts, and backend/driver portal updates.",
@@ -248,10 +261,21 @@
         ],
         "last_modified_epoch": 1773120833.48,
         "role": "unknown"
+      },
+      {
+        "repo": "Project-Kylo-feature-bank-normalizer-core-pr1",
+        "path": "E:\\Repos\\Project-Kylo-feature-bank-normalizer-core-pr1",
+        "stale": true,
+        "readme_present": true,
+        "readme_fresh": false,
+        "todo_fixme_count": 3,
+        "recent_commits": [],
+        "last_modified_epoch": 1777564056.5,
+        "role": "unknown"
       }
     ]
   },
-  "summary_short": "Repo pulse built for 5 repos.",
+  "summary_short": "Repo pulse built for 6 repos.",
   "summary_detailed": "Tracks changed repos, stale repos, docs freshness, TODO/FIXME density, and recent commits where available.",
   "suggested_questions": [
     "what changed recently?",
@@ -261,37 +285,44 @@
   ],
   "evidence_items": [
     {
+      "title": "Repo pulse: Project-Kylo-feature-bank-normalizer-core-pr1",
+      "source_path_or_tool": "E:\\Repos\\Project-Kylo-feature-bank-normalizer-core-pr1",
+      "observed_at": "2026-06-25T14:10:29Z",
+      "summary": "readme_fresh=False stale=True todo_fixme=3",
+      "confidence": 0.8
+    },
+    {
       "title": "Repo pulse: geomapper app",
       "source_path_or_tool": "E:\\Repos\\geomapper app",
-      "observed_at": "2026-04-30T00:22:11Z",
-      "summary": "readme_fresh=True stale=True todo_fixme=0",
+      "observed_at": "2026-06-25T14:10:29Z",
+      "summary": "readme_fresh=False stale=True todo_fixme=0",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: Greg-Kylo",
       "source_path_or_tool": "E:\\Repos\\Greg-Kylo",
-      "observed_at": "2026-04-30T00:22:11Z",
+      "observed_at": "2026-06-25T14:10:29Z",
       "summary": "readme_fresh=False stale=True todo_fixme=0",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: awesome-n8n-templates",
       "source_path_or_tool": "E:\\Repos\\awesome-n8n-templates",
-      "observed_at": "2026-04-30T00:22:11Z",
+      "observed_at": "2026-06-25T14:10:29Z",
       "summary": "readme_fresh=False stale=True todo_fixme=1",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: activepieces",
       "source_path_or_tool": "E:\\Repos\\activepieces",
-      "observed_at": "2026-04-30T00:22:11Z",
+      "observed_at": "2026-06-25T14:10:29Z",
       "summary": "readme_fresh=False stale=True todo_fixme=0",
       "confidence": 0.8
     },
     {
       "title": "Repo pulse: BMAD-METHOD",
       "source_path_or_tool": "E:\\Repos\\BMAD-METHOD",
-      "observed_at": "2026-04-30T00:22:11Z",
+      "observed_at": "2026-06-25T14:10:29Z",
       "summary": "readme_fresh=False stale=True todo_fixme=0",
       "confidence": 0.8
     }
