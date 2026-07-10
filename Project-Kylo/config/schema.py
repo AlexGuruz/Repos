@@ -8,7 +8,7 @@ older deploys, but required fields are validated explicitly.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
@@ -26,6 +26,10 @@ class RuntimeConfig(BaseModel):
     dry_run: bool = Field(default=False)
     log_level: str = Field(default="INFO", min_length=1)
     timezone: str = Field(default="America/Chicago", min_length=1)
+    mode: Literal["audit", "post"] = Field(
+        default="audit",
+        description="audit = forensic only; post = legacy posting",
+    )
     watch_interval_secs: int = Field(default=300, ge=1)
     watch_jitter_secs: int = Field(default=15, ge=0)
     circuit_breaker: Optional[CircuitBreakerConfig] = None
