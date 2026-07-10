@@ -8,9 +8,9 @@ Phase 3 implementation completed on new rig. Vault templates created, deploy tar
 
 ## Links
 
-- [[phase2_summary]] - Phase 2 implementation summary
-- [[../30_infra/hosts/oldrig|oldrig]] - Legacy worker node host note
-- [[../30_infra/hosts/newrig|newrig]] - New orchestrator node host note
+- [[_ops/agent-output/phase2_summary|phase2_summary]] - Phase 2 implementation summary
+- [[30_infra/hosts/oldrig|oldrig]] - Legacy worker node host note
+- [[30_infra/hosts/newrig|newrig]] - New orchestrator node host note
 
 ## Vault Templates
 

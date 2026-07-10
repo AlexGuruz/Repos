@@ -8,10 +8,10 @@ Phase 3A implementation completed on new rig. Deploy targets registry updated wi
 
 ## Links
 
-- [[phase3_summary]] - Phase 3 implementation summary
-- [[../30_infra/hosts/oldrig|oldrig]] - Legacy worker node host note
-- [[../30_infra/hosts/newrig|newrig]] - New orchestrator node host note
-- [[../30_infra/watchers/supervisor|Supervisor Watcher]] - Supervisor watcher documentation
+- [[_ops/agent-output/phase3_summary|phase3_summary]] - Phase 3 implementation summary
+- [[30_infra/hosts/oldrig|oldrig]] - Legacy worker node host note
+- [[30_infra/hosts/newrig|newrig]] - New orchestrator node host note
+- [[30_infra/watchers/supervisor|Supervisor Watcher]] - Supervisor watcher documentation
 
 ## Deploy Targets Registry Updates
 

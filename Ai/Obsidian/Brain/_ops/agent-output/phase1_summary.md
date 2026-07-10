@@ -8,9 +8,9 @@ Phase 1 implementation completed on new rig. All remote-operable items have been
 
 ## Links
 
-- [[phase0_gate]] - Phase 0 gate criteria validation
-- [[oldrig]] - Legacy worker node host note
-- [[newrig]] - New orchestrator node host note
+- [[_ops/agent-output/phase0_gate|phase0_gate]] - Phase 0 gate criteria validation
+- [[30_infra/hosts/oldrig|oldrig]] - Legacy worker node host note
+- [[30_infra/hosts/newrig|newrig]] - New orchestrator node host note
 
 ## Created Infrastructure
 

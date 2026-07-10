@@ -71,7 +71,7 @@ C:\worker\ops\oldrig\supervisor-start.ps1
 - Runs Worker-Agents scheduled task
 
 ## Related
-- [[index|Watchers Index]]
-- [[../hosts/oldrig|Oldrig]]
-- [[../hosts/newrig|Newrig]]
-- [[../../_ops/telemetry/supervisor_status|Supervisor Status Snapshot]]
+- [[30_infra/watchers/index|Watchers Index]]
+- [[30_infra/hosts/oldrig|Oldrig]]
+- [[30_infra/hosts/newrig|Newrig]]
+- [[_ops/telemetry/supervisor_status|Supervisor Status Snapshot]]

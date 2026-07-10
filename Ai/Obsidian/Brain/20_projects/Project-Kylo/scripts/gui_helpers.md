@@ -4,7 +4,7 @@ type: project-subfolder
 repo_path: E:\Repos\Project-Kylo\scripts\gui_helpers
 relative_path: scripts/gui_helpers
 created: 2026-02-06 17:06
-updated: 2026-02-06 17:06
+updated: 2026-05-28
 ---
 
 # scripts / gui_helpers
@@ -14,4 +14,7 @@ Folder in Project-Kylo repo.
 **Repo path:** `E:\Repos\Project-Kylo\scripts\gui_helpers`
 
 ## Related
-- [[Project-Kylo|Project Hub]]
+- [[Brain Home]]
+- [[20_projects/index|All projects]]
+- [[20_projects/Project-Kylo|Project-Kylo]]
+- [[20_projects/Project-Kylo/scripts|scripts]]

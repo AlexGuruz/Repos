@@ -51,5 +51,5 @@ After restart, verify:
 
 ## Related
 
-- [[phase3a_summary|Phase 3A Summary]]
-- [[../30_infra/watchers/supervisor|Supervisor Watcher]]
+- [[_ops/agent-output/phase3a_summary|Phase 3A Summary]]
+- [[30_infra/watchers/supervisor|Supervisor Watcher]]

@@ -4,7 +4,7 @@ type: project-subfolder
 repo_path: E:\Repos\Project-Kylo\.kylo\sync
 relative_path: .kylo/sync
 created: 2026-02-06 17:06
-updated: 2026-02-06 17:06
+updated: 2026-05-28
 ---
 
 # .kylo / sync
@@ -14,4 +14,7 @@ Folder in Project-Kylo repo.
 **Repo path:** `E:\Repos\Project-Kylo\.kylo\sync`
 
 ## Related
-- [[Project-Kylo|Project Hub]]
+- [[Brain Home]]
+- [[20_projects/index|All projects]]
+- [[20_projects/Project-Kylo|Project-Kylo]]
+- [[20_projects/Project-Kylo/.kylo|.kylo]]

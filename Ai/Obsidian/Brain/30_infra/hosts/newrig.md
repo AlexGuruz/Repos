@@ -31,6 +31,6 @@ C:\worker\logs\phase1_newrig.log
 ```
 
 ## Related
-- [[oldrig]]
-- [[phase0_gate]]
-- [[phase1_summary]]
+- [[30_infra/hosts/oldrig|oldrig]]
+- [[_ops/agent-output/phase0_gate|phase0_gate]]
+- [[_ops/agent-output/phase1_summary|phase1_summary]]

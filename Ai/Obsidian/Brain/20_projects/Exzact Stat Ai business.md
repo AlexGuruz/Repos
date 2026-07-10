@@ -3,7 +3,7 @@ project_name: Exzact Stat Ai business
 type: core-project
 status: active
 created: 2026-02-06
-updated: 2026-02-06
+updated: 2026-05-28
 ---
 
 # Exzact Stat Ai business
@@ -13,8 +13,20 @@ Business/investor materials for Exzact Stat AI.
 
 ## Project Notes
 <!-- Add links to project-specific notes as they are created -->
+_No subfolder notes yet._
+
+## Vault
+- [[Brain Home]]
+- [[20_projects/index|All projects]]
+
+## Vault
+- [[Brain Home]]
+- [[20_projects/index|All projects]]
 
 ## Repo Structure
+
+
+
 
 
 
@@ -37,4 +49,4 @@ Business/investor materials for Exzact Stat AI.
 <!-- CHANGELOG_END -->
 
 ## Related
-- [[index|Projects Index]]
+- [[20_projects/index|Projects Index]]

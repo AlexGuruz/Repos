@@ -3,7 +3,7 @@ project_name: Project-Kylo
 type: core-project
 status: active
 created: 2026-02-06
-updated: 2026-02-06
+updated: 2026-05-28
 ---
 
 # Project-Kylo
@@ -13,124 +13,39 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 
 ## Project Notes
 <!-- Add links to project-specific notes as they are created -->
-- [[20_projects/Project-Kylo/.secrets]]
-- [[20_projects/Project-Kylo/_archive/2026-01-27/root_scripts]]
-- [[20_projects/Project-Kylo/_archive/2026-01-27]]
-- [[20_projects/Project-Kylo/_archive]]
-- [[20_projects/Project-Kylo/tools/scripthub/do_not_delete/config]]
-- [[20_projects/Project-Kylo/tools/scripthub/do_not_delete/src]]
-- [[20_projects/Project-Kylo/tools/scripthub/do_not_delete/scripts]]
-- [[20_projects/Project-Kylo/tools/scripthub/do_not_delete]]
-- [[20_projects/Project-Kylo/tools/scripthub]]
-- [[20_projects/Project-Kylo/tools/logs]]
-- [[20_projects/Project-Kylo/tools/scripthub_legacy/config]]
-- [[20_projects/Project-Kylo/tools/scripthub_legacy/logs]]
-- [[20_projects/Project-Kylo/tools/scripthub_legacy/src]]
-- [[20_projects/Project-Kylo/tools/scripthub_legacy]]
-- [[20_projects/Project-Kylo/tools/ops_oneoffs]]
-- [[20_projects/Project-Kylo/tools/tests_manual]]
-- [[20_projects/Project-Kylo/tools/debug]]
-- [[20_projects/Project-Kylo/tools]]
-- [[20_projects/Project-Kylo/archive/docs/User REF]]
-- [[20_projects/Project-Kylo/archive/docs/FINAL-SORTER]]
-- [[20_projects/Project-Kylo/archive/docs/planning]]
-- [[20_projects/Project-Kylo/archive/docs/upgrades]]
-- [[20_projects/Project-Kylo/archive/docs]]
-- [[20_projects/Project-Kylo/archive/data]]
-- [[20_projects/Project-Kylo/archive]]
-- [[20_projects/Project-Kylo/kylo-dashboard/public]]
-- [[20_projects/Project-Kylo/kylo-dashboard/src/components]]
-- [[20_projects/Project-Kylo/kylo-dashboard/src/services]]
-- [[20_projects/Project-Kylo/kylo-dashboard/src/hooks]]
-- [[20_projects/Project-Kylo/kylo-dashboard/src/types]]
-- [[20_projects/Project-Kylo/kylo-dashboard/src]]
-- [[20_projects/Project-Kylo/kylo-dashboard/electron]]
-- [[20_projects/Project-Kylo/kylo-dashboard]]
-- [[20_projects/Project-Kylo/project_kylo.egg-info]]
-- [[20_projects/Project-Kylo/kylo]]
-- [[20_projects/Project-Kylo/syncthing_monitor]]
-- [[20_projects/Project-Kylo/tests]]
-- [[20_projects/Project-Kylo/workflows/telemetry]]
-- [[20_projects/Project-Kylo/workflows/n8n]]
-- [[20_projects/Project-Kylo/workflows]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2026/state]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2026/health]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2026/logs]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2026]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2025/state]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2025/health]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2025/logs]]
-- [[20_projects/Project-Kylo/.kylo/instances/KYLO_2025]]
-- [[20_projects/Project-Kylo/.kylo/instances/kylo/health]]
-- [[20_projects/Project-Kylo/.kylo/instances/kylo]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2026/tmp]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2026/health]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2026/state]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2026/logs]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2026]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2025/tmp]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2025/health]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2025/state]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2025/logs]]
-- [[20_projects/Project-Kylo/.kylo/instances/JGD_2025]]
-- [[20_projects/Project-Kylo/.kylo/instances]]
-- [[20_projects/Project-Kylo/.kylo/ops]]
-- [[20_projects/Project-Kylo/.kylo/sync]]
-- [[20_projects/Project-Kylo/.kylo/hub]]
-- [[20_projects/Project-Kylo/.kylo/health]]
-- [[20_projects/Project-Kylo/.kylo/startup]]
-- [[20_projects/Project-Kylo/.kylo]]
-- [[20_projects/Project-Kylo/telemetry]]
-- [[20_projects/Project-Kylo/services/ops]]
-- [[20_projects/Project-Kylo/services/state]]
-- [[20_projects/Project-Kylo/services/posting]]
-- [[20_projects/Project-Kylo/services/rules]]
-- [[20_projects/Project-Kylo/services/webhook]]
-- [[20_projects/Project-Kylo/services/triage]]
-- [[20_projects/Project-Kylo/services/sheets]]
-- [[20_projects/Project-Kylo/services/rules_promoter]]
-- [[20_projects/Project-Kylo/services/rules_loader]]
-- [[20_projects/Project-Kylo/services/replay]]
-- [[20_projects/Project-Kylo/services/n8n/workflows]]
-- [[20_projects/Project-Kylo/services/n8n]]
-- [[20_projects/Project-Kylo/services/mover]]
-- [[20_projects/Project-Kylo/services/intake]]
-- [[20_projects/Project-Kylo/services/common]]
-- [[20_projects/Project-Kylo/services/bus]]
-- [[20_projects/Project-Kylo/services]]
-- [[20_projects/Project-Kylo/scripts/active/config]]
-- [[20_projects/Project-Kylo/scripts/active/gui_helpers]]
-- [[20_projects/Project-Kylo/scripts/active]]
-- [[20_projects/Project-Kylo/scripts/config]]
-- [[20_projects/Project-Kylo/scripts/gui_helpers]]
-- [[20_projects/Project-Kylo/scripts]]
-- [[20_projects/Project-Kylo/scaffold/tools]]
-- [[20_projects/Project-Kylo/scaffold/tests/intake]]
-- [[20_projects/Project-Kylo/scaffold/tests/unit]]
-- [[20_projects/Project-Kylo/scaffold/tests/triage]]
-- [[20_projects/Project-Kylo/scaffold/tests/sheets]]
-- [[20_projects/Project-Kylo/scaffold/tests/mover]]
-- [[20_projects/Project-Kylo/scaffold/tests]]
-- [[20_projects/Project-Kylo/scaffold/pipeline/template]]
-- [[20_projects/Project-Kylo/scaffold/pipeline]]
-- [[20_projects/Project-Kylo/scaffold]]
-- [[20_projects/Project-Kylo/layout]]
-- [[20_projects/Project-Kylo/docs/runbooks]]
-- [[20_projects/Project-Kylo/docs/n8n]]
-- [[20_projects/Project-Kylo/docs]]
-- [[20_projects/Project-Kylo/db/rules_snapshots]]
-- [[20_projects/Project-Kylo/db/tmp_rules]]
-- [[20_projects/Project-Kylo/db/ddl]]
-- [[20_projects/Project-Kylo/db]]
-- [[20_projects/Project-Kylo/data/layouts]]
-- [[20_projects/Project-Kylo/data]]
-- [[20_projects/Project-Kylo/config/instances]]
-- [[20_projects/Project-Kylo/config/companies]]
-- [[20_projects/Project-Kylo/config]]
-- [[20_projects/Project-Kylo/bin]]
-- [[20_projects/Project-Kylo/.github/workflows]]
-- [[20_projects/Project-Kylo/.github]]
+- [[20_projects/Project-Kylo/.github|.github]]
+- [[20_projects/Project-Kylo/.kylo|.kylo]]
+- [[20_projects/Project-Kylo/.secrets|.secrets]]
+- [[20_projects/Project-Kylo/_archive|_archive]]
+- [[20_projects/Project-Kylo/archive|archive]]
+- [[20_projects/Project-Kylo/bin|bin]]
+- [[20_projects/Project-Kylo/clients|clients]]
+- [[20_projects/Project-Kylo/config|config]]
+- [[20_projects/Project-Kylo/data|data]]
+- [[20_projects/Project-Kylo/db|db]]
+- [[20_projects/Project-Kylo/docs|docs]]
+- [[20_projects/Project-Kylo/kylo|kylo]]
+- [[20_projects/Project-Kylo/kylo-dashboard|kylo-dashboard]]
+- [[20_projects/Project-Kylo/layout|layout]]
+- [[20_projects/Project-Kylo/project_kylo.egg-info|project_kylo.egg-info]]
+- [[20_projects/Project-Kylo/scaffold|scaffold]]
+- [[20_projects/Project-Kylo/scripts|scripts]]
+- [[20_projects/Project-Kylo/services|services]]
+- [[20_projects/Project-Kylo/syncthing_monitor|syncthing_monitor]]
+- [[20_projects/Project-Kylo/telemetry|telemetry]]
+- [[20_projects/Project-Kylo/tests|tests]]
+- [[20_projects/Project-Kylo/tools|tools]]
+- [[20_projects/Project-Kylo/workflows|workflows]]
+
+## Vault
+- [[Brain Home]]
+- [[20_projects/index|All projects]]
+
 ## Repo Structure
+
+
+
+
 
 
 
@@ -307,6 +222,22 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |   |-- verify_sheets_directly.py
 |   |-- watch.ps1
 |   +-- watch_all.py
+|-- clients
+|   +-- gigatt
+|       |-- apps_script
+|       |   |-- registry_sync.gs
+|       |   +-- webhook_sync.gs
+|       |-- exports
+|       |-- google
+|       |   +-- sheet_config.json
+|       |-- incoming
+|       |-- logs
+|       |-- processed
+|       |-- rules
+|       |   |-- category_rules.csv
+|       |   |-- merchant_aliases.csv
+|       |   +-- rules.csv
+|       +-- config.yaml
 |-- config
 |   |-- companies
 |   |   |-- EMPIRE.yaml
@@ -386,6 +317,7 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |   |   |-- PROTOCOL_VERIFICATION_REPORT.md
 |   |   |-- README_KAFKA_SETUP.md
 |   |   +-- SYSTEM_REVIEW_SUMMARY.md
+|   |-- CLIENT_SLOTS.md
 |   |-- CSV_INTAKE.md
 |   |-- DRY_RUN_CHECKLIST.md
 |   |-- EXECUTIVE_SUMMARY.md
@@ -401,18 +333,28 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |   |-- SNAPSHOT_TOOL_SPEC.md
 |   |-- TECHNICAL_APPENDIX.md
 |   |-- TELEMETRY_WORKFLOW.md
+|   |-- WORKER_AI_STATUS.md
+|   |-- WORKER_ASSISTANT.md
 |   |-- workflow.md
 |   |-- WORKFLOW_VERIFICATION_GUIDE.md
 |   |-- WORKSHEET_ARCHITECTURE.md
 |   +-- WORKSHEET_QUICK_REFERENCE.md
 |-- kylo
+|   |-- core
+|   |   +-- __init__.py
+|   |-- db
+|   |-- sheets
+|   |   |-- __init__.py
+|   |   +-- helpers.py
 |   |-- __init__.py
 |   |-- __main__.py
 |   |-- cli.py
+|   |-- client_cli.py
 |   |-- config_validate.py
 |   |-- hub.py
 |   |-- watcher.py
-|   +-- watcher_runtime.py
+|   |-- watcher_runtime.py
+|   +-- workspace.py
 |-- kylo-dashboard
 |   |-- electron
 |   |   |-- main.ts
@@ -475,6 +417,8 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |   |   |   |-- test_mover_watermark_outbox.py
 |   |   |   |-- test_rules_snapshot.py
 |   |   |   +-- test_watermark_outbox.py
+|   |   |-- posting
+|   |   |   +-- test_source_tab_fill.py
 |   |   |-- sheets
 |   |   |   +-- test_poster.py
 |   |   |-- triage
@@ -545,8 +489,10 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |   |   |-- stop_all_services.ps1
 |   |   |-- stop_hub.ps1
 |   |   +-- system_monitor.ps1
-|   |-- config
-|   |-- gui_helpers
+|   |-- worker_ai
+|   |   |-- drift_scan.ps1
+|   |   |-- run_drift_scan.ps1
+|   |   +-- start_tunnel.ps1
 |   |-- auto_start_kylo.ps1
 |   |-- auto_start_kylo_simple.ps1
 |   |-- bootstrap_fresh.ps1
@@ -577,7 +523,8 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |   |   |-- config_loader.py
 |   |   |-- instance.py
 |   |   |-- normalize.py
-|   |   +-- retry.py
+|   |   |-- retry.py
+|   |   +-- rules_workbook.py
 |   |-- intake
 |   |   |-- __init__.py
 |   |   |-- csv_downloader.py
@@ -624,7 +571,6 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |   +-- monitor.py
 |-- telemetry
 |   +-- emitter.py
-|-- tests
 |-- tools
 |   |-- debug
 |   |   |-- benchmark_multi_watchers.py
@@ -2970,6 +2916,8 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |-- docker-compose.yml
 |-- Dockerfile.kafka-consumer
 |-- FRESH_RIG.md
+|-- kylo.py
+|-- KYLO_AUTONOMOUS_NORMALIZATION_DISCOVERY_REPORT.md
 |-- MAINTENANCE.md
 |-- pg_hba_fixed.conf
 |-- Project-Kylo.code-workspace
@@ -2980,6 +2928,7 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 |-- requirements.txt
 |-- requirements-kafka.txt
 |-- restart_all_services.ps1
+|-- setup_client.py
 |-- setup_db.py
 |-- start_all_services.ps1
 |-- start_all_services_with_logs.ps1
@@ -2992,4 +2941,4 @@ Main processing system — petty cash, BANK, transactions, watchers, posting to 
 <!-- CHANGELOG_END -->
 
 ## Related
-- [[index|Projects Index]]
+- [[20_projects/index|Projects Index]]

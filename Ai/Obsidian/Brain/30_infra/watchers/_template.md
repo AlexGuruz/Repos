@@ -32,6 +32,6 @@ Brief description of what this watcher monitors.
 - **Notification Method**: 
 
 ## Related
-- [[index|Watchers Index]]
-- [[oldrig]]
-- [[newrig]]
+- [[30_infra/watchers/index|Watchers Index]]
+- [[30_infra/hosts/oldrig|oldrig]]
+- [[30_infra/hosts/newrig|newrig]]

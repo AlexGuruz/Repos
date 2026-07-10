@@ -1,17 +1,20 @@
 # Watchers Index
 
 ## Overview
+
+Vault map: [[Brain Home]]
+
 This directory contains watcher configurations for monitoring infrastructure components.
 
 ## Watchers
 
-- [[repo_obsidian_sync]] - Monitors E:\Repos and syncs file trees to Obsidian project notes
-- [[supervisor|Supervisor]] - Monitors supervisor system on oldrig (Worker-Agents, Worker-Watchdog)
+- [[30_infra/watchers/repo_obsidian_sync|repo_obsidian_sync]] - Monitors E:\Repos and syncs file trees to Obsidian project notes
+- [[30_infra/watchers/supervisor|Supervisor]] - Monitors supervisor system on oldrig (Worker-Agents, Worker-Watchdog)
 
 ## Template
-- [[_template|Watcher Template]]
+- [[30_infra/watchers/_template|Watcher Template]]
 
 ## Related
-- [[../docker/index|Docker Stacks]]
-- [[../hosts/oldrig|Oldrig]]
-- [[../hosts/newrig|Newrig]]
+- [[30_infra/docker/index|Docker Stacks]]
+- [[30_infra/hosts/oldrig|Oldrig]]
+- [[30_infra/hosts/newrig|Newrig]]

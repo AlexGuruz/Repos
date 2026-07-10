@@ -1,4 +1,4 @@
-﻿# Phase 0 Gate Criteria - Status Report
+# Phase 0 Gate Criteria - Status Report
 
 **Timestamp:** 2026-02-03 16:48:58
 

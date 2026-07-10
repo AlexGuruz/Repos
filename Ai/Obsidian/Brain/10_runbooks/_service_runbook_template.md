@@ -54,5 +54,5 @@ Brief description of the service and its purpose.
 **Resolution**: 
 
 ## Related
-- [[oldrig]]
-- [[newrig]]
+- [[30_infra/hosts/oldrig|oldrig]]
+- [[30_infra/hosts/newrig|newrig]]

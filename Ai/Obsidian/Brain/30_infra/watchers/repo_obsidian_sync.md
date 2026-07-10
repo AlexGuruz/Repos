@@ -5,7 +5,7 @@ target_type: filesystem-watcher
 check_interval: 2
 status: active
 created: 2026-02-06
-updated: 2026-02-06
+updated: 2026-05-28
 ---
 
 # Watcher: repo_obsidian_sync
@@ -112,7 +112,7 @@ powershell -File E:\Repos\_scripts\repo_obsidian_sync.ps1 -Backfill
 - **Syncing with old rig (WORKER-NODE)**: Use Syncthing over SSH. See [[_ops/syncthing-over-ssh-setup]]. Run `E:\Repos\_scripts\syncthing_ssh_tunnel.ps1` to start the tunnel.
 
 ## Related
-- [[index|Watchers Index]]
-- [[../20_projects/Gigatt Transport LLC|Gigatt Transport LLC]]
-- [[oldrig]]
-- [[newrig]]
+- [[30_infra/watchers/index|Watchers Index]]
+- [[20_projects/Gigatt Transport LLC|Gigatt Transport LLC]]
+- [[30_infra/hosts/oldrig|oldrig]]
+- [[30_infra/hosts/newrig|newrig]]

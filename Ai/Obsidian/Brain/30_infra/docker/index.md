@@ -1,6 +1,9 @@
 # Docker Stacks Index
 
 ## Overview
+
+Vault map: [[Brain Home]]
+
 This directory contains documentation for Docker stacks deployed across infrastructure.
 
 ## Stacks
@@ -9,9 +12,9 @@ This directory contains documentation for Docker stacks deployed across infrastr
 - No stacks documented yet
 
 ## Template
-- [[_stack_template|Stack Template]]
+- [[30_infra/docker/_stack_template|Stack Template]]
 
 ## Related
-- [[../watchers/index|Watchers]]
-- [[../hosts/oldrig|Oldrig]]
-- [[../hosts/newrig|Newrig]]
+- [[30_infra/watchers/index|Watchers]]
+- [[30_infra/hosts/oldrig|Oldrig]]
+- [[30_infra/hosts/newrig|Newrig]]

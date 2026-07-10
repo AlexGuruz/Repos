@@ -39,6 +39,6 @@ ssh oldrig docker compose -f /path/to/compose.yml ps
 ```
 
 ## Related
-- [[newrig]]
-- [[phase0_gate]]
-- [[phase1_summary]]
+- [[30_infra/hosts/newrig|newrig]]
+- [[_ops/agent-output/phase0_gate|phase0_gate]]
+- [[_ops/agent-output/phase1_summary|phase1_summary]]

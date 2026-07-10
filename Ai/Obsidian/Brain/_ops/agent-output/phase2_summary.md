@@ -8,10 +8,10 @@ Phase 2 implementation completed on new rig. Telemetry pull mechanism establishe
 
 ## Links
 
-- [[phase1_summary]] - Phase 1 implementation summary
-- [[phase0_gate]] - Phase 0 gate criteria validation
-- [[oldrig]] - Legacy worker node host note
-- [[newrig]] - New orchestrator node host note
+- [[_ops/agent-output/phase1_summary|phase1_summary]] - Phase 1 implementation summary
+- [[_ops/agent-output/phase0_gate|phase0_gate]] - Phase 0 gate criteria validation
+- [[30_infra/hosts/oldrig|oldrig]] - Legacy worker node host note
+- [[30_infra/hosts/newrig|newrig]] - New orchestrator node host note
 
 ## Telemetry System
 

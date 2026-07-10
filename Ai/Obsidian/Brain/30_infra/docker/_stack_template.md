@@ -33,6 +33,6 @@ Brief description of this Docker stack and its purpose.
 - **Last Checked**: 
 
 ## Related
-- [[index|Docker Stacks Index]]
-- [[oldrig]]
-- [[newrig]]
+- [[30_infra/docker/index|Docker Stacks Index]]
+- [[30_infra/hosts/oldrig|oldrig]]
+- [[30_infra/hosts/newrig|newrig]]

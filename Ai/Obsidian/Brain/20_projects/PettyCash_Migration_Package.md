@@ -3,7 +3,7 @@ project_name: PettyCash_Migration_Package
 type: core-project
 status: active
 created: 2026-02-06
-updated: 2026-02-06
+updated: 2026-05-28
 ---
 
 # PettyCash_Migration_Package
@@ -13,28 +13,20 @@ Petty cash sorter — Google Sheets integration, transaction processing, rules, 
 
 ## Project Notes
 <!-- Add links to project-specific notes as they are created -->
-- [[20_projects/PettyCash_Migration_Package/PettyCash/logs]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/LOCKDOWN/BACKUPS/backup_20250721_212632/config]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/LOCKDOWN/BACKUPS/backup_20250721_212632]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/LOCKDOWN/BACKUPS/backup_20250721_212527/config]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/LOCKDOWN/BACKUPS/backup_20250721_212527]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/LOCKDOWN/BACKUPS]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/LOCKDOWN]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/exports]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/zero_amount_transactions]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/processed_transactions/csv_files/PUFFIN]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/processed_transactions/csv_files/NUGZ]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/processed_transactions/csv_files/JGD]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/processed_transactions/csv_files]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/processed_transactions]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/processed_data]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data/downloaded_csv]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/data]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/config]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/backup_original_config/config]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash/backup_original_config]]
-- [[20_projects/PettyCash_Migration_Package/PettyCash]]
+- [[20_projects/PettyCash_Migration_Package/PettyCash|PettyCash]]
+
+## Vault
+- [[Brain Home]]
+- [[20_projects/index|All projects]]
+
+## Vault
+- [[Brain Home]]
+- [[20_projects/index|All projects]]
+
 ## Repo Structure
+
+
+
 
 
 
@@ -65,8 +57,6 @@ Petty cash sorter — Google Sheets integration, transaction processing, rules, 
 |   |   |-- tree_optimization_config.json
 |   |   +-- widget_config.json
 |   |-- data
-|   |   |-- downloaded_csv
-|   |   |-- processed_data
 |   |   |-- processed_transactions
 |   |   |   |-- csv_files
 |   |   |   |   |-- JGD
@@ -91,7 +81,6 @@ Petty cash sorter — Google Sheets integration, transaction processing, rules, 
 |   |   |   |       |-- 2025_04_transactions.csv
 |   |   |   |       +-- 2025_05_transactions.csv
 |   |   |   +-- filing_system.db
-|   |   |-- zero_amount_transactions
 |   |   |-- header_monitor.db
 |   |   |-- last_check.json
 |   |   +-- real_data_analysis.json
@@ -391,4 +380,4 @@ Petty cash sorter — Google Sheets integration, transaction processing, rules, 
 <!-- CHANGELOG_END -->
 
 ## Related
-- [[index|Projects Index]]
+- [[20_projects/index|Projects Index]]
