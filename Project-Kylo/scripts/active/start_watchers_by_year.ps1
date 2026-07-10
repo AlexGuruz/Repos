@@ -47,6 +47,8 @@ Set-Location '$RepoRoot'
 `$env:KYLO_CONFIG_PATH = 'config/global.yaml'
 `$env:KYLO_ACTIVE_YEARS = '$Year'
 `$env:KYLO_WATCH_INTERVAL_SECS = '$IntervalSecs'
+`$env:KYLO_READ_ONLY = '1'
+`$env:KYLO_RUNTIME_MODE = 'audit'
 `$env:PYTHONUNBUFFERED = '1'
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent '$logPath') | Out-Null
 Write-Host \"=== Kylo Watcher $instanceId ($WatcherName) ===\" -ForegroundColor Cyan

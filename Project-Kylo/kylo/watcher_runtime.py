@@ -19,6 +19,7 @@ from services.common.instance import (
     default_watch_state_path,
     get_instance_id,
     get_watcher_name,
+    instance_logs_dir,
     legacy_posting_state_path,
     legacy_watch_state_path,
     migrate_legacy_file,
@@ -27,6 +28,7 @@ from services.intake.csv_downloader import download_petty_cash_csv
 from services.ops.heartbeat import Heartbeat, write_heartbeat
 from services.rules.jgdtruth_provider import fetch_rules_from_jgdtruth
 from services.sheets.poster import _extract_spreadsheet_id
+from services.audit.tick import is_audit_mode, run_audit_tick
 
 #
 # IMPORTANT:
@@ -191,6 +193,28 @@ def intake_checksum(cfg, company: str) -> str:
 
 def tick_once(companies: List[str]) -> Dict[str, Any]:
     cfg = load_config()
+    instance_id = (os.environ.get("KYLO_INSTANCE_ID") or "").strip()
+    audit_mode = is_audit_mode(cfg)
+
+    # Forensic audit runs every tick (snapshots, row diffs, highlights) — before posting logic.
+    audit_summary: Dict[str, Any] = {}
+    try:
+        post_state_path = os.environ.get("KYLO_STATE_PATH")
+        if not post_state_path and instance_id:
+            post_state_path = str(default_posting_state_path(instance_id))
+        elif not post_state_path:
+            post_state_path = ".kylo/state.json"
+        audit_summary = run_audit_tick(
+            cfg,
+            companies,
+            instance_id=instance_id or "kylo",
+            watch_state_path=WATCH_STATE_PATH,
+            posting_state_path=post_state_path,
+        )
+    except Exception as e:
+        print(f"[AUDIT] ERROR audit tick failed: {e}")
+        audit_summary = {"error": str(e)}
+
     state = _load_state()
     # state schema (v2+):
     # - seen.{cid}.rules/intake: latest observed checksums
@@ -240,11 +264,10 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
             if prev_rules != rsum:
                 rules_changed_companies.append(cid)
 
-    # Safe mode / kill switches (env vars)
-    read_only = os.environ.get("KYLO_READ_ONLY", "").strip().lower() in ("1", "true", "yes", "y")
-    disable_instances_raw = (os.environ.get("KYLO_DISABLE_POSTING_FOR", "") or "").strip()
-    disable_companies_raw = (os.environ.get("KYLO_DISABLE_POSTING_COMPANIES", "") or "").strip()
-    instance_id = (os.environ.get("KYLO_INSTANCE_ID", "") or "").strip()
+    # Safe mode / kill switches (env vars). Audit mode never posts transactions.
+    read_only = audit_mode or os.environ.get("KYLO_READ_ONLY", "").strip().lower() in ("1", "true", "yes", "y")
+    disable_instances_raw = (os.environ.get("KYLO_DISABLE_POSTING_FOR") or "").strip()
+    disable_companies_raw = (os.environ.get("KYLO_DISABLE_POSTING_COMPANIES") or "").strip()
     company_key = instance_id.split(":", 1)[0].split("_", 1)[0].strip().upper() if instance_id else ""
     disabled = False
     disabled_reason = None
@@ -287,11 +310,23 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
             paused_active = False
 
     change_detected = bool(changed)
-    should_post = change_detected and (not read_only) and (not disabled) and (not paused_active)
+    post_apply = bool(cfg.get("posting.sheets.apply", False))
+    should_post = (
+        change_detected
+        and post_apply
+        and (not read_only)
+        and (not audit_mode)
+        and (not disabled)
+        and (not paused_active)
+    )
     posting_attempted = bool(should_post)
     posting_skipped_reason: str | None = None
     if not change_detected:
         posting_skipped_reason = "no_changes"
+    elif audit_mode:
+        posting_skipped_reason = "audit_mode"
+    elif not post_apply:
+        posting_skipped_reason = "posting_disabled_config"
     elif read_only:
         posting_skipped_reason = "read_only"
     elif disabled:
@@ -345,10 +380,12 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
     return {
         "changed": changed,
         "summaries": summaries,
+        "audit_summary": audit_summary,
         "change_detected": change_detected,
         "posting_attempted": posting_attempted,
         "posting_skipped_reason": posting_skipped_reason,
         "read_only": read_only,
+        "audit_mode": audit_mode,
         "posting_disabled": disabled,
         "posting_disabled_reason": disabled_reason,
         "circuit_breaker_paused_until": paused_until if paused_active else "",
@@ -434,6 +471,7 @@ def main(argv: list[str] | None = None) -> int:
         active_cfg = cfg.get("year_workbooks_active")
         active_effective = _active_years(cfg)
         post_apply = bool(cfg.get("posting.sheets.apply", False))
+        audit_mode = is_audit_mode(cfg)
         if os.environ.get("KYLO_STATE_PATH"):
             post_state_path = os.environ.get("KYLO_STATE_PATH", ".kylo/state.json")
         elif instance_id:
@@ -448,7 +486,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[WATCH] instance_id={instance_id}")
         print(f"[WATCH] watch_state={WATCH_STATE_PATH}")
         print(f"[WATCH] posting_state={post_state_path}")
+        print(f"[WATCH] runtime.mode={'audit' if audit_mode else 'post'}")
         print(f"[WATCH] posting.sheets.apply={post_apply}")
+        print(f"[WATCH] audit_log={instance_logs_dir(instance_id) / 'audit.log' if instance_id else '.kylo/audit.log'}")
         print(f"[WATCH] active_years env='{active_env or '<unset>'}' cfg={active_cfg} effective={active_effective}")
     except Exception:
         pass
@@ -536,6 +576,16 @@ def main(argv: list[str] | None = None) -> int:
                     hb.change_detected = bool(res.get("change_detected", False))
                     hb.posting_attempted = bool(res.get("posting_attempted", False))
                     hb.posting_skipped_reason = res.get("posting_skipped_reason")
+                    audit_summary = res.get("audit_summary") or {}
+                    hb_summary: Dict[str, Any] = {}
+                    if isinstance(audit_summary, dict) and audit_summary:
+                        hb_summary = {
+                            "audit_events": int(audit_summary.get("events", 0) or 0),
+                            "highlights_applied": int(audit_summary.get("highlights_applied", 0) or 0),
+                            "notes_written": int(audit_summary.get("notes_written", 0) or 0),
+                            "snapshot_dir": str(audit_summary.get("snapshot_dir", "") or ""),
+                            "baseline": bool(audit_summary.get("baseline", False)),
+                        }
                     if changed:
                         hb.last_change_detected_at = hb.last_tick_at
                         hb.last_post_started_at = hb.last_tick_at
@@ -558,21 +608,31 @@ def main(argv: list[str] | None = None) -> int:
                                 skipped_header_or_date += int(s.get("skipped_header_or_date", 0) or 0)
 
                         hb.last_post_ok = ok
-                        hb.last_post_summary = {
-                            "cells_written": total_cells,
-                            "rows_marked_true": total_rows,
-                            "skipped_no_rule": skipped_no_rule,
-                            "skipped_header_or_date": skipped_header_or_date,
-                        }
+                        hb_summary.update(
+                            {
+                                "cells_written": total_cells,
+                                "rows_marked_true": total_rows,
+                                "skipped_no_rule": skipped_no_rule,
+                                "skipped_header_or_date": skipped_header_or_date,
+                            }
+                        )
                     else:
-                        hb.last_post_summary = None
                         hb.last_post_ok = None
+                    hb.last_post_summary = hb_summary or None
                     hb.last_tick_duration_ms = tick_ms
                     hb.last_error = None
                     hb.last_error_at = None
                     write_heartbeat(hb)
                 except Exception:
                     pass
+
+            audit_summary = res.get("audit_summary") or {}
+            if isinstance(audit_summary, dict) and int(audit_summary.get("events", 0) or 0) > 0:
+                print(
+                    f"[AUDIT] {audit_summary.get('events')} change(s) — "
+                    f"highlights={audit_summary.get('highlights_applied', 0)} "
+                    f"snapshot={audit_summary.get('snapshot_dir', '')}"
+                )
 
             if bool(res.get("posting_attempted", False)) and changed:
                 print(f"Posted for: {list(changed.keys())}")

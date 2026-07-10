@@ -95,6 +95,7 @@ def process_csv_intake(
     force_process: bool = False,
     dry_run: bool = False,
     company_key: Optional[str] = None,
+    sheet_name_override: Optional[str] = None,
 ) -> Dict:
     """
     Process CSV intake with comprehensive deduplication
@@ -113,169 +114,177 @@ def process_csv_intake(
     """
     
     # Start telemetry trace
-    with start_trace("csv_intake") as trace:
-        emit("csv_intake", "started", {
+    trace_id = start_trace("csv_intake", (company_key or "unknown").strip() or "unknown")
+    emit("csv_intake", trace_id, "started", {
             "spreadsheet_id": spreadsheet_id,
             "header_rows": header_rows,
             "force_process": force_process,
             "dry_run": dry_run
         })
         
-        try:
-            # 1. Download CSV
-            print("Downloading CSV from Google Sheets...")
-            csv_content = download_petty_cash_csv(spreadsheet_id, service_account_path)
-            
-            # Validate CSV content
-            if not validate_csv_content(csv_content):
-                raise ValueError("CSV content validation failed")
-            
-            # Get CSV metadata
-            metadata = get_csv_metadata(csv_content)
-            print(f"CSV metadata: {json.dumps(metadata, indent=2)}")
-            
-            emit("csv_intake", "csv_downloaded", {
+    try:
+        # 1. Download CSV
+        print("Downloading CSV from Google Sheets...")
+        csv_content = download_petty_cash_csv(
+            spreadsheet_id, service_account_path, sheet_name_override=sheet_name_override
+        )
+        
+        # Validate CSV content
+        if not validate_csv_content(csv_content):
+            raise ValueError("CSV content validation failed")
+        
+        # Get CSV metadata
+        metadata = get_csv_metadata(csv_content)
+        print(f"CSV metadata: {json.dumps(metadata, indent=2)}")
+        
+        emit("csv_intake", trace_id, "csv_downloaded", {
+            "file_fingerprint": metadata['file_fingerprint'],
+            "total_lines": metadata['total_lines'],
+            "non_empty_lines": metadata['non_empty_lines']
+        })
+        
+        # Copy to configured paths (e.g. D:, E:) if intake.csv_copy_paths is set
+        copy_paths = _copy_csv_to_configured_paths(csv_content, company_key=company_key)
+        if copy_paths:
+            emit("csv_intake", trace_id, "csv_copied", {"paths": copy_paths})
+        
+        # 2. Parse transactions
+        print("Parsing CSV transactions...")
+        src_tab = (sheet_name_override or "").strip() or None
+        processor = PettyCashCSVProcessor(
+            csv_content,
+            header_rows,
+            source_tab=src_tab,
+            source_spreadsheet_id=spreadsheet_id,
+        )
+        transactions = list(processor.parse_transactions())
+        
+        processing_stats = processor.get_processing_stats()
+        print(f"Processing stats: {json.dumps(processing_stats, indent=2)}")
+        
+        emit("csv_intake", trace_id, "transactions_parsed", {
+            "transactions_count": len(transactions),
+            "unique_rows_processed": processing_stats['unique_rows_processed'],
+            "duplicate_rows_skipped": processing_stats['duplicate_rows_skipped']
+        })
+        
+        # 3. Validate transactions
+        print("Validating transactions...")
+        valid_transactions = []
+        invalid_count = 0
+        
+        for txn in transactions:
+            is_valid, errors = validate_transaction(txn)
+            if is_valid:
+                valid_transactions.append(txn)
+            else:
+                invalid_count += 1
+                print(f"Invalid transaction: {errors}")
+        
+        print(f"Validation complete: {len(valid_transactions)} valid, {invalid_count} invalid")
+        
+        if not valid_transactions:
+            raise ValueError("No valid transactions found")
+        
+        emit("csv_intake", trace_id, "transactions_validated", {
+            "valid_count": len(valid_transactions),
+            "invalid_count": invalid_count
+        })
+        
+        # 4. Database operations (if not dry run)
+        if dry_run:
+            print("DRY RUN: Skipping database operations")
+            return {
+                "status": "dry_run_completed",
                 "file_fingerprint": metadata['file_fingerprint'],
-                "total_lines": metadata['total_lines'],
-                "non_empty_lines": metadata['non_empty_lines']
-            })
+                "transactions_parsed": len(transactions),
+                "valid_transactions": len(valid_transactions),
+                "invalid_transactions": invalid_count
+            }
+        
+        # Connect to database
+        db_conn = create_db_connection(db_url)
+        
+        try:
+            # 5. Deduplication workflow
+            print("Running deduplication workflow...")
+            dedup_workflow = DeduplicationWorkflow(db_conn)
             
-            # Copy to configured paths (e.g. D:, E:) if intake.csv_copy_paths is set
-            copy_paths = _copy_csv_to_configured_paths(csv_content, company_key=company_key)
-            if copy_paths:
-                emit("csv_intake", "csv_copied", {"paths": copy_paths})
-            
-            # 2. Parse transactions
-            print("Parsing CSV transactions...")
-            processor = PettyCashCSVProcessor(csv_content, header_rows)
-            transactions = list(processor.parse_transactions())
-            
-            processing_stats = processor.get_processing_stats()
-            print(f"Processing stats: {json.dumps(processing_stats, indent=2)}")
-            
-            emit("csv_intake", "transactions_parsed", {
-                "transactions_count": len(transactions),
-                "unique_rows_processed": processing_stats['unique_rows_processed'],
-                "duplicate_rows_skipped": processing_stats['duplicate_rows_skipped']
-            })
-            
-            # 3. Validate transactions
-            print("Validating transactions...")
-            valid_transactions = []
-            invalid_count = 0
-            
-            for txn in transactions:
-                is_valid, errors = validate_transaction(txn)
-                if is_valid:
-                    valid_transactions.append(txn)
-                else:
-                    invalid_count += 1
-                    print(f"Invalid transaction: {errors}")
-            
-            print(f"Validation complete: {len(valid_transactions)} valid, {invalid_count} invalid")
-            
-            if not valid_transactions:
-                raise ValueError("No valid transactions found")
-            
-            emit("csv_intake", "transactions_validated", {
-                "valid_count": len(valid_transactions),
-                "invalid_count": invalid_count
-            })
-            
-            # 4. Database operations (if not dry run)
-            if dry_run:
-                print("DRY RUN: Skipping database operations")
+            # Check if file already processed
+            if not force_process and dedup_workflow.check_file_already_processed(metadata['file_fingerprint']):
+                print(f"File {metadata['file_fingerprint']} already processed. Use --force to reprocess.")
                 return {
-                    "status": "dry_run_completed",
-                    "file_fingerprint": metadata['file_fingerprint'],
-                    "transactions_parsed": len(transactions),
-                    "valid_transactions": len(valid_transactions),
-                    "invalid_transactions": invalid_count
+                    "status": "skipped",
+                    "reason": "file_already_processed",
+                    "file_fingerprint": metadata['file_fingerprint']
                 }
             
-            # Connect to database
-            db_conn = create_db_connection(db_url)
+            # 6. Create ingest batch
+            print("Creating ingest batch...")
+            batch_id = create_ingest_batch(db_conn, "petty_cash_csv")
+            print(f"Created batch ID: {batch_id}")
             
-            try:
-                # 5. Deduplication workflow
-                print("Running deduplication workflow...")
-                dedup_workflow = DeduplicationWorkflow(db_conn)
-                
-                # Check if file already processed
-                if not force_process and dedup_workflow.check_file_already_processed(metadata['file_fingerprint']):
-                    print(f"File {metadata['file_fingerprint']} already processed. Use --force to reprocess.")
-                    return {
-                        "status": "skipped",
-                        "reason": "file_already_processed",
-                        "file_fingerprint": metadata['file_fingerprint']
-                    }
-                
-                # 6. Create ingest batch
-                print("Creating ingest batch...")
-                batch_id = create_ingest_batch(db_conn, "petty_cash_csv")
-                print(f"Created batch ID: {batch_id}")
-                
-                # 7. Process with deduplication
-                dedup_result = dedup_workflow.process_with_deduplication(
-                    valid_transactions, 
-                    metadata['file_fingerprint'], 
-                    batch_id
-                )
-                
-                print(f"Deduplication result: {json.dumps(dedup_result, indent=2)}")
-                
-                if dedup_result['status'] == 'skipped':
-                    return dedup_result
-                
-                # 8. Store transactions
-                print("Storing transactions...")
-                storage_result = store_csv_transactions_batch(
-                    db_conn, 
-                    dedup_result['unique_transactions'], 
-                    batch_id
-                )
-                
-                print(f"Storage result: {json.dumps(storage_result, indent=2)}")
-                
-                # 9. Record file processing
-                dedup_workflow.record_file_processing(
-                    metadata['file_fingerprint'],
-                    batch_id,
-                    len(valid_transactions)
-                )
-                
-                # 10. Cleanup
-                cleanup_temp_data(db_conn)
-                
-                # 11. Get final stats
-                storage_stats = get_storage_stats(db_conn, batch_id)
-                
-                result = {
-                    "status": "completed",
-                    "batch_id": batch_id,
-                    "file_fingerprint": metadata['file_fingerprint'],
-                    "deduplication": dedup_result,
-                    "storage": storage_result,
-                    "storage_stats": storage_stats
-                }
-                
-                emit("csv_intake", "completed", {
-                    "batch_id": batch_id,
-                    "file_fingerprint": metadata['file_fingerprint'],
-                    "transactions_stored": storage_result['transactions_stored'],
-                    "duplicates_skipped": storage_result['duplicates_skipped']
-                })
-                
-                return result
-            finally:
-                db_conn.close()
-                
-        except Exception as e:
-            emit("csv_intake", "error", {
-                "error": str(e),
-                "spreadsheet_id": spreadsheet_id
+            # 7. Process with deduplication
+            dedup_result = dedup_workflow.process_with_deduplication(
+                valid_transactions, 
+                metadata['file_fingerprint'], 
+                batch_id
+            )
+            
+            print(f"Deduplication result: {json.dumps(dedup_result, indent=2)}")
+            
+            if dedup_result['status'] == 'skipped':
+                return dedup_result
+            
+            # 8. Store transactions
+            print("Storing transactions...")
+            storage_result = store_csv_transactions_batch(
+                db_conn, 
+                dedup_result['unique_transactions'], 
+                batch_id
+            )
+            
+            print(f"Storage result: {json.dumps(storage_result, indent=2)}")
+            
+            # 9. Record file processing
+            dedup_workflow.record_file_processing(
+                metadata['file_fingerprint'],
+                batch_id,
+                len(valid_transactions)
+            )
+            
+            # 10. Cleanup
+            cleanup_temp_data(db_conn)
+            
+            # 11. Get final stats
+            storage_stats = get_storage_stats(db_conn, batch_id)
+            
+            result = {
+                "status": "completed",
+                "batch_id": batch_id,
+                "file_fingerprint": metadata['file_fingerprint'],
+                "deduplication": dedup_result,
+                "storage": storage_result,
+                "storage_stats": storage_stats
+            }
+            
+            emit("csv_intake", trace_id, "completed", {
+                "batch_id": batch_id,
+                "file_fingerprint": metadata['file_fingerprint'],
+                "transactions_stored": storage_result['transactions_stored'],
+                "duplicates_skipped": storage_result['duplicates_skipped']
             })
-            raise
+            
+            return result
+        finally:
+            db_conn.close()
+            
+    except Exception as e:
+        emit("csv_intake", trace_id, "error", {
+            "error": str(e),
+            "spreadsheet_id": spreadsheet_id
+        })
+        raise
 
 
 def run_intake_for_company(company: str, *, dry_run: bool = True, force_process: bool = False, header_rows: Optional[int] = None) -> Dict:
@@ -288,15 +297,20 @@ def run_intake_for_company(company: str, *, dry_run: bool = True, force_process:
     companies = (cfg.get("sheets.companies") or [])
     url = None
     resolved_key: Optional[str] = None
+    sheet_override: Optional[str] = None
     for it in companies:
         key = (it.get("key") or "").strip().upper()
         if key == company.strip().upper() or (key == "710" and company.strip().upper() == "710"):
             url = it.get("workbook_url")
             resolved_key = key
+            tabs = it.get("tabs") if isinstance(it.get("tabs"), dict) else {}
+            v = tabs.get("intake") if tabs else None
+            if isinstance(v, str) and v.strip():
+                sheet_override = v.strip()
             break
     if not url:
         raise RuntimeError(f"Workbook URL not found for company {company}")
-    spreadsheet_id = _extract_spreadsheet_id(url)
+    spreadsheet_id = _extract_spreadsheet_id(str(url))
     sa = cfg.get("google.service_account_json_path") or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "secrets/service_account.json")
     db_url = cfg.get("database.global_dsn") or os.environ.get("KYLO_GLOBAL_DSN")
     if header_rows is None:
@@ -305,6 +319,7 @@ def run_intake_for_company(company: str, *, dry_run: bool = True, force_process:
         spreadsheet_id, sa, db_url,
         header_rows=header_rows, force_process=force_process, dry_run=dry_run,
         company_key=resolved_key,
+        sheet_name_override=sheet_override,
     )
 
 

@@ -9,7 +9,7 @@ from services.bus.schema import PromoteRequestMessage
 from services.rules_promoter.service import promote as rules_promote
 from services.replay.worker import replay_after_promotion
 from services.sheets import poster
-from services.common.config_loader import load_config
+from services.common.rules_workbook import get_rules_management_spreadsheet_id
 
 BROKERS = os.getenv("KAFKA_BROKERS","localhost:9092").split(',')
 TOPIC = os.getenv("KAFKA_TOPIC_PROMOTE","rules.promote.requests")
@@ -72,9 +72,17 @@ async def process_message(msg: PromoteRequestMessage):
     # 2) Replay pending txns now satisfied by new rules
     replay_after_promotion(dsn_rw, msg.company_id)
 
-    # 3) Build Active batchUpdate; idempotent post
-    # Use the rules management workbook, not the company transaction workbook
-    rules_management_spreadsheet_id = "1mdLWjezU5uj7R3Rp8bTo5AGPuA4yY81bQux4aAV3kec"
+    # 3) Build Active batchUpdate; idempotent post (rules management workbook only)
+    rules_management_spreadsheet_id = get_rules_management_spreadsheet_id(_cfg)
+    if not rules_management_spreadsheet_id:
+        print(
+            "[WARN] Rules management spreadsheet not configured "
+            "(rules.management_workbook_url / rules.management_spreadsheet_id / KYLO_RULES_MANAGEMENT_SPREADSHEET_ID); "
+            "skipping Active tab sync",
+            file=sys.stderr,
+        )
+        return
+
     service = poster._get_service()
     ensure_ops = poster.ensure_company_tabs(rules_management_spreadsheet_id, [msg.company_id])
     if ensure_ops.get("requests"):

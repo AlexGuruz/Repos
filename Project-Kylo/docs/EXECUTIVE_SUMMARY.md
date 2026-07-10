@@ -1,153 +1,83 @@
-# Executive Summary - Kylo System Review
+# Executive Summary — Project Kylo
 
-## Overview
-This executive summary provides a high-level overview of the comprehensive system review conducted on **January 15, 2025** for the Kylo data processing system.
-
-## Executive Summary
-
-### 🎯 **System Status: PRODUCTION READY**
-
-The Kylo system has been thoroughly tested and is **fully operational** for production deployment. All critical components are working correctly, and the complete data flow from CSV ingestion to Google Sheets output has been verified.
-
-## Key Findings
-
-### ✅ **Strengths**
-- **Comprehensive Architecture**: Well-designed multi-service system with clear separation of concerns
-- **Robust Testing**: 35/35 unit tests passing, comprehensive test coverage
-- **Real-time Monitoring**: Complete telemetry system with n8n integration
-- **Scalable Design**: Per-company database isolation with global coordination
-- **Multi-Company Support**: 4 companies configured and operational (NUGZ, 710 EMPIRE, PUFFIN PURE, JGD)
-- **Error Handling**: Proper error handling and retry mechanisms throughout
-
-### ⚠️ **Areas for Improvement**
-- **Test Infrastructure**: Minor issues with database connectivity in test environment
-- **Documentation**: Could benefit from more detailed operational runbooks
-- **Integration Tests**: Some tests need database fixture setup
-
-## Test Results Summary
-
-### 📊 **Overall Test Results**
-- **System Health Check**: 9/9 tests passed ✅
-- **End-to-End Workflow**: 6/7 tests passed ✅
-- **Unit Tests**: 35/35 tests passed ✅
-- **Integration Tests**: 21/35 tests passed (14 failed due to test infrastructure)
-
-### 🔧 **Component Status**
-| Component | Status | Details |
-|-----------|--------|---------|
-| **CSV Intake** | ✅ Operational | Processing, validation, deduplication working |
-| **Database Storage** | ✅ Operational | Global and company databases functional |
-| **Mover Service** | ✅ Operational | Data movement between databases working |
-| **Sheets Service** | ✅ Operational | Google Sheets API integration working |
-| **Telemetry** | ✅ Operational | Real-time monitoring and event tracking |
-| **Kafka** | ✅ Operational | Event streaming and messaging working |
-| **Configuration** | ✅ Operational | Multi-company setup complete |
-
-## System Architecture
-
-### 📋 **Data Flow**
-```
-CSV Files → Intake Service → Global Database → Mover Service → Company Databases → Sheets Service → Google Sheets
-     ↓           ↓              ↓              ↓              ↓              ↓
-  Telemetry → Telemetry → Telemetry → Telemetry → Telemetry → Telemetry
-     ↓           ↓              ↓              ↓              ↓              ↓
-  n8n Webhook → Event Logger → Service Routing → Processing → Response → Real-time Display
-```
-
-### 🏢 **Company Configuration**
-- **NUGZ**: 12 sheet aliases configured
-- **710 EMPIRE**: 10 sheet aliases configured  
-- **PUFFIN PURE**: 12 sheet aliases configured
-- **JGD**: 18 sheet aliases configured
-
-## Performance Metrics
-
-### ⚡ **Response Times**
-- **CSV Processing**: <1 second for 4 transactions
-- **Database Operations**: <1 second for schema verification
-- **Telemetry Events**: <1 second per event
-- **Kafka Connection**: <2 seconds
-
-### 📈 **Test Execution Times**
-- **System Health Check**: ~5 seconds
-- **End-to-End Test**: ~10 seconds
-- **Unit Tests**: ~40 seconds
-- **Telemetry Test**: ~5 seconds
-
-## Security Assessment
-
-### 🔒 **Security Status: ADEQUATE**
-- ✅ Password authentication enabled
-- ✅ Container isolation
-- ✅ Service account credentials properly configured
-- ✅ No hardcoded secrets in code
-- ⚠️ Host-to-container connectivity needs configuration
-
-## Risk Assessment
-
-### 🟢 **Low Risk**
-- Minor issues identified are related to test infrastructure only
-- No impact on core business functionality
-- All critical components are operational
-
-### 🟡 **Medium Risk**
-- Test infrastructure improvements needed
-- Documentation could be enhanced
-
-## Recommendations
-
-### 🚀 **Immediate Actions (Optional)**
-1. **Database Connection**: Configure proper host-to-container connectivity
-2. **Test Improvements**: Fix SQL escaping issues in integration tests
-3. **Documentation**: Update operational runbooks
-
-### 🔮 **Future Enhancements**
-1. **Performance Monitoring**: Add metrics collection and alerting
-2. **Error Recovery**: Implement automatic error recovery mechanisms
-3. **Scaling**: Prepare for horizontal scaling of services
-4. **Security**: Implement additional security measures for production
-
-## Business Impact
-
-### 💼 **Operational Benefits**
-- **Automated Data Processing**: Reduces manual effort in CSV processing
-- **Real-time Monitoring**: Provides visibility into system operations
-- **Multi-Company Support**: Handles multiple companies efficiently
-- **Error Handling**: Robust error handling reduces data loss risk
-- **Scalability**: Designed to handle growth in data volume
-
-### 📊 **Data Quality**
-- **Deduplication**: Prevents duplicate transactions
-- **Validation**: Ensures data integrity
-- **Audit Trail**: Complete tracking of data flow
-- **Reconciliation**: Built-in reconciliation capabilities
-
-## Deployment Readiness
-
-### ✅ **Production Deployment: APPROVED**
-
-**Criteria Met:**
-- ✅ All core functionality operational
-- ✅ Comprehensive test coverage
-- ✅ Error handling implemented
-- ✅ Monitoring and telemetry active
-- ✅ Multi-company support verified
-- ✅ Performance requirements met
-- ✅ Security measures adequate
-
-**Deployment Status**: **READY FOR PRODUCTION**
-
-## Conclusion
-
-The Kylo system is **fully operational** and ready for production deployment. The comprehensive testing has verified that all critical components are working correctly, and the complete data flow from CSV ingestion to Google Sheets output is functional.
-
-**Key Recommendation**: **PROCEED WITH PRODUCTION DEPLOYMENT**
-
-The minor issues identified are related to test infrastructure and do not affect the core functionality of the system. All business-critical components are operational and performing as expected.
+**Updated:** 2026-07-10 (multi-agent orchestrator audit)  
+**Previous review:** 2025-01-15 (superseded for readiness claims)
 
 ---
 
-**Document Version**: 1.0  
-**Review Date**: January 15, 2025  
-**Next Review**: As needed for production deployment  
-**Approval Status**: Ready for executive approval
+## Current status: NOT READY FOR PRODUCTION
+
+Kylo’s **posting logic fix** (full cell totals + removed 90% auto-reprocess) is **implemented and unit-tested** on the Acheron dev machine. **Live transaction posting is frozen** locally. **Production readiness is blocked** until power-1 is audited, code is synced, and 2026 forensic backlog is CPA-cleared.
+
+**Best current label:** **READY FOR FURTHER DRY-RUN TESTING**
+
+---
+
+## What was verified (2026-07-10)
+
+| Check | Result |
+|-------|--------|
+| `posting.sheets.apply: false` + `runtime.mode: audit` | Confirmed (global + kylo.config after safety freeze) |
+| Posting fix in `jgdtruth_poster.py` | Confirmed (`matched_writes` / `pending_writes`) |
+| Unit tests (posting, audit, intake) | **23/23 passed** |
+| `bin/validate_config.py` | Passed |
+| Local Kylo processes | None running (only unrelated python script) |
+| SSH to power-1 / worker-node | Reachable |
+
+## What was NOT verified
+
+| Gap | Impact |
+|-----|--------|
+| power-1 Docker / watcher processes | Unknown production state |
+| power-1 `posting.sheets.apply` on deployed copy | May still be `true` with pre-fix code |
+| Postgres on power-1:5433 from Acheron | Not reachable (Tailscale/firewall) |
+| Integration tests with live DB | Not run |
+| Git monorepo hygiene | 600+ dirty paths; branch drift across machines |
+
+---
+
+## Root cause summary (2026 posting incidents)
+
+1. **Partial target totals** — only unposted intake rows were summed into financial cells.
+2. **Aggressive reprocess** — heuristic re-ran large portions of the sheet unnecessarily.
+3. **`mark_posted` timing** — marking intake before verifying targets could mask drift (mitigated by verify path; currently `mark_posted: false` during freeze).
+
+---
+
+## Safety freeze applied
+
+`config/kylo.config.yaml` aligned with `config/global.yaml`:
+
+- `runtime.mode: audit`
+- `posting.sheets.apply: false`
+- `posting.mark_posted: false`
+
+**Rollback:** see `docs/ORCHESTRATOR_REPORT_2026-07-10.md` Section 6.
+
+---
+
+## Documentation index (authoritative 2026)
+
+| Document | Purpose |
+|----------|---------|
+| [ORCHESTRATOR_REPORT_2026-07-10.md](ORCHESTRATOR_REPORT_2026-07-10.md) | Full 23-section gate report |
+| [OPERATIONS_RUNBOOK.md](OPERATIONS_RUNBOOK.md) | Startup, shutdown, dry-run, production enablement |
+| [ARCHITECTURE_AND_DATA_FLOW.md](ARCHITECTURE_AND_DATA_FLOW.md) | Technical architecture + 35-step flow |
+| [INVESTOR_CPA_DEMO.md](INVESTOR_CPA_DEMO.md) | Demo script (read-only) |
+| [INCREMENTAL_POSTING.md](INCREMENTAL_POSTING.md) | Signatures, CLI, source tab fill |
+| [README.md](README.md) | Doc index |
+
+---
+
+## Recommendation
+
+**Do not enable production posting** until:
+
+1. power-1 config + code audit confirms fix deployed  
+2. Dry-run watcher on power-1 validates write plan  
+3. 2026 audit backlog reconciled with CPA  
+4. Explicit approval to set `KYLO_ALLOW_POST=1`
+
+---
+
+*Supersedes the 2025-01-15 "PRODUCTION READY" assessment.*

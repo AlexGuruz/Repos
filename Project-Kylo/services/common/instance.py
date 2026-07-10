@@ -59,6 +59,14 @@ def default_watcher_log_path(instance_id: str) -> Path:
     return instance_logs_dir(instance_id) / "watcher.log"
 
 
+def instance_snapshots_dir(instance_id: str) -> Path:
+    return instance_root(instance_id) / "snapshots"
+
+
+def default_audit_log_path(instance_id: str) -> Path:
+    return instance_logs_dir(instance_id) / "audit.log"
+
+
 def legacy_watch_state_path(instance_id: str) -> Path:
     return Path(".kylo") / f"watch_state_{instance_id}.json"
 

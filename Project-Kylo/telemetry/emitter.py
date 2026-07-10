@@ -7,7 +7,8 @@ from urllib.error import URLError
 SINK = os.getenv("TELEMETRY_SINK", "none").lower()  # "none" | "stdout" | "http"
 WEBHOOK_URL = os.getenv("N8N_WEBHOOK_URL", "").strip()
 
-def start_trace(kind: str, company_id: str) -> str:
+
+def start_trace(kind: str, company_id: str = "unknown") -> str:
     return f"{int(time.time())}-{uuid.uuid4().hex[:8]}-{company_id}-{kind}"
 
 def emit(event_type: str, trace_id: str, step: str, payload: Dict[str, Any], level: str="info") -> None:

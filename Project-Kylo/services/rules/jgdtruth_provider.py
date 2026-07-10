@@ -58,6 +58,15 @@ def _active_years(cfg) -> Optional[Set[int]]:
     return None
 
 
+def _quote_tab_a1(name: str) -> str:
+    import re as _re
+
+    s = str(name or "")
+    if _re.search(r"[^A-Za-z0-9_]", s):
+        return "'" + s.replace("'", "''") + "'"
+    return s
+
+
 def fetch_rules_from_jgdtruth(company_id: Optional[str] = None) -> Dict[str, Rule]:
     """Load rules from the "JGD RULES" tab in the year workbook.
     
@@ -121,8 +130,12 @@ def fetch_rules_from_jgdtruth(company_id: Optional[str] = None) -> Dict[str, Rul
             raise RuntimeError(f"workbook_url not set for company '{company_id}' in config")
     
     sid = _extract_spreadsheet_id(str(workbook_url))
+    cfg_rules_tab = (cfg.get("rules.rules_tab_name") or "").strip()
+    rules_tab = cfg_rules_tab or "JGD RULES"
     if selected_year:
-        print(f"[RULES] Loading rules for company '{company_id}' from year {selected_year} workbook -> 'JGD RULES' tab")
+        print(
+            f"[RULES] Loading rules for company '{company_id}' from year {selected_year} workbook -> '{rules_tab}' tab"
+        )
     service = _get_service()
 
     approved_idx = 3  # Column D for approved status (default)
@@ -140,20 +153,23 @@ def fetch_rules_from_jgdtruth(company_id: Optional[str] = None) -> Dict[str, Rul
         except Exception:
             return None
 
-    # Read from "JGD RULES" tab in the year workbook (supports both 2025 and 2026)
+    # Read rules from configured tab (default 'JGD RULES') in the year / company workbook
     values: List[List[object]] = []
-    got = _try_fetch("'JGD RULES'!A1:E10000")  # Read columns A through E
+    got = _try_fetch(f"{_quote_tab_a1(rules_tab)}!A1:E10000")
     if isinstance(got, list):
         values = got
     else:
-        # Fallback: try without quotes (some API versions don't need quotes)
-        got = _try_fetch("JGD RULES!A1:E10000")
+        got = _try_fetch(f"{rules_tab}!A1:E10000")
         if isinstance(got, list):
             values = got
         else:
-            # Fallback: try legacy "JGD" tab name
-            approved_idx = 5  # legacy F
-            got = _try_fetch("JGD!A1:F10000")
+            # Fallback: legacy tab names
+            approved_idx = 5  # legacy F for JGD tab
+            got = _try_fetch("'JGD RULES'!A1:E10000")
+            if not isinstance(got, list):
+                got = _try_fetch("JGD RULES!A1:E10000")
+            if not isinstance(got, list):
+                got = _try_fetch("JGD!A1:F10000")
             values = got or []
 
     rules: Dict[str, Rule] = {}

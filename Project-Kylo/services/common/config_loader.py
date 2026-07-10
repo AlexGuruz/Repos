@@ -86,6 +86,60 @@ def _layered_paths(base_dir: Path, instance_id: str) -> Tuple[Path, Path, Path]:
     return global_path, company_path, instance_path
 
 
+def _merge_sheets_companies(base: Any, overlay: Any) -> Any:
+    """Union ``sheets.companies`` by ``key`` so a client workspace can add GIGATT without dropping NUGZ."""
+    if not isinstance(overlay, list):
+        return base
+    if not isinstance(base, list) or not base:
+        return overlay
+    by_key: Dict[str, Dict[str, Any]] = {}
+    order: list[str] = []
+    for it in base:
+        if isinstance(it, dict) and it.get("key"):
+            k = str(it["key"]).strip().upper()
+            by_key[k] = it
+            order.append(k)
+    for it in overlay:
+        if isinstance(it, dict) and it.get("key"):
+            k = str(it["key"]).strip().upper()
+            if k not in by_key:
+                order.append(k)
+            by_key[k] = it
+    return [by_key[k] for k in order]
+
+
+def _repo_root() -> Path:
+    p = Path.cwd().resolve()
+    for cand in [p, *p.parents]:
+        if (cand / "pyproject.toml").is_file():
+            return cand
+    return p
+
+
+def _load_json_file(path: Path) -> Dict[str, Any]:
+    with open(path, "r", encoding="utf-8") as f:
+        raw = json.load(f) or {}
+    if not isinstance(raw, dict):
+        raise RuntimeError(f"Invalid JSON root in {path} (expected object)")
+    return raw
+
+
+def _load_client_workspace_dict(instance_id: str) -> Dict[str, Any]:
+    """Optional overlay from ``clients/<id>/config.yaml`` or ``config.json``."""
+    cid = instance_id.strip().lower()
+    if not cid:
+        return {}
+    root = _repo_root() / "clients" / cid
+    for name in ("config.yaml", "config.yml"):
+        p = root / name
+        if p.exists():
+            return _load_yaml(str(p))
+    p_json = root / "config.json"
+    if p_json.exists():
+        return _load_json_file(p_json)
+    return {}
+
+
 def _load_layered_config(base_dir: Path, instance_id: str) -> Dict[str, Any]:
     """Load config as global -> company -> instance (deterministic merge)."""
     global_path, company_path, instance_path = _layered_paths(base_dir, instance_id)
@@ -111,6 +165,24 @@ def _load_layered_config(base_dir: Path, instance_id: str) -> Dict[str, Any]:
     merged = _deep_merge(global_raw, company_raw)
     merged = _deep_merge(merged, instance_raw)
     return merged
+
+
+def _merge_client_workspace_overlay(data: Dict[str, Any], instance_id: str) -> Dict[str, Any]:
+    """Deep-merge ``clients/<instance_id>/config.{yaml,json}``; union ``sheets.companies`` by key."""
+    patch = _load_client_workspace_dict(instance_id)
+    if not patch:
+        return data
+    companies_overlay = None
+    if isinstance(patch.get("sheets"), dict) and "companies" in patch["sheets"]:
+        sheets_copy = dict(patch["sheets"])
+        companies_overlay = sheets_copy.pop("companies", None)
+        patch = dict(patch)
+        patch["sheets"] = sheets_copy
+    out = _deep_merge(data, patch)
+    if companies_overlay is not None:
+        merged_list = _merge_sheets_companies(out.get("sheets", {}).get("companies"), companies_overlay)
+        out.setdefault("sheets", {})["companies"] = merged_list
+    return out
 
 
 def _load_env_file(env_path: Optional[str]) -> None:
@@ -219,6 +291,7 @@ def load_config(path: Optional[str] = None) -> KyloConfig:
         global_path = base_dir / "global.yaml"
         if global_path.exists():
             data = _load_layered_config(base_dir=base_dir, instance_id=instance_id)
+            data = _merge_client_workspace_overlay(data, instance_id)
             # Fresh-rig override: use project .secrets if KYLO_SECRETS_DIR is set
             if os.environ.get("KYLO_SECRETS_DIR"):
                 sa_path = os.path.join(os.environ["KYLO_SECRETS_DIR"], "service_account.json")

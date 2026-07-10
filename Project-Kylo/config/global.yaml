@@ -5,6 +5,28 @@ runtime:
   dry_run: false
   log_level: INFO
   timezone: America/Chicago
+  # audit = forensic snapshots + row diffs + highlights; no transaction posting.
+  # post = legacy posting (requires posting.sheets.apply + KYLO_ALLOW_POST=1).
+  mode: audit
+  watch_interval_secs: 300
+  watch_jitter_secs: 15
+
+audit:
+  enabled: true
+  apply_highlights: true
+  write_notes: true
+  note_column: G
+  late_arrival_min_posted_days: 14
+  highlights:
+    enabled: true
+    end_column: 7
+    inserted_rgb: [1.0, 0.75, 0.75]
+    amount_changed_rgb: [1.0, 0.85, 0.55]
+    source_changed_rgb: [1.0, 1.0, 0.65]
+    date_changed_rgb: [0.85, 0.75, 1.0]
+    anomaly_rgb: [1.0, 0.45, 0.45]
+    removed_rgb: [0.85, 0.85, 0.85]
+    default_rgb: [0.95, 0.90, 0.80]
 
 google:
   # Use .secrets in repo root for fresh rig; set KYLO_SECRETS_DIR env to override

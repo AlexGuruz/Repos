@@ -720,6 +720,9 @@ def validate_transaction(transaction: Dict) -> Tuple[bool, List[str]]:
 
         if 'company_id' in transaction:
             valid_companies = _load_valid_companies_global()
+            extra_cid = (os.environ.get("KYLO_CLIENT_COMPANY_KEY") or "").strip().upper()
+            if extra_cid:
+                valid_companies.add(extra_cid)
             if (transaction['company_id'] or '').strip().upper() not in valid_companies:
                 errors.append(f"Invalid company: {transaction['company_id']}")
     except Exception:

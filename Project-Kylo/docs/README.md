@@ -3,8 +3,16 @@
 Authoritative source of truth (archived planning):
 - See `../archive/docs/planning/PDR.md` for product/design requirements, decisions, schemas, mover contract, eventing, Sheets policy, tests, and the rolling checklist.
 
+**Client workspaces (multi-slot overlays):** see `CLIENT_SLOTS.md` — `clients/<id>/` merged after layered YAML; same PostgreSQL pipeline.
+
 Supporting documents:
+- `docs/ORCHESTRATOR_REPORT_2026-07-10.md`: Multi-agent orchestrator report — gates, freeze, tests, remote blockers (2026-07-10).
+- `docs/OPERATIONS_RUNBOOK.md`: Startup, shutdown, dry-run, production enablement, kill switches.
+- `docs/ARCHITECTURE_AND_DATA_FLOW.md`: Technical architecture and 35-step logic flow.
+- `docs/INVESTOR_CPA_DEMO.md`: Read-only investor/CPA demo outline.
+- `docs/EXECUTIVE_SUMMARY.md`: Current readiness status (NOT production ready as of 2026-07-10).
 - `docs/INCREMENTAL_POSTING.md`: Incremental JGDTruth Sheets posting, state file, verification, and optional BANK vs TRANSACTIONS target-cell background tint.
+- **Forensic audit mode** (`runtime.mode: audit` in `config/global.yaml`): every watcher tick saves sheet CSV snapshots, row-level diffs in `.kylo/instances/<id>/logs/audit.log`, and applies intake row highlights. Posting is disabled unless `runtime.mode: post` and `KYLO_ALLOW_POST=1`.
 - `docs/IMPORTER.md`: Batch-only importer spec and tests overview.
 - `docs/DRY_RUN_CHECKLIST.md`: Minimal flow to validate idempotency and approvals.
 - `../archive/docs/planning/REPLICATOR_AND_MIGRATIONS_PLAN.md`: Replicator/migrations outline (archived).

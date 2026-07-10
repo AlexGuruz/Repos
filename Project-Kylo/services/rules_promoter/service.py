@@ -113,13 +113,13 @@ ON CONFLICT (rule_id) DO UPDATE SET rule_json = EXCLUDED.rule_json, applied_at =
 def _sheets_writeback(company_id: str, promoted_count: int) -> Optional[str]:
     try:
         import os as _os
-        from services.rules_loader.sheets_loader import _load_sheets_service, _extract_spreadsheet_id
-        from scaffold.tools.sheets_cli import load_companies_config
-        from scaffold.tools.sheets_cli import resolve_spreadsheet_id as _resolve
 
-        # Use the rules management workbook, not the company transaction workbook
-        # This is the correct spreadsheet for rule management
-        sid = "1mdLWjezU5uj7R3Rp8bTo5AGPuA4yY81bQux4aAV3kec"
+        from services.rules_loader.sheets_loader import _load_sheets_service
+        from services.common.rules_workbook import get_rules_management_spreadsheet_id
+
+        sid = get_rules_management_spreadsheet_id()
+        if not sid:
+            return "skipped: rules.management_workbook_url / rules.management_spreadsheet_id / KYLO_RULES_MANAGEMENT_SPREADSHEET_ID not set"
         sa_path = _os.environ.get("KYLO_SHEETS_SA", _os.path.join("secrets", "service_account.json"))
         if not _os.path.exists(sa_path):
             return "skipped: no service account"
