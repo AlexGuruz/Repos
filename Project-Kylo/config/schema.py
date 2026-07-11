@@ -83,6 +83,11 @@ class RulesConfig(BaseModel):
     xlsx_path: Optional[str] = None
     promote_on_load: bool = Field(default=False)
     management_workbook_url: Optional[HttpUrl] = None
+    management_spreadsheet_id: Optional[str] = None
+    rules_tab_name: Optional[str] = Field(
+        default=None,
+        description="Tab name for rule rows (default JGD RULES / legacy JGD); client workspaces may set AutoCat etc.",
+    )
 
 
 class CSVProcessorColumns(BaseModel):

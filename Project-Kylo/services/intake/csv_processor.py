@@ -14,6 +14,8 @@ from datetime import datetime
 from services.common.config_loader import load_config
 from typing import Dict, Iterator, List, Optional, Tuple
 
+from services.audit.row_model import make_business_line_uid
+
 log = logging.getLogger(__name__)
 
 
@@ -323,9 +325,17 @@ class PettyCashCSVProcessor:
                 txn_uid = self._generate_txn_uid(company, row_index, posted_date, int(amount * 100), source_description)
                 content_hash = self._generate_content_hash(company, posted_date, amount, source_description)
                 business_hash = self._generate_business_hash(company, posted_date, amount, source_description)
+                bl_uid = make_business_line_uid(
+                    self.source_spreadsheet_id or "",
+                    self.source_tab or "TRANSACTIONS",
+                    company,
+                    posted_date,
+                    source_description,
+                )
                 
                 return {
                     "txn_uid": txn_uid,
+                    "business_line_uid": bl_uid,
                     "company_id": company,
                     "posted_date": posted_date,
                     "amount_cents": int(amount * 100),
@@ -362,9 +372,17 @@ class PettyCashCSVProcessor:
             txn_uid = self._generate_txn_uid(company, row_index, posted_date, int(amount * 100), source_description)
             content_hash = self._generate_content_hash(company, posted_date, amount, source_description)
             business_hash = self._generate_business_hash(company, posted_date, amount, source_description)
+            bl_uid = make_business_line_uid(
+                self.source_spreadsheet_id or "",
+                self.source_tab or "TRANSACTIONS",
+                company,
+                posted_date,
+                source_description,
+            )
             
             return {
                 "txn_uid": txn_uid,
+                "business_line_uid": bl_uid,
                 "company_id": company,
                 "posted_date": posted_date,
                 "amount_cents": int(amount * 100),  # Convert to cents

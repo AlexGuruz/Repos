@@ -7,7 +7,6 @@ runtime:
   timezone: America/Chicago
   # audit = forensic snapshots + row diffs + highlights; no transaction posting.
   # post = legacy posting (requires posting.sheets.apply + KYLO_ALLOW_POST=1).
-  mode: audit
   watch_interval_secs: 300
   watch_jitter_secs: 15
 
@@ -17,6 +16,23 @@ audit:
   write_notes: true
   note_column: G
   late_arrival_min_posted_days: 14
+  alerts:
+    enabled: true
+    anomalies:
+      - AMOUNT_REVISION
+      - ROW_INSERTED
+      - FALSE_PAYROLL
+      - FROM_BANK_PAIR
+      - INFLATED_PAYROLL_APPEARANCE
+      - POSTED_FLAG_TOGGLED
+      - KYLO_POSTED_VARIANCE
+      - LATE_ARRIVAL
+  pair_rules:
+    enabled: true
+    max_pair_distance_rows: 3
+  revision_poll:
+    enabled: false
+    interval_hours: 6
   highlights:
     enabled: true
     end_column: 7
@@ -41,6 +57,10 @@ posting:
   sheets:
     apply: false
   mark_posted: false
+  note_include_posted_at: true
+  flagged_target_highlight:
+    enabled: true
+    rgb: [1.0, 0.45, 0.45]
   # After a successful target value write, tint cells by intake tab (background only).
   # Disable with posting.source_tab_fill.enabled: false or env KYLO_SOURCE_TAB_FILL=0.
   source_tab_fill:

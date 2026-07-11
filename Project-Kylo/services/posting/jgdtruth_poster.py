@@ -26,6 +26,19 @@ from services.intake.csv_downloader import download_petty_cash_csv
 from services.intake.csv_processor import parse_csv_transactions
 
 try:
+    from services.audit.poster_audit import (
+        apply_flagged_target_highlights,
+        format_post_note,
+        is_txn_flagged,
+        record_successful_post,
+    )
+except ImportError:
+    apply_flagged_target_highlights = None  # type: ignore
+    format_post_note = None  # type: ignore
+    is_txn_flagged = None  # type: ignore
+    record_successful_post = None  # type: ignore
+
+try:
     from googleapiclient.errors import HttpError
 except ImportError:
     # Fallback if not available
@@ -783,6 +796,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         # rows as posted when their target cell is confirmed written (or already correct).
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
         success_notes: List[Tuple[str, str, int, str, str]] = []  # (source_sid, src_tab, row_idx0, note, target_a1)
+        flagged_target_ranges: Set[str] = set()
+        post_meta_by_a1: Dict[str, Dict[str, Any]] = {}
         skipped_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, reason)
         skipped_tab_not_found: List[str] = []
         skipped_header_date: int = 0
@@ -1052,11 +1067,44 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             tabs_touched.add(tab)
             if for_marking:
                 success_rows.append((source_sid, src_tab, row0, a1))
-                try:
-                    note_msg = f"Posted {amount_cents / 100.0:.2f} -> {tab}/{header} {date_key}"
-                except Exception:
-                    note_msg = "Posted"
+                instance_id = (os.environ.get("KYLO_INSTANCE_ID") or "").strip()
+                flagged = False
+                if is_txn_flagged and instance_id:
+                    try:
+                        flagged = is_txn_flagged(
+                            source_sid=str(source_sid or ""),
+                            source_tab=str(src_tab or "TRANSACTIONS"),
+                            company_id=company_upper,
+                            posted_date=str(dt or ""),
+                            description=str(src or ""),
+                            amount_cents=amount_cents,
+                            instance_id=instance_id,
+                        )
+                    except Exception:
+                        flagged = False
+                if flagged:
+                    flagged_target_ranges.add(a1)
+                if format_post_note:
+                    note_msg = format_post_note(
+                        amount_cents, tab, header, date_key, flagged=flagged
+                    )
+                else:
+                    try:
+                        note_msg = f"Posted {amount_cents / 100.0:.2f} -> {tab}/{header} {date_key}"
+                    except Exception:
+                        note_msg = "Posted"
                 success_notes.append((source_sid, src_tab, row0, note_msg, a1))
+                post_meta_by_a1[a1] = {
+                    "txn_uid": txn_uid,
+                    "source_sid": source_sid,
+                    "source_tab": src_tab,
+                    "row0": row0,
+                    "company_id": company_upper,
+                    "posted_date": str(dt or ""),
+                    "description": str(src or ""),
+                    "amount_cents": amount_cents,
+                    "flagged": flagged,
+                }
 
         updated_ranges: Set[str] = set()
         update_entries: List[Dict[str, object]] = []
@@ -1465,6 +1513,36 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     print(f"[NOTES] Successfully wrote {len(note_data)} notes")
                 except HttpError:
                     pass
+
+            instance_id = (os.environ.get("KYLO_INSTANCE_ID") or "").strip()
+            if record_successful_post and instance_id:
+                for (source_sid, src_tab, row0, msg, target_a1) in success_notes:
+                    if target_a1 not in posted_ok_ranges:
+                        continue
+                    meta = post_meta_by_a1.get(target_a1) or {}
+                    try:
+                        record_successful_post(
+                            instance_id=instance_id,
+                            txn_uid=str(meta.get("txn_uid") or ""),
+                            source_sid=str(meta.get("source_sid") or source_sid or ""),
+                            source_tab=str(meta.get("source_tab") or src_tab or ""),
+                            row0=int(meta.get("row0") if meta.get("row0") is not None else row0),
+                            company_id=str(meta.get("company_id") or company_upper),
+                            posted_date=str(meta.get("posted_date") or ""),
+                            description=str(meta.get("description") or ""),
+                            amount_cents=int(meta.get("amount_cents") or 0),
+                            target_a1=target_a1,
+                            note=str(msg),
+                            flagged=bool(meta.get("flagged")),
+                        )
+                    except Exception as e:
+                        print(f"[AUDIT] WARN: could not record post event: {e}")
+
+            if apply_flagged_target_highlights and flagged_target_ranges and not dry_run:
+                try:
+                    apply_flagged_target_highlights(service, str(target_sid), flagged_target_ranges, cfg)
+                except Exception as e:
+                    print(f"[AUDIT] WARN: flagged target highlight failed: {e}")
 
         if not dry_run and bool(cfg.get("posting.append_transactions", False)):
             _ensure_transactions_append(service, target_sid, append_rows)

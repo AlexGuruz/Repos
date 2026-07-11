@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
+from dataclasses import replace
+
 from services.audit.highlights import apply_target_cell_highlights
 from services.audit.logger import append_post_event
 from services.audit.paths import audit_jsonl_path, business_line_registry_path
@@ -79,12 +81,10 @@ def record_successful_post(
         reg = load_row_registry(path)
         if bl in reg:
             rec = reg[bl]
-            reg[bl] = type(rec)(
-                **{
-                    **rec.to_dict(),
-                    "kylo_posted_at": ts,
-                    "kylo_posted_amount_cents": amount_cents,
-                }
+            reg[bl] = replace(
+                rec,
+                kylo_posted_at=ts,
+                kylo_posted_amount_cents=amount_cents,
             )
             save_row_registry(path, reg)
 
