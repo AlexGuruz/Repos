@@ -102,3 +102,7 @@ Greg-Kylo/
 
 # Claude Code worktree mirror (thousands of duplicate files)
 Growflow/.claude/
+
+_rollback/
+
+**/worker_tunnels.local.json
