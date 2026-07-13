@@ -22,6 +22,7 @@ from brain.bank_vendor_cleaner.engine import (
     assert_plain_values,
     build_alias_lookup,
     get_label_with_source,
+    normalize_text,
     process_rows,
 )
 from brain.bank_vendor_cleaner.loader import (
@@ -180,6 +181,11 @@ def run_pipeline(config: PipelineConfig) -> dict:
     locations = [r.location for r in processed]
     assert_plain_values(labels)
     assert_plain_values(locations)
+    writable_rows = [
+        (config.start_row + i, labels[i], locations[i])
+        for i, raw in enumerate(source_values[: len(processed)])
+        if normalize_text(raw) != ""
+    ]
 
     warnings: list[str] = []
     errors: list[str] = []
@@ -208,36 +214,46 @@ def run_pipeline(config: PipelineConfig) -> dict:
 
     rows_written_c = 0
     rows_written_d = 0
-    if processed and not config.dry_run:
-        rows_written_c = write_column_values(
-            service,
-            config.spreadsheet_id,
-            config.dest_sheet_name,
-            config.label_output_column,
-            config.start_row,
-            labels,
-        )
-        rows_written_d = write_column_values(
-            service,
-            config.spreadsheet_id,
-            config.dest_sheet_name,
-            config.location_output_column,
-            config.start_row,
-            locations,
-        )
+    if writable_rows and not config.dry_run:
+        for row_num, label, location in writable_rows:
+            rows_written_c += write_column_values(
+                service,
+                config.spreadsheet_id,
+                config.dest_sheet_name,
+                config.label_output_column,
+                row_num,
+                [label],
+            )
+            rows_written_d += write_column_values(
+                service,
+                config.spreadsheet_id,
+                config.dest_sheet_name,
+                config.location_output_column,
+                row_num,
+                [location],
+            )
     elif processed and config.dry_run:
         preview = [
-            {"row": config.start_row + i, "label": labels[i], "location": locations[i]}
-            for i in range(min(5, len(labels)))
+            {"row": row_num, "label": label, "location": location}
+            for row_num, label, location in writable_rows[:5]
         ]
-        print(json.dumps({"dry_run_preview": preview, "total_rows": len(labels)}, indent=2))
+        print(json.dumps({"dry_run_preview": preview, "total_rows": len(writable_rows)}, indent=2))
 
     vendor_lookup_results: list[dict] = []
-    if config.vendor_lookup and processed:
-        active = source_values[: len(processed)]
+    if config.vendor_lookup and writable_rows:
+        active = [
+            raw
+            for raw in source_values[: len(processed)]
+            if normalize_text(raw) != ""
+        ]
+        active_processed = [
+            processed[i]
+            for i, raw in enumerate(source_values[: len(processed)])
+            if normalize_text(raw) != ""
+        ]
         vendor_lookup_results = _run_vendor_lookup_pass(
             active,
-            processed,
+            active_processed,
             alias_map,
             cleaning_rules,
             write_pending=not config.dry_run,
@@ -248,11 +264,11 @@ def run_pipeline(config: PipelineConfig) -> dict:
         "source_tab": config.source_sheet_name,
         "destination_tab": config.dest_sheet_name,
         "rows_scanned": len(source_values),
-        "rows_processed": len(processed),
+        "rows_processed": len(writable_rows),
         "rows_written_c": rows_written_c,
         "rows_written_d": rows_written_d,
         "last_source_row": last_row,
-        "last_written_row": last_row if processed else config.start_row - 1,
+        "last_written_row": max((r[0] for r in writable_rows), default=config.start_row - 1),
         "dry_run": config.dry_run,
         "vendor_lookup_count": len(vendor_lookup_results),
         "vendor_lookup": vendor_lookup_results,
