@@ -118,6 +118,15 @@ def test_generate_project_timetable_read_only() -> None:
     assert "actual_duration_known" in row
 
 
+def test_calibration_profile_defaults_to_no_adjustment_without_history() -> None:
+    from brain.live_work_orchestration.timetable.calibration import build_calibration_profile
+
+    profile = build_calibration_profile([])
+
+    assert profile["sample_count"] == 0
+    assert profile["recommended_adjustments"]["apply"] is False
+
+
 def test_compiler_includes_timetable_signals(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path)
     (tmp_path / "ingestion").mkdir(parents=True, exist_ok=True)

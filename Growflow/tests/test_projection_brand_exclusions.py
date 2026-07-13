@@ -32,6 +32,22 @@ def test_utc_bounds_for_store_local_days():
     assert lo < hi
 
 
+def test_accepted_order_line_date_dedupes_seen_ids():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    seen: set[str] = set()
+    tz = ZoneInfo("America/Chicago")
+    row = {"objectId": "order-line-1", "SoldAt": "2026-04-03T16:00:00Z"}
+
+    first = _mod._accepted_order_line_date(row, seen, tz, date(2026, 4, 1), date(2026, 4, 3))
+    duplicate = _mod._accepted_order_line_date(row, seen, tz, date(2026, 4, 1), date(2026, 4, 3))
+
+    assert first == date(2026, 4, 3)
+    assert duplicate is None
+    assert seen == {"objectId:order-line-1"}
+
+
 def test_num_biweek_periods_and_range():
     from datetime import date
 
