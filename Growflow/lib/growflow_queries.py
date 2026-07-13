@@ -133,6 +133,42 @@ query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
 }
 """
 
+# Same as ORDER_ITEMS_QUERY but without Product.Brand and without Package (oldest Retail schema).
+ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE = """
+query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
+  findOrderItems(first: $first, after: $after, where: $where) {
+    edges {
+      node {
+        id
+        objectId
+        SoldAt
+        GrossPrice
+        NetPrice
+        COG
+        SKU
+        OriginId
+        ProductCategory { Name }
+        Product {
+          objectId
+          Name
+          SKU
+          createdAt
+        }
+        NetWeight
+        NetWeightUOM
+        UnitWeight
+        UnitWeightUOM
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    count
+  }
+}
+"""
+
 # OriginalQty vs CurrentQty: see module docstring and GROWFLOW_RETAIL_SCHEMA_MAP.md.
 PACKAGES_TABLE_QUERY = """
 query Packages($first: Int, $after: String, $where: PackagesWhereInput) {
@@ -466,7 +502,12 @@ def fetch_order_items(
     Falls back to ORDER_ITEMS_QUERY_NO_BRAND, then ORDER_ITEMS_QUERY_NO_PACKAGE if the schema
     rejects those fields.
     """
-    queries = (ORDER_ITEMS_QUERY, ORDER_ITEMS_QUERY_NO_BRAND, ORDER_ITEMS_QUERY_NO_PACKAGE)
+    queries = (
+        ORDER_ITEMS_QUERY,
+        ORDER_ITEMS_QUERY_NO_BRAND,
+        ORDER_ITEMS_QUERY_NO_PACKAGE,
+        ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
+    )
     last_err: RuntimeError | None = None
     for q in queries:
         try:
@@ -479,6 +520,8 @@ def fetch_order_items(
             if q is ORDER_ITEMS_QUERY and "Brand" in msg:
                 continue
             if q in (ORDER_ITEMS_QUERY, ORDER_ITEMS_QUERY_NO_BRAND) and "Package" in msg:
+                continue
+            if q is ORDER_ITEMS_QUERY_NO_PACKAGE and "Brand" in msg:
                 continue
             raise
     if last_err:
