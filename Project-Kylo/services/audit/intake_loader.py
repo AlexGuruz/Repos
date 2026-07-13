@@ -8,6 +8,10 @@ from services.intake.csv_processor import PettyCashCSVProcessor
 from services.sheets.poster import _extract_spreadsheet_id
 
 
+class IntakeLoadError(RuntimeError):
+    """Raised when audit intake cannot load the full expected workbook/tab set."""
+
+
 def _active_years(cfg) -> Optional[List[int]]:
     import os
 
@@ -86,9 +90,14 @@ def load_intake_for_company(
 
     txns: List[dict] = []
     csv_by_key: Dict[str, str] = {}
-    for url in intake_urls_for_company(cfg, company):
+    failures: List[str] = []
+    urls = intake_urls_for_company(cfg, company)
+    if not urls:
+        raise IntakeLoadError(f"no intake workbook configured for {company}")
+    for url in urls:
         sid = _extract_spreadsheet_id(str(url))
         if not sid:
+            failures.append(f"{company}:invalid_intake_url")
             continue
         for tab in tabs:
             key = f"{sid}|{tab.upper()}"
@@ -108,8 +117,10 @@ def load_intake_for_company(
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                     txns.append(it)
-            except Exception:
-                continue
+            except Exception as e:
+                failures.append(f"{key}: {type(e).__name__}: {e}")
+    if failures:
+        raise IntakeLoadError("partial intake load blocked; failed tabs: " + "; ".join(failures[:8]))
     return txns, csv_by_key
 
 
@@ -128,4 +139,4 @@ def load_all_intake(
     return all_txns, all_csv
 
 
-__all__ = ["intake_urls_for_company", "load_all_intake", "load_intake_for_company"]
+__all__ = ["IntakeLoadError", "intake_urls_for_company", "load_all_intake", "load_intake_for_company"]

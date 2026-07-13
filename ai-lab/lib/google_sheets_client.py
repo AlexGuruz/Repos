@@ -47,6 +47,13 @@ def _credentials_path() -> Path | None:
     return None
 
 
+def _service_account_path() -> Path | None:
+    p = _resolve_env_path(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+    if p and p.is_file():
+        return p
+    return None
+
+
 def _sheets_token_path(credentials_file: Path) -> Path:
     env = _resolve_env_path(os.getenv("GOOGLE_SHEETS_TOKEN_FILE"))
     if env:
@@ -55,10 +62,12 @@ def _sheets_token_path(credentials_file: Path) -> Path:
 
 
 def preflight_sheets_auth() -> dict[str, Any]:
+    svc = _service_account_path()
     cred = _credentials_path()
     tok = _sheets_token_path(cred) if cred else _LEGACY_TOKEN_FILE
     return {
-        "ok": bool(cred and cred.is_file()) or tok.is_file(),
+        "ok": bool(svc and svc.is_file()) or bool(cred and cred.is_file()) or tok.is_file(),
+        "service_account_file": str(svc) if svc else None,
         "credentials_file": str(cred) if cred else None,
         "sheets_token_file": str(tok),
         "token_exists": tok.is_file(),
@@ -66,6 +75,14 @@ def preflight_sheets_auth() -> dict[str, Any]:
 
 
 def get_sheets_service() -> Resource:
+    service_account_file = _service_account_path()
+    if service_account_file:
+        creds = service_account.Credentials.from_service_account_file(
+            str(service_account_file),
+            scopes=SHEETS_SCOPES,
+        )
+        return build("sheets", "v4", credentials=creds, cache_discovery=False)
+
     credentials_file = _credentials_path()
     if not credentials_file:
         raise FileNotFoundError(
