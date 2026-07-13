@@ -87,6 +87,14 @@ from lib.projection_layer2_recovery import (
 from lib.projection_sku_reorder import build_sku_pre_scale_buy
 
 
+def _is_duplicate_order_item(seen: set[str], node: dict[str, Any]) -> bool:
+    key = order_item_key(node)
+    if key in seen:
+        return True
+    seen.add(key)
+    return False
+
+
 def _load_latest_received_at_by_product_object_id(db_path: Path) -> dict[str, datetime]:
     """
     Read latest transfer receipt timestamp per Product.objectId from transfer receipts SQLite DB.
@@ -1754,8 +1762,7 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
+            if _is_duplicate_order_item(seen, n):
                 continue
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
