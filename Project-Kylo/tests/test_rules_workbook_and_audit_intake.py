@@ -24,6 +24,19 @@ def test_rules_management_spreadsheet_id_env_wins(monkeypatch: pytest.MonkeyPatc
 
 
 def test_audit_intake_fails_closed_on_partial_tab_load(monkeypatch: pytest.MonkeyPatch) -> None:
+    class DottedConfig:
+        def __init__(self, data: dict) -> None:
+            self.data = data
+
+        def get(self, dotted_key: str, default=None):
+            cur = self.data
+            for part in dotted_key.split("."):
+                if isinstance(cur, dict) and part in cur:
+                    cur = cur[part]
+                else:
+                    return default
+            return cur
+
     class DummyProcessor:
         def __init__(self, *args, **kwargs) -> None:
             pass
@@ -39,11 +52,13 @@ def test_audit_intake_fails_closed_on_partial_tab_load(monkeypatch: pytest.Monke
     monkeypatch.setattr(intake_loader, "download_petty_cash_csv", fake_download)
     monkeypatch.setattr(intake_loader, "PettyCashCSVProcessor", DummyProcessor)
 
-    cfg = {
-        "sheets": {
-            "companies": [{"key": "JGD", "workbook_url": "https://docs.google.com/spreadsheets/d/sid/edit"}]
+    cfg = DottedConfig(
+        {
+            "sheets": {
+                "companies": [{"key": "JGD", "workbook_url": "https://docs.google.com/spreadsheets/d/sid/edit"}]
+            }
         }
-    }
+    )
 
     with pytest.raises(intake_loader.IntakeLoadError, match="partial intake load blocked"):
         intake_loader.load_intake_for_company(cfg, "JGD")

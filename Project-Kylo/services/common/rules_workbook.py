@@ -11,16 +11,18 @@ _SPREADSHEET_ID_RE = re.compile(r"/spreadsheets/d/([^/#?]+)")
 def _cfg_get(cfg: Any, dotted_key: str) -> Any:
     if cfg is None:
         return None
+    if isinstance(cfg, dict):
+        cur = cfg
+        for part in dotted_key.split("."):
+            if isinstance(cur, dict) and part in cur:
+                cur = cur[part]
+            else:
+                return None
+        return cur
     getter = getattr(cfg, "get", None)
     if callable(getter):
         return getter(dotted_key)
-    cur = cfg
-    for part in dotted_key.split("."):
-        if isinstance(cur, dict) and part in cur:
-            cur = cur[part]
-        else:
-            return None
-    return cur
+    return None
 
 
 def _extract_spreadsheet_id(value: Any) -> str:
