@@ -240,37 +240,13 @@ def write_backlog_notes(
     detected_at = str(manifest.get("detected_at") or _utc_now_iso())
     tab_q = "'" + tab.replace("'", "''") + "'" if re.search(r"[^A-Za-z0-9_]", tab) else tab
 
-    existing: Dict[str, str] = {}
-    ranges: List[str] = []
-    entries: List[tuple[int, str]] = []
+    batch: List[dict] = []
     for entry in manifest.get("entries") or []:
         if not isinstance(entry, dict) or not entry.get("sheet_row"):
             continue
         sheet_row = int(entry["sheet_row"])
-        ranges.append(f"{tab_q}!{note_column}{sheet_row}")
-        entries.append((sheet_row, _backlog_note(case_id=case_id, detected_at=detected_at, entry=entry, manifest=manifest)))
-
-    if ranges and sid:
-        try:
-            resp = google_api_execute(
-                service.spreadsheets().values().batchGet(spreadsheetId=sid, ranges=ranges),
-                label="backlog:notes_read_existing",
-            )
-            for vr in resp.get("valueRanges") or []:
-                rng = str(vr.get("range") or "")
-                key = rng.split("!")[-1] if "!" in rng else rng
-                vals = vr.get("values") or []
-                existing[key] = str(vals[0][0]) if vals and vals[0] else ""
-        except Exception as e:
-            print(f"[BACKLOG] WARN: could not read existing notes before backlog write: {e}")
-
-    batch: List[dict] = []
-    for sheet_row, note in entries:
-        cell = f"{note_column}{sheet_row}"
-        prior = existing.get(cell, "")
-        if prior and prior.strip() and not prior.startswith("KYLO-AUDIT-SYSTEM"):
-            note = f"{prior} || {note}"[:500]
-        batch.append({"range": f"{tab_q}!{cell}", "values": [[note]]})
+        note = _backlog_note(case_id=case_id, detected_at=detected_at, entry=entry, manifest=manifest)
+        batch.append({"range": f"{tab_q}!{note_column}{sheet_row}", "values": [[note]]})
 
     if not batch or not sid:
         return 0

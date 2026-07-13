@@ -65,8 +65,6 @@ from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
-    ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
-    ORDER_ITEMS_QUERY_NO_PACKAGE,
     PAGE_SIZE,
     date_range_to_where,
     fetch_paginated,
@@ -241,32 +239,18 @@ def _fetch_chunk(
         except RuntimeError as e:
             last_err = e
             err = str(e).lower()
-            if chunk_idx == 1 and attempt == 0 and ("brand" in err or "package" in err or "cannot query field" in err):
-                fallback_queries = []
-                if query is ORDER_ITEMS_QUERY:
-                    if "package" in err:
-                        fallback_queries = [ORDER_ITEMS_QUERY_NO_PACKAGE, ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE]
-                    else:
-                        fallback_queries = [
-                            ORDER_ITEMS_QUERY_NO_BRAND,
-                            ORDER_ITEMS_QUERY_NO_PACKAGE,
-                            ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
-                        ]
-                elif query is ORDER_ITEMS_QUERY_NO_BRAND:
-                    fallback_queries = [ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE]
-                elif query is ORDER_ITEMS_QUERY_NO_PACKAGE:
-                    fallback_queries = [ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE]
-                for candidate in fallback_queries:
-                    try:
-                        raw = fetch_paginated(
-                            "findOrderItems",
-                            candidate,
-                            {"first": PAGE_SIZE, "where": where},
-                            credentials_path=creds,
-                        )
-                        return raw, candidate
-                    except RuntimeError as e2:
-                        last_err = e2
+            if chunk_idx == 1 and attempt == 0 and ("brand" in err or "cannot query field" in err):
+                query = ORDER_ITEMS_QUERY_NO_BRAND
+                try:
+                    raw = fetch_paginated(
+                        "findOrderItems",
+                        query,
+                        {"first": PAGE_SIZE, "where": where},
+                        credentials_path=creds,
+                    )
+                    return raw, query
+                except RuntimeError as e2:
+                    last_err = e2
             delay = min(120, 8 * (2**attempt))
             print(f"  Chunk {chunk_idx} attempt {attempt + 1}/{retries} failed: {e}; sleep {delay}s", flush=True)
             time_module.sleep(delay)
@@ -1773,7 +1757,6 @@ def main() -> int:
             k = order_item_key(n)
             if k in seen:
                 continue
-            seen.add(k)
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
                 continue
