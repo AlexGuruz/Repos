@@ -511,6 +511,7 @@ def build_live_work_index() -> dict[str, Any]:
         "clickup_action_snapshot",
         "ingestion/repo_activity_snapshot",
         "ingestion/github_activity_snapshot",
+        "ingestion/bills_snapshot",
         "timetable_snapshot",
     ]
     rows = []
