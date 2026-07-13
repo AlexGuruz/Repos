@@ -14,7 +14,9 @@ def _cfg_get(cfg: Any, dotted_key: str) -> Any:
     getter = getattr(cfg, "get", None)
     if callable(getter):
         try:
-            return getter(dotted_key)
+            value = getter(dotted_key)
+            if value is not None:
+                return value
         except TypeError:
             pass
     cur = cfg

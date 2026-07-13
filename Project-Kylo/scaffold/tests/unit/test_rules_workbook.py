@@ -39,6 +39,21 @@ def test_rules_workbook_extracts_id_from_management_url(monkeypatch):
     assert get_rules_management_spreadsheet_id(cfg) == "1VA76RvF5Q6gmgIrAbLby1zQltUNEpdf-fvW8qSLw5wU"
 
 
+def test_rules_workbook_accepts_plain_nested_dict(monkeypatch):
+    monkeypatch.delenv("KYLO_RULES_MANAGEMENT_SPREADSHEET_ID", raising=False)
+
+    assert (
+        get_rules_management_spreadsheet_id(
+            {
+                "rules": {
+                    "management_workbook_url": "https://docs.google.com/spreadsheets/d/abcDEF_123456789012345/edit"
+                }
+            }
+        )
+        == "abcDEF_123456789012345"
+    )
+
+
 def test_rules_workbook_falls_back_to_env(monkeypatch):
     monkeypatch.setenv("KYLO_RULES_MANAGEMENT_SPREADSHEET_ID", "env-sheet")
 
