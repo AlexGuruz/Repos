@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import sys
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
+
+_ai_lab_root = Path(__file__).resolve().parents[4]
+if str(_ai_lab_root) not in sys.path:
+    sys.path.insert(0, str(_ai_lab_root))
 
 from services.index_job_types import BuildMetadata
 from services.repo_index_coordinator import RepoIndexCoordinator
