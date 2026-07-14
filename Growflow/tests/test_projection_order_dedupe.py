@@ -33,4 +33,4 @@ def test_projection_rows_dedupe_duplicate_order_items_after_date_filter() -> Non
     )
 
     assert [row["objectId"] for row, _local_day in accepted] == ["line-1"]
-    assert seen == {"line-1"}
+    assert seen == {"objectId:line-1"}
