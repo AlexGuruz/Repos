@@ -212,10 +212,9 @@ def compile_daily_plan_preview(
 
     bills_snap = _load_ingestion_snapshot("bills_snapshot")
     bills_sum = summarize_bills_for_planning(bills_snap)
-    bill_rows = [r for r in (list((bills_snap or {}).get("data") or [])) if isinstance(r, dict)]
-    due_soon_rows = [r for r in bill_rows if r.get("timing_status") in ("at_risk", "upcoming")]
-    overdue_rows = [r for r in bill_rows if r.get("status") == "overdue"]
-    at_risk_only = [r for r in bill_rows if r.get("timing_status") == "at_risk"]
+    due_soon_rows = [r for r in list(bills_sum.get("upcoming") or []) if isinstance(r, dict)]
+    overdue_rows = [r for r in list(bills_sum.get("overdue") or []) if isinstance(r, dict)]
+    at_risk_only = [r for r in list(bills_sum.get("high_risk") or []) if isinstance(r, dict)]
     financial_obligations = {
         "due_soon": [
             {"name": r.get("name"), "due_date": r.get("due_date"), "days_until_due": r.get("days_until_due")}

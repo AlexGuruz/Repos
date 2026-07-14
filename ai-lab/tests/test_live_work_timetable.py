@@ -127,6 +127,24 @@ def test_compiler_includes_timetable_signals(monkeypatch: pytest.MonkeyPatch, tm
     (tmp_path / "time_constraints_snapshot.json").write_text(json.dumps({"data": {"constraints": []}, "confidence": 0.8}), encoding="utf-8")
     (tmp_path / "planning_gaps_snapshot.json").write_text(json.dumps({"data": {"gaps": []}}), encoding="utf-8")
     (tmp_path / "communication_queue_snapshot.json").write_text(json.dumps({"data": {"items": []}}), encoding="utf-8")
+    (tmp_path / "ingestion" / "bills_snapshot.json").write_text(
+        json.dumps(
+            {
+                "data": {
+                    "bills": [
+                        {
+                            "name": "Test bill",
+                            "due_date": "2000-01-01",
+                            "amount": 10.0,
+                            "currency": "USD",
+                            "status": "unpaid",
+                        }
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
     (tmp_path / "daily_progress_snapshot.json").write_text(
         json.dumps(
             {
@@ -146,4 +164,13 @@ def test_compiler_includes_timetable_signals(monkeypatch: pytest.MonkeyPatch, tm
     assert "project_timetable" in prev
     assert "timetable_estimates" in prev
     assert "timetable_clarifications" in prev
+    assert prev["financial_obligations"]["overdue"][0]["name"] == "Test bill"
+
+
+def test_bills_summary_handles_missing_snapshot() -> None:
+    from brain.live_work_orchestration.ingestion.bills import summarize_bills_for_planning
+
+    out = summarize_bills_for_planning(None)
+    assert out["total"] == 0
+    assert out["warnings"] == []
 
