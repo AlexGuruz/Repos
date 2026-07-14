@@ -19,6 +19,18 @@ def test_get_rules_management_spreadsheet_id_prefers_env(monkeypatch) -> None:
     assert get_rules_management_spreadsheet_id(cfg) == "from-env"
 
 
+def test_get_rules_management_spreadsheet_id_from_nested_dict(monkeypatch) -> None:
+    monkeypatch.delenv("KYLO_RULES_MANAGEMENT_SPREADSHEET_ID", raising=False)
+    monkeypatch.delenv("KYLO_RULES_MANAGEMENT_WORKBOOK_URL", raising=False)
+    cfg = {
+        "rules": {
+            "management_workbook_url": "https://docs.google.com/spreadsheets/d/dict-sheet-id/edit",
+        },
+    }
+
+    assert get_rules_management_spreadsheet_id(cfg) == "dict-sheet-id"
+
+
 def test_get_rules_management_spreadsheet_id_from_config_url(monkeypatch) -> None:
     monkeypatch.delenv("KYLO_RULES_MANAGEMENT_SPREADSHEET_ID", raising=False)
     monkeypatch.delenv("KYLO_RULES_MANAGEMENT_WORKBOOK_URL", raising=False)
