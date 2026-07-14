@@ -11,6 +11,15 @@ function EmptyCard({ title, children }) {
   )
 }
 
+function withTimeout(promise, label, timeoutMs = 3000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs)
+    }),
+  ])
+}
+
 export default function RetailPanel() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -28,28 +37,31 @@ export default function RetailPanel() {
     async function load() {
       setLoading(true)
       setError('')
-      const results = await Promise.allSettled([
-        api.retailHealth(),
-        api.retailDashboard(),
-        api.retailStores(),
-        api.retailCapital(),
-        api.retailConsignment(),
-        api.retailReconciliation(),
-      ])
-      if (!mounted) return
-      const rejected = results.find(r => r.status === 'rejected')
-      if (rejected) {
-        setError(rejected.reason?.message || 'Retail API request failed')
+      try {
+        const results = await Promise.allSettled([
+          withTimeout(api.retailHealth(), 'retail health'),
+          withTimeout(api.retailDashboard(), 'retail dashboard'),
+          withTimeout(api.retailStores(), 'retail stores'),
+          withTimeout(api.retailCapital(), 'retail capital'),
+          withTimeout(api.retailConsignment(), 'retail consignment'),
+          withTimeout(api.retailReconciliation(), 'retail reconciliation'),
+        ])
+        if (!mounted) return
+        const rejected = results.find(r => r.status === 'rejected')
+        if (rejected) {
+          setError(rejected.reason?.message || 'Retail API request failed')
+        }
+        setState({
+          health: results[0].status === 'fulfilled' ? results[0].value : { status: 'unavailable', message: 'Retail API did not respond.' },
+          dashboard: results[1].status === 'fulfilled' ? results[1].value : null,
+          stores: results[2].status === 'fulfilled' ? results[2].value : null,
+          capital: results[3].status === 'fulfilled' ? results[3].value : null,
+          consignment: results[4].status === 'fulfilled' ? results[4].value : null,
+          reconciliation: results[5].status === 'fulfilled' ? results[5].value : null,
+        })
+      } finally {
+        if (mounted) setLoading(false)
       }
-      setState({
-        health: results[0].status === 'fulfilled' ? results[0].value : null,
-        dashboard: results[1].status === 'fulfilled' ? results[1].value : null,
-        stores: results[2].status === 'fulfilled' ? results[2].value : null,
-        capital: results[3].status === 'fulfilled' ? results[3].value : null,
-        consignment: results[4].status === 'fulfilled' ? results[4].value : null,
-        reconciliation: results[5].status === 'fulfilled' ? results[5].value : null,
-      })
-      setLoading(false)
     }
     load()
     return () => {
