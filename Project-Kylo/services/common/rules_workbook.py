@@ -28,7 +28,9 @@ def _cfg_get(cfg: Any, dotted_key: str) -> Any:
         return None
     getter = getattr(cfg, "get", None)
     if callable(getter):
-        return getter(dotted_key)
+        value = getter(dotted_key)
+        if value is not None:
+            return value
 
     cur: Any = cfg
     for part in dotted_key.split("."):
