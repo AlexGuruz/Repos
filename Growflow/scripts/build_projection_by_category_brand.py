@@ -87,6 +87,27 @@ from lib.projection_layer2_recovery import (
 from lib.projection_sku_reorder import build_sku_pre_scale_buy
 
 
+def _accept_unique_order_item_in_window(
+    node: dict[str, Any],
+    *,
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> bool:
+    k = order_item_key(node)
+    if k in seen:
+        return False
+    sold = parse_iso_utc(node.get("SoldAt"))
+    if sold is None:
+        return False
+    local_date = sold.astimezone(tz).date()
+    if local_date < report_start_local or local_date > report_end_local:
+        return False
+    seen.add(k)
+    return True
+
+
 def _load_latest_received_at_by_product_object_id(db_path: Path) -> dict[str, datetime]:
     """
     Read latest transfer receipt timestamp per Product.objectId from transfer receipts SQLite DB.
@@ -1754,14 +1775,13 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
+            if not _accept_unique_order_item_in_window(
+                n,
+                seen=seen,
+                tz=tz,
+                report_start_local=report_start_local,
+                report_end_local=report_end_local,
+            ):
                 continue
             validation_rows.append(n)
 
