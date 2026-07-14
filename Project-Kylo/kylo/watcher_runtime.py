@@ -264,8 +264,12 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
             if prev_rules != rsum:
                 rules_changed_companies.append(cid)
 
-    # Safe mode / kill switches (env vars). Audit mode never posts transactions.
+    # Safe mode / kill switches (env vars). Audit/dry-run modes never post transactions.
     read_only = audit_mode or os.environ.get("KYLO_READ_ONLY", "").strip().lower() in ("1", "true", "yes", "y")
+    sheets_dry_run = (
+        os.environ.get("KYLO_SHEETS_DRY_RUN", "").strip().lower() in ("1", "true", "yes", "y")
+        or bool(cfg.get("runtime.dry_run", False))
+    )
     disable_instances_raw = (os.environ.get("KYLO_DISABLE_POSTING_FOR") or "").strip()
     disable_companies_raw = (os.environ.get("KYLO_DISABLE_POSTING_COMPANIES") or "").strip()
     company_key = instance_id.split(":", 1)[0].split("_", 1)[0].strip().upper() if instance_id else ""
@@ -315,6 +319,7 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
         change_detected
         and post_apply
         and (not read_only)
+        and (not sheets_dry_run)
         and (not audit_mode)
         and (not disabled)
         and (not paused_active)
@@ -329,6 +334,8 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
         posting_skipped_reason = "posting_disabled_config"
     elif read_only:
         posting_skipped_reason = "read_only"
+    elif sheets_dry_run:
+        posting_skipped_reason = "dry_run"
     elif disabled:
         posting_skipped_reason = disabled_reason or "disabled"
     elif paused_active:
@@ -385,6 +392,7 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
         "posting_attempted": posting_attempted,
         "posting_skipped_reason": posting_skipped_reason,
         "read_only": read_only,
+        "sheets_dry_run": sheets_dry_run,
         "audit_mode": audit_mode,
         "posting_disabled": disabled,
         "posting_disabled_reason": disabled_reason,

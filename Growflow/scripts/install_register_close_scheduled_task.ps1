@@ -3,13 +3,18 @@
 # Run: .\scripts\install_register_close_scheduled_task.ps1
 $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
+$taskScript = Join-Path $root "scripts\run_register_close_watch_task.ps1"
 $taskName = "GrowflowRegisterCloseTaxes"
 
-. (Join-Path $PSScriptRoot "scheduled_task_pythonw.ps1")
-$action = New-GrowflowPythonwTaskAction `
-    -Root $root.Path `
-    -RelativeScript "scripts\register_close_taxes_sheet.py" `
-    -ScriptArgs @("--once")
+if (-not (Test-Path $taskScript)) {
+    throw "Missing task script: $taskScript"
+}
+
+# Hidden PowerShell host -> pythonw (no console flash).
+$action = New-ScheduledTaskAction `
+    -Execute "powershell.exe" `
+    -Argument "-WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$taskScript`"" `
+    -WorkingDirectory $root.Path
 
 function New-WeeklyRepeatingTrigger {
     param(
@@ -37,7 +42,7 @@ $settings = New-ScheduledTaskSettingsSet `
     -AllowStartIfOnBatteries `
     -DontStopIfGoingOnBatteries `
     -StartWhenAvailable `
-    -MultipleInstances Queue `
+    -MultipleInstances IgnoreNew `
     -ExecutionTimeLimit (New-TimeSpan -Minutes 8) `
     -Hidden
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -156,3 +157,83 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_fetch_chunk_falls_back_when_package_field_is_missing(monkeypatch):
+    calls = []
+
+    def fake_fetch_paginated(root, query, variables, *, credentials_path=None):
+        calls.append(query)
+        if query == _mod.ORDER_ITEMS_QUERY:
+            raise RuntimeError("Cannot query field 'Package' on type 'OrderItems'")
+        assert query == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE
+        return []
+
+    monkeypatch.setattr(_mod, "fetch_paginated", fake_fetch_paginated)
+
+    raw, query = _mod._fetch_chunk(
+        oi_query=_mod.ORDER_ITEMS_QUERY,
+        where={"SoldAt": {"greaterThanOrEqualTo": "2026-01-01T00:00:00Z"}},
+        creds=None,
+        chunk_idx=1,
+        retries=1,
+    )
+
+    assert raw == []
+    assert query == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE
+    assert calls == [_mod.ORDER_ITEMS_QUERY, _mod.ORDER_ITEMS_QUERY_NO_PACKAGE]
+
+
+def test_projection_main_dedupes_duplicate_order_items(monkeypatch, tmp_path):
+    sold_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    node = {
+        "id": "order-line-1",
+        "objectId": "order-line-1",
+        "SoldAt": sold_at,
+        "GrossPrice": 10_000,
+        "NetPrice": 10_000,
+        "COG": 5_000,
+        "ProductCategory": {"Name": "Edibles"},
+        "Product": {
+            "objectId": "product-1",
+            "Name": "Gummy 10pk",
+            "Brand": {"Name": "Brand A"},
+        },
+    }
+
+    def fake_fetch_chunk(**kwargs):
+        return [dict(node), dict(node)], kwargs["oi_query"]
+
+    out = tmp_path / "projection.md"
+    monkeypatch.setattr(_mod, "_fetch_chunk", fake_fetch_chunk)
+    monkeypatch.setattr(_mod, "_load_config_flags", lambda: None)
+    monkeypatch.setattr(_mod, "_credentials_path", lambda: None)
+    monkeypatch.setattr(_mod, "_store_tz", lambda: timezone.utc)
+    monkeypatch.setattr(_mod, "validate_and_normalize", lambda **kwargs: {"ok": True, "report_path": "unit-test"})
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--chunk-days",
+            "1",
+            "--allocation-mode",
+            "gross-share",
+            "--pool-top-n",
+            "0",
+            "--pool",
+            "100",
+            "--no-layer2",
+            "--exclude-brands",
+            "",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert _mod.main() == 0
+    text = out.read_text(encoding="utf-8")
+    assert "- **Unique order lines counted:** 1" in text
+    assert "- **Sales in focus categories (pool-eligible):** $100.00 gross" in text
