@@ -455,7 +455,7 @@ class RepoIndexCoordinator:
                 wr = out.get("result")
                 if not isinstance(wr, dict):
                     reasons.append("smoke_test_empty_response")
-                elif wr.get("ok") is False:
+                elif wr.get("ok") is not True:
                     reasons.append("smoke_test_worker_not_ok")
         except Exception:
             # Likely transient tunnel failure; retryable.
@@ -476,6 +476,20 @@ class RepoIndexCoordinator:
 
         # Promote should be automatic (no Gate B) when validation is clean.
         res = await self._worker_promote_repo_index({"repo_id": repo_id, "staging_version": meta.staging_version})
+        worker_result = res.get("result") if isinstance(res, dict) and isinstance(res.get("result"), dict) else {}
+        if (
+            not isinstance(res, dict)
+            or res.get("ok") is not True
+            or not isinstance(worker_result, dict)
+            or worker_result.get("ok") is not True
+        ):
+            err = ""
+            if isinstance(worker_result, dict):
+                err = str(worker_result.get("error") or "")
+            if not err and isinstance(res, dict):
+                err = str(res.get("error") or "")
+            await self._handle_build_failure(repo_id, f"promote_failed:{err or res}")
+            return
 
         async with self._lock:
             st = self._get_state(repo_id)
@@ -701,7 +715,7 @@ class RepoIndexCoordinator:
     async def _worker_index_repo(self, payload: dict[str, Any]) -> dict[str, Any]:
         from services.supervisor_bridge import route_intent
         # Use supervisor bridge so reads are audited and go through one path.
-        return await route_intent(agent="repo_index_coordinator", op="index_repo", payload=payload)
+        return await route_intent(agent="repo_index_coordinator", op="index_repo", payload=payload, internal=True)
 
     async def _worker_retrieve(self, payload: dict[str, Any]) -> dict[str, Any]:
         from services.supervisor_bridge import route_intent
@@ -709,7 +723,7 @@ class RepoIndexCoordinator:
 
     async def _worker_promote_repo_index(self, payload: dict[str, Any]) -> dict[str, Any]:
         from services.supervisor_bridge import route_intent
-        return await route_intent(agent="repo_index_coordinator", op="promote_repo_index", payload=payload)
+        return await route_intent(agent="repo_index_coordinator", op="promote_repo_index", payload=payload, internal=True)
 
 
 # Singleton, wired in main.py and used by repo_watcher fast path.
