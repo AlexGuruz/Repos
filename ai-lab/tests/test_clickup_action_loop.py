@@ -220,6 +220,25 @@ def test_queue_files_created(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
     assert (tmp_path / "clickup_action_log.jsonl").is_file()
 
 
+def test_corrupt_action_queue_is_not_reset_or_overwritten(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path)
+    queue_path = tmp_path / "clickup_action_queue.json"
+    queue_path.write_text('{"items": [', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="ClickUp queue file is corrupt"):
+        queue_clickup_action(
+            action_type="task_create",
+            target_list="Agent Ops",
+            target_task_id=None,
+            title="T",
+            message="m",
+            category="other",
+            reason="r",
+        )
+
+    assert queue_path.read_text(encoding="utf-8") == '{"items": ['
+
+
 def test_classify_ambiguous_finance_vs_clarify() -> None:
     cat = classify_work_category("Need clarification for company finance budget")
     assert cat in ("agent_clarifications", "company_finances")

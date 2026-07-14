@@ -8,6 +8,7 @@ NOTE: single-writer assumption (Phase 10). This module does not implement cross-
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from pathlib import Path
 from typing import Any
@@ -37,14 +38,18 @@ def _load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
         return default
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else default
-    except Exception:
-        return default
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"ClickUp queue file is corrupt: {path}") from exc
+    if not isinstance(data, dict):
+        raise ValueError(f"ClickUp queue file must contain a JSON object: {path}")
+    return data
 
 
 def _save_json(path: Path, payload: dict[str, Any]) -> None:
     body = json.dumps(payload, indent=2, default=str)
-    path.write_text(body, encoding="utf-8")
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(body, encoding="utf-8")
+    tmp.replace(path)
 
 
 def _append_clickup_log(event_type: str, payload: dict[str, Any]) -> None:

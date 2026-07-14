@@ -87,6 +87,15 @@ from lib.projection_layer2_recovery import (
 from lib.projection_sku_reorder import build_sku_pre_scale_buy
 
 
+def _mark_order_item_seen(node: dict[str, Any], seen: set[str]) -> bool:
+    """Return True only the first time an order-item key is observed."""
+    key = order_item_key(node)
+    if key in seen:
+        return False
+    seen.add(key)
+    return True
+
+
 def _load_latest_received_at_by_product_object_id(db_path: Path) -> dict[str, datetime]:
     """
     Read latest transfer receipt timestamp per Product.objectId from transfer receipts SQLite DB.
@@ -1754,8 +1763,7 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
+            if not _mark_order_item_seen(n, seen):
                 continue
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
