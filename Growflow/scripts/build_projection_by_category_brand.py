@@ -257,6 +257,16 @@ def _fetch_chunk(
     assert last_err is not None
     raise last_err
 
+
+def _iter_unique_order_items(raw: list[dict[str, Any]], seen: set[str]):
+    for node in raw:
+        key = order_item_key(node)
+        if key in seen:
+            continue
+        seen.add(key)
+        yield node
+
+
 BUCKET_DISPLAY_ORDER = [
     "Edibles",
     "Cartridges",
@@ -1753,10 +1763,7 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
+        for n in _iter_unique_order_items(raw, seen):
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
                 continue

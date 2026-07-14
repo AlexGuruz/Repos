@@ -156,3 +156,17 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_order_item_dedupe_marks_seen_before_aggregation():
+    seen = set()
+    rows = [
+        {"objectId": "line-1", "SoldAt": "2026-01-01T00:00:00Z", "GrossPrice": 1000},
+        {"objectId": "line-1", "SoldAt": "2026-01-01T00:00:00Z", "GrossPrice": 1000},
+        {"objectId": "line-2", "SoldAt": "2026-01-02T00:00:00Z", "GrossPrice": 2000},
+    ]
+
+    unique = list(_mod._iter_unique_order_items(rows, seen))
+
+    assert [r["objectId"] for r in unique] == ["line-1", "line-2"]
+    assert seen == {"objectId:line-1", "objectId:line-2"}
