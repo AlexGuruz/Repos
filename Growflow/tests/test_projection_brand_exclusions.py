@@ -70,6 +70,55 @@ def test_implied_monthly_cog_throughput_usd():
     assert t is not None and t > 0
 
 
+def test_countable_order_line_records_seen_after_date_filter():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    seen: set[str] = set()
+    tz = ZoneInfo("America/Chicago")
+    start = date(2026, 1, 1)
+    end = date(2026, 1, 31)
+
+    invalid = {"objectId": "line-1", "SoldAt": None, "GrossPrice": 100}
+    first = {"objectId": "line-1", "SoldAt": "2026-01-05T12:00:00Z", "GrossPrice": 100}
+    duplicate = {"objectId": "line-1", "SoldAt": "2026-01-05T12:00:00Z", "GrossPrice": 100}
+
+    assert _mod._countable_order_line_local_date(invalid, seen, tz, start, end) is None
+    assert seen == set()
+    assert _mod._countable_order_line_local_date(first, seen, tz, start, end) == date(2026, 1, 5)
+    assert seen == {"objectId:line-1"}
+    assert _mod._countable_order_line_local_date(duplicate, seen, tz, start, end) is None
+
+
+def test_fetch_chunk_falls_back_when_package_field_is_unsupported(monkeypatch):
+    calls: list[str] = []
+
+    def fake_fetch_paginated(_connection_field, query, _variables, *, credentials_path=None):
+        calls.append(query)
+        if query in (_mod.ORDER_ITEMS_QUERY, _mod.ORDER_ITEMS_QUERY_NO_BRAND):
+            raise RuntimeError('Cannot query field "Package" on type "OrderItems"')
+        assert query == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE
+        return [{"objectId": "ok"}]
+
+    monkeypatch.setattr(_mod, "fetch_paginated", fake_fetch_paginated)
+
+    rows, query_used = _mod._fetch_chunk(
+        oi_query=_mod.ORDER_ITEMS_QUERY,
+        where={},
+        creds=None,
+        chunk_idx=1,
+        retries=1,
+    )
+
+    assert rows == [{"objectId": "ok"}]
+    assert query_used == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE
+    assert calls == [
+        _mod.ORDER_ITEMS_QUERY,
+        _mod.ORDER_ITEMS_QUERY_NO_BRAND,
+        _mod.ORDER_ITEMS_QUERY_NO_PACKAGE,
+    ]
+
+
 def test_cash_cycle_and_cover_status():
     from lib.projection_layer2_recovery import cash_cycle_status_from_recovery_days, cover_status_from_days_of_cover
 
