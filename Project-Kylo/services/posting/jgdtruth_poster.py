@@ -1556,6 +1556,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
             "skipped_rows": skipped_rows,
+            "failed_ranges": sorted(failed_ranges),
+            "partial_failure": bool(failed_ranges),
         }
 
     # Execute per-target posting and aggregate
@@ -1566,6 +1568,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
     skipped_rows_all: List[Tuple[str, str, int, str]] = []
+    failed_ranges_all: List[str] = []
 
     for target_sid, txns_for_target in txns_by_target_sid.items():
         result = _process_target(target_sid, txns_for_target, ignore_posted=ignore_posted_flag)
@@ -1576,6 +1579,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
         skipped_rows_all.extend(list(result.get("skipped_rows", [])))
+        failed_ranges_all.extend(list(result.get("failed_ranges", [])))
 
     # Basic diagnostics for skipped items (printed once per run)
     if skipped_tab_not_found_all:
@@ -1638,6 +1642,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "write_plan_count": int(len(write_plan)),
         "postable_source_rows_by_tab": postable_rows_counts,
         "target_writes_by_source_tab": write_counts_by_tab,
+        "failed_ranges": sorted(set(failed_ranges_all)),
+        "partial_failure": bool(failed_ranges_all),
     }
 
 

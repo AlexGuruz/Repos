@@ -88,6 +88,15 @@ def _run_sync_hook() -> bool:
     return True
 
 
+def _posting_summary_failed(summary: Any) -> bool:
+    if not isinstance(summary, dict):
+        return False
+    if summary.get("error") or summary.get("partial_failure"):
+        return True
+    failed_ranges = summary.get("failed_ranges")
+    return isinstance(failed_ranges, list) and len(failed_ranges) > 0
+
+
 def rules_checksum(company: str) -> str:
     rules = fetch_rules_from_jgdtruth(company)
     approved = [(r.source or "", r.target_sheet or "", r.target_header or "") for r in rules.values() if r.approved]
@@ -356,7 +365,7 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
                 print(f"[ERROR] Failed to process {cid}: {e}")
                 summaries[cid] = {"error": True}
 
-        any_error = any(isinstance(s, dict) and s.get("error") for s in summaries.values())
+        any_error = any(_posting_summary_failed(s) for s in summaries.values())
         if any_error:
             consecutive_failures = consecutive_failures + 1
             if consecutive_failures >= cb_max:
