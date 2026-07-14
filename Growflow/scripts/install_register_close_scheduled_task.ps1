@@ -5,11 +5,10 @@ $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 $taskName = "GrowflowRegisterCloseTaxes"
 
-. (Join-Path $PSScriptRoot "scheduled_task_pythonw.ps1")
-$action = New-GrowflowPythonwTaskAction `
-    -Root $root.Path `
-    -RelativeScript "scripts\register_close_taxes_sheet.py" `
-    -ScriptArgs @("--once")
+$runner = Join-Path $PSScriptRoot "run_register_close_watch_task.ps1"
+$action = New-ScheduledTaskAction `
+    -Execute "powershell.exe" `
+    -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$runner`""
 
 function New-WeeklyRepeatingTrigger {
     param(
