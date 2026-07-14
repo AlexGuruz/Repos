@@ -65,6 +65,7 @@ from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
+    ORDER_ITEMS_QUERY_NO_PACKAGE,
     PAGE_SIZE,
     date_range_to_where,
     fetch_paginated,
@@ -239,8 +240,26 @@ def _fetch_chunk(
         except RuntimeError as e:
             last_err = e
             err = str(e).lower()
-            if chunk_idx == 1 and attempt == 0 and ("brand" in err or "cannot query field" in err):
+            if (
+                chunk_idx == 1
+                and attempt == 0
+                and query == ORDER_ITEMS_QUERY
+                and ("brand" in err or "cannot query field" in err)
+            ):
                 query = ORDER_ITEMS_QUERY_NO_BRAND
+                try:
+                    raw = fetch_paginated(
+                        "findOrderItems",
+                        query,
+                        {"first": PAGE_SIZE, "where": where},
+                        credentials_path=creds,
+                    )
+                    return raw, query
+                except RuntimeError as e2:
+                    last_err = e2
+                    err = str(e2).lower()
+            if "package" in err and query != ORDER_ITEMS_QUERY_NO_PACKAGE:
+                query = ORDER_ITEMS_QUERY_NO_PACKAGE
                 try:
                     raw = fetch_paginated(
                         "findOrderItems",
@@ -256,6 +275,26 @@ def _fetch_chunk(
             time_module.sleep(delay)
     assert last_err is not None
     raise last_err
+
+
+def _countable_order_line_local_date(
+    node: dict[str, Any],
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> date | None:
+    k = order_item_key(node)
+    if k in seen:
+        return None
+    sold = parse_iso_utc(node.get("SoldAt"))
+    if sold is None:
+        return None
+    ld = sold.astimezone(tz).date()
+    if ld < report_start_local or ld > report_end_local:
+        return None
+    seen.add(k)
+    return ld
 
 BUCKET_DISPLAY_ORDER = [
     "Edibles",
@@ -1754,14 +1793,14 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
+            ld = _countable_order_line_local_date(
+                n,
+                seen,
+                tz,
+                report_start_local,
+                report_end_local,
+            )
+            if ld is None:
                 continue
             validation_rows.append(n)
 
