@@ -14,7 +14,9 @@ def _cfg_get(cfg: Any, dotted_key: str) -> Any:
         return None
     if hasattr(cfg, "get"):
         try:
-            return cfg.get(dotted_key)
+            value = cfg.get(dotted_key)
+            if value is not None:
+                return value
         except TypeError:
             pass
     cur = cfg
