@@ -99,6 +99,19 @@ def test_missing_sources_not_guessed(monkeypatch: pytest.MonkeyPatch, tmp_path: 
     assert len(cq.get("missing_sources") or []) > 0
 
 
+def test_bills_snapshot_is_read_only_manual_lane(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path)
+    (tmp_path / "manual_bills.json").write_text(
+        json.dumps({"bills": [{"name": "Vendor", "due_date": "2026-01-01", "amount": 12.5}]}),
+        encoding="utf-8",
+    )
+    build_all_live_work_snapshots()
+    raw = json.loads((tmp_path / "ingestion" / "bills_snapshot.json").read_text(encoding="utf-8"))
+    assert raw["snapshot_type"] == "bills_snapshot"
+    assert raw["data"]["bills"][0]["name"] == "Vendor"
+    assert raw["summary_detailed"].startswith("Manual bills only")
+
+
 def test_approval_gates_not_weakened() -> None:
     assert "send" in APPROVAL_REQUIRED
     assert requires_approval("patch", None) is True
