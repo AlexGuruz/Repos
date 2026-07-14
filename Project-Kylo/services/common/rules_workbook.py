@@ -9,6 +9,14 @@ from services.sheets.poster import _extract_spreadsheet_id
 def _cfg_get(cfg: Any, key: str) -> Any:
     if cfg is None:
         return None
+    if isinstance(cfg, dict):
+        cur = cfg
+        for part in key.split("."):
+            if isinstance(cur, dict) and part in cur:
+                cur = cur[part]
+            else:
+                return None
+        return cur
     get = getattr(cfg, "get", None)
     if callable(get):
         return get(key)
