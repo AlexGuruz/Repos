@@ -123,6 +123,30 @@ def _load_latest_received_at_by_product_object_id(db_path: Path) -> dict[str, da
         conn.close()
 
 
+def iter_unique_order_items_in_window(
+    raw: list[dict[str, Any]],
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> list[tuple[dict[str, Any], date]]:
+    """Return de-duplicated order items whose SoldAt local date is in the report window."""
+    out: list[tuple[dict[str, Any], date]] = []
+    for n in raw:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        out.append((n, ld))
+    return out
+
+
 def _load_latest_unit_cost_cents_by_product_object_id(db_path: Path) -> dict[str, int]:
     """
     Read ``product_landed_cost_current`` from the transfer receipts SQLite DB.
@@ -1753,16 +1777,7 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
+        for n, ld in iter_unique_order_items_in_window(raw, seen, tz, report_start_local, report_end_local):
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
