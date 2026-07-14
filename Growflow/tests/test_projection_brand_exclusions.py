@@ -1,6 +1,7 @@
 """Tests for brand exclusion parsing in projection script."""
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 
@@ -156,3 +157,56 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_cli_dedupes_duplicate_order_items(monkeypatch, tmp_path: Path):
+    sold_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    item = {
+        "id": "order-item-1",
+        "objectId": "order-item-1",
+        "SoldAt": sold_at,
+        "GrossPrice": 1000,
+        "COG": 400,
+        "SKU": "SKU-1",
+        "ProductCategory": {"Name": "Edibles"},
+        "Product": {
+            "objectId": "product-1",
+            "Name": "Gummy 10pk",
+            "SKU": "SKU-1",
+            "Brand": {"Name": "Acme"},
+        },
+    }
+
+    def fake_fetch_chunk(**kwargs):
+        return [item, dict(item)], kwargs["oi_query"]
+
+    def fake_validate_and_normalize(**kwargs):
+        return {"ok": True, "errors": [], "report_path": str(tmp_path / "validation.json")}
+
+    out = tmp_path / "projection.md"
+    monkeypatch.setattr(_mod, "_fetch_chunk", fake_fetch_chunk)
+    monkeypatch.setattr(_mod, "validate_and_normalize", fake_validate_and_normalize)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--velocity-days",
+            "1",
+            "--allocation-mode",
+            "gross-share",
+            "--no-layer2",
+            "--exclude-brands",
+            "",
+            "--pool",
+            "100",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert _mod.main() == 0
+    text = out.read_text(encoding="utf-8")
+    assert "**Unique order lines counted:** 1" in text
