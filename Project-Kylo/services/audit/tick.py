@@ -48,7 +48,9 @@ def _cfg_get(cfg: Any, dotted: str, default: Any = None) -> Any:
     return default
 
 
-def _sheets_writes_blocked() -> bool:
+def _sheets_writes_blocked(cfg: Any | None = None) -> bool:
+    if is_audit_mode(cfg):
+        return True
     return os.environ.get("KYLO_SHEETS_DRY_RUN", "").strip().lower() in ("1", "true", "yes", "y") or os.environ.get(
         "KYLO_READ_ONLY", ""
     ).strip().lower() in ("1", "true", "yes", "y")
@@ -206,7 +208,8 @@ def run_audit_tick(
 
     write_notes = bool(audit_block.get("write_notes", True))
     apply_hl = bool(audit_block.get("apply_highlights", True))
-    if events and (write_notes or apply_hl) and not _sheets_writes_blocked():
+    sheets_writes_blocked = _sheets_writes_blocked(cfg)
+    if events and (write_notes or apply_hl) and not sheets_writes_blocked:
         try:
             service = _get_service()
         except Exception as e:
@@ -226,8 +229,8 @@ def run_audit_tick(
                     )
                 except Exception as e:
                     print(f"[AUDIT] WARN: notes failed: {e}")
-    elif events and (write_notes or apply_hl) and _sheets_writes_blocked():
-        print("[AUDIT] Skipping sheet highlights/notes (dry-run or read-only)")
+    elif events and (write_notes or apply_hl) and sheets_writes_blocked:
+        print("[AUDIT] Skipping sheet highlights/notes (audit mode, dry-run, or read-only)")
 
     print(
         f"[AUDIT] tick complete rows={len(current)} events={len(events)} "
