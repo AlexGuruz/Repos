@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from services.audit.alerts import emit_audit_alerts
 from services.audit.highlights import apply_audit_highlights
-from services.audit.intake_loader import load_all_intake
+from services.audit.intake_loader import intake_urls_for_company, load_all_intake
 from services.audit.logger import append_audit_jsonl, append_audit_log
 from services.audit.notes import write_audit_notes
 from services.audit.pair_rules import detect_from_bank_payroll_pairs, detect_kylo_posted_amount_variance
@@ -28,7 +28,7 @@ from services.audit.txn_diff import (
     merge_business_line_registry,
 )
 from services.common.instance import default_posting_state_path, default_watch_state_path
-from services.sheets.poster import _get_service
+from services.sheets.poster import _extract_spreadsheet_id, _get_service
 
 
 def _utc_now_iso() -> str:
@@ -64,6 +64,24 @@ def _dedupe_events(events: List[ChangeEvent]) -> List[ChangeEvent]:
         seen.add(sig)
         out.append(ev)
     return out
+
+
+def _expected_csv_keys(cfg: Any, companies: List[str]) -> Set[str]:
+    extra_tabs: List[str] = []
+    try:
+        extra_tabs = [str(t) for t in (cfg.get("intake.extra_tabs") or []) if str(t).strip()]
+    except Exception:
+        extra_tabs = []
+    tabs = tuple(["TRANSACTIONS", "BANK"]) + tuple(extra_tabs)
+    expected: Set[str] = set()
+    for company in companies:
+        for url in intake_urls_for_company(cfg, company):
+            sid = _extract_spreadsheet_id(str(url))
+            if not sid:
+                continue
+            for tab in tabs:
+                expected.add(f"{sid}|{tab.upper()}")
+    return expected
 
 
 def audit_enabled(cfg) -> bool:
@@ -123,6 +141,18 @@ def run_audit_tick(
     except Exception as e:
         summary["error"] = f"intake_load_failed: {e}"
         print(f"[AUDIT] ERROR loading intake: {e}")
+        return summary
+
+    expected_keys = _expected_csv_keys(cfg, companies)
+    missing_keys = sorted(expected_keys - set(csv_by_key.keys()))
+    if missing_keys:
+        summary["error"] = "intake_incomplete"
+        summary["missing_csv_tabs"] = missing_keys
+        summary["loaded_csv_tabs"] = sorted(csv_by_key.keys())
+        print(
+            f"[AUDIT] ERROR incomplete intake load: missing {len(missing_keys)} "
+            f"tab(s); registry will not be updated"
+        )
         return summary
 
     current: Dict[str, RowRecord] = {}

@@ -56,6 +56,29 @@ def test_brand_excluded():
     assert not _mod.brand_excluded("Cartel", ex)
 
 
+def test_unique_order_items_for_local_window_dedupes_seen_ids():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("America/Chicago")
+    raw = [
+        {"objectId": "line-1", "SoldAt": "2026-04-01T15:00:00.000Z", "GrossPrice": 1000},
+        {"objectId": "line-1", "SoldAt": "2026-04-01T15:00:00.000Z", "GrossPrice": 1000},
+        {"objectId": "line-2", "SoldAt": "2026-04-02T15:00:00.000Z", "GrossPrice": 2000},
+        {"objectId": "outside", "SoldAt": "2026-04-03T15:00:00.000Z", "GrossPrice": 3000},
+    ]
+
+    rows = _mod.unique_order_items_for_local_window(
+        raw,
+        set(),
+        tz,
+        date(2026, 4, 1),
+        date(2026, 4, 2),
+    )
+
+    assert [row["objectId"] for row, _ld in rows] == ["line-1", "line-2"]
+
+
 def test_default_exclude_includes_consignment_casefold():
     ex = _mod.parse_brand_exclusions(_mod.DEFAULT_EXCLUDE_BRANDS)
     assert _mod.brand_excluded("ARCTIC EXTRACTS", ex)
