@@ -257,6 +257,27 @@ def _fetch_chunk(
     assert last_err is not None
     raise last_err
 
+
+def _unique_order_item_local_date(
+    node: dict[str, Any],
+    *,
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> date | None:
+    key = order_item_key(node)
+    if key in seen:
+        return None
+    sold = parse_iso_utc(node.get("SoldAt"))
+    if sold is None:
+        return None
+    local_date = sold.astimezone(tz).date()
+    if local_date < report_start_local or local_date > report_end_local:
+        return None
+    seen.add(key)
+    return local_date
+
 BUCKET_DISPLAY_ORDER = [
     "Edibles",
     "Cartridges",
@@ -1754,14 +1775,14 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
+            ld = _unique_order_item_local_date(
+                n,
+                seen=seen,
+                tz=tz,
+                report_start_local=report_start_local,
+                report_end_local=report_end_local,
+            )
+            if ld is None:
                 continue
             validation_rows.append(n)
 

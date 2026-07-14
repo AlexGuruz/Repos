@@ -111,6 +111,7 @@ def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -
         notify_once_per_sales_date=bool(cfg.get("notify_once_per_sales_date", True)),
     )
     exported = 0
+    export_failed = False
     for ev in sorted(pending, key=lambda e: e.end_time_utc):
         print(
             f"Register close detected: shift={ev.shift_id} sales_date={ev.sales_date} "
@@ -128,13 +129,17 @@ def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -
         except Exception as e:
             _append_log(f"Export FAILED for {ev.sales_date}: {e}", cfg)
             print(f"Export FAILED for {ev.sales_date}: {e}", file=sys.stderr, flush=True)
+            export_failed = True
             continue
         if not dry_run:
             mark_notified(state, ev)
             exported += 1
             _append_log(f"Exported taxes for {ev.sales_date} to Google Sheet", cfg)
 
-    state["last_poll_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    if export_failed:
+        _append_log("poll cursor preserved after export failure", cfg)
+    else:
+        state["last_poll_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     if not dry_run:
         save_state(state_path, state)
     _append_log(f"poll ok exported={exported}", cfg)

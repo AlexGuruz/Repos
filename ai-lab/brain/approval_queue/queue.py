@@ -5,6 +5,7 @@ Persists to logs/approval_logs/pending.json; logs resolved to approval_logs/.
 from __future__ import annotations
 
 import json
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime, timezone
@@ -67,8 +68,7 @@ def _log_resolved(id_: str, spec: dict, approve: bool) -> None:
 def submit(spec: ApprovalSpec | dict[str, Any]) -> str:
     """Enqueue approval request; return id."""
     pending = _load_pending()
-    next_id = len(pending) + 1
-    id_ = f"approval-{next_id}"
+    id_ = f"approval-{uuid.uuid4().hex}"
     if isinstance(spec, ApprovalSpec):
         row = {
             "file_path": spec.file_path,

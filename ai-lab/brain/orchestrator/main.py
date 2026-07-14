@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 import sys
 import time
 from collections.abc import Callable
@@ -38,6 +39,32 @@ from brain.orchestrator.response_trace import (
     first_token_tracker,
     new_request_id,
 )
+
+
+_REPO_SCAN_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+_WORKER_REPO_SCAN_CODE = (
+    "import json,sys; from pathlib import Path; sys.path.insert(0,'.'); "
+    "from agents.repo_cartographer.cartographer import run_scan_to_dict; "
+    "name=sys.argv[1] if len(sys.argv)>1 else 'repos_root'; "
+    "root=Path('repos_mirror')/name; "
+    "d=run_scan_to_dict(root,name); "
+    "print(json.dumps(d) if d else '')"
+)
+
+
+def _normalize_repo_scan_name(raw: object) -> str | None:
+    repo_name = (str(raw or "repos_root")).strip() or "repos_root"
+    if repo_name in {".", ".."} or not _REPO_SCAN_NAME_RE.fullmatch(repo_name):
+        return None
+    return repo_name
+
+
+def _build_worker_repo_scan_command(ai_lab_path: str, repo_name: str) -> str:
+    return (
+        f"cd {shlex.quote(ai_lab_path)} && "
+        f"PYTHONPATH={shlex.quote(ai_lab_path)} "
+        f"python3 -c {shlex.quote(_WORKER_REPO_SCAN_CODE)} {shlex.quote(repo_name)}"
+    )
 
 
 def _load_registry() -> list:
@@ -1316,19 +1343,16 @@ def run(
 
     if intent == "run_agent" and params.get("agent") == "repo_cartographer":
         try:
-            repo_name = (params.get("repo_name") or "repos_root").strip() or "repos_root"
+            repo_name = _normalize_repo_scan_name(params.get("repo_name"))
+            if repo_name is None:
+                return {
+                    "reply": "Invalid repo name. Use letters, numbers, dot, underscore, or hyphen only.",
+                    "approval_request": None,
+                }
             worker_cfg = get_worker_ssh_config()
             if worker_cfg:
                 path = worker_cfg["ai_lab_path"]
-                inline = (
-                    f"cd {path} && PYTHONPATH={path} python3 -c "
-                    "'import json,sys; from pathlib import Path; sys.path.insert(0,\".\"); "
-                    "from agents.repo_cartographer.cartographer import run_scan_to_dict; "
-                    "name=sys.argv[1] if len(sys.argv)>1 else \"repos_root\"; "
-                    "root=Path(\"repos_mirror\")/name; "
-                    "d=run_scan_to_dict(root,name); "
-                    "print(json.dumps(d) if d else \"\")' " + repo_name
-                )
+                inline = _build_worker_repo_scan_command(path, repo_name)
                 res = run_ssh_command(
                     worker_cfg["host"],
                     inline,
