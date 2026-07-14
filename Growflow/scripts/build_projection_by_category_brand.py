@@ -65,6 +65,7 @@ from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
+    ORDER_ITEMS_QUERY_NO_PACKAGE,
     PAGE_SIZE,
     date_range_to_where,
     fetch_paginated,
@@ -238,9 +239,9 @@ def _fetch_chunk(
             return raw, query
         except RuntimeError as e:
             last_err = e
-            err = str(e).lower()
-            if chunk_idx == 1 and attempt == 0 and ("brand" in err or "cannot query field" in err):
-                query = ORDER_ITEMS_QUERY_NO_BRAND
+            fallback_query = _schema_fallback_query(query, str(e))
+            if chunk_idx == 1 and attempt == 0 and fallback_query and fallback_query != query:
+                query = fallback_query
                 try:
                     raw = fetch_paginated(
                         "findOrderItems",
@@ -251,11 +252,66 @@ def _fetch_chunk(
                     return raw, query
                 except RuntimeError as e2:
                     last_err = e2
+                    fallback_query = _schema_fallback_query(query, str(e2))
+                    if fallback_query and fallback_query != query:
+                        query = fallback_query
+                        try:
+                            raw = fetch_paginated(
+                                "findOrderItems",
+                                query,
+                                {"first": PAGE_SIZE, "where": where},
+                                credentials_path=creds,
+                            )
+                            return raw, query
+                        except RuntimeError as e3:
+                            last_err = e3
             delay = min(120, 8 * (2**attempt))
             print(f"  Chunk {chunk_idx} attempt {attempt + 1}/{retries} failed: {e}; sleep {delay}s", flush=True)
             time_module.sleep(delay)
     assert last_err is not None
     raise last_err
+
+
+def _query_without_package(query: str) -> str:
+    return query.replace("        Package { objectId }\n", "")
+
+
+def _schema_fallback_query(query: str, error_text: str) -> str | None:
+    err = error_text.lower()
+    if "package" in err or "cannot query field" in err and "package" in err:
+        if query == ORDER_ITEMS_QUERY:
+            return ORDER_ITEMS_QUERY_NO_PACKAGE
+        without_package = _query_without_package(query)
+        return without_package if without_package != query else None
+    if "brand" in err or "cannot query field" in err and "brand" in err:
+        if query == ORDER_ITEMS_QUERY:
+            return ORDER_ITEMS_QUERY_NO_BRAND
+        return None
+    return None
+
+
+def filter_unique_order_items_for_projection_window(
+    rows: list[dict[str, Any]],
+    seen: set[str],
+    *,
+    report_start_local: date,
+    report_end_local: date,
+    tz: ZoneInfo,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        k = order_item_key(row)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(row.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        out.append(row)
+    return out
 
 BUCKET_DISPLAY_ORDER = [
     "Edibles",
@@ -1753,16 +1809,16 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
+        for n in filter_unique_order_items_for_projection_window(
+            raw,
+            seen,
+            report_start_local=report_start_local,
+            report_end_local=report_end_local,
+            tz=tz,
+        ):
             sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
+            assert sold is not None
             ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
