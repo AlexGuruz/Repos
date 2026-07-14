@@ -87,6 +87,28 @@ from lib.projection_layer2_recovery import (
 from lib.projection_sku_reorder import build_sku_pre_scale_buy
 
 
+def _iter_unique_projection_rows(
+    raw: list[dict[str, Any]],
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+):
+    """Yield rows that will be counted exactly once in the projection window."""
+    for n in raw:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        yield n, ld
+
+
 def _load_latest_received_at_by_product_object_id(db_path: Path) -> dict[str, datetime]:
     """
     Read latest transfer receipt timestamp per Product.objectId from transfer receipts SQLite DB.
@@ -1753,16 +1775,7 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
+        for n, ld in _iter_unique_projection_rows(raw, seen, tz, report_start_local, report_end_local):
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)

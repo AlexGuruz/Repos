@@ -45,3 +45,15 @@ def test_supervisor_blocks_read_op_extension_without_metadata() -> None:
     assert body.get("ok") is False
     assert "missing tool metadata" in body.get("error", "")
 
+
+def test_supervisor_blocks_public_repo_index_mutations() -> None:
+    with patch("services.supervisor_bridge._worker_call", new_callable=AsyncMock) as worker_call, \
+         patch("services.supervisor_bridge.bus.publish", new_callable=AsyncMock):
+        client = _client()
+        resp = client.post("/api/tools/invoke", json={"op": "promote_repo_index", "agent": "test", "payload": {}})
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body.get("ok") is False
+    worker_call.assert_not_awaited()
+

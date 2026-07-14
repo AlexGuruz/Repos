@@ -74,11 +74,9 @@ def _catalog_attachment_from_payload(payload: dict) -> str | None:
 
 
 ALLOWLISTED_READ_OPS = frozenset({
-    "index_repo",
     "semantic_search",
     "chunk_retrieve",
     "retrieve",
-    "promote_repo_index",
     "explain_log",
     "summarize_diff",
     "embed",
@@ -94,6 +92,10 @@ ALLOWLISTED_READ_OPS = frozenset({
     "query",
     "search",
 })
+
+# Mutating worker index operations are coordinator-only. Public chat/tools paths
+# must not bypass repo-index validation and approval gates.
+INTERNAL_WORKER_OPS = frozenset({"index_repo", "promote_repo_index"})
 
 # These paths are invoked with HTTP GET (no JSON body).
 WORKER_HTTP_GET_OPS = frozenset({"health", "ready", "live", "status", "ping"})
@@ -203,13 +205,14 @@ async def _log_action(action_id: str, agent: str, op: str, detail: str, status: 
     await bus.publish("action", ev.model_dump())
 
 
-async def route_intent(agent: str, op: str, payload: dict) -> dict:
+async def route_intent(agent: str, op: str, payload: dict, *, internal: bool = False) -> dict:
     """
     Main entry point called by the chat router when the user triggers
     a task. Returns a dict the chat router sends back to the UI.
     """
     act_id = f"ACT-{uuid.uuid4().hex[:6].upper()}"
     decision = _approval_decision(op, approved=False)
+    read_forward_allowed = op in effective_allowlisted_read_ops() or (internal and op in INTERNAL_WORKER_OPS)
     if op in effective_allowlisted_read_ops() and op not in ALLOWLISTED_READ_OPS and not _has_tool_metadata(op):
         return {
             "ok": False,
@@ -224,7 +227,7 @@ async def route_intent(agent: str, op: str, payload: dict) -> dict:
         }
 
     # Read-only → forward to worker
-    if op in effective_allowlisted_read_ops():
+    if read_forward_allowed:
         await bus.publish("feed", {
             "agent": agent, "op": "rag" if "search" in op or "retrieve" in op or "embed" in op else "read",
             "detail": f"{op} → {payload.get('target', payload.get('repo_path', '?'))}",
