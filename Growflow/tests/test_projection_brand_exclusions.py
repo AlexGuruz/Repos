@@ -156,3 +156,66 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_main_dedupes_duplicate_order_items(monkeypatch, tmp_path):
+    from datetime import datetime, timezone
+    from zoneinfo import ZoneInfo
+
+    sold_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    node = {
+        "objectId": "order-line-1",
+        "SoldAt": sold_at,
+        "GrossPrice": 10_000,
+        "COG": 4_000,
+        "ProductCategory": {"Name": "Edibles"},
+        "Product": {
+            "Brand": {"Name": "Brand A"},
+            "Name": "Gummy",
+            "SKU": "SKU-1",
+            "objectId": "product-1",
+        },
+    }
+    out_path = tmp_path / "projection.md"
+
+    monkeypatch.setattr(_mod, "_load_config_flags", lambda: None)
+    monkeypatch.setattr(_mod, "_store_tz", lambda: ZoneInfo("UTC"))
+    monkeypatch.setattr(_mod, "_credentials_path", lambda: None)
+    monkeypatch.setattr(_mod, "_fetch_chunk", lambda **kwargs: ([node, dict(node)], kwargs["oi_query"]))
+    monkeypatch.setattr(
+        _mod,
+        "iter_sold_at_date_chunks",
+        lambda start, end, chunk_days: [("unused-from", "unused-to")],
+    )
+    monkeypatch.setattr(
+        _mod,
+        "validate_and_normalize",
+        lambda **kwargs: {"ok": True, "report_path": str(tmp_path / "validation.json")},
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--velocity-days",
+            "1",
+            "--allocation-mode",
+            "gross-share",
+            "--pool-top-n",
+            "0",
+            "--no-layer2",
+            "--validation-mode",
+            "warning",
+            "--out",
+            str(out_path),
+            "--exclude-brands",
+            "",
+        ],
+    )
+
+    assert _mod.main() == 0
+    text = out_path.read_text(encoding="utf-8")
+    assert "- **Unique order lines counted:** 1" in text
+    assert "| 1 | Brand A | $100.00 | 100.00% | $18,000.00 |" in text
