@@ -11,11 +11,17 @@ function EmptyCard({ title, children }) {
   )
 }
 
-function withTimeout(promise, label, timeoutMs = 3000) {
+const UNAVAILABLE_HEALTH = {
+  ok: false,
+  status: 'unavailable',
+  message: 'Retail workflows are not connected in this environment.',
+}
+
+function withFallback(promise, fallback, timeoutMs = 3000) {
   return Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`${label} timed out`)), timeoutMs)
+    promise.catch(() => fallback),
+    new Promise(resolve => {
+      setTimeout(() => resolve(fallback), timeoutMs)
     }),
   ])
 }
@@ -38,27 +44,25 @@ export default function RetailPanel() {
       setLoading(true)
       setError('')
       try {
-        const results = await Promise.allSettled([
-          withTimeout(api.retailHealth(), 'retail health'),
-          withTimeout(api.retailDashboard(), 'retail dashboard'),
-          withTimeout(api.retailStores(), 'retail stores'),
-          withTimeout(api.retailCapital(), 'retail capital'),
-          withTimeout(api.retailConsignment(), 'retail consignment'),
-          withTimeout(api.retailReconciliation(), 'retail reconciliation'),
+        const results = await Promise.all([
+          withFallback(api.retailHealth(), UNAVAILABLE_HEALTH),
+          withFallback(api.retailDashboard(), { status: 'unavailable', metrics: [] }),
+          withFallback(api.retailStores(), { status: 'unavailable', stores: [] }),
+          withFallback(api.retailCapital(), { status: 'unavailable', scenarios: [] }),
+          withFallback(api.retailConsignment(), { status: 'unavailable', items: [] }),
+          withFallback(api.retailReconciliation(), { status: 'unavailable', items: [] }),
         ])
         if (!mounted) return
-        const rejected = results.find(r => r.status === 'rejected')
-        if (rejected) {
-          setError(rejected.reason?.message || 'Retail API request failed')
-        }
         setState({
-          health: results[0].status === 'fulfilled' ? results[0].value : { status: 'unavailable', message: 'Retail API did not respond.' },
-          dashboard: results[1].status === 'fulfilled' ? results[1].value : null,
-          stores: results[2].status === 'fulfilled' ? results[2].value : null,
-          capital: results[3].status === 'fulfilled' ? results[3].value : null,
-          consignment: results[4].status === 'fulfilled' ? results[4].value : null,
-          reconciliation: results[5].status === 'fulfilled' ? results[5].value : null,
+          health: results[0],
+          dashboard: results[1],
+          stores: results[2],
+          capital: results[3],
+          consignment: results[4],
+          reconciliation: results[5],
         })
+      } catch (e) {
+        if (mounted) setError(e?.message || 'Retail API request failed')
       } finally {
         if (mounted) setLoading(false)
       }
