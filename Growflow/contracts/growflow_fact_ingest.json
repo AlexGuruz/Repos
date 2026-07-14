@@ -1,0 +1,71 @@
+{
+  "metric_id": "growflow_fact_ingest",
+  "description": "Normalized order line ingest for retail fact store.",
+  "business_question": "What sold, by whom, where, with pricing and catalog joins?",
+  "allowed_query_template_ids": ["order_items_retail_dashboard_v1"],
+  "expected_root_path": "data.findOrderItems",
+  "required_fields": [
+    "objectId",
+    "SoldAt",
+    "GrossPrice",
+    "NetPrice",
+    "Orders.objectId",
+    "Orders.User.FullName"
+  ],
+  "optional_fields": [
+    "COG",
+    "OriginalPrice",
+    "Price",
+    "Store.objectId",
+    "Product.objectId",
+    "Product.Brand.Name",
+    "ProductCategory.Name",
+    "Orders.Type",
+    "Orders.Status",
+    "Orders.Discounts",
+    "Orders.PreOrderType",
+    "Package.objectId"
+  ],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "GrossPrice": "confirmed",
+    "NetPrice": "confirmed",
+    "Orders.User.FullName": "confirmed",
+    "Orders.PreOrderType": "confirmed",
+    "Store.objectId": "confirmed",
+    "Product.Brand.Name": "confirmed",
+    "COG": "inferred"
+  },
+  "field_types": {
+    "objectId": "str",
+    "SoldAt": "iso_datetime",
+    "GrossPrice": "int",
+    "NetPrice": "int"
+  },
+  "date_field_expectations": {
+    "date_fields": ["SoldAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": false,
+    "source_of_truth": "OrderItems.Store.objectId"
+  },
+  "brand_category_expectations": {
+    "brand_optional": true,
+    "category_optional": true
+  },
+  "empty_result_policy": "warn",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["order_item_id", "sold_at"],
+    "non_negative_field": "gross_price_cents"
+  },
+  "downstream_outputs_allowed": ["growflow_facts.db", "retail_dashboard"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Budtender via Orders union fragment User.FullName — not findUsers.",
+    "Channel inferred from Orders.PreOrderType; no Channel/IsOnline on lines.",
+    "Returns may require wider window; Type=Return not seen in recent 100-order probe."
+  ]
+}

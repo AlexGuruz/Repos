@@ -1,0 +1,20 @@
+{
+  "period": {"start": "2026-06-01", "end": "2026-06-02"},
+  "store": {"net_sales": 40.0},
+  "budtender_sales": [
+    {"budtender": "Alice", "net_sales": 30.0},
+    {"budtender": "Bob", "net_sales": 10.0}
+  ],
+  "discounts_over_time": [
+    {"date": "2026-06-01", "net_sales": 28.0},
+    {"date": "2026-06-02", "net_sales": 12.0}
+  ],
+  "brand_summary": [
+    {"canonical_brand": "A", "net_sales": 30.0},
+    {"canonical_brand": "B", "net_sales": 10.0}
+  ],
+  "budtender_by_category": [
+    {"category_name": "Flower", "budtender": "Alice", "net_sales": 30.0},
+    {"category_name": "Edibles", "budtender": "Bob", "net_sales": 10.0}
+  ]
+}

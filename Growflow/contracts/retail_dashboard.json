@@ -1,0 +1,54 @@
+{
+  "metric_id": "retail_dashboard",
+  "description": "Four-widget retail operations dashboard aggregates from fact store.",
+  "business_question": "How are budtenders, discounts, categories, and brands performing?",
+  "allowed_query_template_ids": ["order_items_retail_dashboard_v1"],
+  "expected_root_path": "data.findOrderItems",
+  "required_fields": ["objectId", "SoldAt", "GrossPrice", "NetPrice"],
+  "optional_fields": [
+    "Orders.User.FullName",
+    "Product.Brand.Name",
+    "ProductCategory.Name",
+    "COG",
+    "landed_cost_cents"
+  ],
+  "field_confidence": {
+    "objectId": "confirmed",
+    "SoldAt": "confirmed",
+    "Orders.User.FullName": "confirmed"
+  },
+  "field_types": {
+    "objectId": "str",
+    "SoldAt": "iso_datetime",
+    "GrossPrice": "int",
+    "NetPrice": "int"
+  },
+  "date_field_expectations": {
+    "date_fields": ["SoldAt"],
+    "must_overlap_requested_range": true
+  },
+  "location_or_store_expectations": {
+    "store_scope_required": false,
+    "source_of_truth": "request_context.store_id"
+  },
+  "brand_category_expectations": {
+    "brand_optional": false,
+    "category_optional": false
+  },
+  "empty_result_policy": "fail",
+  "duplicate_policy": "warn",
+  "sanity_checks": {
+    "dedupe_key_fields": ["order_item_id"],
+    "sum_validation": [
+      "sum(budtender.net_sales) == store_net_sales",
+      "sum(brand.net_sales) == store_net_sales",
+      "sum(daily.net_sales) == store_net_sales"
+    ]
+  },
+  "downstream_outputs_allowed": ["retail_dashboard.db", "retail_dashboard_latest.json", "command_center_ui"],
+  "confidence_level": "high",
+  "known_schema_risks": [
+    "Dual margin requires landed_cost join from transfer_receipts.db.",
+    "Coaching flags are heuristic vs store averages."
+  ]
+}

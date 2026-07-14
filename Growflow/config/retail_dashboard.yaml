@@ -1,0 +1,43 @@
+# Retail dashboard defaults (Growflow repo)
+sales_timezone: America/Chicago
+
+# Period presets exposed to API / UI
+period_presets:
+  - last_7_days
+  - last_30_days
+  - last_90_days
+
+# Coaching thresholds (percentage points vs store average)
+coaching:
+  high_discount_pp: 15.0
+  low_aov_pct: 20.0
+
+# Channel filter options (PreOrderType proxy)
+channels:
+  - all
+  - in_store
+  - online
+
+# Data paths (relative to repo root)
+paths:
+  facts_db: data/growflow_facts.db
+  cache_db: data/retail_dashboard.db
+  latest_json: data/retail_dashboard_latest.json
+  layer2_csv: data/projection_by_category_brand_layer2_recovery.csv
+  capital_json: data/retail_capital_latest.json
+  consignment_json: data/retail_consignment_latest.json
+  transfer_db: data/transfer_receipts.db
+
+# API service (localhost only)
+api:
+  host: 127.0.0.1
+  port: 8791
+
+# Reconciliation gate (Operations metrics vs trusted export)
+reconciliation:
+  money_tolerance_abs: 1.0
+  pct_tolerance: 0.005
+  default_out: data/retail_reconciliation_latest.json
+  default_dashboard_json: data/retail_dashboard_latest.json
+  default_reference_csv: data/reference/growflow_retail_dashboard_export.csv
+  require_reference: false

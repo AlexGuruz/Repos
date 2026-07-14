@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "org_id_default": "nugz",
+  "policy": {
+    "no_graphql_at_ask_time": true,
+    "no_refresh_from_operator_desk": true,
+    "prefer_prepared_snapshot": true
+  },
+  "surfaces": [
+    {
+      "surface_id": "platform_status",
+      "metric_id": "platform_status",
+      "business_questions": [
+        "is growflow healthy?",
+        "what is stale?",
+        "platform SLO breaches"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "latest_json",
+          "path": "Growflow/data/platform_status_latest.json"
+        },
+        {
+          "kind": "http_get",
+          "url": "http://127.0.0.1:8791/api/v1/platform/health",
+          "via": "CC /api/retail/platform-health or Growflow API"
+        },
+        {
+          "kind": "operator_tool",
+          "id": "operator_growflow_status"
+        }
+      ],
+      "contract": null,
+      "build_time_only": [
+        "scripts/build_platform_status.py",
+        "scripts/run_platform_orchestrator.py"
+      ],
+      "freshness_sla_seconds": 14400,
+      "forbidden_at_ask_time": [
+        "POST /api/retail/refresh",
+        "live GraphQL"
+      ]
+    },
+    {
+      "surface_id": "retail_dashboard",
+      "metric_id": "retail_dashboard",
+      "business_questions": [
+        "store net sales for last 30 days",
+        "budtender discounts",
+        "brand summary"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "prepared_snapshot",
+          "path": "ai-lab/state/prepared_context/growflow_snapshot.json",
+          "field": "data.retail"
+        },
+        {
+          "kind": "latest_json",
+          "path": "Growflow/data/retail_dashboard_latest.json"
+        },
+        {
+          "kind": "http_get",
+          "url": "http://127.0.0.1:8791/api/retail/dashboard",
+          "via": "CC /api/retail/dashboard"
+        },
+        {
+          "kind": "operator_tool",
+          "id": "operator_growflow_retail"
+        }
+      ],
+      "contract": "Growflow/contracts/retail_dashboard.json",
+      "build_time_only": [
+        "scripts/ingest_growflow_facts.py",
+        "scripts/build_retail_dashboard.py"
+      ],
+      "freshness_sla_seconds": 14400,
+      "forbidden_at_ask_time": [
+        "POST /api/retail/refresh",
+        "live GraphQL"
+      ]
+    },
+    {
+      "surface_id": "retail_capital",
+      "metric_id": "projection_by_category_brand",
+      "business_questions": [
+        "buy plan allocation",
+        "capital pool KPIs",
+        "fastest recovery brands"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "latest_json",
+          "path": "Growflow/data/retail_capital_latest.json"
+        },
+        {
+          "kind": "http_get",
+          "url": "http://127.0.0.1:8791/api/retail/capital",
+          "via": "CC /api/retail/capital"
+        },
+        {
+          "kind": "operator_tool",
+          "id": "operator_growflow_capital"
+        }
+      ],
+      "contract": "Growflow/contracts/projection_by_category_brand.json",
+      "build_time_only": [
+        "scripts/build_projection_by_category_brand.py",
+        "scripts/build_retail_capital.py"
+      ],
+      "freshness_sla_seconds": 172800,
+      "forbidden_at_ask_time": [
+        "POST /api/retail/capital/scenario without approval",
+        "live GraphQL"
+      ]
+    },
+    {
+      "surface_id": "retail_consignment",
+      "metric_id": "consignment",
+      "business_questions": [
+        "consignment backlog",
+        "vendor pull recommendations",
+        "overdue net terms"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "latest_json",
+          "path": "Growflow/data/retail_consignment_latest.json"
+        },
+        {
+          "kind": "latest_json",
+          "path": "Growflow/data/consignment_state.json"
+        },
+        {
+          "kind": "http_get",
+          "url": "http://127.0.0.1:8791/api/retail/consignment",
+          "via": "CC /api/retail/consignment"
+        },
+        {
+          "kind": "operator_tool",
+          "id": "operator_growflow_consignment"
+        }
+      ],
+      "contract": null,
+      "build_time_only": [
+        "scripts/consignment_daily_allocation.py",
+        "scripts/build_retail_consignment.py"
+      ],
+      "freshness_sla_seconds": 86400,
+      "forbidden_at_ask_time": [
+        "sheet writes without approval",
+        "live GraphQL"
+      ]
+    },
+    {
+      "surface_id": "sales_projection_eod",
+      "metric_id": "sales_projection",
+      "business_questions": [
+        "eod forecast today",
+        "pace vs friday median",
+        "collected so far"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "latest_json",
+          "path": "Growflow/data/sales_projection_latest.json"
+        },
+        {
+          "kind": "http_get",
+          "url": "http://127.0.0.1:8791/api/v1/projection",
+          "via": "Growflow Platform API"
+        },
+        {
+          "kind": "operator_tool",
+          "id": "operator_growflow_projection"
+        }
+      ],
+      "contract": null,
+      "build_time_only": [
+        "scripts/run_daily_sales_projection.py",
+        "scripts/close_sales_projection_day.py"
+      ],
+      "freshness_sla_seconds": 43200,
+      "forbidden_at_ask_time": [
+        "live GraphQL"
+      ]
+    },
+    {
+      "surface_id": "company_bi",
+      "metric_id": "company_bi",
+      "business_questions": [
+        "company bi summary",
+        "margin vs expenses",
+        "sheets transactions freshness"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "latest_json",
+          "path": "Growflow/data/company_bi_report_latest.json"
+        },
+        {
+          "kind": "http_get",
+          "url": "http://127.0.0.1:8791/api/v1/bi",
+          "via": "Growflow Platform API"
+        },
+        {
+          "kind": "operator_tool",
+          "id": "operator_growflow_bi_summary"
+        }
+      ],
+      "contract": null,
+      "build_time_only": [
+        "company_bi/scripts/build_sheets_transactions_db.py",
+        "scripts/build_company_bi_report.py"
+      ],
+      "freshness_sla_seconds": 172800,
+      "forbidden_at_ask_time": [
+        "python -m company_bi.run_pipeline",
+        "live GraphQL"
+      ]
+    },
+    {
+      "surface_id": "transfer_receipts",
+      "metric_id": "transfer_receipts",
+      "business_questions": [
+        "landed cost freshness",
+        "transfer receipts status"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "prepared_snapshot",
+          "path": "ai-lab/state/prepared_context/growflow_snapshot.json",
+          "field": "data.validation_status_by_metric.transfer_receipts"
+        },
+        {
+          "kind": "validation_latest",
+          "glob": "Growflow/state/validation_reports/transfer_receipts/*.json"
+        }
+      ],
+      "contract": "Growflow/contracts/transfer_receipts.json",
+      "build_time_only": [
+        "scripts/build_transfer_receipts_db.py"
+      ],
+      "freshness_sla_seconds": 172800,
+      "forbidden_at_ask_time": [
+        "live GraphQL"
+      ]
+    },
+    {
+      "surface_id": "read_surfaces_catalog",
+      "metric_id": "catalog",
+      "business_questions": [
+        "what growflow tools can I use?",
+        "which local files are safe to read?"
+      ],
+      "ask_time_reads": [
+        {
+          "kind": "latest_json",
+          "path": "ai-lab/registry/growflow_read_surfaces/catalog.json"
+        },
+        {
+          "kind": "operator_tool",
+          "id": "operator_growflow_catalog"
+        }
+      ],
+      "contract": null,
+      "build_time_only": [],
+      "freshness_sla_seconds": 604800,
+      "forbidden_at_ask_time": [
+        "live GraphQL"
+      ]
+    }
+  ]
+}
