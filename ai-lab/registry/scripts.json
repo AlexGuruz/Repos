@@ -18,6 +18,7 @@
     "auth": "GROWFLOW_API_KEY",
     "status": "deprecated",
     "repo": "Greg-Kylo",
+    "executable": false,
     "approval_required": true
   },
   {

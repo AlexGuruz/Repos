@@ -127,6 +127,17 @@ def run(
             duration=0.0,
             success=False,
         )
+    if entry.get("executable") is False or str(entry.get("status") or "").lower() == "deprecated":
+        return RunResult(
+            stdout="",
+            stderr=(
+                f"Tool {tool_name} is not executable "
+                f"(status={entry.get('status')!r}). Use Operator Desk read tools instead."
+            ),
+            exit_code=3,
+            duration=0.0,
+            success=False,
+        )
     script_path = _resolve_path(entry)
     if not script_path:
         return RunResult(
