@@ -9,8 +9,7 @@
     "SoldAt",
     "GrossPrice",
     "NetPrice",
-    "Orders.objectId",
-    "Orders.User.FullName"
+    "Orders.objectId"
   ],
   "optional_fields": [
     "COG",
@@ -20,6 +19,7 @@
     "Product.objectId",
     "Product.Brand.Name",
     "ProductCategory.Name",
+    "Orders.User.FullName",
     "Orders.Type",
     "Orders.Status",
     "Orders.Discounts",
@@ -31,6 +31,7 @@
     "SoldAt": "confirmed",
     "GrossPrice": "confirmed",
     "NetPrice": "confirmed",
+    "Orders.objectId": "confirmed",
     "Orders.User.FullName": "confirmed",
     "Orders.PreOrderType": "confirmed",
     "Store.objectId": "confirmed",
@@ -58,13 +59,14 @@
   "empty_result_policy": "warn",
   "duplicate_policy": "warn",
   "sanity_checks": {
-    "dedupe_key_fields": ["order_item_id", "sold_at"],
-    "non_negative_field": "gross_price_cents"
+    "dedupe_key_fields": ["objectId", "SoldAt"],
+    "non_negative_field": "GrossPrice"
   },
   "downstream_outputs_allowed": ["growflow_facts.db", "retail_dashboard"],
   "confidence_level": "high",
   "known_schema_risks": [
-    "Budtender via Orders union fragment User.FullName — not findUsers.",
+    "Orders on OrderItems is a GraphQL list/union ([... on Orders]), not a nested object — validators must walk the first fragment.",
+    "Budtender via Orders[].User.FullName — optional when User null; not findUsers.",
     "Channel inferred from Orders.PreOrderType; no Channel/IsOnline on lines.",
     "Returns may require wider window; Type=Return not seen in recent 100-order probe."
   ]

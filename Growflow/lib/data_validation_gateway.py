@@ -53,13 +53,36 @@ def _coerce_request_id(request_context: dict[str, Any] | None) -> str:
     return request_id or f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}_{uuid.uuid4().hex[:8]}"
 
 
-def _extract_path(payload: dict[str, Any], path: str) -> Any:
+def _extract_path(payload: Any, path: str) -> Any:
+    """Dot-path lookup with GraphQL list/union tolerance.
+
+    When a path segment lands on a list (e.g. OrderItems.Orders [... on Orders]),
+    take the first dict element that contains the next key. Matches live GrowFlow
+    shapes and lib.retail_dashboard.normalize.first_order_fragment.
+    """
     cur: Any = payload
     for part in [p for p in str(path).split(".") if p]:
-        if isinstance(cur, dict) and part in cur:
+        if isinstance(cur, dict):
+            if part not in cur:
+                return None
             cur = cur[part]
-        else:
-            return None
+            continue
+        if isinstance(cur, list):
+            nxt: Any = None
+            for item in cur:
+                if isinstance(item, dict) and part in item and item[part] is not None:
+                    nxt = item[part]
+                    break
+            if nxt is None:
+                for item in cur:
+                    if isinstance(item, dict) and part in item:
+                        nxt = item[part]
+                        break
+            if nxt is None and not any(isinstance(item, dict) and part in item for item in cur):
+                return None
+            cur = nxt
+            continue
+        return None
     return cur
 
 

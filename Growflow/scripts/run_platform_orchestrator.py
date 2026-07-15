@@ -46,13 +46,29 @@ def _now() -> str:
 def _run(cmd: list[str], *, cwd: Path) -> dict[str, Any]:
     print(">>", " ".join(cmd), flush=True)
     env = {**dict(__import__("os").environ), "PYTHONPATH": str(cwd)}
+    if not (env.get("GROWFLOW_RETAIL_ORG") or "").strip():
+        # Load org from config.yaml when scheduler/shell omit env
+        try:
+            from lib.growflow_config import load_config
+
+            cfg = load_config()
+            org = (cfg.get("org_id") or "").strip()
+            if org:
+                env["GROWFLOW_RETAIL_ORG"] = org
+                print(f"  using GROWFLOW_RETAIL_ORG={org} from config", flush=True)
+        except Exception as exc:
+            print(f"  warn: could not load org from config: {exc}", flush=True)
     r = subprocess.run(cmd, cwd=str(cwd), env=env, capture_output=True, text=True)
-    return {
+    out = {
         "cmd": cmd,
         "exit_code": r.returncode,
         "stdout_tail": (r.stdout or "")[-3000:],
         "stderr_tail": (r.stderr or "")[-2000:],
     }
+    if r.returncode != 0:
+        print((r.stdout or "")[-2000:], flush=True)
+        print((r.stderr or "")[-2000:], flush=True)
+    return out
 
 
 def run_job(job: PlatformJob) -> PlatformJob:
@@ -68,7 +84,15 @@ def run_job(job: PlatformJob) -> PlatformJob:
 
     steps: list[list[str]] = []
     if kind in ("ingest", "full"):
-        steps.append([py, str(REPO / "scripts" / "ingest_growflow_facts.py"), "--days", str(days)])
+        ingest = [
+            py,
+            str(REPO / "scripts" / "ingest_growflow_facts.py"),
+            "--days",
+            str(days),
+            "--validation-mode",
+            str(params.get("ingest_validation_mode") or "strict"),
+        ]
+        steps.append(ingest)
     if kind in ("dashboard", "full"):
         cmd = [py, str(REPO / "scripts" / "build_retail_dashboard.py"), "--preset", preset, "--strict"]
         if params.get("compare", True):

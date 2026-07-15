@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from lib.data_validation_gateway import (
+    _extract_path,
     load_metric_contract,
     load_query_template,
     validate_and_normalize,
@@ -157,3 +158,58 @@ def test_integrated_scripts_reference_gateway():
     for script in scripts:
         text = script.read_text(encoding="utf-8")
         assert "validate_and_normalize" in text
+
+
+def test_extract_path_walks_orders_union_list():
+    row = {
+        "objectId": "line-1",
+        "Orders": [
+            {
+                "objectId": "ord-1",
+                "User": {"FullName": "Bud Tender"},
+            }
+        ],
+    }
+    assert _extract_path(row, "Orders.objectId") == "ord-1"
+    assert _extract_path(row, "Orders.User.FullName") == "Bud Tender"
+
+
+def test_fact_ingest_strict_accepts_list_shaped_orders():
+    raw = {
+        "data": {
+            "findOrderItems": {
+                "edges": [
+                    {
+                        "node": {
+                            "objectId": "line-1",
+                            "SoldAt": "2026-07-14T18:00:00.000Z",
+                            "GrossPrice": 1000,
+                            "NetPrice": 900,
+                            "Orders": [
+                                {
+                                    "objectId": "ord-1",
+                                    "User": {"objectId": "u1", "FullName": "Bud Tender"},
+                                }
+                            ],
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    res = validate_and_normalize(
+        metric_id="growflow_fact_ingest",
+        template_id="order_items_retail_dashboard_v1",
+        raw_json=raw,
+        request_context={
+            "request_id": "unit_fact_ingest_orders_list",
+            "requested_date_range": {
+                "from": "2026-07-14T00:00:00.000Z",
+                "to": "2026-07-14T23:59:59.000Z",
+            },
+        },
+        mode="strict",
+    )
+    assert res["ok"] is True
+    assert not res.get("missing_required_fields")
+    assert res.get("duplicate_count", 0) == 0
