@@ -1,0 +1,36 @@
+# Company Gmail accounts for the unified command center.
+# OAuth client JSON is shared; each account gets its own token file under secrets/gmail/tokens/.
+#
+# First-time auth (interactive browser):
+#   python -m email_sorter.accounts --auth jgdproperties
+#
+credentials_file: secrets/gmail/credentials.json
+
+accounts:
+  - id: jgdproperties
+    email: jgdpropertiesllc@gmail.com
+    display_name: JGD Properties LLC
+    token_file: secrets/gmail/tokens/jgdproperties.json
+    roles:
+      - executive
+      - licenses
+      - investors
+    digest_priority: high
+
+  - id: jagadnursery
+    email: jagadnurseryllc@gmail.com
+    display_name: Jagad Nursery LLC
+    token_file: secrets/gmail/tokens/jagadnursery.json
+    roles:
+      - executive
+      - licenses
+      - investors
+    digest_priority: high
+
+  - id: nugzdispo
+    email: nugzdispo@gmail.com
+    display_name: Nugz Dispo
+    token_file: secrets/gmail/tokens/nugzdispo.json
+    roles:
+      - retail
+    digest_priority: high

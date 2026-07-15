@@ -1,0 +1,21 @@
+canonical:
+  hot_urgent: "Hot / Urgent"
+  bills_invoices: "Bills / Invoices"
+  legal_compliance: "Legal / Compliance"
+  licenses_executive: "Licenses / Executive"
+  investors_finance: "Investors / Finance"
+  retail_operations: "Retail / Operations"
+  needs_reply: "Needs Reply"
+  summary_worthy: "Summary-worthy"
+  needs_review: "Needs Review"
+
+category_label_map:
+  hot_urgent: "Hot / Urgent"
+  bills_invoices: "Bills / Invoices"
+  legal_compliance: "Legal / Compliance"
+  licenses_executive: "Licenses / Executive"
+  investors_finance: "Investors / Finance"
+  retail_operations: "Retail / Operations"
+  needs_reply: "Needs Reply"
+  summary_worthy: "Summary-worthy"
+  needs_review: "Needs Review"

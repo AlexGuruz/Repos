@@ -1,0 +1,169 @@
+# Deterministic triage for company inboxes (command center).
+# First match wins. Prefer needs_review over a wrong auto-label.
+
+priority_order:
+  - hot_urgent
+  - legal_compliance
+  - bills_invoices
+  - investors_finance
+  - licenses_executive
+  - retail_operations
+  - needs_reply
+  - summary_worthy
+  - needs_review
+
+hot_urgent_signals:
+  subject_keywords:
+    - "urgent"
+    - "immediate"
+    - "action required"
+    - "deadline"
+    - "past due"
+    - "final notice"
+    - "time sensitive"
+    - "respond by"
+  body_keywords:
+    - "urgent"
+    - "immediate action"
+    - "deadline"
+    - "past due"
+    - "final notice"
+
+legal_compliance_signals:
+  subject_keywords:
+    - "legal"
+    - "attorney"
+    - "law firm"
+    - "subpoena"
+    - "court"
+    - "compliance"
+    - "regulatory"
+    - "violation"
+    - "notice of"
+  body_keywords:
+    - "legal notice"
+    - "attorney"
+    - "compliance"
+    - "regulatory"
+    - "court"
+  sender_domains:
+    - "law"
+    - "legal"
+
+bills_invoices_signals:
+  subject_keywords:
+    - "invoice"
+    - "bill"
+    - "payment due"
+    - "amount due"
+    - "statement"
+    - "receipt"
+    - "renewal"
+    - "subscription"
+  body_keywords:
+    - "invoice"
+    - "amount due"
+    - "payment due"
+    - "balance due"
+    - "pay now"
+  attachment_filename_keywords:
+    - "invoice"
+    - "statement"
+    - "receipt"
+
+investors_finance_signals:
+  subject_keywords:
+    - "investor"
+    - "investment"
+    - "cap table"
+    - "term sheet"
+    - "fundraising"
+    - "wire"
+    - "capital"
+    - "shareholder"
+    - "equity"
+    - "SAFE"
+    - "convertible"
+  body_keywords:
+    - "investor"
+    - "investment"
+    - "term sheet"
+    - "fundraising"
+    - "wire transfer"
+    - "capital call"
+
+licenses_executive_signals:
+  subject_keywords:
+    - "license"
+    - "licence"
+    - "permit"
+    - "registration"
+    - "renewal"
+    - "secretary of state"
+    - "LLC"
+    - "articles of organization"
+    - "annual report"
+    - "good standing"
+    - "executive"
+    - "board"
+  body_keywords:
+    - "business license"
+    - "license renewal"
+    - "permit"
+    - "registration"
+    - "secretary of state"
+    - "annual report"
+
+retail_operations_signals:
+  subject_keywords:
+    - "order"
+    - "delivery"
+    - "inventory"
+    - "POS"
+    - "dispensary"
+    - "retail"
+    - "customer"
+    - "vendor"
+    - "wholesale"
+  body_keywords:
+    - "retail"
+    - "inventory"
+    - "point of sale"
+    - "delivery"
+    - "customer order"
+
+needs_reply_signals:
+  subject_keywords:
+    - "?"
+    - "follow up"
+    - "following up"
+    - "please respond"
+    - "waiting for your"
+  body_keywords:
+    - "please reply"
+    - "please respond"
+    - "let me know"
+    - "get back to me"
+
+summary_worthy_signals:
+  subject_keywords:
+    - "summary"
+    - "weekly"
+    - "daily digest"
+    - "newsletter"
+    - "update"
+    - "report"
+  body_keywords:
+    - "summary"
+    - "weekly update"
+    - "monthly report"
+
+account_category_boosts:
+  jgdproperties:
+    - investors_finance
+    - licenses_executive
+  jagadnursery:
+    - investors_finance
+    - licenses_executive
+  nugzdispo:
+    - retail_operations
