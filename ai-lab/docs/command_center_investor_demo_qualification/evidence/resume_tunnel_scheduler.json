@@ -1,0 +1,66 @@
+{
+  "tool_results": {
+    "repo_status": {
+      "ok": false,
+      "ms": 7710.072299989406,
+      "error": "HTTP Error 404: Not Found",
+      "raw": "{\"detail\":\"Not Found\"}"
+    },
+    "health": {
+      "ok": false,
+      "ms": 1.5267999842762947,
+      "error": "HTTP Error 404: Not Found",
+      "raw": "{\"detail\":\"Not Found\"}"
+    },
+    "worker_health": {
+      "ok": false,
+      "ms": 15.823299996554852,
+      "error": "HTTP Error 404: Not Found",
+      "raw": "{\"detail\":\"Not Found\"}"
+    },
+    "index_repo": {
+      "ok": false,
+      "ms": 2.0917000365443528,
+      "error": "HTTP Error 404: Not Found",
+      "raw": "{\"detail\":\"Not Found\"}"
+    }
+  },
+  "control_ok": 6,
+  "control_n": 7,
+  "tunnel": {
+    "active": 0,
+    "active_bulk": 0,
+    "queue_depths": {
+      "control": 0,
+      "interactive": 0,
+      "bulk": 0
+    },
+    "metrics": {
+      "submitted": 0,
+      "completed": 0,
+      "timeouts": 0,
+      "cancellations": 0,
+      "rejections": 0,
+      "by_lane": {
+        "control": {
+          "submitted": 0,
+          "completed": 0,
+          "timeouts": 0,
+          "rejected": 0
+        },
+        "interactive": {
+          "submitted": 0,
+          "completed": 0,
+          "timeouts": 0,
+          "rejected": 0
+        },
+        "bulk": {
+          "submitted": 0,
+          "completed": 0,
+          "timeouts": 0,
+          "rejected": 0
+        }
+      }
+    }
+  }
+}

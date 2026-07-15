@@ -1,0 +1,9 @@
+{
+  "http": 200,
+  "body": {
+    "ok": true,
+    "id": "approval-112",
+    "resolution": "denied",
+    "executed": false
+  }
+}

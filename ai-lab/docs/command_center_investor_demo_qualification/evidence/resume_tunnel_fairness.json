@@ -1,0 +1,67 @@
+{
+  "worker_health_direct": {
+    "ok": true,
+    "ms": 1973.1338999699801,
+    "body": "{\"ok\":true,\"task\":\"health\",\"repo_id\":null,\"summary\":null,\"warnings\":[],\"errors\":[],\"meta\":{\"ollama\":\"ok\"}}"
+  },
+  "control_samples": [
+    {
+      "path": "/api/health",
+      "ok": false,
+      "ms": 5022.525700042024,
+      "error": "timed out"
+    }
+  ],
+  "control_ok": 0,
+  "control_n": 1,
+  "control_p95_ms": null,
+  "repo_status_calls": [
+    {
+      "ok": true,
+      "ms": 806.2654999666847,
+      "http": 200
+    },
+    {
+      "ok": true,
+      "ms": 685.3687000111677,
+      "http": 200
+    },
+    {
+      "ok": true,
+      "ms": 744.6776999859139,
+      "http": 200
+    },
+    {
+      "ok": true,
+      "ms": 679.8933999962173,
+      "http": 200
+    },
+    {
+      "ok": true,
+      "ms": 744.2362000001594,
+      "http": 200
+    }
+  ],
+  "bulk_probe": [
+    {
+      "ok": false,
+      "ms": 0,
+      "error": "HTTP Error 503: Service Unavailable"
+    }
+  ],
+  "tunnel_after": null,
+  "metrics_before": {
+    "path": "/api/channels/metrics",
+    "ok": true,
+    "ms": 796.1709999945015,
+    "http": 200,
+    "body": "{\"ok\":true,\"channels\":{\"shim_uses\":0,\"channels\":{\"telemetry\":{\"channel\":\"telemetry\",\"published\":228,\"delivered\":228,\"dropped\":0,\"coalesced\":0,\"send_failures\":0,\"overload\":0,\"connected_clients\":1,\"queue_depth\":0,\"max_queue_depth\":1,\"history_len\":5},\"control\":{\"channel\":\"control\",\"published\":7,\"delivered\":14,\"dropped\":0,\"coalesced\":0,\"send_failures\":0,\"overload\":0,\"connected_clients\":2,\"queue_depth\":0,\"max_queue_depth\":1,\"history_len\":7},\"chat\":{\"channel\":\"chat\",\"published\":0,\"delivered\":0,\"droppe"
+  },
+  "metrics_after": {
+    "path": "/api/channels/metrics",
+    "ok": true,
+    "ms": 342.69189997576177,
+    "http": 200,
+    "body": "{\"ok\":true,\"channels\":{\"shim_uses\":0,\"channels\":{\"telemetry\":{\"channel\":\"telemetry\",\"published\":229,\"delivered\":229,\"dropped\":0,\"coalesced\":0,\"send_failures\":0,\"overload\":0,\"connected_clients\":1,\"queue_depth\":0,\"max_queue_depth\":1,\"history_len\":5},\"control\":{\"channel\":\"control\",\"published\":7,\"delivered\":14,\"dropped\":0,\"coalesced\":0,\"send_failures\":0,\"overload\":0,\"connected_clients\":2,\"queue_depth\":0,\"max_queue_depth\":1,\"history_len\":7},\"chat\":{\"channel\":\"chat\",\"published\":0,\"delivered\":0,\"droppe"
+  }
+}

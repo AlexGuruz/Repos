@@ -22,7 +22,7 @@
   },
   {
     "tool_name": "growflow_ingest_facts",
-    "path": "Growflow/scripts/ingest_growflow_facts.py",
+    "path": "scripts/ingest_growflow_facts.py",
     "purpose": "Incremental GrowFlow fact ingest into data/growflow_facts.db",
     "inputs": ["days"],
     "outputs": ["growflow_facts.db"],
@@ -33,7 +33,7 @@
   },
   {
     "tool_name": "growflow_build_retail_dashboard",
-    "path": "Growflow/scripts/build_retail_dashboard.py",
+    "path": "scripts/build_retail_dashboard.py",
     "purpose": "Build retail_dashboard_latest.json from fact store",
     "inputs": ["preset", "compare", "strict", "reconcile"],
     "outputs": ["retail_dashboard_latest.json"],
@@ -44,7 +44,7 @@
   },
   {
     "tool_name": "growflow_build_retail_capital",
-    "path": "Growflow/scripts/build_retail_capital.py",
+    "path": "scripts/build_retail_capital.py",
     "purpose": "Build retail_capital_latest.json from layer2 CSV",
     "inputs": ["layer2_csv"],
     "outputs": ["retail_capital_latest.json"],
@@ -55,7 +55,7 @@
   },
   {
     "tool_name": "growflow_build_retail_consignment",
-    "path": "Growflow/scripts/build_retail_consignment.py",
+    "path": "scripts/build_retail_consignment.py",
     "purpose": "Build retail_consignment_latest.json from consignment.db",
     "inputs": [],
     "outputs": ["retail_consignment_latest.json"],
@@ -66,7 +66,7 @@
   },
   {
     "tool_name": "growflow_platform_orchestrator",
-    "path": "Growflow/scripts/run_platform_orchestrator.py",
+    "path": "scripts/run_platform_orchestrator.py",
     "purpose": "Scheduled platform refresh: ingest/dashboard/consignment/capital/status",
     "inputs": ["kind", "days", "preset"],
     "outputs": ["platform_status_latest.json", "data/events/latest.json"],
@@ -77,7 +77,7 @@
   },
   {
     "tool_name": "growflow_build_projection_buy_plan",
-    "path": "Growflow/scripts/build_projection_by_category_brand.py",
+    "path": "scripts/build_projection_by_category_brand.py",
     "purpose": "Canonical buy-plan / capital layer2 projection runner",
     "inputs": ["pool", "velocity_days", "cash_cycle_days", "allocation_mode", "days"],
     "outputs": ["projection_by_category_brand_layer2_recovery.csv"],
@@ -88,13 +88,24 @@
   },
   {
     "tool_name": "growflow_build_company_bi_report",
-    "path": "Growflow/scripts/build_company_bi_report.py",
+    "path": "scripts/build_company_bi_report.py",
     "purpose": "Company BI report from facts + sheets_transactions.db",
     "inputs": ["months"],
     "outputs": ["company_bi_report_latest.json"],
     "auth": null,
     "status": "working",
     "repo": "Growflow",
+    "approval_required": true
+  },
+  {
+    "tool_name": "cc_investor_demo_ping",
+    "path": "scripts/cc_investor_demo_ping.py",
+    "purpose": "Safe read-only ping for Command Center investor-demo approval→execute qualification",
+    "inputs": [],
+    "outputs": ["ok", "marker"],
+    "auth": null,
+    "status": "working",
+    "repo": "ai-lab",
     "approval_required": true
   },
   {

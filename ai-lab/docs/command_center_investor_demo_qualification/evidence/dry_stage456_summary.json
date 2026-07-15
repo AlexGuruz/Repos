@@ -1,0 +1,10 @@
+﻿{
+    "matching_auto":  true,
+    "ts":  "2026-07-15T15:10:51Z",
+    "rule_id":  "PAR-B140C959",
+    "approve_id":  "approval-124",
+    "after_delete_pending":  true,
+    "deny_id":  "approval-125",
+    "always_id":  "approval-130",
+    "matching_status":  "auto_approved"
+}

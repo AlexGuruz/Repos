@@ -68,6 +68,10 @@ class GrowflowStatusResult(ResultEnvelope):
 class ApprovalSubmissionResult(ResultEnvelope):
     tool_name: str = ""
     status: str = "pending"
+    auto_permanent: bool = False
+    permanent_rule_id: str | None = None
+    act_id: str | None = None
+    execute_queued: bool = False
 
 
 @dataclass

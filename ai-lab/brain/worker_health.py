@@ -169,10 +169,12 @@ def get_worker_health_snapshot(
     total_start = time.perf_counter()
     service_budget_ms = budget_ms
     if interactive and budget_ms:
-        service_budget_ms = max(300, min(1500, int(budget_ms * 0.75)))
+        # Allow enough wall time for remote WA (;8765) — previously capped at 1.2s and
+        # falsely reported WA down during investor-demo preflight while curl /health was 200.
+        service_budget_ms = max(300, min(4000, int(budget_ms * 0.8)))
     per_service_timeout = 3.0
     if interactive and service_budget_ms:
-        per_service_timeout = max(0.15, min(1.2, service_budget_ms / 1000.0))
+        per_service_timeout = max(0.15, min(3.0, service_budget_ms / 1000.0))
 
     services_map: dict[str, ServiceHealth] = {
         "worker_assistant": _service_timeout("worker_assistant", per_service_timeout) if interactive else check_worker_assistant(worker_name, timeout_sec=per_service_timeout),

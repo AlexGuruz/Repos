@@ -1,0 +1,12 @@
+FRONTEND:
+  cd E:\Repos\ai-lab\command-center\command-center\frontend
+  npm run dev
+  PID=
+
+BACKEND:
+  $env:PYTHONPATH = 'E:\Repos\ai-lab'
+  $env:OPERATOR_DESK_ENABLED = '1'
+  $env:CC_LIGHT_MODE = '0'
+  cd E:\Repos\ai-lab\command-center\command-center\backend
+  ..\.venv\Scripts\python.exe ..\scripts\run_uvicorn_once.py
+  PID=18292

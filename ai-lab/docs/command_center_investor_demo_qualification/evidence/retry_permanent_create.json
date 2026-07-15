@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "rule": {
+    "id": "PAR-68D535AA",
+    "action": "operator_desk_tool",
+    "match": {
+      "reason": "RETRY_ALWAYS_MARKER ping",
+      "action_type": "operator_desk_tool",
+      "file_path": "operator_desk",
+      "tool_name": "cc_investor_demo_ping"
+    },
+    "note": "RETRY_ALWAYS investor demo",
+    "source_approval_id": "approval-120"
+  }
+}

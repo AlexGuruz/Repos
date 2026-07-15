@@ -1,0 +1,25 @@
+INFO:     Started server process [69916]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 10048] error while attempting to bind on address ('127.0.0.1', 8000): [winerror 10048] only one usage of each socket address (protocol/network address/port) is normally permitted
+INFO:     Waiting for application shutdown.
+ERROR:    Traceback (most recent call last):
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 732, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\zacle\AppData\Local\Programs\Python\Python312\Lib\contextlib.py", line 217, in __aexit__
+    await anext(self.gen)
+  File "E:\Repos\ai-lab\command-center\command-center\backend\main.py", line 76, in lifespan
+    await channels.stop()
+  File "E:\Repos\ai-lab\command-center\command-center\backend\services\channels.py", line 325, in stop
+    await ch.stop()
+  File "E:\Repos\ai-lab\command-center\command-center\backend\services\channels.py", line 125, in stop
+    await self._worker
+  File "E:\Repos\ai-lab\command-center\command-center\backend\services\channels.py", line 224, in _drain_loop
+    item = await self._outbound.get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\zacle\AppData\Local\Programs\Python\Python312\Lib\asyncio\queues.py", line 158, in get
+    await getter
+asyncio.exceptions.CancelledError
+
+ERROR:    Application shutdown failed. Exiting.

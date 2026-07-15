@@ -1,0 +1,98 @@
+{
+  "worker_name": "worker-rig-01",
+  "ssh_configured": false,
+  "all_ok": false,
+  "services": [
+    {
+      "name": "worker_assistant",
+      "ok": false,
+      "url": null,
+      "status_code": null,
+      "detail": "timeout after 1200ms budget",
+      "latency_ms": null
+    },
+    {
+      "name": "n8n",
+      "ok": false,
+      "url": null,
+      "status_code": null,
+      "detail": "timeout after 1200ms budget",
+      "latency_ms": null
+    },
+    {
+      "name": "ollama",
+      "ok": false,
+      "url": null,
+      "status_code": null,
+      "detail": "timeout after 1200ms budget",
+      "latency_ms": null
+    }
+  ],
+  "checked_at": "2026-07-15T00:01:12Z",
+  "timeout_budget_ms": 2000,
+  "worker_status": "offline_or_unreachable",
+  "last_known_status": {
+    "checked_at": "2026-07-15T00:01:03Z",
+    "worker_status": "offline_or_unreachable",
+    "all_ok": false,
+    "services": [
+      {
+        "name": "worker_assistant",
+        "ok": false,
+        "url": null,
+        "status_code": null,
+        "detail": "timeout after 1200ms budget",
+        "latency_ms": null
+      },
+      {
+        "name": "n8n",
+        "ok": false,
+        "url": null,
+        "status_code": null,
+        "detail": "timeout after 1200ms budget",
+        "latency_ms": null
+      },
+      {
+        "name": "ollama",
+        "ok": false,
+        "url": null,
+        "status_code": null,
+        "detail": "timeout after 1200ms budget",
+        "latency_ms": null
+      }
+    ],
+    "tunnel_status": {
+      "worker_name": "worker-rig-01",
+      "expected_ports": [
+        8766,
+        5679,
+        11435
+      ],
+      "reachable_ports": [
+        8766,
+        5679,
+        11435
+      ],
+      "missing_ports": [],
+      "likely_up": true,
+      "detail": "Tunnel appears up."
+    }
+  },
+  "tunnel_status": {
+    "worker_name": "worker-rig-01",
+    "expected_ports": [
+      8766,
+      5679,
+      11435
+    ],
+    "reachable_ports": [
+      8766,
+      5679,
+      11435
+    ],
+    "missing_ports": [],
+    "likely_up": true,
+    "detail": "Tunnel appears up."
+  },
+  "last_checked": "2026-07-15T00:01:12Z"
+}

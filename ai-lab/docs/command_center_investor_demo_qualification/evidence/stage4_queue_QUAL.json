@@ -1,0 +1,53 @@
+[
+  {
+    "id": "approval-105",
+    "type": "approval",
+    "agent": "operator_desk",
+    "action": "operator_desk_tool",
+    "detail": "QUAL_ALWAYS_MARKER growflow sales today",
+    "status": "pending",
+    "timestamp": "2026-07-14T23:59:16.636709+00:00",
+    "catalog_context": "[catalog] component_id=command-center\nlifecycle=partial capabilities=api=partial, approvals=partial, auth=partial, deployment=partial, ingestion=na, observability=unbuilt, retrieval=na, ui=partial, worker_execution=partial\nowners approval=lab-core code=lab-core\nprimary_repo=command-center\nauthority.api_contract=code: repo:command-center/backend@main",
+    "file_path": "operator_desk",
+    "payload": {
+      "action_type": "operator_desk_tool",
+      "file_path": "operator_desk",
+      "tool_name": "growflow_sales_today",
+      "reason": "QUAL_ALWAYS_MARKER growflow sales today"
+    }
+  },
+  {
+    "id": "approval-104",
+    "type": "approval",
+    "agent": "operator_desk",
+    "action": "operator_desk_tool",
+    "detail": "QUAL_DENY_MARKER growflow sales today",
+    "status": "pending",
+    "timestamp": "2026-07-14T23:59:10.567244+00:00",
+    "catalog_context": "[catalog] component_id=command-center\nlifecycle=partial capabilities=api=partial, approvals=partial, auth=partial, deployment=partial, ingestion=na, observability=unbuilt, retrieval=na, ui=partial, worker_execution=partial\nowners approval=lab-core code=lab-core\nprimary_repo=command-center\nauthority.api_contract=code: repo:command-center/backend@main",
+    "file_path": "operator_desk",
+    "payload": {
+      "action_type": "operator_desk_tool",
+      "file_path": "operator_desk",
+      "tool_name": "growflow_sales_today",
+      "reason": "QUAL_DENY_MARKER growflow sales today"
+    }
+  },
+  {
+    "id": "approval-103",
+    "type": "approval",
+    "agent": "operator_desk",
+    "action": "operator_desk_tool",
+    "detail": "QUAL_APPROVE_MARKER growflow sales today",
+    "status": "pending",
+    "timestamp": "2026-07-14T23:59:08.054567+00:00",
+    "catalog_context": "[catalog] component_id=command-center\nlifecycle=partial capabilities=api=partial, approvals=partial, auth=partial, deployment=partial, ingestion=na, observability=unbuilt, retrieval=na, ui=partial, worker_execution=partial\nowners approval=lab-core code=lab-core\nprimary_repo=command-center\nauthority.api_contract=code: repo:command-center/backend@main",
+    "file_path": "operator_desk",
+    "payload": {
+      "action_type": "operator_desk_tool",
+      "file_path": "operator_desk",
+      "tool_name": "growflow_sales_today",
+      "reason": "QUAL_APPROVE_MARKER growflow sales today"
+    }
+  }
+]

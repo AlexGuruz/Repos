@@ -107,7 +107,12 @@ def submit_tool_proposal(
     action_type: str = "operator_desk_tool",
     file_path: str = "operator_desk",
 ) -> ApprovalSubmissionResult:
-    """Enqueue brain approval with mandatory tool_name/args. Does not execute."""
+    """Enqueue brain approval with mandatory tool_name/args.
+
+    If a durable permanent allowlist rule matches, skip the pending card and
+    return ``approval_required=False`` (auto path). Command Center should then
+    execute via the same approved-run path as Always Approve.
+    """
     name = (tool_name or "").strip()
     if name not in _allowed_tool_names():
         raise OperatorError(ACTION_NOT_ALLOWLISTED, f"tool_name not in scripts.json: {name}")
@@ -116,11 +121,85 @@ def submit_tool_proposal(
 
     try:
         from brain.approval_queue.queue import submit
+        from brain.permanent_allowlist import brain_spec_match_payload, find_matching_rule
     except ImportError as exc:
         raise OperatorError(
             APPROVAL_SERVICE_UNAVAILABLE,
             "brain.approval_queue unavailable",
         ) from exc
+
+    probe = brain_spec_match_payload(
+        {
+            "file_path": file_path,
+            "action_type": action_type,
+            "tool_name": name,
+            "reason": reason,
+        }
+    )
+    rule = find_matching_rule(action_type, probe)
+    if rule:
+        rid = str(rule.get("id") or "")
+        try:
+            from brain.approval_queue.queue import resolve as queue_resolve
+            from brain.execution import run as execution_run
+        except ImportError as exc:
+            raise OperatorError(
+                APPROVAL_SERVICE_UNAVAILABLE,
+                "brain resolve/execution unavailable",
+            ) from exc
+        try:
+            approval_id = submit(
+                {
+                    "file_path": file_path,
+                    "action_type": action_type,
+                    "reason": reason,
+                    "risk_level": risk_level,
+                    "agent": "operator_desk",
+                    "tool_name": name,
+                    "args": payload_args,
+                }
+            )
+            if not queue_resolve(approval_id, True):
+                raise OperatorError(
+                    APPROVAL_SERVICE_UNAVAILABLE,
+                    f"permanent match could not resolve {approval_id}",
+                )
+            result = execution_run(
+                name,
+                payload_args,
+                300,
+                approval_context={
+                    "approved": True,
+                    "approval_id": approval_id,
+                    "source": "operator_desk.permanent_auto",
+                    "permanent_rule_id": rid,
+                },
+            )
+        except OperatorError:
+            raise
+        except Exception as exc:
+            raise OperatorError(APPROVAL_SERVICE_UNAVAILABLE, str(exc)) from exc
+
+        warnings = [f"Matched permanent rule {rid}; auto-approved and executed"]
+        if not result.success:
+            warnings.append(
+                f"execution_failed: {(result.stderr or result.stdout or 'unknown')[:300]}"
+            )
+        return ApprovalSubmissionResult(
+            ok=bool(result.success),
+            source="approval_queue",
+            freshness="fresh",
+            approval_required=False,
+            approval_id=approval_id,
+            tool_name=name,
+            status="auto_approved" if result.success else "auto_approved_exec_failed",
+            auto_permanent=True,
+            permanent_rule_id=rid or None,
+            act_id=f"ACT-{approval_id}",
+            execute_queued=False,
+            degraded=not result.success,
+            warnings=warnings,
+        )
 
     try:
         approval_id = submit(

@@ -1,0 +1,1 @@
+pytest_exit=0 elapsed_s=00:01:12.4362215

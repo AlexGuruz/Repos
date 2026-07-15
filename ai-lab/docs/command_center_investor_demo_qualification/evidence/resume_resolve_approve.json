@@ -1,0 +1,11 @@
+{
+  "http": 200,
+  "body": {
+    "ok": true,
+    "id": "approval-111",
+    "resolution": "approved",
+    "executed": true,
+    "execute_queued": true,
+    "act_id": "ACT-approval-111"
+  }
+}

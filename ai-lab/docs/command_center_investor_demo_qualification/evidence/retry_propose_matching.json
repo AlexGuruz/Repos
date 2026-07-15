@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "source": "approval_queue",
+  "freshness": "fresh",
+  "generated_at": null,
+  "warnings": [
+    "Matched permanent rule PAR-68D535AA; auto-approved and executed"
+  ],
+  "error_code": null,
+  "degraded": false,
+  "approval_required": false,
+  "approval_id": "approval-121",
+  "tool_name": "cc_investor_demo_ping",
+  "status": "auto_approved",
+  "auto_permanent": true,
+  "permanent_rule_id": "PAR-68D535AA",
+  "act_id": "ACT-approval-121",
+  "execute_queued": false
+}
