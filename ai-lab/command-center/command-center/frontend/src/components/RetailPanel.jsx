@@ -129,61 +129,78 @@ function KpiChips({ kpis }) {
   )
 }
 
+function TableCaption({ count, noun }) {
+  if (!count) return null
+  return <div className="retail-table-caption">{count} {noun}{count === 1 ? '' : 's'}</div>
+}
+
 function BudtenderTable({ rows }) {
+  const list = rows || []
   return (
-    <table className="retail-table">
-      <thead>
-        <tr>
-          <th>Budtender</th>
-          <th>Net sales</th>
-          <th>Orders</th>
-          <th>AOV</th>
-          <th>Disc %</th>
-          <th>Flags</th>
-        </tr>
-      </thead>
-      <tbody>
-        {(rows || []).map(r => (
-          <tr key={r.budtender} className={r.flags?.length ? 'flagged' : ''}>
-            <td>{r.budtender}</td>
-            <td>{fmtUsd(r.net_sales)}</td>
-            <td>{r.order_count}</td>
-            <td>{fmtUsd(r.aov)}</td>
-            <td>{fmtPct(r.effective_discount_pct)}</td>
-            <td>{(r.flags || []).join(', ') || '—'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <>
+      <div className="retail-scroll">
+        <table className="retail-table">
+          <thead>
+            <tr>
+              <th>Budtender</th>
+              <th>Net sales</th>
+              <th>Orders</th>
+              <th>AOV</th>
+              <th>Disc %</th>
+              <th>Flags</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map(r => (
+              <tr key={r.budtender} className={r.flags?.length ? 'flagged' : ''}>
+                <td>{r.budtender}</td>
+                <td>{fmtUsd(r.net_sales)}</td>
+                <td>{r.order_count}</td>
+                <td>{fmtUsd(r.aov)}</td>
+                <td>{fmtPct(r.effective_discount_pct)}</td>
+                <td>{(r.flags || []).join(', ') || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <TableCaption count={list.length} noun="budtender" />
+    </>
   )
 }
 
 function BrandTable({ rows }) {
+  const list = rows || []
   return (
-    <table className="retail-table">
-      <thead>
-        <tr>
-          <th>Brand</th>
-          <th>Net</th>
-          <th>Disc %</th>
-          <th>Native margin</th>
-          <th>Landed margin</th>
-          <th>Rank</th>
-        </tr>
-      </thead>
-      <tbody>
-        {(rows || []).slice(0, 15).map(r => (
-          <tr key={r.canonical_brand || r.brand_name}>
-            <td>{r.brand_name}</td>
-            <td>{fmtUsd(r.net_sales)}</td>
-            <td>{fmtPct(r.effective_discount_pct)}</td>
-            <td>{fmtPct(r.native_margin_pct)}</td>
-            <td>{fmtPct(r.landed_margin_pct)}</td>
-            <td>{r.profit_velocity_rank ?? '—'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <>
+      <div className="retail-scroll">
+        <table className="retail-table">
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Net</th>
+              <th>Disc %</th>
+              <th>Native margin</th>
+              <th>Landed margin</th>
+              <th>Rank</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map(r => (
+              <tr key={r.canonical_brand || r.brand_name}>
+                <td>{r.brand_name}</td>
+                <td>{fmtUsd(r.net_sales)}</td>
+                <td>{fmtPct(r.effective_discount_pct)}</td>
+                <td>{fmtPct(r.native_margin_pct)}</td>
+                <td>{fmtPct(r.landed_margin_pct)}</td>
+                <td>{r.profit_velocity_rank ?? '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <TableCaption count={list.length} noun="brand" />
+    </>
   )
 }
 
@@ -235,6 +252,20 @@ export default function RetailPanel() {
   }, [])
 
   useEffect(() => { load(); loadReconciliation(); loadProjection() }, [load, loadReconciliation, loadProjection])
+
+  // Auto-refresh the board every 5 minutes: re-fetch the latest built dashboard
+  // (does NOT trigger a rebuild job). Skips while a manual rebuild is in flight or tab hidden.
+  useEffect(() => {
+    const FIVE_MIN_MS = 5 * 60 * 1000
+    const t = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return
+      if (refreshing) return
+      load()
+      loadReconciliation()
+      loadProjection()
+    }, FIVE_MIN_MS)
+    return () => clearInterval(t)
+  }, [load, loadReconciliation, loadProjection, refreshing])
 
   useEffect(() => {
     if (!jobId) return undefined
@@ -345,39 +376,45 @@ export default function RetailPanel() {
             </section>
             <section className="wide">
               <h3>Discounts Over Time</h3>
-              <table className="retail-table compact">
-                <thead>
-                  <tr><th>Date</th><th>Net</th><th>Disc %</th><th>% orders disc</th></tr>
-                </thead>
-                <tbody>
-                  {(data.discounts_over_time || []).map(d => (
-                    <tr key={d.date}>
-                      <td>{d.date}</td>
-                      <td>{fmtUsd(d.net_sales)}</td>
-                      <td>{fmtPct(d.effective_discount_pct)}</td>
-                      <td>{fmtPct(d.pct_orders_discounted)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="retail-scroll">
+                <table className="retail-table compact">
+                  <thead>
+                    <tr><th>Date</th><th>Net</th><th>Disc %</th><th>% orders disc</th></tr>
+                  </thead>
+                  <tbody>
+                    {(data.discounts_over_time || []).map(d => (
+                      <tr key={d.date}>
+                        <td>{d.date}</td>
+                        <td>{fmtUsd(d.net_sales)}</td>
+                        <td>{fmtPct(d.effective_discount_pct)}</td>
+                        <td>{fmtPct(d.pct_orders_discounted)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <TableCaption count={(data.discounts_over_time || []).length} noun="day" />
             </section>
             <section className="wide">
               <h3>Budtender by Category</h3>
-              <table className="retail-table compact">
-                <thead>
-                  <tr><th>Category</th><th>Budtender</th><th>Net</th><th>Items</th></tr>
-                </thead>
-                <tbody>
-                  {(data.budtender_by_category || []).slice(0, 20).map((r, i) => (
-                    <tr key={`${r.category_name}-${r.budtender}-${i}`}>
-                      <td>{r.category_name}</td>
-                      <td>{r.budtender}</td>
-                      <td>{fmtUsd(r.net_sales)}</td>
-                      <td>{r.item_count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="retail-scroll tall">
+                <table className="retail-table compact">
+                  <thead>
+                    <tr><th>Category</th><th>Budtender</th><th>Net</th><th>Items</th></tr>
+                  </thead>
+                  <tbody>
+                    {(data.budtender_by_category || []).map((r, i) => (
+                      <tr key={`${r.category_name}-${r.budtender}-${i}`}>
+                        <td>{r.category_name}</td>
+                        <td>{r.budtender}</td>
+                        <td>{fmtUsd(r.net_sales)}</td>
+                        <td>{r.item_count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <TableCaption count={(data.budtender_by_category || []).length} noun="category × budtender row" />
             </section>
           </div>
         </>
@@ -386,7 +423,10 @@ export default function RetailPanel() {
       )}
 
       <style>{`
-        .retail-panel { padding: 1rem 1.25rem; color: #e8eef2; max-width: 1400px; }
+        .retail-panel {
+          padding: 1rem 1.25rem; color: #e8eef2; max-width: 1400px;
+          flex: 1 1 auto; min-height: 0; overflow-y: auto; box-sizing: border-box;
+        }
         .retail-subnav { display: flex; gap: 0.25rem; margin-bottom: 1rem; border-bottom: 1px solid #1e293b; }
         .retail-subnav button {
           background: transparent; border: none; color: #64748b; padding: 0.5rem 0.75rem;
@@ -429,11 +469,18 @@ export default function RetailPanel() {
         .retail-kpi .value { font-size: 1.1rem; font-weight: 600; }
         .retail-kpi .delta { font-size: 0.75rem; color: #94a3b8; }
         .retail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .retail-grid section { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 0.75rem; overflow: auto; }
+        .retail-grid section { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 0.75rem; overflow: hidden; }
         .retail-grid section.wide { grid-column: 1 / -1; }
         .retail-grid h3 { margin: 0 0 0.5rem; font-size: 0.95rem; color: #5eead4; }
+        .retail-scroll { max-height: 340px; overflow: auto; border: 1px solid #1e293b; border-radius: 6px; }
+        .retail-scroll.tall { max-height: 460px; }
+        .retail-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+        .retail-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
+        .retail-scroll::-webkit-scrollbar-track { background: #0b1220; }
+        .retail-table-caption { margin-top: 0.35rem; font-size: 0.7rem; color: #64748b; }
         .retail-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         .retail-table th, .retail-table td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid #1e293b; }
+        .retail-table thead th { position: sticky; top: 0; background: #111f38; z-index: 1; }
         .retail-table th { color: #94a3b8; font-weight: 500; }
         .retail-table tr.flagged td { color: #fcd34d; }
         .retail-table.compact { font-size: 0.75rem; }
