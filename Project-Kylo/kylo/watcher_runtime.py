@@ -26,7 +26,7 @@ from services.common.instance import (
 )
 from services.intake.csv_downloader import download_petty_cash_csv
 from services.ops.heartbeat import Heartbeat, write_heartbeat
-from services.rules.jgdtruth_provider import fetch_rules_from_jgdtruth
+from services.rules.jgdtruth_provider import fetch_rules_by_intake_tab, fetch_rules_from_jgdtruth
 from services.sheets.poster import _extract_spreadsheet_id
 from services.audit.tick import is_audit_mode, run_audit_tick
 
@@ -89,8 +89,23 @@ def _run_sync_hook() -> bool:
 
 
 def rules_checksum(company: str) -> str:
-    rules = fetch_rules_from_jgdtruth(company)
-    approved = [(r.source or "", r.target_sheet or "", r.target_header or "") for r in rules.values() if r.approved]
+    """Checksum approved rules across all intake tabs (dual BANK/TX when configured)."""
+    by_tab = fetch_rules_by_intake_tab(company)
+    approved = []
+    for tab_name in sorted(by_tab.keys()):
+        for r in by_tab[tab_name].values():
+            if not r.approved:
+                continue
+            approved.append(
+                (
+                    tab_name,
+                    r.source or "",
+                    r.target_sheet or "",
+                    r.target_header or "",
+                    r.pool or "",
+                    r.event_type or "",
+                )
+            )
     approved.sort()
     payload = "\n".join(["|".join(t) for t in approved])
     return _md5(payload)

@@ -1,0 +1,58 @@
+version: 1
+
+# SANDBOX ONLY — does not affect KYLO_2026 live watchers.
+# Start only when testing: set KYLO_INSTANCE_ID=KYLO_2026_SANDBOX
+# Never point start_watchers_by_year.ps1 at this without intent.
+
+instance:
+  id: KYLO_2026_SANDBOX
+  # All companies still listed in global; year filter isolates 2026 sandbox book.
+
+year_workbooks_active: ["2026"]
+
+# Overlay year workbook URLs to the liquidity sandbox copy.
+year_workbooks:
+  "2026":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1Y9tauvFUxrBnfBk5yrfDFs_nNefEfnvp6jzRyNU2FWw/edit
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1Y9tauvFUxrBnfBk5yrfDFs_nNefEfnvp6jzRyNU2FWw/edit
+
+rules:
+  # Dual rule tabs: TRANSACTIONS intake -> TRANSACTIONS RULES; BANK -> BANK RULES
+  rules_tab_name: TRANSACTIONS RULES
+  bank_rules_tab_name: BANK RULES
+
+runtime:
+  # Posting enabled for sandbox dual-rule proof (2026-07-15). Instance is isolated from live.
+  mode: post
+  dry_run: false
+
+posting:
+  sheets:
+    apply: true
+  target_layout:
+    PAYROLL: { mode: merged_color, eod: helper_totals }
+    JGD: { mode: in_sheet_zones, zones: [CASH, BANK] }
+    EXPENSES: { mode: twin_tabs, cash_tab: CASH EXPENSES, bank_tab: BANK EXPENSES }
+    INCOME: { mode: in_sheet_zones, zones: [CASH, BANK, TRANSFER] }
+    NUGZ_COG: { mode: single_pool, pool: CASH }
+  projection_match:
+    enabled: true
+    window_days: 2
+    amount_tolerance: 0.02
+    clear_on_match: true
+    review_on_ambiguous: true
+    log_tab: PROJECTION CONSUMED
+    include_tabs:
+      - CASH EXPENSES
+      - BANK EXPENSES
+      - PAYROLL
+      - NUGZ COG
+      - INCOME
+      - JGD
+      - CC Payments
+      - NON CANNABIS
+      - ALLOCATED
+      - CANNABIS DIST
+
+google:
+  service_account_json_path: E:/secrets/gcp/sa.json

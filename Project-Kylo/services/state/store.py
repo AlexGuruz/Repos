@@ -15,7 +15,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, Optional, Set
+from typing import Dict, Iterable, List, Optional, Set
 
 from services.common.instance import (
     get_instance_id,
@@ -35,6 +35,7 @@ class State:
     cell_signatures: Dict[str, Dict[str, str]] = field(default_factory=dict)
     processed_txn_uids: Dict[str, Set[str]] = field(default_factory=dict)
     skipped_txn_uids: Dict[str, Set[str]] = field(default_factory=dict)
+    projection_consumptions: Dict[str, List[Dict[str, object]]] = field(default_factory=dict)
 
     def get_signature(self, company_id: str, cell_key: str) -> Optional[str]:
         return self.cell_signatures.get(company_id, {}).get(cell_key)
@@ -66,12 +67,20 @@ class State:
         """Clear skipped transactions for a company (e.g., when rules change)."""
         self.skipped_txn_uids.pop(company_id, None)
 
+    def add_projection_consumption(self, company_id: str, record: Dict[str, object]) -> None:
+        bucket = self.projection_consumptions.setdefault(company_id, [])
+        bucket.append(dict(record))
+
+    def get_projection_consumptions(self, company_id: str) -> List[Dict[str, object]]:
+        return list(self.projection_consumptions.get(company_id, []))
+
     def to_serializable(self) -> Dict[str, object]:
         return {
             "version": self.version,
             "cell_signatures": self.cell_signatures,
             "processed_txn_uids": {k: sorted(v) for k, v in self.processed_txn_uids.items()},
             "skipped_txn_uids": {k: sorted(v) for k, v in self.skipped_txn_uids.items()},
+            "projection_consumptions": self.projection_consumptions,
         }
 
 
@@ -151,6 +160,7 @@ def load_state(path: Optional[Path] = None) -> State:
     cell_signatures = data.get("cell_signatures") or {}
     processed = data.get("processed_txn_uids") or {}
     skipped = data.get("skipped_txn_uids") or {}
+    projection_consumptions = data.get("projection_consumptions") or {}
     # Convert processed lists to sets for faster merging
     processed_sets = {k: set(v) for k, v in processed.items()}
     skipped_sets = {k: set(v) for k, v in skipped.items()}
@@ -162,6 +172,10 @@ def load_state(path: Optional[Path] = None) -> State:
         },
         processed_txn_uids=processed_sets,
         skipped_txn_uids=skipped_sets,
+        projection_consumptions={
+            str(company): list(records or [])
+            for company, records in projection_consumptions.items()
+        },
     )
     return state
 
