@@ -37,21 +37,56 @@ Rules retarget to merged tabs. Legacy tabs (`JGD EXPENSES`, etc.) remain for ref
 
 Fill color is UX only — EOD never sums by color.
 
-## BALANCE running totals
+## BALANCE running totals — continuous actual → projected EOD
 
-**Cash and Bank EOD are the actual account ledgers, not reconstructions.**
+The EOD line is **one continuous running balance**. Up to the last actual day
+(`D0 = max date in TRANSACTIONS/BANK`) it is the raw account ledgers; past `D0`
+it continues with projected pool nets pulled live from the target tabs, so a
+projected shortfall visibly drives Available down (and negative).
 
-| Col | Meaning | Formula |
-|-----|---------|---------|
-| **I** | Bank EOD | `$4,845.52 + SUMIFS(BANK!D:D, BANK!A:A, "<="&date)` — the BANK tab running balance |
-| **J** | Cash EOD | `SUMIFS(TRANSACTIONS!D:D, TRANSACTIONS!A:A, "<="&date)` — the TRANSACTIONS running balance (START OF YEAR $6,673.09 seeds it) |
-| **K** | In Transit | Running float of TRUE transfers mid-flight (`TO BANK↔DEPOSIT`, `FROM BANK↔WITHDRAW` only) |
-| **L** | AVAILABLE | **`=I+J+K`** |
+| Col | Meaning | Actual region (`d ≤ D0`) | Projection region (`d > D0`) |
+|-----|---------|--------------------------|------------------------------|
+| **G** | Proj Cash Net | blank | live `SUMIF` of cash-pool target cells for the day |
+| **H** | Proj Bank Net | blank | live `SUMIF` of bank-pool target cells for the day |
+| **I** | Bank EOD | `$4,845.52 + SUMIFS(BANK!D:D, BANK!A:A, "<="&date)` | `=I(prev)+H` |
+| **J** | Cash EOD | `SUMIFS(TRANSACTIONS!D:D, TRANSACTIONS!A:A, "<="&date)` (START OF YEAR $6,673.09 seeds it) | `=J(prev)+G` |
+| **K** | In Transit | Running float of TRUE transfers mid-flight (`TO BANK↔DEPOSIT`, `FROM BANK↔WITHDRAW` only) | carries `K(D0)` |
+| **L** | AVAILABLE | **`=I+J+K`** | **`=I+J+K`** |
+
+Projection rows are **shaded** and the first projected row carries a note marking
+where actuals end.
+
+### Projected pool nets (cols G/H) — source columns
+
+Signed daily values summed by pool (INCOME transfer nets AB/AC are excluded):
+
+- **Cash (G):** `CASH EXPENSES!B`, `PAYROLL!V` (Payroll Cash Net), `JGD!K` (JGD Cash Net), `NUGZ COG!B`, `CANNABIS DIST!B`, `NON CANNABIS!B`, `ALLOCATED!B`, `INCOME!X` (Income Cash Net)
+- **Bank (H):** `BANK EXPENSES!B`, `PAYROLL!W` (Payroll Bank Net), `JGD!L` (JGD Bank Net), `CC Payments!B`, `INCOME!Y` (Income Bank Net)
+
+Map + formula builder live in `services/posting/projection_forecast.py`.
 
 Day 1 check: **Available $12,036.96** with `L = I + J + K`.
 
-**Cash EOD (J) ties to the TRANSACTIONS ledger to the penny every day** — verified by
-`tools/debug/_reconcile_cash_eod_vs_transactions.py` (max diff `0.0000`).
+**Cash EOD (J) ties to the TRANSACTIONS ledger to the penny for every actual day** — verified by
+`tools/debug/_reconcile_cash_eod_vs_transactions.py` (max diff `0.0000`). The projection
+region does not change actuals.
+
+## In Transit drift alert
+
+Transfer legs (`TO BANK`/`DEPOSIT`, `FROM BANK`/`WITHDRAW`) that stay unreconciled
+longer than **`in_transit.drift_days` (default 7)** are flagged on `BALANCE!K18`
+(with a note) and emailed to `alexstonedz@stonedprojects.com`, stating each
+amount, days in transit, and which pool the funds should land in
+(`TO BANK`→**BANK**, `WITHDRAW`→**CASH**).
+
+- Detection: `services/posting/in_transit_drift.py`
+- Email: `services/notify/email_notifier.py`. Sandbox uses `transport: gmail_api` — the
+  **stashbox** service account (`stashbox@ai-dataframe.iam.gserviceaccount.com`, key
+  `E:/secrets/gcp/sa.json`) sends via the Gmail API as the delegated mailbox
+  `notify.email.sender`. Requires domain-wide delegation for the `gmail.send` scope.
+  (SMTP transport via env `SMTP_HOST/PORT/USERNAME/PASSWORD/EMAIL_SENDER` is the fallback.)
+- Dedupe: `drift_alerts` in posting state so the same drift is not re-emailed
+- Config: `in_transit.drift_days`, `notify.email.*` in `KYLO_2026_SANDBOX.yaml`
 
 **ATM LOAD / SWITCH are NOT netted through In Transit.** ATM LOAD is cash deployed
 into the machine (real cash-out on TRANSACTIONS); SWITCH is ATM revenue settling

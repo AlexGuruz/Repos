@@ -36,6 +36,8 @@ class State:
     processed_txn_uids: Dict[str, Set[str]] = field(default_factory=dict)
     skipped_txn_uids: Dict[str, Set[str]] = field(default_factory=dict)
     projection_consumptions: Dict[str, List[Dict[str, object]]] = field(default_factory=dict)
+    # In-transit drift alert dedupe: drift_key -> ISO timestamp last alerted.
+    drift_alerts: Dict[str, str] = field(default_factory=dict)
 
     def get_signature(self, company_id: str, cell_key: str) -> Optional[str]:
         return self.cell_signatures.get(company_id, {}).get(cell_key)
@@ -74,6 +76,20 @@ class State:
     def get_projection_consumptions(self, company_id: str) -> List[Dict[str, object]]:
         return list(self.projection_consumptions.get(company_id, []))
 
+    def last_drift_alert(self, drift_key: str) -> Optional[str]:
+        """Return the ISO timestamp a drift was last alerted, or None."""
+        return self.drift_alerts.get(drift_key)
+
+    def record_drift_alert(self, drift_key: str, when_iso: str) -> None:
+        self.drift_alerts[drift_key] = when_iso
+
+    def prune_drift_alerts(self, active_keys: Iterable[str]) -> None:
+        """Drop dedupe entries for drifts that have since reconciled."""
+        keep = set(active_keys)
+        for key in list(self.drift_alerts.keys()):
+            if key not in keep:
+                self.drift_alerts.pop(key, None)
+
     def to_serializable(self) -> Dict[str, object]:
         return {
             "version": self.version,
@@ -81,6 +97,7 @@ class State:
             "processed_txn_uids": {k: sorted(v) for k, v in self.processed_txn_uids.items()},
             "skipped_txn_uids": {k: sorted(v) for k, v in self.skipped_txn_uids.items()},
             "projection_consumptions": self.projection_consumptions,
+            "drift_alerts": self.drift_alerts,
         }
 
 
@@ -161,6 +178,7 @@ def load_state(path: Optional[Path] = None) -> State:
     processed = data.get("processed_txn_uids") or {}
     skipped = data.get("skipped_txn_uids") or {}
     projection_consumptions = data.get("projection_consumptions") or {}
+    drift_alerts = data.get("drift_alerts") or {}
     # Convert processed lists to sets for faster merging
     processed_sets = {k: set(v) for k, v in processed.items()}
     skipped_sets = {k: set(v) for k, v in skipped.items()}
@@ -176,6 +194,7 @@ def load_state(path: Optional[Path] = None) -> State:
             str(company): list(records or [])
             for company, records in projection_consumptions.items()
         },
+        drift_alerts={str(k): str(v) for k, v in drift_alerts.items()},
     )
     return state
 

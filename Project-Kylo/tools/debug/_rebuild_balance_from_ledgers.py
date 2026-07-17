@@ -42,6 +42,19 @@ from services.posting.transfer_matcher import (
     match_transfers,
     running_in_transit,
 )
+from services.posting.in_transit_drift import (
+    find_drifting_transfers,
+    format_drift_email,
+    drift_dedupe_key,
+    drift_totals_by_pool,
+)
+from services.posting.projection_forecast import (
+    CASH_NET_TARGETS,
+    BANK_NET_TARGETS,
+    net_sumif_formula,
+)
+from services.notify import build_email_notifier
+from services.state.store import load_state, save_state
 from services.sheets.poster import _extract_spreadsheet_id
 
 SA = r"E:/secrets/gcp/sa.json"
@@ -145,30 +158,93 @@ print(
     f"matched={len(result.matches)} unmatched={len(result.unmatched)}"
 )
 
+# --- Boundary: last actual day. d<=D0 = actual ledger; d>D0 = projection. ---
+_actual_dates = [parse_date(t.get("posted_date")) for t in rows]
+_actual_dates = [d for d in _actual_dates if d]
+D0 = max(_actual_dates) if _actual_dates else None
+print(f"boundary D0 (last actual date) = {D0}")
+
+
+def batch_update(requests):
+    retry(
+        lambda: svc.spreadsheets()
+        .batchUpdate(spreadsheetId=SID, body={"requests": requests})
+        .execute()
+    )
+
+
+def sheet_id(title):
+    meta = retry(
+        lambda: svc.spreadsheets()
+        .get(spreadsheetId=SID, fields="sheets.properties")
+        .execute()
+    )
+    for sh in meta.get("sheets", []):
+        if sh["properties"]["title"] == title:
+            return sh["properties"]["sheetId"]
+    return None
+
+
+# Projected pool nets pulled live from target tabs (per DUAL_POOL_TARGET_MODEL).
+# The pool->column map + formula builder live in services.posting.projection_forecast.
+def net_formula(targets, r):
+    return net_sumif_formula(targets, f"$B{r}")
+
 # --- Build formulas ---
-# J = cash ledger: cumulative TRANSACTIONS!D where TRANSACTIONS!A <= this date.
-#     START OF YEAR (6673.09) lives in TRANSACTIONS so it seeds the opening.
-# I = OPENING_BANK + cumulative BANK!D where BANK!A <= this date.
+# ACTUAL region (d <= D0):
+#   J = cash ledger: cumulative TRANSACTIONS!D where TRANSACTIONS!A <= this date.
+#       START OF YEAR (6673.09) lives in TRANSACTIONS so it seeds the opening.
+#   I = OPENING_BANK + cumulative BANK!D where BANK!A <= this date.
+# PROJECTION region (d > D0): continue the running EOD with projected pool nets
+#   from the target tabs (G = proj cash net, H = proj bank net), so a projected
+#   shortfall makes J/I/L visibly decline / go negative.
 rows_i: List[List[Any]] = []
 rows_j: List[List[Any]] = []
 rows_k: List[List[Any]] = []
 rows_l: List[List[Any]] = []
+rows_g: List[List[Any]] = []
+rows_h: List[List[Any]] = []
+
+# K carried across any blank-date rows so In Transit never resets to 0.
+k_list: List[float] = []
+_last_k = 0.0
+for d in spine:
+    if d is not None and d in k_run:
+        _last_k = k_run[d]
+    k_list.append(round(_last_k, 2))
+
+first_proj_i: Optional[int] = None
 for i, d in enumerate(spine):
     r = 20 + i
-    # SUMIFS by date serial in B{r}
-    rows_j.append(
-        [f'=IFERROR(SUMIFS(TRANSACTIONS!$D:$D,TRANSACTIONS!$A:$A,"<="&$B{r}),0)']
-    )
-    rows_i.append(
-        [f'={OPENING_BANK}+IFERROR(SUMIFS(BANK!$D:$D,BANK!$A:$A,"<="&$B{r}),0)']
-    )
-    rows_k.append([round(k_run.get(d, 0.0), 2) if d else 0])
+    is_actual = d is not None and (D0 is None or d <= D0)
+    if is_actual:
+        rows_j.append(
+            [f'=IFERROR(SUMIFS(TRANSACTIONS!$D:$D,TRANSACTIONS!$A:$A,"<="&$B{r}),0)']
+        )
+        rows_i.append(
+            [f'={OPENING_BANK}+IFERROR(SUMIFS(BANK!$D:$D,BANK!$A:$A,"<="&$B{r}),0)']
+        )
+        rows_g.append([""])
+        rows_h.append([""])
+    else:
+        if first_proj_i is None:
+            first_proj_i = i
+        # Projected day nets (blank date rows contribute 0 and just carry).
+        rows_g.append([net_formula(CASH_NET_TARGETS, r) if d is not None else ""])
+        rows_h.append([net_formula(BANK_NET_TARGETS, r) if d is not None else ""])
+        rows_j.append([f"=J{r-1}+IFERROR(G{r},0)"])
+        rows_i.append([f"=I{r-1}+IFERROR(H{r},0)"])
+    rows_k.append([k_list[i]])
     rows_l.append([f"=I{r}+J{r}+K{r}"])
 
-print("writing I/J/K/L ...")
+print(f"writing I/J/K/L + G/H (first projected row index={first_proj_i}) ...")
 update(a1("BALANCE", "J20"), rows_j, raw=False)
 time.sleep(1.5)
 update(a1("BALANCE", "I20"), rows_i, raw=False)
+time.sleep(1.5)
+update(a1("BALANCE", "G20"), rows_g, raw=False)
+time.sleep(1.5)
+update(a1("BALANCE", "H20"), rows_h, raw=False)
 time.sleep(1.5)
 update(a1("BALANCE", "K20"), rows_k, raw=True)
 time.sleep(1.2)
@@ -201,10 +277,10 @@ update(
             "Bank day net (BANK)",
             "",
             "",
-            "",
-            "",
-            "BANK EOD = BANK ledger",
-            "CASH EOD = TRANSACTIONS ledger",
+            "Projected cash net (future only)",
+            "Projected bank net (future only)",
+            "BANK EOD = ledger (actual) then +proj",
+            "CASH EOD = ledger (actual) then +proj",
             "IN TRANSIT (TO/FROM BANK float)",
             "AVAILABLE = I+J+K",
         ],
@@ -215,8 +291,8 @@ update(
             "Bank dNet",
             "",
             "",
-            "",
-            "",
+            "Proj Cash Net",
+            "Proj Bank Net",
             "Bank EOD",
             "Cash EOD",
             "In Transit",
@@ -225,6 +301,65 @@ update(
     ],
     raw=True,
 )
+
+# --- Mark the actual -> projected boundary (shade projected rows + note) ---
+if first_proj_i is not None:
+    bal_sid = sheet_id("BALANCE")
+    if bal_sid is not None:
+        start_idx = 19 + first_proj_i  # 0-based grid row of first projected data row
+        end_idx = 19 + len(spine)
+        proj_date0 = spine[first_proj_i]
+        batch_update(
+            [
+                {
+                    "repeatCell": {
+                        "range": {
+                            "sheetId": bal_sid,
+                            "startRowIndex": start_idx,
+                            "endRowIndex": end_idx,
+                            "startColumnIndex": 0,
+                            "endColumnIndex": 12,
+                        },
+                        "cell": {
+                            "userEnteredFormat": {
+                                "backgroundColor": {
+                                    "red": 0.99,
+                                    "green": 0.96,
+                                    "blue": 0.82,
+                                }
+                            }
+                        },
+                        "fields": "userEnteredFormat.backgroundColor",
+                    }
+                },
+                {
+                    "updateCells": {
+                        "range": {
+                            "sheetId": bal_sid,
+                            "startRowIndex": start_idx,
+                            "endRowIndex": start_idx + 1,
+                            "startColumnIndex": 1,
+                            "endColumnIndex": 2,
+                        },
+                        "rows": [
+                            {
+                                "values": [
+                                    {
+                                        "note": (
+                                            f"PROJECTED from here. Actuals end at D0={D0}. "
+                                            f"Rows below use projected cash/bank nets (cols G/H) "
+                                            f"from the target tabs; a shortfall drives Available negative."
+                                        )
+                                    }
+                                ]
+                            }
+                        ],
+                        "fields": "note",
+                    }
+                },
+            ]
+        )
+        print(f"shaded projected rows from {proj_date0} (grid row {start_idx+1})")
 
 # --- Verify readback against python ledger on a few dates ---
 time.sleep(2)
@@ -236,6 +371,8 @@ want = {
     date(2026, 6, 27),
     date(2026, 7, 15),
     date(2026, 7, 16),
+    date(2026, 8, 15),
+    date(2026, 12, 31),
 }
 for r in check:
     d = parse_date(r[0] if r else None)
@@ -247,6 +384,87 @@ for r in check:
             except Exception:
                 return 0.0
         I, J, K, L = f(row[7]), f(row[8]), f(row[9]), f(row[10])
-        print(f" {d}  {I:11,.2f} {J:11,.2f} {K:9,.2f} {L:11,.2f}")
+        tag = "" if (D0 and d <= D0) else "  <proj>"
+        print(f" {d}  {I:11,.2f} {J:11,.2f} {K:9,.2f} {L:11,.2f}{tag}")
+
+# --- In Transit drift: flag > drift_days and email the owner ---
+drift_days = int(cfg.get("in_transit.drift_days", 7) or 7)
+as_of = D0 or date.today()
+drifts = find_drifting_transfers(result.unmatched, as_of, drift_days=drift_days)
+print(f"\nin-transit drift > {drift_days}d as of {as_of}: {len(drifts)} leg(s)")
+if drifts:
+    by_pool = drift_totals_by_pool(drifts)
+    for dft in drifts:
+        print(
+            f"  ${dft.amount:,.2f} -> {dft.expected_pool} "
+            f"(since {dft.since_date}, {dft.age_days}d; {dft.description})"
+        )
+    # On-sheet flag on the In Transit header (K19) + note.
+    bal_sid = sheet_id("BALANCE")
+    total = round(sum(x.amount for x in drifts), 2)
+    flag_note = (
+        f"DRIFT: ${total:,.2f} in transit > {drift_days}d as of {as_of}. "
+        f"Expected -> BANK ${by_pool.get('BANK',0.0):,.2f}, CASH ${by_pool.get('CASH',0.0):,.2f}."
+    )
+    update(a1("BALANCE", "K18"), [[f"DRIFT ${total:,.2f} >{drift_days}d (see note)"]], raw=True)
+    if bal_sid is not None:
+        batch_update(
+            [
+                {
+                    "updateCells": {
+                        "range": {
+                            "sheetId": bal_sid,
+                            "startRowIndex": 18,
+                            "endRowIndex": 19,
+                            "startColumnIndex": 10,
+                            "endColumnIndex": 11,
+                        },
+                        "rows": [{"values": [{"note": flag_note}]}],
+                        "fields": "note",
+                    }
+                }
+            ]
+        )
+    # Email (deduped via posting state); no-op if SMTP not configured.
+    try:
+        state = load_state()
+    except Exception as exc:
+        print(f"[DRIFT] state load failed: {exc}; skipping dedupe")
+        state = None
+    new_drifts = []
+    if state is not None:
+        active_keys = [drift_dedupe_key(x) for x in drifts]
+        state.prune_drift_alerts(active_keys)
+        new_drifts = [x for x in drifts if not state.last_drift_alert(drift_dedupe_key(x))]
+    else:
+        new_drifts = drifts
+    if new_drifts:
+        notifier = build_email_notifier(cfg, extra_recipients=["alexstonedz@stonedprojects.com"])
+        subject, body = format_drift_email(new_drifts, as_of, drift_days=drift_days)
+        sent = notifier.send(subject, body)
+        if sent:
+            print(f"[DRIFT] emailed {len(new_drifts)} new drift(s) to {notifier.recipients}")
+            if state is not None:
+                now_iso = datetime.now().isoformat(timespec="seconds")
+                for x in new_drifts:
+                    state.record_drift_alert(drift_dedupe_key(x), now_iso)
+        elif not notifier.enabled:
+            print(
+                f"[DRIFT] email not sent (not configured: missing {notifier.missing()}); "
+                f"flagged on sheet only"
+            )
+        else:
+            print(
+                "[DRIFT] email send FAILED (see error above); flagged on sheet only. "
+                "Not recording dedupe so it retries next run."
+            )
+    if state is not None:
+        try:
+            save_state(state)
+        except Exception as exc:
+            print(f"[DRIFT] state save failed: {exc}")
+else:
+    # Clear any stale on-sheet drift flag when nothing is drifting.
+    update(a1("BALANCE", "K18"), [[""]], raw=True)
 
 print("\nDONE rebuild BALANCE from ledgers")

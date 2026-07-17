@@ -39,16 +39,19 @@
 Opening seeds on `BALANCE`: Bank **$4,845.52**, Cash **$6,673.09**.
 
 ```
-BankEOD[d]   = BankEOD[d-1]   + BankDayNet[d]
-CashEOD[d]   = CashEOD[d-1]   + CashDayNet[d]
-AVAILABLE[d] = BankEOD[d]    + CashEOD[d]    + InTransit[d]   # K stub = 0 this pass
+# d <= D0 (actual):    I/J from raw ledgers (SUMIFS)
+# d >  D0 (projected):  I[d]=I[d-1]+H[d],  J[d]=J[d-1]+G[d]
+AVAILABLE[d] = BankEOD[d] + CashEOD[d] + InTransit[d]
 ```
 
 `L[d] = I[d] + J[d] + K[d]` always.
 
-### Cash / Bank EOD come straight from the account ledgers
+### Cash / Bank EOD: actual ledgers, then projected forward
 
-The authoritative daily balances are the raw intake ledgers, **not** a sum of target tabs:
+The EOD is a **single continuous running line**. Let `D0` = the last actual day
+(`max date in TRANSACTIONS/BANK`).
+
+**Actual region (`d ≤ D0`)** — authoritative raw intake ledgers, **not** a sum of target tabs:
 
 - **Cash EOD** `J = SUMIFS(TRANSACTIONS!D:D, TRANSACTIONS!A:A, "<="&date)` — the TRANSACTIONS
   tab IS the physical cash pool; its running balance is cash on hand. START OF YEAR
@@ -57,8 +60,20 @@ The authoritative daily balances are the raw intake ledgers, **not** a sum of ta
   running balance.
 
 This guarantees Cash EOD matches the TRANSACTIONS running balance per day exactly.
-The target-tab reconstruction (INCOME/EXPENSES/PAYROLL/COG helpers) is kept only for
-presentation and drilldown, never as the EOD source.
+
+**Projection region (`d > D0`)** — the line continues using projected pool nets from
+the target tabs so a planned shortfall is obvious:
+
+- `J[d] = J[d-1] + G[d]`, `I[d] = I[d-1] + H[d]`
+- `G` (Proj Cash Net) / `H` (Proj Bank Net) are live `SUMIF`s of the signed daily
+  pool columns (`CASH/BANK EXPENSES!B`, `PAYROLL!V/W`, `JGD!K/L`, `NUGZ COG!B`,
+  `CANNABIS DIST!B`, `NON CANNABIS!B`, `ALLOCATED!B`, `INCOME!X/Y`). INCOME transfer
+  nets (`AB/AC`) are excluded so transfers never change Available.
+- Projection rows are shaded and marked with a note at the boundary.
+
+Map + formula builder + pure projector: `services/posting/projection_forecast.py`.
+The target-tab reconstruction is the EOD source **only** past `D0`; for `d ≤ D0` the
+raw ledgers remain authoritative.
 
 ### In Transit (K) — transfer matcher
 
@@ -73,6 +88,14 @@ Only **true $-for-$ transfers** bridge the timing gap (matched within **±3 days
 the machine, SWITCH is ATM revenue settling to bank. Each stays on its own ledger.
 
 `BALANCE!K` = running unmatched/lagged transfer float. Transfers never change Available.
+
+**Drift alert:** a transfer leg that stays unreconciled longer than
+`in_transit.drift_days` (default 7) is flagged on `BALANCE!K18` (with a note) and
+emailed to the owner, naming the amount, age, and destination pool
+(`TO BANK`→BANK, `WITHDRAW`→CASH). Detection `services/posting/in_transit_drift.py`;
+email `services/notify/email_notifier.py` (sandbox uses `transport: gmail_api` — the
+stashbox service account sends via the Gmail API as the delegated `notify.email.sender`;
+SMTP is the fallback); repeat alerts deduped via `drift_alerts` in posting state.
 
 ### BankDayNet[d] sums (machine-readable)
 

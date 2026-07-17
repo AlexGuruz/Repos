@@ -54,5 +54,22 @@ posting:
       - ALLOCATED
       - CANNABIS DIST
 
+in_transit:
+  # Flag transfer legs (TO BANK/DEPOSIT, FROM BANK/WITHDRAW) that stay in transit
+  # longer than this many days; drift is surfaced on BALANCE and emailed.
+  drift_days: 7
+
+notify:
+  email:
+    enabled: true
+    # Send via the Gmail API using the "stashbox" Google service account
+    # (stashbox@ai-dataframe.iam.gserviceaccount.com) with domain-wide delegation.
+    # 'sender' is the delegated Workspace mailbox the SA sends as.
+    transport: gmail_api
+    service_account_json: E:/secrets/gcp/sa.json
+    sender: alexstonedz@stonedprojects.com
+    recipients:
+      - alexstonedz@stonedprojects.com
+
 google:
   service_account_json_path: E:/secrets/gcp/sa.json
