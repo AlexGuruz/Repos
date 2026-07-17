@@ -12,12 +12,21 @@ Validated on nugzdispensary (2026-06):
 | Menu OTD at time of sale | ``OrderItems.OriginalPrice`` | Matches ``Product.SalesPrice`` on undiscounted lines |
 | Pre-tax portion rung on line | ``OrderItems.GrossPrice`` | Lower than menu; taxes are separate line elements |
 | Tax on line | ``OrderItems.Taxes[].value.taxAmount`` | JSON in ``Element.value`` |
-| Customer OTD collected | ``GrossPrice`` + sum(taxAmount) | Matches register; ≈ ``OriginalPrice`` when no discount |
-| Discounted pre-tax charge | ``OrderItems.Price`` | Can be below ``OriginalPrice`` (promo) |
+| Amount actually tendered | ``OrderItems.Price`` | Discounted, **tax-inclusive** register charge; can be below ``OriginalPrice`` (promo) |
+| Pre-discount OTD estimate | ``GrossPrice`` + sum(taxAmount) | Overstates: ignores line discount and re-adds tax onto a tax-inclusive menu |
 
 ``NetPrice`` is **not** OTD; it tracks another net slice (often close to ``GrossPrice``).
 
-Use ``menu_price_cents`` for flat menu dollars; ``collected_otd_cents`` for actual tendered amount.
+IMPORTANT — net sales / collected basis:
+    ``OrderItems.Price`` (stored as ``price_cents``) is the amount the customer
+    actually paid. Its per-line sum reconciles to ``orders.total_cents`` to the
+    penny every day. Do **not** use ``collected_otd_cents`` (``GrossPrice`` + tax)
+    as net sales: because the menu is tax-inclusive and discounts live on the line,
+    it overstates (e.g. 7/16/26: $4,221 vs the true $2,699.84). See
+    tools/debug/_diag_price_vs_ordertotal.py.
+
+Use ``menu_price_cents`` for flat menu dollars; ``price_cents`` for actual tendered
+amount. ``collected_otd_cents`` is retained only as a pre-discount reference.
 """
 from __future__ import annotations
 

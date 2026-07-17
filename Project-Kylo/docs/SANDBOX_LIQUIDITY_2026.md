@@ -94,6 +94,43 @@ into the bank (real bank-in on BANK). They are not a $-for-$ transfer pair.
 
 Rebuild script: `python tools/debug/_rebuild_balance_from_ledgers.py`
 
+## Live intake mirror (every 120s)
+
+Sandbox TRANSACTIONS + BANK stay current with the **live** 2026 workbook so EOD
+can be validated day-to-day while you change sandbox layout/rules. **One-way
+only** — never writes live; does not touch KYLO_2025 / KYLO_2026 watchers.
+
+| Live tab | Sandbox tab | What is copied |
+|----------|-------------|----------------|
+| TRANSACTIONS | TRANSACTIONS | Full rows A:Z including Processed / Approved / NOTES / posting log text |
+| BANK | BANK | Full rows A:Z including Processed / NOTES / posting log text |
+
+When the live fingerprint changes the daemon copies those tabs, then rebuilds
+BALANCE (advances D0, refreshes In Transit K). Unchanged polls are a cheap
+read-only fingerprint (~seconds).
+
+```powershell
+cd E:\Repos\Project-Kylo
+# Interactive (window + log tee)
+.\scripts\active\start_sandbox_live_mirror.ps1
+
+# Always-on Scheduled Task (boot/logon + 5m restart guard)
+.\scripts\active\install_sandbox_live_mirror.ps1
+Start-ScheduledTask -TaskName KyloSandboxLiveMirror
+
+# One-shot verify
+$env:PYTHONPATH = "E:\Repos\Project-Kylo"
+$env:KYLO_INSTANCE_ID = "KYLO_2026_SANDBOX"
+python scripts/sandbox_live_mirror_daemon.py --once --force
+```
+
+- Config: `sandbox_mirror.*` in `KYLO_2026_SANDBOX.yaml` (`interval_seconds: 120`)
+- Module: `services/sandbox/intake_mirror.py`
+- Daemon: `scripts/sandbox_live_mirror_daemon.py`
+- Heartbeat: `.kylo/instances/KYLO_2026_SANDBOX/health/sandbox_mirror.json`
+- Log: `.kylo/instances/KYLO_2026_SANDBOX/logs/sandbox_mirror.log`
+- EOD check: `python tools/debug/_validate_sandbox_eod_vs_live.py`
+
 `START OF YEAR` rule is **disabled** for posting; the $6,673.09 START OF YEAR row on
 TRANSACTIONS is the cash opening that seeds the `J` ledger.
 

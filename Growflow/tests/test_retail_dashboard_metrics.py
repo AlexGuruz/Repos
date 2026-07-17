@@ -35,6 +35,7 @@ def _line(
         "net_price_cents": net,
         "discount_cents": discount,
         "original_price_cents": menu,
+        "price_cents": net,
         "collected_otd_cents": net,
         "cog_cents": cog,
         "landed_cost_cents": landed,

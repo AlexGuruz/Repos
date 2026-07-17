@@ -58,9 +58,21 @@ class DashboardPayload:
 
 
 def _line_net_cents(row: dict[str, Any]) -> int:
+    """Net sales basis = actual amount tendered on the line = ``price_cents``.
+
+    Nugz sells at **tax-inclusive** menu prices, so ``OrderItems.Price`` (stored as
+    ``price_cents``) is the discounted, tax-inclusive amount the customer actually
+    paid. Its per-line sum reconciles to ``orders.total_cents`` to the penny every
+    day (validated in tools/debug/_diag_price_vs_ordertotal.py).
+
+    ``collected_otd_cents`` (GrossPrice + line tax) is NOT used: it ignores line
+    discounts and adds tax on top of an already tax-inclusive menu, overstating net
+    sales (e.g. 7/16/26 showed $4,221 vs the true $2,699.84). ``NetPrice`` is a
+    different, lower net slice and understates sales.
+    """
     if row.get("is_return"):
-        return -abs(int(row.get("net_price_cents") or 0))
-    return int(row.get("net_price_cents") or 0)
+        return -abs(int(row.get("price_cents") or 0))
+    return int(row.get("price_cents") or 0)
 
 
 def _line_gross_cents(row: dict[str, Any]) -> int:

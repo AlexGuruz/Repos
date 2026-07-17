@@ -54,6 +54,20 @@ posting:
       - ALLOCATED
       - CANNABIS DIST
 
+# One-way live → sandbox intake mirror (does NOT write live; isolated from KYLO_2025/2026).
+# Daemon: scripts/sandbox_live_mirror_daemon.py
+# Start:  .\scripts\active\start_sandbox_live_mirror.ps1
+# Install always-on: .\scripts\active\install_sandbox_live_mirror.ps1
+sandbox_mirror:
+  enabled: true
+  interval_seconds: 120
+  rebuild_balance_on_change: true
+  # Full rows incl. Processed/Approved/NOTES/log columns:
+  #   live TRANSACTIONS → sandbox TRANSACTIONS
+  #   live BANK         → sandbox BANK
+  live_sid: 1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+  # sandbox_sid defaults to year_workbooks.2026.intake_workbook_url when omitted
+
 in_transit:
   # Flag transfer legs (TO BANK/DEPOSIT, FROM BANK/WITHDRAW) that stay in transit
   # longer than this many days; drift is surfaced on BALANCE and emailed.
