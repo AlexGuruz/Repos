@@ -30,11 +30,14 @@ posting:
   sheets:
     apply: true
   target_layout:
-    PAYROLL: { mode: merged_color, eod: helper_totals }
-    JGD: { mode: in_sheet_zones, zones: [CASH, BANK] }
+    # Physical column order: CASH zone LEFT, BANK zone RIGHT (helpers at each zone end).
+    # Day-net columns for BALANCE G/H: see services/posting/projection_forecast.py
+    PAYROLL: { mode: merged_color, eod: helper_totals, column_order: left_cash_right_bank }
+    JGD: { mode: in_sheet_zones, zones: [CASH, BANK], column_order: left_cash_right_bank }
     EXPENSES: { mode: twin_tabs, cash_tab: CASH EXPENSES, bank_tab: BANK EXPENSES }
-    INCOME: { mode: in_sheet_zones, zones: [CASH, BANK, TRANSFER] }
+    INCOME: { mode: in_sheet_zones, zones: [CASH, BANK, TRANSFER], column_order: left_cash_right_bank }
     NUGZ_COG: { mode: single_pool, pool: CASH }
+    CC_PAYMENTS: { mode: single_pool, pool: BANK }
   projection_match:
     enabled: true
     window_days: 2

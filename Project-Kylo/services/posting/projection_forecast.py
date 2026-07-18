@@ -11,8 +11,8 @@ manual forecast cells already in the target category tabs, per
   * a pure running-EOD projector (``project_forward_eod``) used by tests and by
     any non-sheet caller.
 
-INCOME transfer nets (cols AB/AC) are intentionally excluded so transfers never
-change Available.
+INCOME transfer nets (sandbox cols AA/AB after left/right layout) are
+intentionally excluded so transfers never change Available.
 """
 from __future__ import annotations
 
@@ -21,23 +21,32 @@ from datetime import date
 from typing import Dict, List, Optional, Sequence, Tuple
 
 # pool -> [(target tab, signed daily column)]
+# Sandbox left=CASH / right=BANK layout (see docs/DUAL_POOL_TARGET_MODEL.md):
+#   PAYROLL helpers at zone ends (cash net left of bank zone, bank net at far right)
+#   JGD / INCOME helpers sit at the end of each pool zone
+#   Twin/single tabs keep day net in column B
 CASH_NET_TARGETS: List[Tuple[str, str]] = [
     ("CASH EXPENSES", "B"),
-    ("PAYROLL", "V"),        # Payroll Cash Net
-    ("JGD", "K"),            # JGD Cash Net
+    ("PAYROLL", "T"),        # Payroll Cash Net (end of cash zone)
+    ("JGD", "F"),            # JGD Cash Net (end of cash zone)
     ("NUGZ COG", "B"),
     ("CANNABIS DIST", "B"),
     ("NON CANNABIS", "B"),
     ("ALLOCATED", "B"),
-    ("INCOME", "X"),         # Income Cash Net (transfers excluded)
+    ("INCOME", "M"),         # Income Cash Net (end of cash zone; transfers excluded)
 ]
 BANK_NET_TARGETS: List[Tuple[str, str]] = [
     ("BANK EXPENSES", "B"),
-    ("PAYROLL", "W"),        # Payroll Bank Net
-    ("JGD", "L"),            # JGD Bank Net
+    ("PAYROLL", "W"),        # Payroll Bank Net (end of bank zone)
+    ("JGD", "K"),            # JGD Bank Net (end of bank zone)
     ("CC Payments", "B"),
-    ("INCOME", "Y"),         # Income Bank Net (transfers excluded)
+    ("INCOME", "W"),         # Income Bank Net (end of bank zone; transfers excluded)
 ]
+
+# Daily spine starts at row 20. Rows 2–13 are month rollups whose col-A
+# serials are the 19th of each month — full-column SUMIF would pull those
+# month totals into Proj Cash/Bank Net on every xx/19 date.
+_DAILY_FIRST_ROW = 20
 
 
 def quote_tab(tab: str) -> str:
@@ -48,9 +57,15 @@ def net_sumif_formula(targets: Sequence[Tuple[str, str]], date_cell: str) -> str
     """Live formula: sum each target's signed daily column for the row's date.
 
     ``date_cell`` is the A1 reference holding the date (e.g. ``$B23``).
+    Ranges start at the daily spine (row 20) so month-header rollups in
+    rows 2–13 are never matched.
     """
+    r0 = _DAILY_FIRST_ROW
     terms = [
-        f"IFERROR(SUMIF({quote_tab(tab)}!$A:$A,{date_cell},{quote_tab(tab)}!${col}:${col}),0)"
+        (
+            f"IFERROR(SUMIF({quote_tab(tab)}!$A${r0}:$A,{date_cell},"
+            f"{quote_tab(tab)}!${col}${r0}:${col}),0)"
+        )
         for tab, col in targets
     ]
     return "=" + "+".join(terms)

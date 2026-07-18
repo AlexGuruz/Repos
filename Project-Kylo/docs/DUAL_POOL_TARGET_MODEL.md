@@ -21,12 +21,32 @@
 | Target | Presentation | EOD feed |
 |--------|--------------|----------|
 | **EXPENSES** | Twin tabs `CASH EXPENSES` / `BANK EXPENSES` | Each tab daily B → matching EOD pot |
-| **PAYROLL** | One `PAYROLL` tab; cash + bank post here; source fill colors | Helper cols `Payroll Cash Net` + `Payroll Bank Net` per day |
-| **JGD** | One `JGD` tab with **Cash \| Bank** column zones | Zone day totals → Cash EOD / Bank EOD |
-| **NUGZ COG** | One `NUGZ COG` tab (cash pool only) | All amounts → Cash EOD via tab B |
-| **INCOME** | One `INCOME` tab with **Cash \| Bank \| Transfers** zones | Cash-group sum + Bank-group sum; transfers excluded from Available |
-| **CC Payments** | One `CC Payments` tab (bank) | Bank EOD only |
-| **NON CANNABIS / ALLOCATED / CANNABIS DIST** | Single tabs + source color | Pool helpers or journal attribution |
+| **PAYROLL** | One `PAYROLL` tab; **cash people LEFT / bank people RIGHT** + source fill colors | Helper cols `Payroll Cash Net` + `Payroll Bank Net` at each zone end |
+| **JGD** | One `JGD` tab with **Cash LEFT \| Bank RIGHT** column zones | Zone day totals → Cash EOD / Bank EOD |
+| **NUGZ COG** | One `NUGZ COG` tab (cash pool only, left semantics) | All amounts → Cash EOD via tab B |
+| **INCOME** | One `INCOME` tab with **Cash LEFT \| Bank RIGHT \| Transfers far-right** | Cash-group sum + Bank-group sum; transfers excluded from Available |
+| **CC Payments** | One `CC Payments` tab (bank / right semantics) | Bank EOD only |
+| **NON CANNABIS / ALLOCATED / CANNABIS DIST** | Single tabs (cash-primary) + source color | Pool helpers or journal attribution |
+
+### Physical left / right column contract (sandbox)
+
+Owner-facing rule: on every merged target tab, **CASH columns sit on the LEFT** and
+**BANK columns sit on the RIGHT**, so daily projection amounts are SUM / SUMIF /
+SUMRANGE-pullable from the correct side. Helper net columns sit at the **end of
+each pool zone** (machine-readable for BALANCE G/H).
+
+| Tab | Left (cash) | Right (bank) | Helpers (sandbox cols) |
+|-----|-------------|--------------|------------------------|
+| PAYROLL | person cols `C:S` | `GREG WREN` bank col `V` | Cash Net `T`, Bank Net `W` |
+| JGD | `ATM LOAD` / `CLOVER` / `SERVICE FEE` (`C:E`) | `SWITCH` / `CLOVER (BANK)` / `SERVICE FEE (BANK)` (`H:J`) | Cash Net `F`, Bank Net `K` |
+| INCOME | REG/sales cash headers (`C:L`) | SQUARE/VENMO/… (`O:V`) | Cash Net `M`, Bank Net `W`; transfers `Y:Z` + xfer nets `AA:AB` excluded from G/H |
+| CASH EXPENSES | whole tab (day net `B`) | — | — |
+| BANK EXPENSES | — | whole tab (day net `B`) | — |
+| NUGZ COG / NON CANNABIS / ALLOCATED / CANNABIS DIST | whole tab (day net `B`) | — | — |
+| CC Payments | — | whole tab (day net `B`) | — |
+
+Migration / re-align: `python tools/debug/_align_left_cash_right_bank_sandbox.py`
+(then rebuild BALANCE).
 
 ### Over-split tabs (hidden/frozen on sandbox)
 
@@ -66,10 +86,12 @@ the target tabs so a planned shortfall is obvious:
 
 - `J[d] = J[d-1] + G[d]`, `I[d] = I[d-1] + H[d]`
 - `G` (Proj Cash Net) / `H` (Proj Bank Net) are live `SUMIF`s of the signed daily
-  pool columns (`CASH/BANK EXPENSES!B`, `PAYROLL!V/W`, `JGD!K/L`, `NUGZ COG!B`,
-  `CANNABIS DIST!B`, `NON CANNABIS!B`, `ALLOCATED!B`, `INCOME!X/Y`). INCOME transfer
-  nets (`AB/AC`) are excluded so transfers never change Available.
-- Projection rows are shaded and marked with a note at the boundary.
+  pool columns on the **left (cash) / right (bank)** layout
+  (`CASH/BANK EXPENSES!B`, `PAYROLL!T/W`, `JGD!F/K`, `NUGZ COG!B`,
+  `CANNABIS DIST!B`, `NON CANNABIS!B`, `ALLOCATED!B`, `INCOME!M/W`). INCOME transfer
+  nets (`AA/AB`) are excluded so transfers never change Available.
+- Ranges are spine-scoped (`$A$20:$A` / col `$20:$`) so month rollups on the 19th
+  never collide with daily `xx/19` dates.
 
 Map + formula builder + pure projector: `services/posting/projection_forecast.py`.
 The target-tab reconstruction is the EOD source **only** past `D0`; for `d ≤ D0` the
@@ -97,28 +119,16 @@ email `services/notify/email_notifier.py` (sandbox uses `transport: gmail_api` �
 stashbox service account sends via the Gmail API as the delegated `notify.email.sender`;
 SMTP is the fallback); repeat alerts deduped via `drift_alerts` in posting state.
 
-### BankDayNet[d] sums (machine-readable)
+### CashDayNet[d] / BankDayNet[d] (machine-readable)
 
-| Source | Reference |
-|--------|-----------|
-| Bank expenses | `BANK EXPENSES!B{d}` |
-| Bank payroll | `PAYROLL!Payroll Bank Net` row d |
-| Bank JGD | `JGD!JGD Bank Net` row d |
-| Bank income | `INCOME` bank zone sum row d |
-| CC payments | `CC Payments!B{d}` |
-| Bank non-cannabis | `NON CANNABIS!Bank Net` row d (if any) |
-
-### CashDayNet[d] sums (machine-readable)
-
-| Source | Reference |
-|--------|-----------|
-| Cash expenses | `CASH EXPENSES!B{d}` |
-| Cash payroll | `PAYROLL!Payroll Cash Net` row d |
-| Cash JGD | `JGD!JGD Cash Net` row d |
-| NUGZ COG | `NUGZ COG!B{d}` |
-| Cannabis dist | `CANNABIS DIST!B{d}` |
-| Non-cannabis / allocated | `NON CANNABIS!B{d}`, `ALLOCATED!B{d}` (cash-primary) |
-| Cash income | `INCOME` cash zone sum row d |
+| Source | Cash reference | Bank reference |
+|--------|----------------|----------------|
+| Expenses | `CASH EXPENSES!B{d}` | `BANK EXPENSES!B{d}` |
+| Payroll | `PAYROLL!Payroll Cash Net` (`T`) | `PAYROLL!Payroll Bank Net` (`W`) |
+| JGD | `JGD!JGD Cash Net` (`F`) | `JGD!JGD Bank Net` (`K`) |
+| Income | `INCOME!Income Cash Net` (`M`) | `INCOME!Income Bank Net` (`W`) |
+| NUGZ COG / cannabis / allocated / non-cannabis | tab `B{d}` | — |
+| CC payments | — | `CC Payments!B{d}` |
 
 **Attributed net includes:**
 
@@ -183,11 +193,12 @@ For projection `P` at `(sheet, header, date_p, amount_p)`:
 ```yaml
 posting:
   target_layout:
-    PAYROLL: { mode: merged_color, eod: helper_totals }
-    JGD: { mode: in_sheet_zones, zones: [CASH, BANK] }
+    PAYROLL: { mode: merged_color, eod: helper_totals, column_order: left_cash_right_bank }
+    JGD: { mode: in_sheet_zones, zones: [CASH, BANK], column_order: left_cash_right_bank }
     EXPENSES: { mode: twin_tabs, cash_tab: CASH EXPENSES, bank_tab: BANK EXPENSES }
-    INCOME: { mode: in_sheet_zones, zones: [CASH, BANK, TRANSFER] }
+    INCOME: { mode: in_sheet_zones, zones: [CASH, BANK, TRANSFER], column_order: left_cash_right_bank }
     NUGZ_COG: { mode: single_pool, pool: CASH }
+    CC_PAYMENTS: { mode: single_pool, pool: BANK }
   projection_match:
     enabled: true
     window_days: 2

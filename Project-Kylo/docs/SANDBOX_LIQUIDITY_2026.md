@@ -12,14 +12,14 @@ Live (do not edit for this project): `1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fq
 
 Full contract: [`DUAL_POOL_TARGET_MODEL.md`](DUAL_POOL_TARGET_MODEL.md)
 
-## Target layout (collapsed)
+## Target layout (left = CASH / right = BANK)
 
 | Keep | Merged / single |
 |------|-----------------|
-| **CASH EXPENSES** + **BANK EXPENSES** (twins) | **PAYROLL** (one tab + source color + helper nets) |
-| | **JGD** (Cash \| Bank zones + helper nets) |
-| | **INCOME** (Cash \| Bank \| Transfer zones + helper nets) |
-| | **NUGZ COG** (cash only), **CC Payments**, **NON CANNABIS**, **ALLOCATED**, **CANNABIS DIST** |
+| **CASH EXPENSES** + **BANK EXPENSES** (twins) | **PAYROLL** (cash people left / bank people right + helper nets) |
+| | **JGD** (Cash LEFT \| Bank RIGHT + helper nets at zone ends) |
+| | **INCOME** (Cash LEFT \| Bank RIGHT \| Transfers far-right + helper nets) |
+| | **NUGZ COG** (cash only), **CC Payments** (bank), **NON CANNABIS**, **ALLOCATED**, **CANNABIS DIST** |
 
 ### Hidden over-split twins
 
@@ -27,15 +27,17 @@ Full contract: [`DUAL_POOL_TARGET_MODEL.md`](DUAL_POOL_TARGET_MODEL.md)
 
 Rules retarget to merged tabs. Legacy tabs (`JGD EXPENSES`, etc.) remain for reference only.
 
-### EOD helper columns (machine-readable)
+### EOD helper columns (machine-readable, zone ends)
 
-| Tab | Helpers |
-|-----|---------|
-| PAYROLL | `Payroll Cash Net`, `Payroll Bank Net` |
-| JGD | `JGD Cash Net`, `JGD Bank Net` |
-| INCOME | `Income Cash Net`, `Income Bank Net` |
+| Tab | Left helper | Right helper | Sandbox cols |
+|-----|-------------|--------------|--------------|
+| PAYROLL | `Payroll Cash Net` | `Payroll Bank Net` | `T` / `W` |
+| JGD | `JGD Cash Net` | `JGD Bank Net` | `F` / `K` |
+| INCOME | `Income Cash Net` | `Income Bank Net` | `M` / `W` (transfers `AA`/`AB` excluded from G/H) |
 
 Fill color is UX only — EOD never sums by color.
+
+Re-align layout: `python tools/debug/_align_left_cash_right_bank_sandbox.py`
 
 ## BALANCE running totals — continuous actual → projected EOD
 
@@ -58,10 +60,12 @@ where actuals end.
 
 ### Projected pool nets (cols G/H) — source columns
 
-Signed daily values summed by pool (INCOME transfer nets AB/AC are excluded):
+Signed daily values summed by pool from the **left (cash) / right (bank)** layout
+(INCOME transfer nets AA/AB are excluded). Spine-scoped `SUMIF` from row 20+ so
+`xx/19` dates never pull month rollups:
 
-- **Cash (G):** `CASH EXPENSES!B`, `PAYROLL!V` (Payroll Cash Net), `JGD!K` (JGD Cash Net), `NUGZ COG!B`, `CANNABIS DIST!B`, `NON CANNABIS!B`, `ALLOCATED!B`, `INCOME!X` (Income Cash Net)
-- **Bank (H):** `BANK EXPENSES!B`, `PAYROLL!W` (Payroll Bank Net), `JGD!L` (JGD Bank Net), `CC Payments!B`, `INCOME!Y` (Income Bank Net)
+- **Cash (G):** `CASH EXPENSES!B`, `PAYROLL!T` (Payroll Cash Net), `JGD!F` (JGD Cash Net), `NUGZ COG!B`, `CANNABIS DIST!B`, `NON CANNABIS!B`, `ALLOCATED!B`, `INCOME!M` (Income Cash Net)
+- **Bank (H):** `BANK EXPENSES!B`, `PAYROLL!W` (Payroll Bank Net), `JGD!K` (JGD Bank Net), `CC Payments!B`, `INCOME!W` (Income Bank Net)
 
 Map + formula builder live in `services/posting/projection_forecast.py`.
 
@@ -152,10 +156,12 @@ python bin/sort_and_post_from_jgdtruth.py --company JGD --baseline --reprocess-p
 python bin/sort_and_post_from_jgdtruth.py --company NUGZ --baseline --reprocess-posted --rules-changed
 ```
 
-## Collapse + wire (one-time maintenance)
+## Collapse + left/right align (one-time maintenance)
 
 ```powershell
 python tools/debug/_collapse_dual_pool_sandbox.py
+python tools/debug/_align_left_cash_right_bank_sandbox.py
+python tools/debug/_rebuild_balance_from_ledgers.py
 ```
 
 ## Still open

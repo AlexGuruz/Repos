@@ -15,24 +15,25 @@ from services.posting.projection_forecast import (
 def test_pool_maps_use_income_net_not_transfer_cols():
     cash = dict(CASH_NET_TARGETS)
     bank = dict(BANK_NET_TARGETS)
-    # INCOME cash/bank NET columns, never the transfer nets (AB/AC).
-    assert cash["INCOME"] == "X"
-    assert bank["INCOME"] == "Y"
-    assert "AB" not in cash.values()
-    assert "AC" not in bank.values()
-    # Twin expense tabs land in the correct pool.
+    # INCOME cash/bank NET columns at zone ends, never the transfer nets (AA/AB).
+    assert cash["INCOME"] == "M"
+    assert bank["INCOME"] == "W"
+    assert "AA" not in cash.values() and "AB" not in cash.values()
+    assert "AA" not in bank.values() and "AB" not in bank.values()
+    # Twin expense tabs land in the correct pool (day net col B).
     assert cash["CASH EXPENSES"] == "B"
     assert bank["BANK EXPENSES"] == "B"
-    # Zone helper nets.
-    assert cash["PAYROLL"] == "V" and bank["PAYROLL"] == "W"
-    assert cash["JGD"] == "K" and bank["JGD"] == "L"
+    # Zone helper nets (left=cash / right=bank layout).
+    assert cash["PAYROLL"] == "T" and bank["PAYROLL"] == "W"
+    assert cash["JGD"] == "F" and bank["JGD"] == "K"
 
 
 def test_net_sumif_formula_quotes_tabs_with_spaces():
-    f = net_sumif_formula([("CASH EXPENSES", "B"), ("INCOME", "X")], "$B23")
+    f = net_sumif_formula([("CASH EXPENSES", "B"), ("INCOME", "M")], "$B23")
     assert f.startswith("=")
-    assert "SUMIF('CASH EXPENSES'!$A:$A,$B23,'CASH EXPENSES'!$B:$B)" in f
-    assert "SUMIF(INCOME!$A:$A,$B23,INCOME!$X:$X)" in f
+    # Spine-only ranges (row 20+) so month rollups in rows 2–13 never match.
+    assert "SUMIF('CASH EXPENSES'!$A$20:$A,$B23,'CASH EXPENSES'!$B$20:$B)" in f
+    assert "SUMIF(INCOME!$A$20:$A,$B23,INCOME!$M$20:$M)" in f
     assert "IFERROR(" in f
 
 
