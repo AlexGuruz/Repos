@@ -23,10 +23,17 @@ def extract_spreadsheet_id(value: str | None) -> str:
 def _cfg_get(cfg: Any, dotted_key: str) -> Any:
     if cfg is None:
         return None
+    cur = cfg
+    if isinstance(cur, dict):
+        for part in dotted_key.split("."):
+            if isinstance(cur, dict) and part in cur:
+                cur = cur[part]
+            else:
+                return None
+        return cur
     getter = getattr(cfg, "get", None)
     if callable(getter):
         return getter(dotted_key)
-    cur = cfg
     for part in dotted_key.split("."):
         if isinstance(cur, dict) and part in cur:
             cur = cur[part]
