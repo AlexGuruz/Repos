@@ -1456,7 +1456,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     mark_by_sid[source_sid].append({"range": f"{a1_tab}!{pcol}{sheet_row}", "values": [[True]]})
                 except Exception:
                     continue
-            for (source_sid, src_tab, row0, msg, target_a1) in success_notes:
+            for (source_sid, src_tab, row0, msg, target_a1, _meta) in success_notes:
                 if target_a1 not in posted_ok_ranges:
                     continue
                 try:
