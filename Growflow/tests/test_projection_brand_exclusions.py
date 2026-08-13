@@ -156,3 +156,66 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_main_dedupes_order_items_before_aggregation(monkeypatch, tmp_path):
+    from datetime import datetime, timezone
+
+    sold_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    node = {
+        "objectId": "order-item-1",
+        "SoldAt": sold_at,
+        "GrossPrice": 1_000,
+        "COG": 400,
+        "ProductCategory": {"Name": "Edibles"},
+        "Product": {
+            "objectId": "product-1",
+            "Name": "Test Gummies",
+            "SKU": "TG-1",
+            "Brand": {"Name": "Test Brand"},
+        },
+        "Package": {"objectId": "package-1"},
+    }
+    captured = {}
+
+    def fake_fetch_chunk(**_kwargs):
+        return [dict(node), dict(node)], _mod.ORDER_ITEMS_QUERY
+
+    def fake_validate_and_normalize(**kwargs):
+        edges = kwargs["raw_json"]["data"]["findOrderItems"]["edges"]
+        captured["validated_rows"] = len(edges)
+        return {"ok": True, "report_path": str(tmp_path / "validation.json")}
+
+    out_path = tmp_path / "projection.md"
+    monkeypatch.setattr(_mod, "_fetch_chunk", fake_fetch_chunk)
+    monkeypatch.setattr(_mod, "_store_tz", lambda: timezone.utc)
+    monkeypatch.setattr(_mod, "validate_and_normalize", fake_validate_and_normalize)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--chunk-days",
+            "1",
+            "--pool",
+            "100",
+            "--out",
+            str(out_path),
+            "--no-layer2",
+            "--allocation-mode",
+            "gross-share",
+            "--exclude-brands",
+            "",
+            "--validation-mode",
+            "warning",
+        ],
+    )
+
+    assert _mod.main() == 0
+
+    text = out_path.read_text(encoding="utf-8")
+    assert captured["validated_rows"] == 1
+    assert "**Unique order lines counted:** 1" in text
+    assert "| Edibles | $10.00 | $100.00 |" in text
