@@ -25,8 +25,12 @@ def _cfg_get(cfg: Any, dotted_key: str) -> Any:
         return None
     getter = getattr(cfg, "get", None)
     if callable(getter):
-        return getter(dotted_key)
+        value = getter(dotted_key)
+        if value is not None:
+            return value
     cur = cfg
+    if hasattr(cur, "data"):
+        cur = getattr(cur, "data")
     for part in dotted_key.split("."):
         if isinstance(cur, dict) and part in cur:
             cur = cur[part]
