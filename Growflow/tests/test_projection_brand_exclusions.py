@@ -156,3 +156,44 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_order_item_dedupe_stable_ids_only():
+    seen: set[str] = set()
+    row = {"objectId": "line-1", "SoldAt": "2026-01-01T00:00:00.000Z", "GrossPrice": 100}
+    assert _mod._accept_unique_projection_order_item(row, seen) is True
+    assert _mod._accept_unique_projection_order_item(dict(row), seen) is False
+
+    # Fallback keys can represent distinct lines with identical sale/SKU/gross fields.
+    fallback_row = {"SoldAt": "2026-01-01T00:00:00.000Z", "GrossPrice": 100, "Product": {"SKU": "S1"}}
+    assert _mod._accept_unique_projection_order_item(fallback_row, seen) is True
+    assert _mod._accept_unique_projection_order_item(dict(fallback_row), seen) is True
+
+
+def test_fetch_chunk_falls_back_when_package_field_missing(monkeypatch):
+    calls: list[str] = []
+    expected = [{"objectId": "line-1", "SoldAt": "2026-01-01T00:00:00.000Z"}]
+
+    def fake_fetch_paginated(connection_field, query, variables, credentials_path=None):
+        calls.append(query)
+        if query != _mod.ORDER_ITEMS_QUERY_NO_PACKAGE:
+            raise RuntimeError('Cannot query field "Package" on type "OrderItems"')
+        return expected
+
+    monkeypatch.setattr(_mod, "fetch_paginated", fake_fetch_paginated)
+
+    rows, query_used = _mod._fetch_chunk(
+        oi_query=_mod.ORDER_ITEMS_QUERY,
+        where={"SoldAt": {"greaterThanOrEqualTo": "2026-01-01T00:00:00.000Z"}},
+        creds=None,
+        chunk_idx=1,
+        retries=1,
+    )
+
+    assert rows == expected
+    assert query_used == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE
+    assert calls == [
+        _mod.ORDER_ITEMS_QUERY,
+        _mod.ORDER_ITEMS_QUERY_NO_BRAND,
+        _mod.ORDER_ITEMS_QUERY_NO_PACKAGE,
+    ]

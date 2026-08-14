@@ -65,6 +65,7 @@ from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
+    ORDER_ITEMS_QUERY_NO_PACKAGE,
     PAGE_SIZE,
     date_range_to_where,
     fetch_paginated,
@@ -228,34 +229,51 @@ def _fetch_chunk(
     last_err: Exception | None = None
     query = oi_query
     for attempt in range(max(1, retries)):
-        try:
-            raw = fetch_paginated(
-                "findOrderItems",
-                query,
-                {"first": PAGE_SIZE, "where": where},
-                credentials_path=creds,
-            )
-            return raw, query
-        except RuntimeError as e:
-            last_err = e
-            err = str(e).lower()
-            if chunk_idx == 1 and attempt == 0 and ("brand" in err or "cannot query field" in err):
-                query = ORDER_ITEMS_QUERY_NO_BRAND
-                try:
-                    raw = fetch_paginated(
-                        "findOrderItems",
-                        query,
-                        {"first": PAGE_SIZE, "where": where},
-                        credentials_path=creds,
-                    )
-                    return raw, query
-                except RuntimeError as e2:
-                    last_err = e2
-            delay = min(120, 8 * (2**attempt))
-            print(f"  Chunk {chunk_idx} attempt {attempt + 1}/{retries} failed: {e}; sleep {delay}s", flush=True)
-            time_module.sleep(delay)
+        candidates = _order_item_query_candidates(query) if chunk_idx == 1 else (query,)
+        for candidate in candidates:
+            try:
+                raw = fetch_paginated(
+                    "findOrderItems",
+                    candidate,
+                    {"first": PAGE_SIZE, "where": where},
+                    credentials_path=creds,
+                )
+                return raw, candidate
+            except RuntimeError as e:
+                last_err = e
+                if candidate != candidates[-1] and _is_order_item_schema_field_error(e):
+                    continue
+                break
+        delay = min(120, 8 * (2**attempt))
+        print(f"  Chunk {chunk_idx} attempt {attempt + 1}/{retries} failed: {last_err}; sleep {delay}s", flush=True)
+        time_module.sleep(delay)
     assert last_err is not None
     raise last_err
+
+
+def _is_order_item_schema_field_error(exc: RuntimeError) -> bool:
+    err = str(exc).lower()
+    return "cannot query field" in err or "brand" in err or "package" in err
+
+
+def _order_item_query_candidates(initial_query: str) -> tuple[str, ...]:
+    candidates: list[str] = [initial_query]
+    if initial_query == ORDER_ITEMS_QUERY:
+        candidates.append(ORDER_ITEMS_QUERY_NO_BRAND)
+    if ORDER_ITEMS_QUERY_NO_PACKAGE not in candidates:
+        candidates.append(ORDER_ITEMS_QUERY_NO_PACKAGE)
+    return tuple(candidates)
+
+
+def _accept_unique_projection_order_item(node: dict[str, Any], seen: set[str]) -> bool:
+    """Return False for duplicate stable order-line IDs; do not collapse fallback keys."""
+    key = order_item_key(node)
+    if not key.startswith(("objectId:", "id:")):
+        return True
+    if key in seen:
+        return False
+    seen.add(key)
+    return True
 
 BUCKET_DISPLAY_ORDER = [
     "Edibles",
@@ -1754,8 +1772,7 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
+            if not _accept_unique_projection_order_item(n, seen):
                 continue
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
