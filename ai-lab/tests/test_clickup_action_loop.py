@@ -220,6 +220,36 @@ def test_queue_files_created(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
     assert (tmp_path / "clickup_action_log.jsonl").is_file()
 
 
+def test_corrupt_action_queue_is_not_overwritten(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path)
+    queue_path = tmp_path / "clickup_action_queue.json"
+    queue_path.write_text('{"generated_at": "t", "items": [', encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="Refusing to overwrite unreadable queue file"):
+        queue_clickup_action(
+            action_type="task_create",
+            target_list="Agent Ops",
+            target_task_id=None,
+            title="T",
+            message="m",
+            category="other",
+            reason="r",
+        )
+
+    assert queue_path.read_text(encoding="utf-8") == '{"generated_at": "t", "items": ['
+
+
+def test_corrupt_clarification_queue_is_not_overwritten(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path)
+    queue_path = tmp_path / "clickup_clarification_queue.json"
+    queue_path.write_text('{"generated_at": "t", "items": [', encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="Refusing to overwrite unreadable queue file"):
+        queue_clarification(message="Q", reason="r")
+
+    assert queue_path.read_text(encoding="utf-8") == '{"generated_at": "t", "items": ['
+
+
 def test_classify_ambiguous_finance_vs_clarify() -> None:
     cat = classify_work_category("Need clarification for company finance budget")
     assert cat in ("agent_clarifications", "company_finances")

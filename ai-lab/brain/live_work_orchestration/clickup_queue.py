@@ -37,14 +37,18 @@ def _load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
         return default
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else default
-    except Exception:
-        return default
+    except Exception as exc:
+        raise RuntimeError(f"Refusing to overwrite unreadable queue file: {path}") from exc
+    if not isinstance(data, dict):
+        raise RuntimeError(f"Refusing to overwrite malformed queue file: {path}")
+    return data
 
 
 def _save_json(path: Path, payload: dict[str, Any]) -> None:
     body = json.dumps(payload, indent=2, default=str)
-    path.write_text(body, encoding="utf-8")
+    tmp_path = path.with_name(f"{path.name}.tmp")
+    tmp_path.write_text(body, encoding="utf-8")
+    tmp_path.replace(path)
 
 
 def _append_clickup_log(event_type: str, payload: dict[str, Any]) -> None:
