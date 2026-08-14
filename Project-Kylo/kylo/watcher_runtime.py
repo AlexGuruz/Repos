@@ -42,6 +42,17 @@ from services.audit.tick import is_audit_mode, run_audit_tick
 WATCH_STATE_PATH = os.environ.get("KYLO_WATCH_STATE_PATH", os.path.join(".kylo", "watch_state.json"))
 
 
+def _posting_summary_failed(summary: Any) -> bool:
+    if not isinstance(summary, dict):
+        return False
+    if summary.get("error"):
+        return True
+    try:
+        return int(summary.get("failed_range_count", 0) or 0) > 0
+    except Exception:
+        return False
+
+
 def _md5(s: str) -> str:
     return hashlib.md5(s.encode("utf-8")).hexdigest()
 
@@ -356,7 +367,7 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
                 print(f"[ERROR] Failed to process {cid}: {e}")
                 summaries[cid] = {"error": True}
 
-        any_error = any(isinstance(s, dict) and s.get("error") for s in summaries.values())
+        any_error = any(_posting_summary_failed(s) for s in summaries.values())
         if any_error:
             consecutive_failures = consecutive_failures + 1
             if consecutive_failures >= cb_max:

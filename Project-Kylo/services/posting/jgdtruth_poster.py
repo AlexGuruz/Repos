@@ -1552,30 +1552,40 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "cells_written": int(cells_written),
             "rows_marked_true": int(rows_marked_true),
             "fills_applied": int(fills_applied),
+            "failed_range_count": int(len(failed_ranges)),
+            "failed_ranges": sorted(failed_ranges),
+            "error": bool(failed_ranges),
             "tabs": sorted(tabs_touched),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
             "skipped_rows": skipped_rows,
+            "success_rows": success_rows,
         }
 
     # Execute per-target posting and aggregate
     total_cells_written = 0
     total_rows_marked_true = 0
     total_fills_applied = 0
+    total_failed_ranges = 0
     tabs_all: Set[str] = set()
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
     skipped_rows_all: List[Tuple[str, str, int, str]] = []
+    failed_ranges_all: List[str] = []
+    success_rows_all: List[Tuple[str, str, int, str]] = []
 
     for target_sid, txns_for_target in txns_by_target_sid.items():
         result = _process_target(target_sid, txns_for_target, ignore_posted=ignore_posted_flag)
         total_cells_written += int(result.get("cells_written", 0))
         total_rows_marked_true += int(result.get("rows_marked_true", 0))
         total_fills_applied += int(result.get("fills_applied", 0))
+        total_failed_ranges += int(result.get("failed_range_count", 0) or 0)
         tabs_all |= set(result.get("tabs", []))
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
         skipped_rows_all.extend(list(result.get("skipped_rows", [])))
+        failed_ranges_all.extend([str(x) for x in (result.get("failed_ranges", []) or [])])
+        success_rows_all.extend(list(result.get("success_rows", [])))
 
     # Basic diagnostics for skipped items (printed once per run)
     if skipped_tab_not_found_all:
@@ -1633,6 +1643,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "cells_written": int(total_cells_written),
         "rows_marked_true": int(total_rows_marked_true),
         "fills_applied": int(total_fills_applied),
+        "failed_range_count": int(total_failed_ranges),
+        "failed_ranges": sorted(set(failed_ranges_all)),
+        "error": bool(total_failed_ranges),
         "tabs": sorted(tabs_all),
         "write_plan_path": wp_out,
         "write_plan_count": int(len(write_plan)),
