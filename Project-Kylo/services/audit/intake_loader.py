@@ -24,8 +24,8 @@ def _active_years(cfg) -> Optional[List[int]]:
         for it in cfg_val:
             try:
                 years.append(int(str(it).strip()))
-            except Exception:
-                continue
+            except Exception as e:
+                raise RuntimeError(f"failed to load intake tab {key}: {e}") from e
         return years or None
     ym = cfg.get("year_workbooks") or {}
     if isinstance(ym, dict) and ym:
