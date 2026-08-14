@@ -1,6 +1,7 @@
 """Tests for brand exclusion parsing in projection script."""
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -156,3 +157,49 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_main_dedupes_duplicate_order_items(monkeypatch, tmp_path):
+    node = {
+        "objectId": "order-line-1",
+        "SoldAt": "2026-08-14T12:00:00Z",
+        "GrossPrice": 1000,
+        "COG": 400,
+        "ProductCategory": {"Name": "Edibles"},
+        "Product": {"Name": "Gummy", "Brand": {"Name": "Cartel"}},
+    }
+
+    monkeypatch.setattr(_mod, "fetch_paginated", lambda *args, **kwargs: [dict(node), dict(node)])
+    monkeypatch.setattr(_mod, "_credentials_path", lambda: None)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--chunk-days",
+            "1",
+            "--pool",
+            "100",
+            "--allocation-mode",
+            "gross-share",
+            "--pool-top-n",
+            "0",
+            "--exclude-brands",
+            "",
+            "--landed-cog",
+            "off",
+            "--no-layer2",
+            "--validation-mode",
+            "discovery",
+            "--out",
+            str(tmp_path / "projection.md"),
+        ],
+    )
+
+    assert _mod.main() == 0
+    report = (tmp_path / "projection.md").read_text(encoding="utf-8")
+    assert "**Unique order lines counted:** 1" in report
+    raw_payload = json.loads((tmp_path / "projection_raw_order_items.json").read_text(encoding="utf-8"))
+    assert len(raw_payload["data"]["findOrderItems"]["edges"]) == 1
