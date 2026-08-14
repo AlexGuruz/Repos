@@ -1763,6 +1763,7 @@ def main() -> int:
             ld = sold.astimezone(tz).date()
             if ld < report_start_local or ld > report_end_local:
                 continue
+            seen.add(k)
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
