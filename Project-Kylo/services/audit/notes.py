@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+import hashlib
+import json
 from typing import Dict, List, Set, Tuple
 
 from services.audit.row_model import ChangeEvent
@@ -21,6 +23,27 @@ def _finding_label(event: ChangeEvent) -> str:
 
 def _tab_quote(tab: str) -> str:
     return "'" + tab.replace("'", "''") + "'" if re.search(r"[^A-Za-z0-9_]", tab) else tab
+
+
+def _event_note_id(event: ChangeEvent) -> str:
+    material = (
+        event.source_spreadsheet_id,
+        event.source_tab,
+        int(event.sheet_row or 0),
+        event.row_key,
+        event.event,
+        event.changed_field,
+        event.before,
+        event.after,
+        tuple(event.anomalies or []),
+        event.posted_date,
+        event.description,
+        int(event.amount_cents or 0),
+        event.txn_uid,
+        event.business_line_uid,
+    )
+    payload = json.dumps(material, ensure_ascii=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
 def write_audit_notes(
@@ -68,11 +91,15 @@ def write_audit_notes(
             cell_key = cell_range.split("!")[-1]
             prior = existing.get(cell_key, "")
             label = _finding_label(ev)
+            note_id = _event_note_id(ev)
+            if note_id and note_id in prior:
+                continue
             amt = ev.amount_cents / 100.0
             amt_str = f"(${abs(amt):,.2f})" if amt < 0 else f"${amt:,.2f}"
             parts = [
                 "KYLO-AUDIT-SYSTEM",
                 case_id,
+                f"id={note_id}",
                 label,
                 f"{ev.posted_date} {ev.company_id} {ev.description} {amt_str}",
             ]
@@ -84,6 +111,8 @@ def write_audit_notes(
                 combined = f"{prior} || {audit_line}"[:500]
             else:
                 combined = audit_line[:500]
+            if combined == prior:
+                continue
             batch.append({"range": cell_range, "values": [[combined]]})
 
         if not batch:
