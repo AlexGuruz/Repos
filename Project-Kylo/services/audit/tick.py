@@ -70,6 +70,13 @@ def _source_key(record: RowRecord) -> str:
     return f"{record.source_spreadsheet_id}|{record.source_tab.upper()}"
 
 
+def _loaded_source_key(raw: str) -> str:
+    sid, sep, tab = str(raw or "").strip().partition("|")
+    if not sep:
+        return str(raw or "").strip()
+    return f"{sid}|{tab.upper()}"
+
+
 def _only_loaded_sources(
     registry: Dict[str, RowRecord], loaded_sources: Set[str]
 ) -> Dict[str, RowRecord]:
@@ -140,7 +147,7 @@ def run_audit_tick(
         summary["error"] = f"intake_load_failed: {e}"
         print(f"[AUDIT] ERROR loading intake: {e}")
         return summary
-    loaded_sources = {str(k).strip().upper() for k in csv_by_key.keys() if str(k).strip()}
+    loaded_sources = {_loaded_source_key(str(k)) for k in csv_by_key.keys() if str(k).strip()}
     if not loaded_sources:
         summary["error"] = "intake_load_failed: no source tabs loaded"
         print("[AUDIT] ERROR loading intake: no source tabs loaded")

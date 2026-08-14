@@ -66,3 +66,41 @@ def test_audit_tick_preserves_unloaded_tab_registry(monkeypatch, tmp_path: Path)
     saved = load_row_registry(row_registry_path(instance_id))
     assert set(saved) == {transactions_row.row_key, bank_row.row_key}
     assert saved[bank_row.row_key].description == bank_row.description
+
+
+def test_audit_tick_still_removes_rows_from_loaded_tabs(monkeypatch, tmp_path: Path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("KYLO_READ_ONLY", "1")
+
+    from services.audit.paths import business_line_registry_path, row_registry_path
+    from services.audit.tick import run_audit_tick
+
+    instance_id = "JGD_2026"
+    sid = "spreadsheet-lowercase-id"
+    kept_row = _record(sid=sid, tab="TRANSACTIONS", row0=1)
+    removed_row = _record(sid=sid, tab="TRANSACTIONS", row0=2)
+    unloaded_bank_row = _record(sid=sid, tab="BANK", row0=3)
+    previous_rows = {
+        kept_row.row_key: kept_row,
+        removed_row.row_key: removed_row,
+        unloaded_bank_row.row_key: unloaded_bank_row,
+    }
+    save_row_registry(row_registry_path(instance_id), previous_rows)
+    save_row_registry(
+        business_line_registry_path(instance_id),
+        {row.business_line_uid: row for row in previous_rows.values()},
+    )
+
+    def fake_load_all_intake(cfg, companies):
+        return [kept_row.to_dict()], {f"{sid}|transactions": "csv loaded"}
+
+    monkeypatch.setattr("services.audit.tick.load_all_intake", fake_load_all_intake)
+    monkeypatch.setattr("services.audit.tick.emit_audit_alerts", lambda *args, **kwargs: 0)
+
+    summary = run_audit_tick({}, ["JGD"], instance_id=instance_id)
+
+    assert summary["events"] == 1
+    saved = load_row_registry(row_registry_path(instance_id))
+    assert kept_row.row_key in saved
+    assert removed_row.row_key not in saved
+    assert unloaded_bank_row.row_key in saved
