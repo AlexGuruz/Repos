@@ -1,6 +1,7 @@
 """Tests for brand exclusion parsing in projection script."""
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 
@@ -156,3 +157,55 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_main_dedupes_duplicate_order_items_in_projection(monkeypatch, tmp_path):
+    sold_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    node = {
+        "objectId": "dup-order-line",
+        "SoldAt": sold_at,
+        "GrossPrice": 10_000,
+        "COG": 5_000,
+        "Product": {
+            "Name": "Acme Gummies",
+            "Brand": {"Name": "Acme"},
+            "objectId": "product-1",
+        },
+        "ProductCategory": {"Name": "Edible"},
+    }
+    out_path = tmp_path / "projection.md"
+
+    monkeypatch.setattr(
+        _mod,
+        "_fetch_chunk",
+        lambda **_kwargs: ([dict(node), dict(node)], _mod.ORDER_ITEMS_QUERY),
+    )
+    monkeypatch.setattr(
+        _mod,
+        "validate_and_normalize",
+        lambda **_kwargs: {"ok": True, "report_path": str(tmp_path / "validation.json")},
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--chunk-days",
+            "1",
+            "--out",
+            str(out_path),
+            "--exclude-brands",
+            "",
+            "--allocation-mode",
+            "gross-share",
+            "--no-layer2",
+        ],
+    )
+
+    assert _mod.main() == 0
+
+    rendered = out_path.read_text(encoding="utf-8")
+    assert "**Unique order lines counted:** 1" in rendered
+    assert "**Sales in focus categories (pool-eligible):** $100.00 gross" in rendered
