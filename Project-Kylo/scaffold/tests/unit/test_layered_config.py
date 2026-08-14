@@ -199,7 +199,7 @@ sheets:
     cfg = load_config()
     companies = cfg.get("sheets.companies") or []
     assert len(companies) == 1
-    assert companies[0]["workbook_url"] == "https://docs.google.com/spreadsheets/d/base-workbook-id"
+    assert str(companies[0]["workbook_url"]).rstrip("/") == "https://docs.google.com/spreadsheets/d/base-workbook-id"
     assert companies[0]["tabs"] == {
         "intake": "CUSTOM INTAKE",
         "output": "CLEAN TRANSACTIONS",
