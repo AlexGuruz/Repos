@@ -9,7 +9,7 @@ Single map of **repos, services, ports, tunnels, and paths** for this workspace.
 | `C:\Repos\Repos` | Common clone location (nested `Repos` folder) |
 | `E:\Repos` | Alternate drive; same layout when used |
 | `C:\Repos` | Possible flat clone root |
-| `C:\Project-Kylo` | Standalone Kylo checkout (may duplicate `REPOS_ROOT\Project-Kylo`) |
+| `C:\Project-Kylo` | Standalone Kylo checkout (may duplicate `REPOS_ROOT\products\project-kylo`) |
 | `C:\worker` | Autonomous **worker** machine stack (not inside monorepo) |
 
 If instructions say `REPOS_ROOT\…`, substitute your actual clone path.
@@ -21,14 +21,14 @@ If instructions say `REPOS_ROOT\…`, substitute your actual clone path.
 | System | Location | Ports / access | Primary docs |
 |--------|----------|----------------|--------------|
 | **Repos monorepo** | `REPOS_ROOT` | — | This file |
-| **Project-Kylo** | `REPOS_ROOT\Project-Kylo` or `C:\Project-Kylo` | Postgres/Kafka via Docker (see Kylo README) | `Project-Kylo\README.md`, `Project-Kylo\docs\README.md` |
-| **COG allocation** | `REPOS_ROOT\cog-allocation-system` | — | `cog-allocation-system\docs\PIPELINE_AND_SHEETS.md` |
+| **Project-Kylo** | `REPOS_ROOT\products\project-kylo` or `C:\Project-Kylo` | Postgres/Kafka via Docker (see Kylo README) | `Project-Kylo\README.md`, `Project-Kylo\docs\README.md` |
+| **COG allocation** | `REPOS_ROOT\products\cog-allocation` | — | `cog-allocation-system\docs\PIPELINE_AND_SHEETS.md` |
 | **COG (worker copy)** | `C:\worker\cog-allocation-system` | — | Same pipeline docs; optional duplicate for worker-side automation |
-| **Growflow (stub)** | `REPOS_ROOT\Growflow` | — | `Growflow\README.md`, `Growflow\docs\` |
-| **PettyCash** | `REPOS_ROOT\PettyCash_Migration_Package\PettyCash` | — | Package READMEs |
-| **ai-lab** | `REPOS_ROOT\ai-lab` | — | `ai-lab\docs\`, `ai-lab\email_sorter\` |
+| **Growflow** | `REPOS_ROOT\products\growflow` (→ `products\growflow` after senior migrate) | Retail API **:8791** | `Growflow\README.md`, `Growflow\docs\`, [AI_LAB_KYLO_GROWFLOW_OVERVIEW.md](AI_LAB_KYLO_GROWFLOW_OVERVIEW.md) |
+| **PettyCash** | `REPOS_ROOT\archive\pettycash-migration\PettyCash` | — | Package READMEs |
+| **ai-lab** | `REPOS_ROOT\products\ai-lab` | — | `ai-lab\docs\`, `ai-lab\email_sorter\` |
 | **Worker stack** | `C:\worker` | **8765** Worker Assistant, **5678** n8n, **11434** Ollama, **22** SSH | § [Worker PC stack](#worker-pc-stack) below; on-box: `C:\worker\docs\MAIN_RIG_ORCHESTRATION.md` |
-| **Activepieces** | `REPOS_ROOT\activepieces` | (app-defined when run) | Upstream README; § [Glossary](#glossary-activepieces-vs-cworker) |
+| **Activepieces** | `REPOS_ROOT\vendor\activepieces` | (app-defined when run) | Upstream README; § [Glossary](#glossary-activepieces-vs-cworker) |
 
 ---
 
@@ -146,10 +146,10 @@ Everything below lives under **`REPOS_ROOT`** unless noted.
 |--------|------|---------|
 | **Project-Kylo** | App | Petty cash, BANK, transactions, watchers, Sheets, Postgres, Kafka/Redpanda, Docker. Maintenance-only. |
 | **cog-allocation-system** | App | Sales CSV → daily COG → Sheets; Drive watcher, pipeline scripts. |
-| **Growflow** | App (stub) | GrowFlow integration spec/config; no full API client in repo yet. |
+| **Growflow** | App | POS/retail intelligence, consignment, company BI, Retail API `:8791` (not a stub). |
 | **PettyCash_Migration_Package** | App | Petty cash sorter, Sheets, migration assets. |
 | **ai-lab** | App/tools | Email sorter, `gmail_portable`, `docs\`, tests, `brain\`. |
-| **Ai** | Vault | Obsidian: `Ai\Obsidian\Brain`. |
+| **Ai** | Vault | Obsidian: `internal\obsidian-brain\Obsidian\Brain`. |
 | **activepieces** | Upstream | Automation platform (partial clone). |
 | **awesome-n8n-templates** | Reference | n8n workflow JSON library. |
 | **BMAD-METHOD** | Framework | BMAD agents, tasks, checklists, expansion packs. |
@@ -170,7 +170,7 @@ Everything below lives under **`REPOS_ROOT`** unless noted.
 
 | Path | Note |
 |------|------|
-| `C:\Project-Kylo` | Full Kylo tree; align with `REPOS_ROOT\Project-Kylo` when both exist (same remote, different working copies). |
+| `C:\Project-Kylo` | Full Kylo tree; align with `REPOS_ROOT\products\project-kylo` when both exist (same remote, different working copies). |
 | `C:\worker\cog-allocation-system` | Second copy of COG tooling for worker-side jobs; keep behavior in sync with monorepo copy intentionally. |
 
 ---
@@ -200,10 +200,10 @@ Everything below lives under **`REPOS_ROOT`** unless noted.
 | Use | Where |
 |-----|--------|
 | COG / Sheets (device) | `D:\_config\google_service_account.json`, `%LOCALAPPDATA%\_config\`, or `cog-allocation-system/config/service_account.json` |
-| Kylo | `Project-Kylo/.secrets/service_account.json` |
-| ScriptHub do_not_delete | `Project-Kylo/tools/scripthub/do_not_delete/config/service_account.json` |
-| PettyCash | `PettyCash_Migration_Package/PettyCash/config/service_account.json` |
-| Kylo DB / env | `Project-Kylo/.env`, optional `config/dsn_map_local.json` |
+| Kylo | `products/project-kylo/.secrets/service_account.json` (or `E:/secrets/...`) |
+| ScriptHub do_not_delete | `products/project-kylo/tools/scripthub/do_not_delete/config/service_account.json` |
+| PettyCash | `archive/pettycash-migration/PettyCash/config/service_account.json` |
+| Kylo DB / env | `products/project-kylo/.env`, optional `config/dsn_map_local.json` |
 
 ### Known gaps / TODO
 
@@ -222,7 +222,7 @@ Everything below lives under **`REPOS_ROOT`** unless noted.
 | **Activepieces `worker` package** | Code under `activepieces/packages/server/worker/` — **job runner inside Activepieces**, not this PC. |
 | **Activepieces `ai` package** | `activepieces/packages/server/api/src/app/ai/` — provider UI for OpenAI, Google, Anthropic, etc. |
 | **Autonomous worker** | **`C:\worker`** — Ollama, Worker Assistant, n8n, supervisor; see § [Worker PC stack](#worker-pc-stack). |
-| **Kylo `.secrets`** | `Project-Kylo/.secrets/service_account.json` for Sheets. |
+| **Kylo `.secrets`** | `products/project-kylo/.secrets/service_account.json` for Sheets (never commit; prefer `E:/secrets`). |
 
 ---
 
@@ -258,15 +258,15 @@ git clone https://github.com/<user>/<repo>.git C:\Repos
 
 Post-clone:
 
-- **Obsidian vault:** `REPOS_ROOT\Ai\Obsidian\Brain`  
-- **Scripts:** `REPOS_ROOT\_scripts\install_obsidian_plugins.ps1`, `repo_obsidian_sync.ps1` if used  
+- **Obsidian vault:** `REPOS_ROOT\internal\obsidian-brain\Obsidian\Brain`  
+- **Scripts:** `REPOS_ROOT\tools\scripts\_scripts\install_obsidian_plugins.ps1`, `repo_obsidian_sync.ps1` if used  
 - **Secrets:** not in git — see [Not in Git](#not-in-git--setup-checklist)  
 - **Worker:** runtime usually stays **`C:\worker`**; `REPOS_ROOT\Worker` may be empty — sync strategy per machine  
 - **Path maps:** update `_scripts/repo_obsidian_map.json` if vault or `repos_root` differs (e.g. `C:` vs `E:`)  
 
 | Legacy path | After consolidation |
 |-------------|---------------------|
-| `E:\Ai\Obsidian\Brain` | `REPOS_ROOT\Ai\Obsidian\Brain` |
+| `E:\internal\obsidian-brain\Obsidian\Brain` | `REPOS_ROOT\internal\obsidian-brain\Obsidian\Brain` |
 | `E:\Worker` (optional) | `REPOS_ROOT\Worker` or parallel `C:\worker` |
 
 ---
@@ -278,7 +278,7 @@ Post-clone:
 | Kylo operations | `Project-Kylo/COMMAND_REFERENCE.md`, `Project-Kylo/MAINTENANCE.md` |
 | Kylo docs index | `Project-Kylo/docs/README.md` |
 | COG pipeline | `cog-allocation-system/docs/PIPELINE_AND_SHEETS.md` |
-| Email / ai-lab | `REPOS_ROOT\ai-lab\docs\` (runbooks, integration maps) |
+| Email / ai-lab | `REPOS_ROOT\products\ai-lab\docs\` (runbooks, integration maps) |
 | Workspace migration | `REPOS_ROOT/README_MIGRATION.md` |
 | On-worker copy-paste | `C:\worker\docs\MAIN_RIG_ORCHESTRATION.md` (mirrors tunnel section; keep in sync mentally with this file) |
 

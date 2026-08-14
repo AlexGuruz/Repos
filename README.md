@@ -1,10 +1,18 @@
 # Repos
 
-Monorepo parent: **Project-Kylo**, **cog-allocation-system**, **Growflow**, **ai-lab**, **Ai** (Obsidian), **activepieces**, templates, and supporting folders.
+Monorepo parent for Kylo, Growflow, COG, ai-lab, and supporting systems.
 
 ## Documentation
 
-**[docs/SYSTEMS_AND_REPOS.md](docs/SYSTEMS_AND_REPOS.md)** — unified map of every system, **worker node (`C:\worker`)**, **SSH tunnels**, ports, data paths, secrets checklist, and Git/Obsidian clone notes.
+**[docs/AI_LAB_KYLO_GROWFLOW_OVERVIEW.md](docs/AI_LAB_KYLO_GROWFLOW_OVERVIEW.md)** — plain-language overview of **AI Lab**, **Project Kylo**, and **Growflow**.
+
+**[docs/SYSTEMS_AND_REPOS.md](docs/SYSTEMS_AND_REPOS.md)** — unified ops map: worker (`C:\worker`), SSH tunnels, ports, secrets.
+
+**[docs/SENIOR_LAYOUT.md](docs/SENIOR_LAYOUT.md)** — target zone layout (`products/`, `internal/`, …).
+
+**[docs/REPO_PATH_MIGRATION.md](docs/REPO_PATH_MIGRATION.md)** — canonical old→new path map for humans, scripts, and Cursor agents.
+
+**[tools/migration/README.md](tools/migration/README.md)** — migration toolkit (path helpers, inventory, migrate, power-1 smoke).
 
 Index: [docs/README.md](docs/README.md).
 
@@ -14,4 +22,4 @@ Autonomous stack (Ollama, Worker Assistant, n8n) runs on the worker PC under **`
 
 ## Interview portfolio (quick start)
 
-Highlight on GitHub: **ai-lab** (orchestration + command center), **Project-Kylo** (event-driven finance ops), **cog-allocation-system**, and **geomapper** app folder. Runbooks and demo commands: [docs/INTERVIEW_DEMO_CHECKLIST.md](docs/INTERVIEW_DEMO_CHECKLIST.md).
+Highlight on GitHub: `products/ai-lab` (orchestration + command center), `products/project-kylo` (event-driven finance ops), `products/cog-allocation`, and `products/gigatt-geomapper`. Runbooks and demo commands: [docs/INTERVIEW_DEMO_CHECKLIST.md](docs/INTERVIEW_DEMO_CHECKLIST.md).

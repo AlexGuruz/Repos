@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "notes": "Main-rig canonical paths only (v1). repo_id must match primary_repo on components. See CATALOG_SSOT_IMPLEMENTATION_PLAN.md §8.4.",
+  "repos": [
+    {
+      "repo_id": "ai-lab",
+      "path": "E:/Repos/products/ai-lab",
+      "repo_class_ref": "tooling_internal"
+    },
+    {
+      "repo_id": "ai-lab-governance",
+      "path": "E:/Repos/products/ai-lab-governance",
+      "repo_class_ref": "tooling_internal"
+    },
+    {
+      "repo_id": "command-center",
+      "path": "E:/Repos/products/ai-lab/command-center/command-center",
+      "repo_class_ref": "tooling_internal"
+    },
+    {
+      "repo_id": "geomapper",
+      "path": "E:/Repos/products/gigatt-geomapper",
+      "repo_class_ref": "tooling_internal"
+    },
+    {
+      "repo_id": "worker",
+      "path": "E:/Repos/tools/scripts/root-scripts/worker_ai",
+      "repo_class_ref": "tooling_internal"
+    },
+    {
+      "repo_id": "lab-secrets",
+      "path": "E:/secrets",
+      "repo_class_ref": "config_secrets"
+    }
+  ]
+}

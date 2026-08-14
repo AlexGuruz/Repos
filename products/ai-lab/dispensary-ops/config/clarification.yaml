@@ -1,0 +1,148 @@
+# Dispensary Command Center — clarification & configuration
+# Blocking items must be resolved before production imports are enabled.
+# Last updated: 2026-07-02
+
+version: 1
+
+location:
+  default_location_id: default
+  timezone: America/Chicago
+  # store_name: ""  # REQUIRED
+
+sales_target:
+  monthly_gross_usd: 120000
+  # gross_definition: REQUIRED — one of: before_tax_after_returns | before_tax_before_returns | other
+  # returns_reduce_target: true | false
+  # discounts_reduce_target: true | false
+  max_payroll_pct_of_sales: 0.28
+  max_inventory_spend_pct_of_sales: 0.35
+  acceptable_purchasing_budget_while_rebuilding: null  # set USD cap when known
+
+project_kylo:
+  status: needs_clarification
+  postgres:
+    host: power-1
+    port: 5434
+    database: greg_kylo_global
+    read_only: true
+  export_path: null  # e.g. E:/data/kylo/exports
+  sync_mode_preference: file_export  # file_export | postgres_read | kafka (future)
+  open_questions:
+    - Where does Kylo write cleaned budget output (sheet tab names vs PG views)?
+    - Exact flag enum values for uncertain/suspicious/duplicate/manual?
+    - Does Kylo expose confidence scores on cleaned transactions?
+    - How are source Google Sheet row IDs tracked (txn UID field name)?
+    - Sync cadence: watcher 240s vs scheduled export?
+    - Which logic stays in Kylo vs command center (no re-posting)?
+
+google_sheets:
+  status: needs_clarification
+  credentials_env: GOOGLE_APPLICATION_CREDENTIALS
+  sources: []
+  # Example entry (uncomment and fill):
+  # - id: budget_main
+  #   spreadsheet_id: ""
+  #   sheet_name: ""
+  #   source_type: budget
+  #   header_row: 1
+  open_questions:
+    - Spreadsheet IDs for budget, bank, cash, bills, schedule, payroll
+    - Tab names and header row numbers per tab
+    - Date and currency column formats
+    - Column mapping for supplier order dollar history
+    - Kylo-cleaned tab location (same workbook or separate)
+
+pos:
+  status: needs_clarification
+  assumed_system: GrowFlow POS
+  # store_id: ""
+  open_questions:
+    - Confirm POS system name and API/export access method
+    - Gross sales definition for $120K target (tax inclusive/exclusive)
+    - Discount and return handling in gross reporting
+    - Product/category ID mapping consistency with GrowFlow inventory
+
+growflow:
+  status: partial  # ai-lab already has exports + retail API proxy
+  retail_api_url: http://127.0.0.1:8791
+  repo_path: E:/Repos/products/growflow
+  open_questions:
+    - API auth method and rate limits for deliveries/inventory
+    - Delivery status field definitions
+    - Historical delivery completeness for 60-day pattern window
+    - Vendor/product ID canonical fields
+
+suppliers:
+  status: needs_clarification
+  contacts: []  # manually maintained
+  open_questions:
+    - Full supplier list with contact person, phone, email
+    - Preferred order method per supplier (text vs LeafLink vs email)
+    - Min order, delivery days, lead time, cutoff times
+    - Payment terms
+    - Approved products and max repeat order amounts per supplier
+
+leaflink:
+  status: research
+  automation_allowed: unknown
+  browser_automation_acceptable: false
+  initial_mode: draft_only
+  open_questions:
+    - API availability and account tier
+    - Terms of service for order automation
+    - Product mapping requirements
+    - Required order fields and approval process on portal
+
+taxes:
+  status: needs_clarification
+  all_estimates_labeled: true
+  rules: []
+  # Example:
+  # - tax_type: sales
+  #   rate: 0.08625
+  #   applies_to: taxable_gross
+  open_questions:
+    - Applicable tax types (sales, cannabis excise, payroll employer)
+    - Rates and filing/payment schedules
+    - Whether POS gross includes or excludes tax
+    - Required tax reserve percentage
+
+recurring_bills:
+  status: needs_clarification
+  variance_threshold_pct_default: 10
+  seed_from:
+    - config/bills.yaml
+    - kylo_cluster_detection
+  open_questions:
+    - Which bills repeat monthly with usual amounts and due dates
+    - Payment methods and approval rules per bill
+    - Which bills may later qualify for auto-approval
+
+payroll:
+  status: needs_clarification
+  pay_period: biweekly  # confirm
+  overtime_rules: {}
+  open_questions:
+    - Pay period start/end rules
+    - Hourly rates by role/employee
+    - Overtime, bonuses, tips, commissions handling
+    - Employer payroll tax assumptions
+    - Export/submission method after human review
+
+automation_defaults:
+  phase_1_mode: manual
+  workflows:
+    supplier_ordering: manual
+    supplier_texting: manual
+    leaflink: manual
+    bills: manual
+    payroll: manual
+    tax_projections: manual
+    reconciliation: manual
+    sales_recovery: assisted
+    inventory_warnings: assisted
+
+approval_thresholds:
+  owner_approval_order_usd: 10000
+  owner_approval_bill_variance_pct: 15
+  reconciliation_discrepancy_usd: 500

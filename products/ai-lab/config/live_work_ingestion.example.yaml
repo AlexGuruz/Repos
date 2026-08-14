@@ -1,0 +1,27 @@
+repo_activity:
+  enabled: true
+  repo_roots:
+    - E:/Repos/products/ai-lab
+  scan_depth: 2
+  include_file_samples: true
+  max_file_samples: 20
+  include_file_activity: true
+  max_file_timestamp_samples: 25
+  include_commit_subjects: true
+  max_commit_subjects: 20
+  include_commit_timestamps: true
+  max_commit_timestamps: 20
+  since_hours: 24
+
+github_activity:
+  enabled: true
+  repos:
+    - owner: YOUR_ORG_OR_USER
+      name: ai-lab
+      local_path: E:/Repos/products/ai-lab
+  include_prs: true
+  include_issues: true
+  include_closed_recent: false
+  since_days: 14
+  stale_pr_days: 7
+  max_items_per_repo: 50
