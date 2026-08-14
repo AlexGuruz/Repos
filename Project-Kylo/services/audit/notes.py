@@ -37,7 +37,7 @@ def write_audit_notes(
     by_sid: Dict[str, List[Tuple[str, ChangeEvent]]] = {}
     seen: Set[str] = set()
     for ev in events:
-        if ev.event == "ROW_REMOVED":
+        if ev.event in {"ROW_REMOVED", "ROW_SHIFTED"}:
             continue
         sig = f"{ev.source_spreadsheet_id}|{ev.sheet_row}|{ev.event}|{ev.changed_field}"
         if sig in seen:

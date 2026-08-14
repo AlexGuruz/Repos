@@ -154,3 +154,54 @@ posting:
     cfg = load_config()
     assert cfg.get("posting.sheets.apply") is False
 
+
+def test_client_workspace_company_overlay_preserves_base_fields(monkeypatch, tmp_path: Path):
+    cfg_dir = tmp_path / "config"
+    _write(
+        cfg_dir / "global.yaml",
+        """
+version: 1
+runtime:
+  dry_run: true
+  log_level: INFO
+  timezone: America/Chicago
+google:
+  service_account_json_path: C:\\\\secrets\\\\sa.json
+database:
+  global_dsn: postgresql://postgres:kylo@localhost:5433/kylo_global
+  per_company: false
+  company_dsns: {}
+sheets:
+  companies:
+    - key: JGD
+      workbook_url: https://docs.google.com/spreadsheets/d/base-workbook-id
+      tabs:
+        intake: PETTY CASH
+        output: CLEAN TRANSACTIONS
+""".lstrip(),
+    )
+    _write(
+        tmp_path / "clients" / "jgd_2025" / "config.yaml",
+        """
+sheets:
+  companies:
+    - key: JGD
+      tabs:
+        intake: CUSTOM INTAKE
+""".lstrip(),
+    )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("KYLO_INSTANCE_ID", "JGD_2025")
+
+    from services.common.config_loader import load_config
+
+    cfg = load_config()
+    companies = cfg.get("sheets.companies") or []
+    assert len(companies) == 1
+    assert companies[0]["workbook_url"] == "https://docs.google.com/spreadsheets/d/base-workbook-id"
+    assert companies[0]["tabs"] == {
+        "intake": "CUSTOM INTAKE",
+        "output": "CLEAN TRANSACTIONS",
+    }
+

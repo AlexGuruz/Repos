@@ -159,7 +159,7 @@ def apply_audit_highlights(
 
     by_sid: Dict[str, Dict[Tuple[str, int], Dict[str, float]]] = {}
     for ev in events:
-        if ev.event == "ROW_REMOVED":
+        if ev.event in {"ROW_REMOVED", "ROW_SHIFTED"}:
             continue
         sid = ev.source_spreadsheet_id
         row0 = ev.sheet_row - 1
