@@ -354,10 +354,8 @@ export default function ChatPanel() {
     await streamChatFromUser(text)
   }
 
-  // Inject approval cards for pending approvals (retail capital shows inline on Capital tab).
-  const pendingApprovals = events.filter(
-    e => e.type === 'approval' && e.action !== 'retail_capital_scenario',
-  )
+  // Keep every pending approval visible in chat; the Retail tab may be unavailable.
+  const pendingApprovals = events.filter(e => e.type === 'approval')
 
   return (
     <div className="flex flex-col flex-1 min-h-0">

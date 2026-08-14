@@ -1549,9 +1549,11 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         return {
             "target_sid": target_sid,
+            "ok": not bool(failed_ranges),
             "cells_written": int(cells_written),
             "rows_marked_true": int(rows_marked_true),
             "fills_applied": int(fills_applied),
+            "failed_ranges": sorted(failed_ranges),
             "tabs": sorted(tabs_touched),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
@@ -1566,6 +1568,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
     skipped_rows_all: List[Tuple[str, str, int, str]] = []
+    failed_ranges_all: List[str] = []
 
     for target_sid, txns_for_target in txns_by_target_sid.items():
         result = _process_target(target_sid, txns_for_target, ignore_posted=ignore_posted_flag)
@@ -1576,6 +1579,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
         skipped_rows_all.extend(list(result.get("skipped_rows", [])))
+        failed_ranges_all.extend(list(result.get("failed_ranges", [])))
 
     # Basic diagnostics for skipped items (printed once per run)
     if skipped_tab_not_found_all:
@@ -1630,9 +1634,11 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
     return {
         "company": company,
+        "ok": not bool(failed_ranges_all),
         "cells_written": int(total_cells_written),
         "rows_marked_true": int(total_rows_marked_true),
         "fills_applied": int(total_fills_applied),
+        "failed_ranges": sorted(set(failed_ranges_all)),
         "tabs": sorted(tabs_all),
         "write_plan_path": wp_out,
         "write_plan_count": int(len(write_plan)),

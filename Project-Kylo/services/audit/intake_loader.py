@@ -8,6 +8,14 @@ from services.intake.csv_processor import PettyCashCSVProcessor
 from services.sheets.poster import _extract_spreadsheet_id
 
 
+class IntakeLoadIncomplete(RuntimeError):
+    """Raised when one or more configured intake tabs could not be loaded."""
+
+    def __init__(self, failures: List[str]):
+        self.failures = failures
+        super().__init__("incomplete intake load: " + "; ".join(failures))
+
+
 def _active_years(cfg) -> Optional[List[int]]:
     import os
 
@@ -86,6 +94,7 @@ def load_intake_for_company(
 
     txns: List[dict] = []
     csv_by_key: Dict[str, str] = {}
+    failures: List[str] = []
     for url in intake_urls_for_company(cfg, company):
         sid = _extract_spreadsheet_id(str(url))
         if not sid:
@@ -108,8 +117,10 @@ def load_intake_for_company(
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                     txns.append(it)
-            except Exception:
-                continue
+            except Exception as exc:
+                failures.append(f"{company.strip().upper()} {sid} {tab}: {exc}")
+    if failures:
+        raise IntakeLoadIncomplete(failures)
     return txns, csv_by_key
 
 
@@ -128,4 +139,4 @@ def load_all_intake(
     return all_txns, all_csv
 
 
-__all__ = ["intake_urls_for_company", "load_all_intake", "load_intake_for_company"]
+__all__ = ["IntakeLoadIncomplete", "intake_urls_for_company", "load_all_intake", "load_intake_for_company"]
