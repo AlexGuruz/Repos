@@ -20,19 +20,21 @@ def _extract_spreadsheet_id(value: str | None) -> str:
 def _cfg_get(cfg: Any | None, dotted_key: str) -> Any:
     if cfg is None:
         return None
+    if isinstance(cfg, dict):
+        cur: Any = cfg
+        for part in dotted_key.split("."):
+            if isinstance(cur, dict) and part in cur:
+                cur = cur[part]
+            else:
+                return None
+        return cur
     getter = getattr(cfg, "get", None)
     if callable(getter):
         try:
             return getter(dotted_key)
         except Exception:
             return None
-    cur: Any = cfg
-    for part in dotted_key.split("."):
-        if isinstance(cur, dict) and part in cur:
-            cur = cur[part]
-        else:
-            return None
-    return cur
+    return None
 
 
 def get_rules_management_spreadsheet_id(cfg: Any | None = None) -> str:
