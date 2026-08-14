@@ -210,4 +210,5 @@ export const api = {
     post(`/api/retail/capital/scenario/${encodeURIComponent(approvalId)}/deny`, {}, { timeoutMs: 10000 }),
   retailConsignment: () => get('/api/retail/consignment'),
   retailReconciliation: () => get('/api/retail/reconciliation'),
+  retailProjection: () => get('/api/retail/projection'),
 }

@@ -103,3 +103,10 @@ async def retail_reconciliation():
     payload = _unavailable("reconciliation")
     payload["rows"] = []
     return payload
+
+
+@router.get("/projection")
+async def retail_projection():
+    payload = _unavailable("projection")
+    payload["projection"] = None
+    return payload
