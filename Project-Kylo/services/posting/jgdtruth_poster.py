@@ -790,8 +790,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return str(name)
 
         # All rule-matched transactions (posted + unposted) for full target-cell totals.
-        # Last tuple field: for_marking — True only for rows that still need posted/notes updates.
-        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool]] = []
+        # for_marking is True only for rows that still need posted/notes updates.
+        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool, str, str]] = []
         # NOTE: We store the resolved target A1 range per source row so we only mark
         # rows as posted when their target cell is confirmed written (or already correct).
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
@@ -930,6 +930,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     txn_uid,
                     source_sid,
                     not is_posted,
+                    str(dt or ""),
+                    str(src or ""),
                 )
             )
 
@@ -949,7 +951,24 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # Resolve writes to exact A1 cells
         data: List[Dict[str, object]] = []
-        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _mark) in matched_writes})
+        unique_tabs = sorted(
+            {
+                tab
+                for (
+                    tab,
+                    _header,
+                    _date,
+                    _amt,
+                    _src_tab,
+                    _row0,
+                    _txn,
+                    _sid,
+                    _mark,
+                    _posted_date,
+                    _desc,
+                ) in matched_writes
+            }
+        )
         headers_map = _batch_read_headers(service, target_sid, unique_tabs, header_row)
         cell_totals: Dict[str, int] = {}
         cell_txns: Dict[str, Set[str]] = defaultdict(set)
@@ -1031,7 +1050,19 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return actual
             return static_row
 
-        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid, for_marking) in matched_writes:
+        for (
+            tab,
+            header,
+            date_key,
+            amount_cents,
+            src_tab,
+            row0,
+            txn_uid,
+            source_sid,
+            for_marking,
+            posted_date,
+            description,
+        ) in matched_writes:
             headers = headers_map.get(tab) or []
             norm = [str(h).strip().lower() for h in headers]
             wanted = (header or "").strip().lower()
@@ -1075,8 +1106,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                             source_sid=str(source_sid or ""),
                             source_tab=str(src_tab or "TRANSACTIONS"),
                             company_id=company_upper,
-                            posted_date=str(dt or ""),
-                            description=str(src or ""),
+                            posted_date=posted_date,
+                            description=description,
                             amount_cents=amount_cents,
                             instance_id=instance_id,
                         )
@@ -1100,8 +1131,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     "source_tab": src_tab,
                     "row0": row0,
                     "company_id": company_upper,
-                    "posted_date": str(dt or ""),
-                    "description": str(src or ""),
+                    "posted_date": posted_date,
+                    "description": description,
                     "amount_cents": amount_cents,
                     "flagged": flagged,
                 }
