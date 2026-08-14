@@ -81,7 +81,37 @@ def diff_registries(
     before_keys = set(before.keys())
     after_keys = set(after.keys())
 
+    def _stable_identity(record: RowRecord) -> str:
+        if record.business_line_uid:
+            return f"bl:{record.business_line_uid}"
+        if record.content_fp:
+            return f"fp:{record.content_fp}"
+        return ""
+
+    def _unique_identity_map(registry: Dict[str, RowRecord]) -> Dict[str, Tuple[str, RowRecord]]:
+        grouped: Dict[str, List[Tuple[str, RowRecord]]] = {}
+        for key, record in registry.items():
+            ident = _stable_identity(record)
+            if ident:
+                grouped.setdefault(ident, []).append((key, record))
+        return {ident: rows[0] for ident, rows in grouped.items() if len(rows) == 1}
+
+    before_identity = _unique_identity_map(before)
+    after_identity = _unique_identity_map(after)
+    shifted_pairs: List[Tuple[str, str, RowRecord]] = []
+    for ident, (old_key, _old_record) in before_identity.items():
+        new = after_identity.get(ident)
+        if not new:
+            continue
+        new_key, new_record = new
+        if old_key != new_key:
+            shifted_pairs.append((old_key, new_key, new_record))
+    shifted_before_keys = {old_key for old_key, _new_key, _record in shifted_pairs}
+    shifted_after_keys = {new_key for _old_key, new_key, _record in shifted_pairs}
+
     for rk in sorted(after_keys - before_keys):
+        if rk in shifted_after_keys:
+            continue
         r = after[rk]
         anomalies: List[str] = ["ROW_INSERTED"]
         if r.posted_flag:
@@ -111,6 +141,8 @@ def diff_registries(
         )
 
     for rk in sorted(before_keys - after_keys):
+        if rk in shifted_before_keys:
+            continue
         r = before[rk]
         events.append(
             ChangeEvent(
@@ -133,6 +165,15 @@ def diff_registries(
     for rk in sorted(before_keys & after_keys):
         b = before[rk]
         a = after[rk]
+        before_ident = _stable_identity(b)
+        after_ident = _stable_identity(a)
+        if (
+            before_ident
+            and after_ident
+            and before_ident != after_ident
+            and (before_ident in after_identity or after_ident in before_identity)
+        ):
+            continue
         base = dict(
             row_key=rk,
             source_spreadsheet_id=a.source_spreadsheet_id,
@@ -207,32 +248,27 @@ def diff_registries(
                 )
             )
 
-    before_fp: Dict[str, str] = {v.content_fp: k for k, v in before.items() if v.content_fp}
-    after_fp: Dict[str, str] = {v.content_fp: k for k, v in after.items() if v.content_fp}
-    for fp, new_key in after_fp.items():
-        old_key = before_fp.get(fp)
-        if old_key and old_key != new_key and new_key not in before_keys:
-            continue
-        if old_key and old_key != new_key and new_key in before_keys:
-            r = after[new_key]
-            events.append(
-                ChangeEvent(
-                    ts=ts,
-                    event="ROW_SHIFTED",
-                    row_key=new_key,
-                    source_spreadsheet_id=r.source_spreadsheet_id,
-                    source_tab=r.source_tab,
-                    sheet_row=sheet_row_1based(r.row_index_0based),
-                    company_id=r.company_id,
-                    changed_field="position",
-                    before=old_key.split("|")[-1],
-                    after=str(r.row_index_0based),
-                    anomalies=["CONTENT_SHIFTED"],
-                    posted_date=r.posted_date,
-                    description=r.description,
-                    amount_cents=r.amount_cents,
-                )
+    for old_key, new_key, r in shifted_pairs:
+        events.append(
+            ChangeEvent(
+                ts=ts,
+                event="ROW_SHIFTED",
+                row_key=new_key,
+                source_spreadsheet_id=r.source_spreadsheet_id,
+                source_tab=r.source_tab,
+                sheet_row=sheet_row_1based(r.row_index_0based),
+                company_id=r.company_id,
+                changed_field="position",
+                before=old_key.split("|")[-1],
+                after=str(r.row_index_0based),
+                anomalies=["CONTENT_SHIFTED"],
+                posted_date=r.posted_date,
+                description=r.description,
+                amount_cents=r.amount_cents,
+                txn_uid=r.txn_uid,
+                business_line_uid=r.business_line_uid,
             )
+        )
 
     inversions = detect_date_inversions(list(after.values()))
     for row_key, sheet_row, prev_d, cur_d in inversions:

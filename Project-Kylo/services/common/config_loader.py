@@ -97,14 +97,16 @@ def _merge_sheets_companies(base: Any, overlay: Any) -> Any:
     for it in base:
         if isinstance(it, dict) and it.get("key"):
             k = str(it["key"]).strip().upper()
-            by_key[k] = it
+            by_key[k] = dict(it)
             order.append(k)
     for it in overlay:
         if isinstance(it, dict) and it.get("key"):
             k = str(it["key"]).strip().upper()
             if k not in by_key:
                 order.append(k)
-            by_key[k] = it
+                by_key[k] = dict(it)
+            else:
+                by_key[k] = _deep_merge(by_key[k], it)
     return [by_key[k] for k in order]
 
 
