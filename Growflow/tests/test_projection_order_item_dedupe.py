@@ -30,7 +30,7 @@ def _order_line() -> dict:
             "Name": "Test Flower",
             "Brand": {"Name": "Test Brand"},
         },
-        "ProductCategory": {"Name": "Flower"},
+        "ProductCategory": {"Name": "Preroll"},
     }
 
 
