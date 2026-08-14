@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import os
+import json
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from services.audit.alerts import emit_audit_alerts
 from services.audit.highlights import apply_audit_highlights
@@ -15,6 +17,7 @@ from services.audit.paths import (
     audit_jsonl_path,
     audit_log_path,
     business_line_registry_path,
+    emitted_event_state_path,
     revision_state_path,
     row_registry_path,
 )
@@ -64,6 +67,73 @@ def _dedupe_events(events: List[ChangeEvent]) -> List[ChangeEvent]:
         seen.add(sig)
         out.append(ev)
     return out
+
+
+def _event_signature(ev: ChangeEvent) -> str:
+    material: Tuple[object, ...] = (
+        ev.source_spreadsheet_id,
+        ev.source_tab,
+        int(ev.sheet_row or 0),
+        ev.row_key,
+        ev.event,
+        ev.changed_field,
+        ev.before,
+        ev.after,
+        tuple(ev.anomalies or []),
+        ev.posted_date,
+        ev.description,
+        int(ev.amount_cents or 0),
+        ev.txn_uid,
+        ev.business_line_uid,
+    )
+    payload = json.dumps(material, ensure_ascii=True, separators=(",", ":"), sort_keys=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _load_emitted_signatures(path: Path) -> Set[str]:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            values = raw.get("signatures") or []
+        elif isinstance(raw, list):
+            values = raw
+        else:
+            values = []
+        return {str(v) for v in values if str(v).strip()}
+    except Exception:
+        return set()
+
+
+def _save_emitted_signatures(path: Path, signatures: Set[str]) -> None:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps({"signatures": sorted(signatures)}, indent=2, ensure_ascii=True) + "\n",
+            encoding="utf-8",
+        )
+    except Exception as e:
+        print(f"[AUDIT] WARN: could not persist emitted event signatures: {e}")
+
+
+def _filter_new_events(instance_id: str, events: List[ChangeEvent]) -> Tuple[List[ChangeEvent], Set[str], bool]:
+    """Suppress unchanged anomaly/findings so live sheet notes/highlights stay idempotent."""
+    if not events:
+        return [], set(), False
+    path = emitted_event_state_path(instance_id)
+    emitted = _load_emitted_signatures(path)
+    next_emitted = set(emitted)
+    out: List[ChangeEvent] = []
+    suppressed = 0
+    for ev in events:
+        sig = _event_signature(ev)
+        if sig in emitted:
+            suppressed += 1
+            continue
+        next_emitted.add(sig)
+        out.append(ev)
+    if suppressed:
+        print(f"[AUDIT] Suppressed {suppressed} previously emitted audit event(s)")
+    return out, next_emitted, next_emitted != emitted
 
 
 def audit_enabled(cfg) -> bool:
@@ -166,7 +236,7 @@ def run_audit_tick(
             )
         )
 
-    events = _dedupe_events(events)
+    events, emitted_signatures, emitted_signatures_changed = _filter_new_events(instance_id, _dedupe_events(events))
 
     merged = merge_registry(previous, current, ts=ts)
     merged_bl = merge_business_line_registry(previous_bl, current_bl, ts=ts)
@@ -228,6 +298,9 @@ def run_audit_tick(
                     print(f"[AUDIT] WARN: notes failed: {e}")
     elif events and (write_notes or apply_hl) and _sheets_writes_blocked():
         print("[AUDIT] Skipping sheet highlights/notes (dry-run or read-only)")
+
+    if emitted_signatures_changed:
+        _save_emitted_signatures(emitted_event_state_path(instance_id), emitted_signatures)
 
     print(
         f"[AUDIT] tick complete rows={len(current)} events={len(events)} "

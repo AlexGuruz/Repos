@@ -25,6 +25,10 @@ def revision_state_path(instance_id: str) -> Path:
     return instance_state_dir(instance_id) / "audit_revision_state.json"
 
 
+def emitted_event_state_path(instance_id: str) -> Path:
+    return instance_state_dir(instance_id) / "audit_emitted_events.json"
+
+
 def snapshots_root(instance_id: str) -> Path:
     return instance_root(instance_id) / "snapshots"
 
@@ -37,6 +41,7 @@ __all__ = [
     "audit_jsonl_path",
     "audit_log_path",
     "business_line_registry_path",
+    "emitted_event_state_path",
     "latest_snapshot_link",
     "revision_state_path",
     "row_registry_path",
