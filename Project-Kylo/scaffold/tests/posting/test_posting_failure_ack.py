@@ -113,6 +113,78 @@ def test_posting_reports_failed_target_range(monkeypatch, tmp_path):
     assert result["rows_marked_true"] == 0
 
 
+def test_posting_audit_metadata_uses_each_transaction(monkeypatch, tmp_path):
+    from services.posting import jgdtruth_poster as poster
+    from services.rules.jgdtruth_provider import Rule
+    from services.intake import csv_processor
+
+    cfg = _Cfg()
+    flagged_calls = []
+    recorded_posts = []
+
+    monkeypatch.setenv("KYLO_STATE_PATH", str(tmp_path / "posting_state.json"))
+    monkeypatch.setenv("KYLO_INSTANCE_ID", "JGD_2026")
+    monkeypatch.delenv("KYLO_READ_ONLY", raising=False)
+    monkeypatch.delenv("KYLO_SHEETS_DRY_RUN", raising=False)
+    monkeypatch.setattr(poster, "load_config", lambda: cfg)
+    monkeypatch.setattr(csv_processor, "load_config", lambda: cfg)
+    monkeypatch.setattr(poster, "_get_service", lambda: _FakeService())
+    monkeypatch.setattr(
+        poster,
+        "fetch_rules_from_jgdtruth",
+        lambda company: {
+            "FIRST": Rule("FIRST", "TARGET", "TOTAL", True, "JGD"),
+            "SECOND": Rule("SECOND", "TARGET", "TOTAL", True, "JGD"),
+        },
+    )
+
+    def fake_download(_sid, _service_account, sheet_name_override=None):
+        header = "Date,Company,Description,Amount,Other,Processed,Notes\n"
+        if str(sheet_name_override).upper() == "BANK":
+            return header
+        return (
+            header
+            + "2026-01-01,JGD,FIRST,10.00,,FALSE,\n"
+            + "2026-01-02,JGD,SECOND,20.00,,FALSE,\n"
+        )
+
+    def fake_is_flagged(**kwargs):
+        flagged_calls.append(kwargs)
+        return kwargs["description"] == "FIRST"
+
+    def fake_record_post(**kwargs):
+        recorded_posts.append(kwargs)
+
+    monkeypatch.setattr(poster, "download_petty_cash_csv", fake_download)
+    monkeypatch.setattr(poster, "is_txn_flagged", fake_is_flagged)
+    monkeypatch.setattr(poster, "record_successful_post", fake_record_post)
+    monkeypatch.setattr(poster, "apply_flagged_target_highlights", lambda *args, **kwargs: None)
+
+    def fake_execute(_req, policy=None, label=""):
+        if label == "target:tabs_meta":
+            return {"sheets": [{"properties": {"sheetId": 1, "title": "TARGET"}}]}
+        if label == "batchGet:headers":
+            return {"valueRanges": [{"range": "TARGET!1:1", "values": [["Date", "TOTAL"]]}]}
+        if label == "target:date_col_read":
+            return {"values": [["1/1/26"], ["1/2/26"]]}
+        return {}
+
+    monkeypatch.setattr(poster, "google_api_execute", fake_execute)
+
+    result = poster.run("JGD")
+
+    assert result["error"] is False
+    assert result["rows_marked_true"] == 2
+    assert [(c["posted_date"], c["description"]) for c in flagged_calls] == [
+        ("2026-01-01", "FIRST"),
+        ("2026-01-02", "SECOND"),
+    ]
+    assert [(p["posted_date"], p["description"], p["flagged"]) for p in recorded_posts] == [
+        ("2026-01-01", "FIRST", True),
+        ("2026-01-02", "SECOND", False),
+    ]
+
+
 def test_watcher_does_not_ack_failed_posting_summary(monkeypatch, tmp_path):
     from kylo import watcher_runtime
     from services.posting import jgdtruth_poster
