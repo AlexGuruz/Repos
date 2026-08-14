@@ -1553,6 +1553,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "rows_marked_true": int(rows_marked_true),
             "fills_applied": int(fills_applied),
             "tabs": sorted(tabs_touched),
+            "failed_ranges": sorted(failed_ranges),
+            "failed_ranges_count": int(len(failed_ranges)),
+            "partial_failure": bool(failed_ranges),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
             "skipped_rows": skipped_rows,
@@ -1563,6 +1566,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     total_rows_marked_true = 0
     total_fills_applied = 0
     tabs_all: Set[str] = set()
+    failed_ranges_all: Set[str] = set()
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
     skipped_rows_all: List[Tuple[str, str, int, str]] = []
@@ -1573,6 +1577,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         total_rows_marked_true += int(result.get("rows_marked_true", 0))
         total_fills_applied += int(result.get("fills_applied", 0))
         tabs_all |= set(result.get("tabs", []))
+        failed_ranges_all |= {str(r) for r in (result.get("failed_ranges") or []) if str(r)}
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
         skipped_rows_all.extend(list(result.get("skipped_rows", [])))
@@ -1638,6 +1643,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "write_plan_count": int(len(write_plan)),
         "postable_source_rows_by_tab": postable_rows_counts,
         "target_writes_by_source_tab": write_counts_by_tab,
+        "failed_ranges": sorted(failed_ranges_all),
+        "failed_ranges_count": int(len(failed_ranges_all)),
+        "partial_failure": bool(failed_ranges_all),
     }
 
 
