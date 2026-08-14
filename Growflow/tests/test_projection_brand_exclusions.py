@@ -213,3 +213,30 @@ def test_fetch_chunk_falls_back_when_brand_and_package_fields_missing(monkeypatc
         _mod.ORDER_ITEMS_QUERY_NO_PACKAGE,
         _mod.ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
     ]
+
+
+def test_unique_order_items_dedupes_only_in_window_rows():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("UTC")
+    seen = set()
+    rows = [
+        {"objectId": "same", "SoldAt": "2025-12-31T12:00:00.000Z", "GrossPrice": 100},
+        {"objectId": "same", "SoldAt": "2026-01-02T12:00:00.000Z", "GrossPrice": 200},
+        {"objectId": "same", "SoldAt": "2026-01-03T12:00:00.000Z", "GrossPrice": 300},
+        {"objectId": "other", "SoldAt": "2026-01-03T12:00:00.000Z", "GrossPrice": 400},
+    ]
+
+    kept = list(
+        _mod._iter_unique_order_items_in_local_window(
+            rows,
+            seen,
+            tz,
+            date(2026, 1, 1),
+            date(2026, 1, 31),
+        )
+    )
+
+    assert [r["GrossPrice"] for r in kept] == [200, 400]
+    assert seen == {"objectId:same", "objectId:other"}
