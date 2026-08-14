@@ -1406,6 +1406,28 @@ def biweek_local_range(
     return a, b
 
 
+def _unique_order_item_local_date(
+    node: dict[str, Any],
+    *,
+    seen: set[str],
+    store_tz,
+    report_start_local: date,
+    report_end_local: date,
+) -> date | None:
+    """Return the local sale date for a new in-window order line, else None."""
+    k = order_item_key(node)
+    if k in seen:
+        return None
+    sold = parse_iso_utc(node.get("SoldAt"))
+    if sold is None:
+        return None
+    ld = sold.astimezone(store_tz).date()
+    if ld < report_start_local or ld > report_end_local:
+        return None
+    seen.add(k)
+    return ld
+
+
 def _yaml_scalar(text: str, key: str) -> str | None:
     m = re.search(rf"^\s*{re.escape(key)}:\s*[\"']?([^\"'#\n]+)", text, re.MULTILINE)
     if not m:
@@ -1754,14 +1776,14 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
+            ld = _unique_order_item_local_date(
+                n,
+                seen=seen,
+                store_tz=tz,
+                report_start_local=report_start_local,
+                report_end_local=report_end_local,
+            )
+            if ld is None:
                 continue
             validation_rows.append(n)
 
