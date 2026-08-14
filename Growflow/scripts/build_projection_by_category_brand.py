@@ -29,7 +29,7 @@ Scenario knobs: `docs/GROWFLOW_PLANNER_SCENARIO_CONTROLS.md`.
 from __future__ import annotations
 
 import argparse
-from typing import Any
+from typing import Any, Iterator
 import csv
 import math
 import os
@@ -85,6 +85,28 @@ from lib.projection_layer2_recovery import (
     usable_cog_cents,
 )
 from lib.projection_sku_reorder import build_sku_pre_scale_buy
+
+
+def iter_unique_order_items_in_window(
+    raw: list[dict[str, Any]],
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> Iterator[tuple[dict[str, Any], date]]:
+    """Yield unique order lines whose SoldAt falls inside the report's local date window."""
+    for n in raw:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        yield n, ld
 
 
 def _load_latest_received_at_by_product_object_id(db_path: Path) -> dict[str, datetime]:
@@ -1753,16 +1775,7 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
+        for n, ld in iter_unique_order_items_in_window(raw, seen, tz, report_start_local, report_end_local):
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
