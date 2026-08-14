@@ -108,8 +108,8 @@ def load_intake_for_company(
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                     txns.append(it)
-            except Exception:
-                continue
+            except Exception as e:
+                raise RuntimeError(f"failed to load intake tab {key}: {e}") from e
     return txns, csv_by_key
 
 
