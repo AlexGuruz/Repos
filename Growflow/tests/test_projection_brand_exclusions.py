@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from datetime import datetime, timezone
 
 REPO = Path(__file__).resolve().parents[1]
 if str(REPO) not in sys.path:
@@ -156,3 +157,51 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_main_dedupes_duplicate_order_items(monkeypatch, tmp_path):
+    sold_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    node = {
+        "objectId": "order-line-1",
+        "SoldAt": sold_at,
+        "GrossPrice": 10_000,
+        "COG": 4_000,
+        "ProductCategory": {"Name": "Edibles"},
+        "Product": {"objectId": "product-1", "Name": "Gummies", "Brand": {"Name": "Acme"}},
+    }
+
+    def fake_fetch_chunk(**kwargs):
+        return [dict(node), dict(node)], _mod.ORDER_ITEMS_QUERY
+
+    monkeypatch.setattr(_mod, "_fetch_chunk", fake_fetch_chunk)
+    monkeypatch.setattr(_mod, "_load_config_flags", lambda: None)
+    monkeypatch.setattr(_mod, "_store_tz", lambda: timezone.utc)
+    monkeypatch.setattr(
+        _mod,
+        "validate_and_normalize",
+        lambda **kwargs: {"ok": True, "report_path": str(tmp_path / "validation.json")},
+    )
+    out = tmp_path / "projection.md"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--allocation-mode",
+            "gross-share",
+            "--pool-top-n",
+            "0",
+            "--exclude-brands",
+            "",
+            "--no-layer2",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert _mod.main() == 0
+    markdown = out.read_text(encoding="utf-8")
+    assert "- **Unique order lines counted:** 1" in markdown
+    assert "- **Sales in focus categories (pool-eligible):** $100.00 gross;" in markdown
