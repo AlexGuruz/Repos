@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 
 import pytest
+import services.intake.csv_processor as csv_processor
+import services.posting.jgdtruth_poster as poster
 
 from services.posting.jgdtruth_poster import (
     _build_sheet_title_to_id,
@@ -149,3 +152,170 @@ def test_env_kylo_source_tab_fill_off(monkeypatch):
     )
     assert n == 0
     assert bodies == []
+
+
+class _Cfg:
+    def __init__(self, data):
+        self.data = data
+
+    def get(self, dotted_key, default=None):
+        cur = self.data
+        for part in str(dotted_key).split("."):
+            if isinstance(cur, dict) and part in cur:
+                cur = cur[part]
+            else:
+                return default
+        return cur
+
+
+class _Req:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class _FakeValues:
+    def __init__(self, calls):
+        self.calls = calls
+
+    def get(self, **kwargs):
+        return _Req(kind="values_get", **kwargs)
+
+    def batchGet(self, **kwargs):
+        return _Req(kind="values_batch_get", **kwargs)
+
+    def batchUpdate(self, **kwargs):
+        self.calls.append(("values_batch_update", kwargs))
+        return _Req(kind="values_batch_update", **kwargs)
+
+    def append(self, **kwargs):
+        self.calls.append(("values_append", kwargs))
+        return _Req(kind="values_append", **kwargs)
+
+
+class _FakeSheets:
+    def __init__(self, calls):
+        self.calls = calls
+
+    def values(self):
+        return _FakeValues(self.calls)
+
+    def get(self, **kwargs):
+        return _Req(kind="sheets_get", **kwargs)
+
+    def batchUpdate(self, **kwargs):
+        self.calls.append(("sheets_batch_update", kwargs))
+        return _Req(kind="sheets_batch_update", **kwargs)
+
+
+class _FakeService:
+    def __init__(self):
+        self.calls = []
+
+    def spreadsheets(self):
+        return _FakeSheets(self.calls)
+
+
+def test_post_audit_metadata_stays_per_source_row_for_aggregated_target_cell(monkeypatch, tmp_path):
+    cfg = _Cfg(
+        {
+            "runtime": {"dry_run": False},
+            "sheets": {
+                "companies": [
+                    {
+                        "key": "JGD",
+                        "workbook_url": "https://docs.google.com/spreadsheets/d/target_sid/edit",
+                    }
+                ]
+            },
+            "intake": {
+                "workbook_url": "https://docs.google.com/spreadsheets/d/source_sid/edit",
+                "csv_processor": {"header_rows": 1},
+                "extra_tabs": [],
+            },
+            "intake_static_dates": {"header_row": 1, "first_row": 20},
+            "posting": {
+                "sheets": {"apply": True},
+                "mark_posted": True,
+                "append_transactions": False,
+                "source_tab_fill": {"enabled": False},
+            },
+            "matching": {"relaxed_companies": []},
+            "dates": {"relaxed_companies": []},
+        }
+    )
+    service = _FakeService()
+    captured_posts = []
+    flagged_checks = []
+
+    monkeypatch.setenv("KYLO_INSTANCE_ID", "JGD_TEST")
+    monkeypatch.setenv("KYLO_STATE_PATH", str(tmp_path / "posting_state.json"))
+    monkeypatch.setattr(poster, "load_config", lambda: cfg)
+    monkeypatch.setattr(csv_processor, "load_config", lambda: cfg)
+    monkeypatch.setattr(poster, "_get_service", lambda: service)
+    monkeypatch.setattr(
+        poster,
+        "fetch_rules_from_jgdtruth",
+        lambda company: {
+            "Snack": SimpleNamespace(
+                source="Snack",
+                target_sheet="JGD EXPENSES",
+                target_header="Food",
+                approved=True,
+                company_id="JGD",
+            ),
+            "Drink": SimpleNamespace(
+                source="Drink",
+                target_sheet="JGD EXPENSES",
+                target_header="Food",
+                approved=True,
+                company_id="JGD",
+            ),
+        },
+    )
+
+    def fake_download(spreadsheet_id, service_account, sheet_name_override=None):
+        if sheet_name_override == "TRANSACTIONS":
+            return "\n".join(
+                [
+                    "Date,Company,Description,Amount,Other,Processed,Notes",
+                    "2026-06-01,JGD,Snack,1.00,,FALSE,",
+                    "2026-06-01,JGD,Drink,2.00,,FALSE,",
+                ]
+            )
+        raise RuntimeError("tab missing")
+
+    def fake_execute(req, policy=None, label=""):
+        if label == "target:tabs_meta":
+            return {"sheets": [{"properties": {"sheetId": 7, "title": "JGD EXPENSES"}}]}
+        if label == "batchGet:headers":
+            return {"valueRanges": [{"range": "'JGD EXPENSES'!1:1", "values": [["Date", "Food"]]}]}
+        if label == "target:date_col_read":
+            return {"values": [["6/1/26"]]}
+        if label == "read:header_row":
+            return {"values": [["Date", "Company", "Description", "Amount", "Other", "Processed", "Notes"]]}
+        return {}
+
+    def fake_is_flagged(**kwargs):
+        flagged_checks.append(kwargs)
+        return kwargs["description"] == "Snack"
+
+    def fake_record_successful_post(**kwargs):
+        captured_posts.append(kwargs)
+
+    monkeypatch.setattr(poster, "download_petty_cash_csv", fake_download)
+    monkeypatch.setattr(poster, "google_api_execute", fake_execute)
+    monkeypatch.setattr(poster, "is_txn_flagged", fake_is_flagged)
+    monkeypatch.setattr(poster, "record_successful_post", fake_record_successful_post)
+
+    result = poster.run("JGD")
+
+    assert result["cells_written"] == 1
+    assert result["rows_marked_true"] == 2
+    assert [(p["description"], p["amount_cents"], p["row0"], p["flagged"]) for p in captured_posts] == [
+        ("Snack", 100, 1, True),
+        ("Drink", 200, 2, False),
+    ]
+    assert [(c["description"], c["amount_cents"]) for c in flagged_checks] == [
+        ("Snack", 100),
+        ("Drink", 200),
+    ]
