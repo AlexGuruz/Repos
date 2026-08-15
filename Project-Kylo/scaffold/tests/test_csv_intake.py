@@ -5,10 +5,21 @@ Tests for CSV intake functionality
 import pytest
 import tempfile
 import os
+import importlib.util
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from services.intake.csv_downloader import get_file_fingerprint, validate_csv_content, get_csv_metadata
 from services.intake.csv_processor import PettyCashCSVProcessor, validate_transaction
+
+
+_CSV_INTAKE_SPEC = importlib.util.spec_from_file_location(
+    "csv_intake_cli",
+    Path(__file__).resolve().parents[2] / "bin" / "csv_intake.py",
+)
+csv_intake_cli = importlib.util.module_from_spec(_CSV_INTAKE_SPEC)
+assert _CSV_INTAKE_SPEC.loader is not None
+_CSV_INTAKE_SPEC.loader.exec_module(csv_intake_cli)
 
 
 class TestCSVDownloader:
@@ -300,3 +311,85 @@ GH,01/04/2025,JGD,Test transaction 4,400.00"""
         assert stats['unique_rows_processed'] == 4
         assert stats['duplicate_rows_skipped'] == 0
         assert len(transactions) == stats['unique_rows_processed']
+
+
+def test_process_csv_intake_commits_after_successful_storage(monkeypatch):
+    events = []
+
+    class FakeConnection:
+        def commit(self):
+            events.append("commit")
+
+        def rollback(self):
+            events.append("rollback")
+
+        def close(self):
+            events.append("close")
+
+    class FakeProcessor:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def parse_transactions(self):
+            return [{"txn_uid": "txn-1"}]
+
+        def get_processing_stats(self):
+            return {
+                "unique_rows_processed": 1,
+                "duplicate_rows_skipped": 0,
+            }
+
+    class FakeDeduplicationWorkflow:
+        def __init__(self, db_conn):
+            pass
+
+        def check_file_already_processed(self, fingerprint):
+            return False
+
+        def process_with_deduplication(self, transactions, file_fingerprint, batch_id):
+            return {
+                "status": "completed",
+                "unique_transactions": [{"txn_uid": "txn-1"}],
+            }
+
+        def record_file_processing(self, file_fingerprint, batch_id, row_count):
+            events.append("record_file_processing")
+
+    conn = FakeConnection()
+    monkeypatch.setattr(csv_intake_cli, "download_petty_cash_csv", lambda *args, **kwargs: "csv")
+    monkeypatch.setattr(csv_intake_cli, "validate_csv_content", lambda _content: True)
+    monkeypatch.setattr(
+        csv_intake_cli,
+        "get_csv_metadata",
+        lambda _content: {
+            "file_fingerprint": "fp",
+            "total_lines": 2,
+            "non_empty_lines": 2,
+        },
+    )
+    monkeypatch.setattr(csv_intake_cli, "_copy_csv_to_configured_paths", lambda *args, **kwargs: [])
+    monkeypatch.setattr(csv_intake_cli, "PettyCashCSVProcessor", FakeProcessor)
+    monkeypatch.setattr(csv_intake_cli, "validate_transaction", lambda _txn: (True, []))
+    monkeypatch.setattr(csv_intake_cli, "create_db_connection", lambda _db_url: conn)
+    monkeypatch.setattr(csv_intake_cli, "DeduplicationWorkflow", FakeDeduplicationWorkflow)
+    monkeypatch.setattr(csv_intake_cli, "create_ingest_batch", lambda _conn, _source: 42)
+    monkeypatch.setattr(
+        csv_intake_cli,
+        "store_csv_transactions_batch",
+        lambda _conn, _transactions, _batch_id: {
+            "transactions_stored": 1,
+            "duplicates_skipped": 0,
+        },
+    )
+    monkeypatch.setattr(csv_intake_cli, "cleanup_temp_data", lambda _conn: events.append("cleanup"))
+    monkeypatch.setattr(
+        csv_intake_cli,
+        "get_storage_stats",
+        lambda _conn, _batch_id: events.append("storage_stats") or {"stored": 1},
+    )
+
+    result = csv_intake_cli.process_csv_intake("sid", "sa.json", "postgres://db")
+
+    assert result["status"] == "completed"
+    assert "rollback" not in events
+    assert events.index("storage_stats") < events.index("commit") < events.index("close")

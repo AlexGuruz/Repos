@@ -6,7 +6,12 @@ from unittest.mock import patch
 
 from zoneinfo import ZoneInfo
 
-from lib.transfer_receipt_export import fetch_transfer_receipt_rows, parse_received_at_utc, rows_from_transfer_node
+from lib.transfer_receipt_export import (
+    fetch_transfer_nodes,
+    fetch_transfer_receipt_rows,
+    parse_received_at_utc,
+    rows_from_transfer_node,
+)
 
 
 def test_rows_from_transfer_node_timestamps():
@@ -93,3 +98,39 @@ def test_fetch_transfer_receipt_rows_skip(mock_nodes):
     mock_nodes.assert_called_once_with(first=2, status="Accepted", credentials_path=None)
     assert len(rows) == 1
     assert rows[0]["transfer_object_id"] == "NEW"
+
+
+def test_fetch_transfer_nodes_paginates_until_requested_count(monkeypatch):
+    calls = []
+    pages = [
+        {
+            "data": {
+                "findTransfers": {
+                    "edges": [{"node": {"objectId": "T1"}}],
+                    "pageInfo": {"hasNextPage": True, "endCursor": "cursor-1"},
+                }
+            }
+        },
+        {
+            "data": {
+                "findTransfers": {
+                    "edges": [{"node": {"objectId": "T2"}}],
+                    "pageInfo": {"hasNextPage": False, "endCursor": None},
+                }
+            }
+        },
+    ]
+
+    def fake_graphql_request(query, variables, credentials_path=None):
+        calls.append(variables)
+        return pages[len(calls) - 1]
+
+    monkeypatch.setattr("lib.transfer_receipt_export.graphql_request", fake_graphql_request)
+
+    nodes = fetch_transfer_nodes(first=2, status="Accepted", credentials_path="creds.json")
+
+    assert [n["objectId"] for n in nodes] == ["T1", "T2"]
+    assert calls == [
+        {"first": 2, "after": None, "where": {"Status": {"equalTo": "Accepted"}}},
+        {"first": 1, "after": "cursor-1", "where": {"Status": {"equalTo": "Accepted"}}},
+    ]

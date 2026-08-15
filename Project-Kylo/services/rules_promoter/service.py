@@ -45,30 +45,6 @@ FROM app.rules_active;
         return r[0] if r else None
 
 
-def _active_count(conn) -> int:
-    with conn.cursor() as cur:
-        cur.execute("SELECT COUNT(*) FROM app.rules_active;")
-        return int(cur.fetchone()[0])
-
-
-def _compute_snapshot_checksum(snapshot: List[Tuple[str, dict]]) -> str:
-    """Replicate the DB checksum formula:
-    md5(string_agg(rule_id || '|' || md5(rule_json::text) ORDER BY rule_id))
-    where rule_id = uuid5(NAMESPACE_URL, content_hash)
-    """
-    import uuid as _uuid
-    import hashlib as _hashlib
-    rows: List[Tuple[str, str]] = []
-    for content_hash, rule_json in snapshot:
-        rid = str(_uuid.uuid5(_uuid.NAMESPACE_URL, content_hash))
-        rj_txt = json.dumps(rule_json, separators=(",", ":"))
-        inner = _hashlib.md5(rj_txt.encode("utf-8")).hexdigest()
-        rows.append((rid, inner))
-    rows.sort(key=lambda x: x[0])
-    concat = "\n".join(f"{rid}|{inner}" for (rid, inner) in rows)
-    return "md5:" + _hashlib.md5(concat.encode("utf-8")).hexdigest()
-
-
 def _fetch_pending_approved(conn, table_name: str) -> List[Tuple[str, dict]]:
     with conn.cursor() as cur:
         cur.execute(
@@ -89,8 +65,9 @@ ORDER BY content_hash
 
 def _apply_snapshot_to_company(conn, snapshot: List[Tuple[str, dict]]) -> None:
     with conn.cursor() as cur:
-        cur.execute("TRUNCATE app.rules_active;")
-        # Convert to arrays for UNNEST insert
+        # Promote approved pending rows incrementally. The pending tables are pruned
+        # after successful promotion, so replacing the whole active table from the
+        # current pending set would delete previously promoted rules.
         import uuid as _uuid
         rule_ids = []
         rule_jsons = []
@@ -108,6 +85,20 @@ ON CONFLICT (rule_id) DO UPDATE SET rule_json = EXCLUDED.rule_json, applied_at =
 """,
             {"rule_id": rule_ids, "rule_json": rule_jsons},
         )
+
+
+def _count_snapshot_rules_in_active(conn, snapshot: List[Tuple[str, dict]]) -> int:
+    if not snapshot:
+        return 0
+    import uuid as _uuid
+
+    rule_ids = [str(_uuid.uuid5(_uuid.NAMESPACE_URL, ch)) for ch, _rj in snapshot]
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT COUNT(*) FROM app.rules_active WHERE rule_id = ANY(%s::uuid[]);",
+            (rule_ids,),
+        )
+        return int(cur.fetchone()[0])
 
 
 def _sheets_writeback(company_id: str, promoted_count: int) -> Optional[str]:
@@ -194,10 +185,8 @@ def promote(global_dsn: Optional[str], company_dsn_map: Dict[str, str], companie
                         continue
                     _apply_snapshot_to_company(cconn, snapshot)
                     checksum = _compute_company_checksum(cconn)
-                    count_after = _active_count(cconn)
+                    promoted_present = _count_snapshot_rules_in_active(cconn, snapshot)
                     cconn.commit()
-                # Compute expected checksum from the snapshot we just applied
-                expected_checksum = _compute_snapshot_checksum(snapshot)
 
                 # 2) bump version + record snapshot in global (if available)
                 version = 1
@@ -230,8 +219,9 @@ ON CONFLICT (company_id, version) DO NOTHING;
                 # Optional prune of approved pending
                 pruned_note = ""
                 try:
-                    # Always attempt prune, but only after confirmation: count and checksum must match expected
-                    if count_after == len(snapshot) and checksum and checksum == expected_checksum:
+                    # Always attempt prune, but only after confirming every pending-approved
+                    # rule is present in active. Active may contain previously promoted rules.
+                    if promoted_present == len(snapshot) and checksum:
                         with psycopg2.connect(company_dsn) as cconn2:
                             with cconn2.cursor() as cur2:
                                 cur2.execute(f"DELETE FROM {table} WHERE approved = true;")
