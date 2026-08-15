@@ -56,6 +56,43 @@ def test_brand_excluded():
     assert not _mod.brand_excluded("Cartel", ex)
 
 
+def test_unique_order_items_in_local_window_dedupes_across_chunks():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("America/Chicago")
+    seen: set[str] = set()
+    first_chunk = [
+        {"objectId": "oi-1", "SoldAt": "2026-04-03T15:00:00.000Z", "GrossPrice": 1000},
+        {"objectId": "oi-1", "SoldAt": "2026-04-03T15:00:00.000Z", "GrossPrice": 1000},
+        {"objectId": "oi-2", "SoldAt": "2026-04-05T04:00:00.000Z", "GrossPrice": 2000},
+    ]
+
+    kept = _mod._unique_order_items_in_local_window(
+        first_chunk,
+        seen,
+        tz=tz,
+        report_start_local=date(2026, 4, 3),
+        report_end_local=date(2026, 4, 3),
+    )
+
+    assert [row["objectId"] for row, _ in kept] == ["oi-1"]
+
+    second_chunk = [
+        {"objectId": "oi-1", "SoldAt": "2026-04-03T15:00:00.000Z", "GrossPrice": 1000},
+        {"objectId": "oi-3", "SoldAt": "2026-04-03T16:00:00.000Z", "GrossPrice": 3000},
+    ]
+    kept = _mod._unique_order_items_in_local_window(
+        second_chunk,
+        seen,
+        tz=tz,
+        report_start_local=date(2026, 4, 3),
+        report_end_local=date(2026, 4, 3),
+    )
+
+    assert [row["objectId"] for row, _ in kept] == ["oi-3"]
+
+
 def test_default_exclude_includes_consignment_casefold():
     ex = _mod.parse_brand_exclusions(_mod.DEFAULT_EXCLUDE_BRANDS)
     assert _mod.brand_excluded("ARCTIC EXTRACTS", ex)
