@@ -29,8 +29,21 @@ def test_get_worker_assistant_url_from_registry_when_env_unset():
 
 def test_get_worker_assistant_url_env_override(monkeypatch):
     monkeypatch.setenv("WORKER_ASSISTANT_URL", "http://127.0.0.1:8765")
-    url = get_worker_assistant_url("worker-rig-01")
+    url = get_worker_assistant_url("worker-rig-02")
     assert url == "http://127.0.0.1:8765"
+
+
+def test_secondary_worker_uses_registry_when_primary_env_is_set(monkeypatch):
+    monkeypatch.setenv("WORKER_ASSISTANT_URL", "http://127.0.0.1:8765")
+    monkeypatch.setenv("WORKER_N8N_URL", "http://127.0.0.1:5678")
+    monkeypatch.setenv("OLLAMA_HOST", "127.0.0.1:11434")
+    monkeypatch.delenv("WORKER_ASSISTANT_URL_SECONDARY", raising=False)
+    monkeypatch.delenv("WORKER_N8N_URL_SECONDARY", raising=False)
+    monkeypatch.delenv("OLLAMA_HOST_SECONDARY", raising=False)
+
+    assert get_worker_assistant_url("worker-rig-01") == "http://127.0.0.1:8766"
+    assert get_worker_n8n_url("worker-rig-01") == "http://127.0.0.1:5679"
+    assert get_worker_ollama_base_url("worker-rig-01") == "http://127.0.0.1:11435"
 
 
 def test_get_service_url_generic():
