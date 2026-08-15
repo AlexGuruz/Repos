@@ -157,15 +157,35 @@ def fetch_transfer_nodes(
     status: str,
     credentials_path: str | None,
 ) -> list[dict[str, Any]]:
-    r = graphql_request(
-        TRANSFER_RECEIPTS_QUERY,
-        {"first": int(first), "status": str(status)},
-        credentials_path=credentials_path,
-    )
-    if r.get("errors"):
-        raise RuntimeError(r["errors"][0].get("message", r["errors"]))
-    edges = ((r.get("data") or {}).get("findTransfers") or {}).get("edges") or []
-    return [e["node"] for e in edges if e.get("node")]
+    take = max(0, int(first))
+    if take == 0:
+        return []
+
+    out: list[dict[str, Any]] = []
+    after: str | None = None
+    while len(out) < take:
+        page_size = min(100, take - len(out))
+        r = graphql_request(
+            TRANSFER_RECEIPTS_PAGED_QUERY,
+            {
+                "first": page_size,
+                "after": after,
+                "where": {"Status": {"equalTo": str(status)}},
+            },
+            credentials_path=credentials_path,
+        )
+        if r.get("errors"):
+            raise RuntimeError(r["errors"][0].get("message", r["errors"]))
+        conn = (r.get("data") or {}).get("findTransfers") or {}
+        edges = conn.get("edges") or []
+        out.extend([e["node"] for e in edges if e.get("node")])
+        page_info = conn.get("pageInfo") or {}
+        if not page_info.get("hasNextPage"):
+            break
+        after = page_info.get("endCursor")
+        if not after:
+            break
+    return out[:take]
 
 
 def fetch_transfer_nodes_since(
