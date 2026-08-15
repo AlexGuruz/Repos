@@ -66,6 +66,68 @@ def _dedupe_events(events: List[ChangeEvent]) -> List[ChangeEvent]:
     return out
 
 
+def _stable_shift_row_keys(
+    previous_bl: Dict[str, RowRecord],
+    current_bl: Dict[str, RowRecord],
+) -> tuple[Set[str], Set[str]]:
+    removed: Set[str] = set()
+    inserted: Set[str] = set()
+    for business_line_uid, before in previous_bl.items():
+        after = current_bl.get(business_line_uid)
+        if after is None or before.row_key == after.row_key:
+            continue
+        removed.add(before.row_key)
+        inserted.add(after.row_key)
+    return removed, inserted
+
+
+def _suppress_stable_shift_churn(
+    events: List[ChangeEvent],
+    previous: Dict[str, RowRecord],
+    current: Dict[str, RowRecord],
+    previous_bl: Dict[str, RowRecord],
+    current_bl: Dict[str, RowRecord],
+) -> List[ChangeEvent]:
+    removed_shift_keys, inserted_shift_keys = _stable_shift_row_keys(previous_bl, current_bl)
+    changed_shift_keys: Set[str] = set()
+    stable_before = set(previous_bl.keys())
+    stable_after = set(current_bl.keys())
+    for row_key in set(previous.keys()) & set(current.keys()):
+        before_uid = str(previous[row_key].business_line_uid or "").strip()
+        after_uid = str(current[row_key].business_line_uid or "").strip()
+        if (
+            before_uid
+            and after_uid
+            and before_uid != after_uid
+            and before_uid in stable_after
+            and after_uid in stable_before
+            and before_uid in stable_before
+            and after_uid in stable_after
+        ):
+            changed_shift_keys.add(row_key)
+    if not removed_shift_keys and not inserted_shift_keys and not changed_shift_keys:
+        return events
+    out: List[ChangeEvent] = []
+    for ev in events:
+        if ev.event == "ROW_REMOVED" and ev.row_key in removed_shift_keys:
+            continue
+        if ev.event == "ROW_INSERTED" and ev.changed_field == "row" and ev.row_key in inserted_shift_keys:
+            continue
+        if ev.event == "ROW_CHANGED" and ev.row_key in changed_shift_keys:
+            continue
+        out.append(ev)
+    return out
+
+
+def _sheet_side_effect_events(events: List[ChangeEvent]) -> List[ChangeEvent]:
+    out: List[ChangeEvent] = []
+    for ev in events:
+        if ev.event == "ROW_SHIFTED" and set(ev.anomalies) <= {"CONTENT_SHIFTED"}:
+            continue
+        out.append(ev)
+    return out
+
+
 def audit_enabled(cfg) -> bool:
     raw_off = (os.environ.get("KYLO_AUDIT") or "").strip().lower()
     if raw_off in ("0", "false", "no", "n", "off"):
@@ -149,6 +211,8 @@ def run_audit_tick(
     if previous_bl:
         events.extend(diff_business_line_registries(previous_bl, current_bl, ts=ts))
 
+    events = _suppress_stable_shift_churn(events, previous, current, previous_bl, current_bl)
+
     pair_block = audit_block.get("pair_rules") or {}
     if not isinstance(pair_block, dict) or pair_block.get("enabled", True):
         max_dist = int(pair_block.get("max_pair_distance_rows", 3) or 3) if isinstance(pair_block, dict) else 3
@@ -206,7 +270,8 @@ def run_audit_tick(
 
     write_notes = bool(audit_block.get("write_notes", True))
     apply_hl = bool(audit_block.get("apply_highlights", True))
-    if events and (write_notes or apply_hl) and not _sheets_writes_blocked():
+    sheet_events = _sheet_side_effect_events(events)
+    if sheet_events and (write_notes or apply_hl) and not _sheets_writes_blocked():
         try:
             service = _get_service()
         except Exception as e:
@@ -215,18 +280,18 @@ def run_audit_tick(
         if service is not None:
             if apply_hl:
                 try:
-                    summary["highlights_applied"] = apply_audit_highlights(service, events, cfg)
+                    summary["highlights_applied"] = apply_audit_highlights(service, sheet_events, cfg)
                 except Exception as e:
                     print(f"[AUDIT] WARN: highlights failed: {e}")
             if write_notes:
                 note_col = str(audit_block.get("note_column", "G") or "G")
                 try:
                     summary["notes_written"] = write_audit_notes(
-                        service, events, note_column=note_col, case_id="LIVE-AUDIT"
+                        service, sheet_events, note_column=note_col, case_id="LIVE-AUDIT"
                     )
                 except Exception as e:
                     print(f"[AUDIT] WARN: notes failed: {e}")
-    elif events and (write_notes or apply_hl) and _sheets_writes_blocked():
+    elif sheet_events and (write_notes or apply_hl) and _sheets_writes_blocked():
         print("[AUDIT] Skipping sheet highlights/notes (dry-run or read-only)")
 
     print(
