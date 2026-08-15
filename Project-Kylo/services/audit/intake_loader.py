@@ -86,6 +86,7 @@ def load_intake_for_company(
 
     txns: List[dict] = []
     csv_by_key: Dict[str, str] = {}
+    errors: List[str] = []
     for url in intake_urls_for_company(cfg, company):
         sid = _extract_spreadsheet_id(str(url))
         if not sid:
@@ -108,8 +109,10 @@ def load_intake_for_company(
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                     txns.append(it)
-            except Exception:
-                continue
+            except Exception as e:
+                errors.append(f"{company.strip().upper()} {sid} {tab}: {e}")
+    if errors:
+        raise RuntimeError("intake tab load failed; refusing partial audit snapshot: " + "; ".join(errors))
     return txns, csv_by_key
 
 
