@@ -92,7 +92,7 @@ def test_unique_order_items_in_local_window_dedupes_across_chunks():
 
     assert first == [duplicate]
     assert second == []
-    assert seen == {"order-line-1"}
+    assert seen == {"objectId:order-line-1"}
 
 
 def test_implied_monthly_cog_throughput_usd():
