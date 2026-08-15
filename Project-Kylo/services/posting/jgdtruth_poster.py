@@ -1586,6 +1586,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "cells_written": int(cells_written),
             "rows_marked_true": int(rows_marked_true),
             "fills_applied": int(fills_applied),
+            "failed_range_count": int(len(failed_ranges)),
+            "error": bool(failed_ranges),
             "tabs": sorted(tabs_touched),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
@@ -1596,6 +1598,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     total_cells_written = 0
     total_rows_marked_true = 0
     total_fills_applied = 0
+    total_failed_ranges = 0
+    target_error_count = 0
     tabs_all: Set[str] = set()
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
@@ -1606,6 +1610,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         total_cells_written += int(result.get("cells_written", 0))
         total_rows_marked_true += int(result.get("rows_marked_true", 0))
         total_fills_applied += int(result.get("fills_applied", 0))
+        total_failed_ranges += int(result.get("failed_range_count", 0) or 0)
+        if bool(result.get("error")):
+            target_error_count += 1
         tabs_all |= set(result.get("tabs", []))
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
@@ -1667,6 +1674,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "cells_written": int(total_cells_written),
         "rows_marked_true": int(total_rows_marked_true),
         "fills_applied": int(total_fills_applied),
+        "failed_range_count": int(total_failed_ranges),
+        "error": bool(target_error_count),
         "tabs": sorted(tabs_all),
         "write_plan_path": wp_out,
         "write_plan_count": int(len(write_plan)),
