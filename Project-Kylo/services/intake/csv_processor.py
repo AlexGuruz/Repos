@@ -633,6 +633,10 @@ class PettyCashCSVProcessor:
             final_names.add("710 EMPIRE")
         if "PUFFIN" in final_names:
             final_names.add("PUFFIN PURE")
+        if "710 EMPIRE" in final_names:
+            final_names.add("EMPIRE")
+        if "PUFFIN PURE" in final_names:
+            final_names.add("PUFFIN")
         # Union any discovered legacy sets
         final_names |= names_json
         final_names |= names_cfg
@@ -641,7 +645,7 @@ class PettyCashCSVProcessor:
             return final_names
 
         # Legacy default set
-        return {'NUGZ', '710 EMPIRE', 'PUFFIN PURE', 'JGD'}
+        return {'NUGZ', '710 EMPIRE', 'EMPIRE', 'PUFFIN PURE', 'PUFFIN', 'JGD'}
 
 
 def parse_csv_transactions(csv_content: str, header_rows: int = 19, source_tab: Optional[str] = None) -> List[Dict]:
@@ -730,11 +734,15 @@ def validate_transaction(transaction: Dict) -> Tuple[bool, List[str]]:
                 finals.add("710 EMPIRE")
             if "PUFFIN" in finals:
                 finals.add("PUFFIN PURE")
+            if "710 EMPIRE" in finals:
+                finals.add("EMPIRE")
+            if "PUFFIN PURE" in finals:
+                finals.add("PUFFIN")
             finals |= names_json
             finals |= names_cfg
             if finals:
                 return finals
-            return {'NUGZ', '710 EMPIRE', 'PUFFIN PURE', 'JGD'}
+            return {'NUGZ', '710 EMPIRE', 'EMPIRE', 'PUFFIN PURE', 'PUFFIN', 'JGD'}
 
         if 'company_id' in transaction:
             valid_companies = _load_valid_companies_global()
