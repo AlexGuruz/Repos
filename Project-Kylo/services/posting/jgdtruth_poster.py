@@ -529,6 +529,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     except Exception:
         extra_tabs = []
     tabs_to_pull = tuple(["TRANSACTIONS", "BANK"]) + tuple(extra_tabs)
+    intake_load_errors: List[str] = []
     for sid in intake_sids:
         for tab in tabs_to_pull:
             try:
@@ -547,9 +548,11 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                 csv_txns.extend(part)
-            except Exception:
-                # If a tab is missing, continue with the other
-                continue
+            except Exception as exc:
+                intake_load_errors.append(f"{sid}:{tab}: {exc}")
+    if intake_load_errors:
+        joined = "; ".join(intake_load_errors)
+        raise RuntimeError(f"Incomplete intake load for {company_upper}; aborting posting before target writes: {joined}")
     
     # Sort transactions to ensure consistent processing order:
     # 1. By posted_date (chronological)

@@ -8,6 +8,10 @@ from services.intake.csv_processor import PettyCashCSVProcessor
 from services.sheets.poster import _extract_spreadsheet_id
 
 
+class IntakeLoadError(RuntimeError):
+    """Raised when a configured intake source cannot be loaded completely."""
+
+
 def _active_years(cfg) -> Optional[List[int]]:
     import os
 
@@ -86,6 +90,7 @@ def load_intake_for_company(
 
     txns: List[dict] = []
     csv_by_key: Dict[str, str] = {}
+    load_errors: List[str] = []
     for url in intake_urls_for_company(cfg, company):
         sid = _extract_spreadsheet_id(str(url))
         if not sid:
@@ -108,8 +113,11 @@ def load_intake_for_company(
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                     txns.append(it)
-            except Exception:
-                continue
+            except Exception as exc:
+                load_errors.append(f"{sid}:{tab}: {exc}")
+    if load_errors:
+        joined = "; ".join(load_errors)
+        raise IntakeLoadError(f"incomplete intake load for {company.strip().upper()}: {joined}")
     return txns, csv_by_key
 
 
@@ -128,4 +136,4 @@ def load_all_intake(
     return all_txns, all_csv
 
 
-__all__ = ["intake_urls_for_company", "load_all_intake", "load_intake_for_company"]
+__all__ = ["IntakeLoadError", "intake_urls_for_company", "load_all_intake", "load_intake_for_company"]
