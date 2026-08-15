@@ -34,7 +34,8 @@ def _adapter_load_config() -> Any | None:
 LOGGER = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 _GMAIL_SERVICES: dict[str, Resource] = {}
-_LABEL_NAME_TO_ID: dict[str, str] = {}
+_GMAIL_SERVICE_KEYS: dict[int, str] = {}
+_LABEL_NAME_TO_ID: dict[str, dict[str, str]] = {}
 
 _ADAPTER_ROOT = Path(__file__).resolve().parent.parent
 _LEGACY_CREDENTIALS_FILE = _ADAPTER_ROOT / "credentials.json"
@@ -141,6 +142,8 @@ def preflight_gmail_auth(
 
 def clear_gmail_service_cache() -> None:
     _GMAIL_SERVICES.clear()
+    _GMAIL_SERVICE_KEYS.clear()
+    _LABEL_NAME_TO_ID.clear()
 
 
 def get_gmail_service(
@@ -162,20 +165,20 @@ def get_gmail_service(
             [_resolve_env_path(str(token_file)) or Path(token_file)] + token_candidates
         )
 
-    cache_key = str(token_candidates[0]) if token_candidates else "default"
-    cached = _GMAIL_SERVICES.get(cache_key)
-    if cached is not None:
-        return cached
+    for candidate_token in token_candidates:
+        cached = _GMAIL_SERVICES.get(str(candidate_token))
+        if cached is not None:
+            return cached
 
     creds: Credentials | None = None
 
     # Where token.json will be written if OAuth flow is required.
     if token_candidates:
-        token_file = token_candidates[0]
+        preferred_token_file = token_candidates[0]
     elif config is not None:
-        token_file = Path(config.google_token_file)
+        preferred_token_file = Path(config.google_token_file)
     else:
-        token_file = _LEGACY_TOKEN_FILE
+        preferred_token_file = _LEGACY_TOKEN_FILE
 
     credentials_file = None
     for p in credential_candidates:
@@ -193,12 +196,14 @@ def get_gmail_service(
             token_file_loaded = candidate_token
             break
         except Exception:
-            LOGGER.warning("Ignoring invalid token file and starting OAuth flow again: %s", candidate_token)
-            try:
-                candidate_token.unlink(missing_ok=True)
-            except Exception:
-                pass
+            LOGGER.warning("Ignoring invalid token file and trying the next candidate: %s", candidate_token)
             creds = None
+
+    token_file = token_file_loaded or preferred_token_file
+    cache_key = str(token_file)
+    cached = _GMAIL_SERVICES.get(cache_key)
+    if cached is not None:
+        return cached
 
     # If token file exists but invalid, we may fall back to OAuth.
     # If creds are loaded and valid/refreshable, credentials.json may not be required.
@@ -240,6 +245,7 @@ def get_gmail_service(
 
     service = build("gmail", "v1", credentials=creds)
     _GMAIL_SERVICES[cache_key] = service
+    _GMAIL_SERVICE_KEYS[id(service)] = cache_key
     return service
 
 
@@ -422,8 +428,9 @@ def save_draft_reply(message_id: str, reply_text: str) -> str:
         raise RuntimeError(f"Gmail API error while creating draft: {exc}") from exc
 
 
-def _refresh_label_cache() -> None:
-    service = get_gmail_service()
+def _refresh_label_cache(service: Resource | None = None, cache_key: str | None = None) -> dict[str, str]:
+    service = service or get_gmail_service()
+    cache_key = cache_key or _GMAIL_SERVICE_KEYS.get(id(service), "default")
     labels: dict[str, str] = {}
     response = service.users().labels().list(userId="me").execute()
     for label in response.get("labels", []):
@@ -432,8 +439,17 @@ def _refresh_label_cache() -> None:
         if name and label_id:
             labels[name] = label_id
 
-    _LABEL_NAME_TO_ID.clear()
-    _LABEL_NAME_TO_ID.update(labels)
+    _LABEL_NAME_TO_ID[cache_key] = labels
+    return labels
+
+
+def _current_label_cache() -> dict[str, str]:
+    service = get_gmail_service()
+    cache_key = _GMAIL_SERVICE_KEYS.get(id(service), "default")
+    labels = _LABEL_NAME_TO_ID.get(cache_key)
+    if labels is None:
+        labels = _refresh_label_cache(service=service, cache_key=cache_key)
+    return labels
 
 
 def _normalize_label_name(value: str) -> str:
@@ -448,13 +464,12 @@ def _normalize_label_name(value: str) -> str:
 def resolve_existing_label_name(label_name: str) -> str | None:
     if not label_name.strip():
         return None
-    if not _LABEL_NAME_TO_ID:
-        _refresh_label_cache()
-    if label_name in _LABEL_NAME_TO_ID:
+    labels = _current_label_cache()
+    if label_name in labels:
         return label_name
 
     target = _normalize_label_name(label_name)
-    for existing_name in _LABEL_NAME_TO_ID:
+    for existing_name in labels:
         existing_norm = _normalize_label_name(existing_name)
         if existing_norm == target or existing_norm.endswith(target):
             return existing_name
@@ -465,14 +480,16 @@ def get_or_create_label_id(label_name: str) -> str:
     if not label_name.strip():
         raise ValueError("Label name cannot be empty.")
 
+    labels = _current_label_cache()
     existing = resolve_existing_label_name(label_name)
-    if existing and existing in _LABEL_NAME_TO_ID:
-        return _LABEL_NAME_TO_ID[existing]
+    if existing and existing in labels:
+        return labels[existing]
 
-    _refresh_label_cache()
+    labels = _refresh_label_cache()
     existing = resolve_existing_label_name(label_name)
-    if existing and existing in _LABEL_NAME_TO_ID:
-        return _LABEL_NAME_TO_ID[existing]
+    labels = _current_label_cache()
+    if existing and existing in labels:
+        return labels[existing]
 
     service = get_gmail_service()
     body = {
@@ -486,14 +503,14 @@ def get_or_create_label_id(label_name: str) -> str:
         created_id = created.get("id", "")
         if not created_id:
             raise RuntimeError(f"Label create returned no id for: {label_name}")
-        _LABEL_NAME_TO_ID[label_name] = created_id
+        _current_label_cache()[label_name] = created_id
         LOGGER.info("Created Gmail label: %s", label_name)
         return created_id
     except HttpError as exc:
         # Handle race condition where label may have been created by another run.
         LOGGER.warning("Create label failed for '%s', refreshing cache: %s", label_name, exc)
-        _refresh_label_cache()
-        cached = _LABEL_NAME_TO_ID.get(label_name)
+        labels = _refresh_label_cache()
+        cached = labels.get(label_name)
         if cached:
             return cached
         raise RuntimeError(f"Failed to create Gmail label '{label_name}': {exc}") from exc
@@ -525,9 +542,8 @@ def apply_action_label(
 
 
 def _label_id_to_name_map() -> dict[str, str]:
-    if not _LABEL_NAME_TO_ID:
-        _refresh_label_cache()
-    return {label_id: label_name for label_name, label_id in _LABEL_NAME_TO_ID.items()}
+    labels = _current_label_cache()
+    return {label_id: label_name for label_name, label_id in labels.items()}
 
 
 def get_message_label_names(message_id: str) -> set[str]:
@@ -563,7 +579,7 @@ def remove_label_from_message(message_id: str, label_name: str) -> None:
     existing_name = resolve_existing_label_name(label_name)
     if not existing_name:
         return
-    label_id = _LABEL_NAME_TO_ID.get(existing_name)
+    label_id = _current_label_cache().get(existing_name)
     if not label_id:
         return
 
@@ -582,14 +598,15 @@ def delete_label_if_exists(label_name: str) -> bool:
     existing_name = resolve_existing_label_name(label_name)
     if not existing_name:
         return False
-    label_id = _LABEL_NAME_TO_ID.get(existing_name)
+    labels = _current_label_cache()
+    label_id = labels.get(existing_name)
     if not label_id:
         return False
 
     try:
         service.users().labels().delete(userId="me", id=label_id).execute()
         LOGGER.info("Deleted Gmail label: %s", existing_name)
-        _LABEL_NAME_TO_ID.pop(existing_name, None)
+        labels.pop(existing_name, None)
         return True
     except HttpError as exc:
         raise RuntimeError(f"Gmail API error while deleting label '{existing_name}': {exc}") from exc

@@ -1218,6 +1218,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         cells_written = 0
         rows_marked_true = 0
+        mark_write_failures = 0
+        note_write_failures = 0
         # Track which target ranges were actually written this run (to avoid falsely marking source rows as posted).
         ranges_attempted: Set[str] = set()
         ranges_written: Set[str] = set()
@@ -1510,6 +1512,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     rows_marked_true += len(mark_data)
                     print(f"[MARK] Successfully marked {len(mark_data)} rows as posted")
                 except HttpError:
+                    mark_write_failures += len(mark_data)
                     pass
             for sid, note_data in note_by_sid.items():
                 if not sid or not note_data:
@@ -1525,6 +1528,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     )
                     print(f"[NOTES] Successfully wrote {len(note_data)} notes")
                 except HttpError:
+                    note_write_failures += len(note_data)
                     pass
 
             instance_id = (os.environ.get("KYLO_INSTANCE_ID") or "").strip()
@@ -1564,6 +1568,10 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "cells_written": int(cells_written),
             "rows_marked_true": int(rows_marked_true),
             "fills_applied": int(fills_applied),
+            "partial_failure": bool(failed_ranges or mark_write_failures or note_write_failures),
+            "failed_ranges": sorted(failed_ranges),
+            "mark_write_failures": int(mark_write_failures),
+            "note_write_failures": int(note_write_failures),
             "tabs": sorted(tabs_touched),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
@@ -1574,6 +1582,10 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     total_cells_written = 0
     total_rows_marked_true = 0
     total_fills_applied = 0
+    partial_failure = False
+    failed_ranges_all: List[str] = []
+    mark_write_failures_total = 0
+    note_write_failures_total = 0
     tabs_all: Set[str] = set()
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
@@ -1584,6 +1596,10 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         total_cells_written += int(result.get("cells_written", 0))
         total_rows_marked_true += int(result.get("rows_marked_true", 0))
         total_fills_applied += int(result.get("fills_applied", 0))
+        partial_failure = partial_failure or bool(result.get("partial_failure", False))
+        failed_ranges_all.extend([str(r) for r in (result.get("failed_ranges", []) or [])])
+        mark_write_failures_total += int(result.get("mark_write_failures", 0) or 0)
+        note_write_failures_total += int(result.get("note_write_failures", 0) or 0)
         tabs_all |= set(result.get("tabs", []))
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
@@ -1645,6 +1661,10 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "cells_written": int(total_cells_written),
         "rows_marked_true": int(total_rows_marked_true),
         "fills_applied": int(total_fills_applied),
+        "partial_failure": bool(partial_failure),
+        "failed_ranges": sorted(set(failed_ranges_all)),
+        "mark_write_failures": int(mark_write_failures_total),
+        "note_write_failures": int(note_write_failures_total),
         "tabs": sorted(tabs_all),
         "write_plan_path": wp_out,
         "write_plan_count": int(len(write_plan)),

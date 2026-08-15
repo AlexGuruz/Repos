@@ -258,6 +258,7 @@ def process_csv_intake(
             
             # 11. Get final stats
             storage_stats = get_storage_stats(db_conn, batch_id)
+            db_conn.commit()
             
             result = {
                 "status": "completed",
@@ -276,6 +277,9 @@ def process_csv_intake(
             })
             
             return result
+        except Exception:
+            db_conn.rollback()
+            raise
         finally:
             db_conn.close()
             

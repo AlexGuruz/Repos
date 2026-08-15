@@ -311,6 +311,7 @@ def test_post_audit_metadata_stays_per_source_row_for_aggregated_target_cell(mon
 
     assert result["cells_written"] == 1
     assert result["rows_marked_true"] == 2
+    assert result["partial_failure"] is False
     assert [(p["description"], p["amount_cents"], p["row0"], p["flagged"]) for p in captured_posts] == [
         ("Snack", 100, 1, True),
         ("Drink", 200, 2, False),
