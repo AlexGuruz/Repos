@@ -21,7 +21,7 @@ def test_get_worker_assistant_url_from_registry_when_env_unset():
         url = get_worker_assistant_url("worker-rig-01")
         assert url is None or url.startswith("http")
         if url:
-            assert "8765" in url
+            assert "8766" in url
     finally:
         if env_val is not None:
             os.environ["WORKER_ASSISTANT_URL"] = env_val
