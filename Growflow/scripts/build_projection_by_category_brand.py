@@ -391,6 +391,33 @@ def allocate_pool_top_n_by_recovery_throughput(
     return out
 
 
+def _unique_order_items_in_local_window(
+    raw: list[dict[str, Any]],
+    *,
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+    seen: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Return in-window order items once per stable GrowFlow order item id."""
+    if seen is None:
+        seen = set()
+    out: list[dict[str, Any]] = []
+    for n in raw:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        out.append(n)
+    return out
+
+
 def _norm(v: float, lo: float, hi: float) -> float:
     if hi <= lo:
         return 0.5
@@ -1753,16 +1780,13 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
+        for n in _unique_order_items_in_local_window(
+            raw,
+            tz=tz,
+            report_start_local=report_start_local,
+            report_end_local=report_end_local,
+            seen=seen,
+        ):
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)

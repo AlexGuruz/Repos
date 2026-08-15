@@ -87,7 +87,10 @@ def load_intake_for_company(
     txns: List[dict] = []
     csv_by_key: Dict[str, str] = {}
     errors: List[str] = []
-    for url in intake_urls_for_company(cfg, company):
+    urls = intake_urls_for_company(cfg, company)
+    if not urls:
+        raise RuntimeError(f"no configured intake workbook URL for {company.strip().upper()}")
+    for url in urls:
         sid = _extract_spreadsheet_id(str(url))
         if not sid:
             continue
