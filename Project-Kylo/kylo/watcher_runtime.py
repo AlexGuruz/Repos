@@ -356,7 +356,21 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
                 print(f"[ERROR] Failed to process {cid}: {e}")
                 summaries[cid] = {"error": True}
 
-        any_error = any(isinstance(s, dict) and s.get("error") for s in summaries.values())
+        def _posting_failed(summary: Any) -> bool:
+            if not isinstance(summary, dict):
+                return True
+            if summary.get("error"):
+                return True
+            if summary.get("posting_complete") is False:
+                return True
+            try:
+                if int(summary.get("failed_ranges_count") or 0) > 0:
+                    return True
+            except Exception:
+                return True
+            return False
+
+        any_error = any(_posting_failed(s) for s in summaries.values())
         if any_error:
             consecutive_failures = consecutive_failures + 1
             if consecutive_failures >= cb_max:
