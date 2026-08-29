@@ -8,7 +8,7 @@ import unicodedata
 from datetime import date, timedelta
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple
 
 from services.common.config_loader import load_config
 from services.rules.jgdtruth_provider import fetch_rules_from_jgdtruth
@@ -43,6 +43,50 @@ try:
 except ImportError:
     # Fallback if not available
     HttpError = Exception
+
+
+class MatchedWrite(NamedTuple):
+    tab: str
+    header: str
+    date_key: str
+    amount_cents: int
+    source_tab: str
+    row0: int
+    txn_uid: str
+    source_sid: str
+    for_marking: bool
+    posted_date: str
+    description: str
+
+
+def _post_meta_key(source_sid: str, source_tab: str, row0: int, target_a1: str) -> Tuple[str, str, int, str]:
+    return (
+        str(source_sid or ""),
+        str(source_tab or "TRANSACTIONS"),
+        int(row0),
+        str(target_a1 or ""),
+    )
+
+
+def _post_meta_from_write(
+    write: MatchedWrite,
+    target_a1: str,
+    *,
+    company_id: str,
+    flagged: bool,
+) -> Tuple[Tuple[str, str, int, str], Dict[str, Any]]:
+    key = _post_meta_key(write.source_sid, write.source_tab, write.row0, target_a1)
+    return key, {
+        "txn_uid": write.txn_uid,
+        "source_sid": write.source_sid,
+        "source_tab": write.source_tab,
+        "row0": write.row0,
+        "company_id": company_id,
+        "posted_date": write.posted_date,
+        "description": write.description,
+        "amount_cents": write.amount_cents,
+        "flagged": flagged,
+    }
 
 
 def _col_to_a1(col_index_0: int) -> str:
@@ -790,14 +834,14 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return str(name)
 
         # All rule-matched transactions (posted + unposted) for full target-cell totals.
-        # Last tuple field: for_marking — True only for rows that still need posted/notes updates.
-        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool]] = []
+        # for_marking is True only for rows that still need posted/notes updates.
+        matched_writes: List[MatchedWrite] = []
         # NOTE: We store the resolved target A1 range per source row so we only mark
         # rows as posted when their target cell is confirmed written (or already correct).
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
         success_notes: List[Tuple[str, str, int, str, str]] = []  # (source_sid, src_tab, row_idx0, note, target_a1)
         flagged_target_ranges: Set[str] = set()
-        post_meta_by_a1: Dict[str, Dict[str, Any]] = {}
+        post_meta_by_source: Dict[Tuple[str, str, int, str], Dict[str, Any]] = {}
         skipped_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, reason)
         skipped_tab_not_found: List[str] = []
         skipped_header_date: int = 0
@@ -920,21 +964,23 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 continue
 
             matched_writes.append(
-                (
-                    resolved_tab,
-                    rule.target_header,
-                    date_key,
-                    int(amount_cents),
-                    source_tab or "TRANSACTIONS",
-                    int(t.get("row_index_0based") or 0),
-                    txn_uid,
-                    source_sid,
-                    not is_posted,
+                MatchedWrite(
+                    tab=resolved_tab,
+                    header=rule.target_header,
+                    date_key=date_key,
+                    amount_cents=int(amount_cents),
+                    source_tab=source_tab or "TRANSACTIONS",
+                    row0=int(t.get("row_index_0based") or 0),
+                    txn_uid=txn_uid,
+                    source_sid=source_sid,
+                    for_marking=not is_posted,
+                    posted_date=str(dt or ""),
+                    description=str(src or ""),
                 )
             )
 
         # Print diagnostic summary
-        pending_writes = [w for w in matched_writes if w[8]]
+        pending_writes = [w for w in matched_writes if w.for_marking]
         print(f"[DIAG] Total transactions: {total_txns}")
         print(f"[DIAG] Skipped (already posted): {skipped_posted}")
         print(f"[DIAG] Skipped (wrong company): {skipped_wrong_company}")
@@ -949,7 +995,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # Resolve writes to exact A1 cells
         data: List[Dict[str, object]] = []
-        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _mark) in matched_writes})
+        unique_tabs = sorted({w.tab for w in matched_writes})
         headers_map = _batch_read_headers(service, target_sid, unique_tabs, header_row)
         cell_totals: Dict[str, int] = {}
         cell_txns: Dict[str, Set[str]] = defaultdict(set)
@@ -1031,10 +1077,10 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return actual
             return static_row
 
-        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid, for_marking) in matched_writes:
-            headers = headers_map.get(tab) or []
+        for write in matched_writes:
+            headers = headers_map.get(write.tab) or []
             norm = [str(h).strip().lower() for h in headers]
-            wanted = (header or "").strip().lower()
+            wanted = (write.header or "").strip().lower()
             col_index = norm.index(wanted) if wanted in norm else -1
             if col_index < 0 and company_upper in relaxed_companies:
                 for i, h in enumerate(norm):
@@ -1042,42 +1088,42 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                         col_index = i
                         break
             if col_index < 0:
-                if for_marking:
+                if write.for_marking:
                     skipped_header_date += 1
-                    skipped_rows.append((source_sid, src_tab, row0, f"Header not found: {header}"))
+                    skipped_rows.append((write.source_sid, write.source_tab, write.row0, f"Header not found: {write.header}"))
                 continue
             col_a1 = _col_to_a1(col_index)
             # Resolve date row with static mapping, then correct using Column A lookup.
-            row_index = _resolve_date_row(tab, date_key, dates_to_row.get(date_key))
+            row_index = _resolve_date_row(write.tab, write.date_key, dates_to_row.get(write.date_key))
             if row_index is None:
-                if for_marking:
+                if write.for_marking:
                     skipped_header_date += 1
-                    skipped_rows.append((source_sid, src_tab, row0, f"Date not found: {date_key}"))
+                    skipped_rows.append((write.source_sid, write.source_tab, write.row0, f"Date not found: {write.date_key}"))
                 continue
 
-            a1 = f"{_quote_tab_a1(tab)}!{col_a1}{row_index}"
-            cell_totals[a1] = cell_totals.get(a1, 0) + int(amount_cents)
-            if txn_uid:
-                cell_txns[a1].add(txn_uid)
-            if src_tab:
-                cell_source_tabs[a1].add(str(src_tab).strip() or "TRANSACTIONS")
+            a1 = f"{_quote_tab_a1(write.tab)}!{col_a1}{row_index}"
+            cell_totals[a1] = cell_totals.get(a1, 0) + int(write.amount_cents)
+            if write.txn_uid:
+                cell_txns[a1].add(write.txn_uid)
+            if write.source_tab:
+                cell_source_tabs[a1].add(str(write.source_tab).strip() or "TRANSACTIONS")
             else:
                 cell_source_tabs[a1].add("TRANSACTIONS")
-            cell_meta[a1] = (tab, header, date_key)
-            tabs_touched.add(tab)
-            if for_marking:
-                success_rows.append((source_sid, src_tab, row0, a1))
+            cell_meta[a1] = (write.tab, write.header, write.date_key)
+            tabs_touched.add(write.tab)
+            if write.for_marking:
+                success_rows.append((write.source_sid, write.source_tab, write.row0, a1))
                 instance_id = (os.environ.get("KYLO_INSTANCE_ID") or "").strip()
                 flagged = False
                 if is_txn_flagged and instance_id:
                     try:
                         flagged = is_txn_flagged(
-                            source_sid=str(source_sid or ""),
-                            source_tab=str(src_tab or "TRANSACTIONS"),
+                            source_sid=str(write.source_sid or ""),
+                            source_tab=str(write.source_tab or "TRANSACTIONS"),
                             company_id=company_upper,
-                            posted_date=str(dt or ""),
-                            description=str(src or ""),
-                            amount_cents=amount_cents,
+                            posted_date=write.posted_date,
+                            description=write.description,
+                            amount_cents=write.amount_cents,
                             instance_id=instance_id,
                         )
                     except Exception:
@@ -1086,25 +1132,16 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     flagged_target_ranges.add(a1)
                 if format_post_note:
                     note_msg = format_post_note(
-                        amount_cents, tab, header, date_key, flagged=flagged
+                        write.amount_cents, write.tab, write.header, write.date_key, flagged=flagged
                     )
                 else:
                     try:
-                        note_msg = f"Posted {amount_cents / 100.0:.2f} -> {tab}/{header} {date_key}"
+                        note_msg = f"Posted {write.amount_cents / 100.0:.2f} -> {write.tab}/{write.header} {write.date_key}"
                     except Exception:
                         note_msg = "Posted"
-                success_notes.append((source_sid, src_tab, row0, note_msg, a1))
-                post_meta_by_a1[a1] = {
-                    "txn_uid": txn_uid,
-                    "source_sid": source_sid,
-                    "source_tab": src_tab,
-                    "row0": row0,
-                    "company_id": company_upper,
-                    "posted_date": str(dt or ""),
-                    "description": str(src or ""),
-                    "amount_cents": amount_cents,
-                    "flagged": flagged,
-                }
+                success_notes.append((write.source_sid, write.source_tab, write.row0, note_msg, a1))
+                meta_key, meta = _post_meta_from_write(write, a1, company_id=company_upper, flagged=flagged)
+                post_meta_by_source[meta_key] = meta
 
         updated_ranges: Set[str] = set()
         update_entries: List[Dict[str, object]] = []
@@ -1519,7 +1556,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 for (source_sid, src_tab, row0, msg, target_a1) in success_notes:
                     if target_a1 not in posted_ok_ranges:
                         continue
-                    meta = post_meta_by_a1.get(target_a1) or {}
+                    meta = post_meta_by_source.get(_post_meta_key(source_sid, src_tab, row0, target_a1)) or {}
                     try:
                         record_successful_post(
                             instance_id=instance_id,
