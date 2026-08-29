@@ -56,6 +56,36 @@ def test_brand_excluded():
     assert not _mod.brand_excluded("Cartel", ex)
 
 
+def test_unique_order_lines_in_local_window_dedupes_across_chunks():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("America/Chicago")
+    seen: set[str] = set()
+    line = {
+        "objectId": "order-item-1",
+        "SoldAt": "2026-04-03T15:00:00.000Z",
+        "GrossPrice": 1000,
+    }
+    first = _mod.unique_order_lines_in_local_window(
+        [line],
+        seen,
+        tz,
+        date(2026, 4, 3),
+        date(2026, 4, 3),
+    )
+    second = _mod.unique_order_lines_in_local_window(
+        [dict(line)],
+        seen,
+        tz,
+        date(2026, 4, 3),
+        date(2026, 4, 3),
+    )
+
+    assert first == [(line, date(2026, 4, 3))]
+    assert second == []
+
+
 def test_default_exclude_includes_consignment_casefold():
     ex = _mod.parse_brand_exclusions(_mod.DEFAULT_EXCLUDE_BRANDS)
     assert _mod.brand_excluded("ARCTIC EXTRACTS", ex)
