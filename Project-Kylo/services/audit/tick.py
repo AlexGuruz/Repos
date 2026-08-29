@@ -66,6 +66,29 @@ def _dedupe_events(events: List[ChangeEvent]) -> List[ChangeEvent]:
     return out
 
 
+def _source_key(record: RowRecord) -> str:
+    return f"{record.source_spreadsheet_id}|{record.source_tab.upper()}"
+
+
+def _loaded_source_key(raw: str) -> str:
+    sid, sep, tab = str(raw or "").strip().partition("|")
+    if not sep:
+        return str(raw or "").strip()
+    return f"{sid}|{tab.upper()}"
+
+
+def _only_loaded_sources(
+    registry: Dict[str, RowRecord], loaded_sources: Set[str]
+) -> Dict[str, RowRecord]:
+    return {k: v for k, v in registry.items() if _source_key(v) in loaded_sources}
+
+
+def _preserve_unloaded_sources(
+    registry: Dict[str, RowRecord], loaded_sources: Set[str]
+) -> Dict[str, RowRecord]:
+    return {k: v for k, v in registry.items() if _source_key(v) not in loaded_sources}
+
+
 def audit_enabled(cfg) -> bool:
     raw_off = (os.environ.get("KYLO_AUDIT") or "").strip().lower()
     if raw_off in ("0", "false", "no", "n", "off"):
@@ -124,6 +147,11 @@ def run_audit_tick(
         summary["error"] = f"intake_load_failed: {e}"
         print(f"[AUDIT] ERROR loading intake: {e}")
         return summary
+    loaded_sources = {_loaded_source_key(str(k)) for k in csv_by_key.keys() if str(k).strip()}
+    if not loaded_sources:
+        summary["error"] = "intake_load_failed: no source tabs loaded"
+        print("[AUDIT] ERROR loading intake: no source tabs loaded")
+        return summary
 
     current: Dict[str, RowRecord] = {}
     for txn in txns:
@@ -137,17 +165,21 @@ def run_audit_tick(
 
     current_list = list(current.values())
     current_bl = build_business_line_registry(current_list)
+    previous_loaded = _only_loaded_sources(previous, loaded_sources)
+    previous_unloaded = _preserve_unloaded_sources(previous, loaded_sources)
+    previous_bl_loaded = _only_loaded_sources(previous_bl, loaded_sources)
+    previous_bl_unloaded = _preserve_unloaded_sources(previous_bl, loaded_sources)
     late_days = int(audit_block.get("late_arrival_min_posted_days", 14) or 14)
 
     events: List[ChangeEvent] = []
-    if previous:
-        events.extend(diff_registries(previous, current, ts=ts, late_arrival_min_posted_days=late_days))
+    if previous_loaded:
+        events.extend(diff_registries(previous_loaded, current, ts=ts, late_arrival_min_posted_days=late_days))
     else:
         summary["baseline"] = True
-        print(f"[AUDIT] Baseline registry: {len(current)} rows (no diff on first tick)")
+        print(f"[AUDIT] Baseline registry for loaded sources: {len(current)} rows (no diff on first tick)")
 
-    if previous_bl:
-        events.extend(diff_business_line_registries(previous_bl, current_bl, ts=ts))
+    if previous_bl_loaded:
+        events.extend(diff_business_line_registries(previous_bl_loaded, current_bl, ts=ts))
 
     pair_block = audit_block.get("pair_rules") or {}
     if not isinstance(pair_block, dict) or pair_block.get("enabled", True):
@@ -168,8 +200,10 @@ def run_audit_tick(
 
     events = _dedupe_events(events)
 
-    merged = merge_registry(previous, current, ts=ts)
-    merged_bl = merge_business_line_registry(previous_bl, current_bl, ts=ts)
+    merged = previous_unloaded
+    merged.update(merge_registry(previous_loaded, current, ts=ts))
+    merged_bl = previous_bl_unloaded
+    merged_bl.update(merge_business_line_registry(previous_bl_loaded, current_bl, ts=ts))
     save_row_registry(reg_path, merged)
     save_row_registry(bl_path, merged_bl)
 
@@ -196,6 +230,7 @@ def run_audit_tick(
             "row_count": len(current),
             "business_line_count": len(current_bl),
             "csv_tabs": sorted(csv_by_key.keys()),
+            "preserved_unloaded_rows": len(previous_unloaded),
             "baseline": summary["baseline"],
         },
         watch_state_path=w_path if w_path.exists() else None,
