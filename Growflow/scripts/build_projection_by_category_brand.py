@@ -65,6 +65,8 @@ from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
+    ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
+    ORDER_ITEMS_QUERY_NO_PACKAGE,
     PAGE_SIZE,
     date_range_to_where,
     fetch_paginated,
@@ -226,36 +228,81 @@ def _fetch_chunk(
 ) -> tuple[list, str]:
     """Returns (nodes, query_used). Retries on transient network/HTML errors."""
     last_err: Exception | None = None
-    query = oi_query
-    for attempt in range(max(1, retries)):
+    order_item_query_fallbacks = (
+        ORDER_ITEMS_QUERY,
+        ORDER_ITEMS_QUERY_NO_BRAND,
+        ORDER_ITEMS_QUERY_NO_PACKAGE,
+        ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
+    )
+
+    def _query_candidates(first_query: str) -> list[str]:
+        seen: set[str] = set()
+        candidates: list[str] = []
         try:
-            raw = fetch_paginated(
-                "findOrderItems",
-                query,
-                {"first": PAGE_SIZE, "where": where},
-                credentials_path=creds,
-            )
-            return raw, query
-        except RuntimeError as e:
-            last_err = e
-            err = str(e).lower()
-            if chunk_idx == 1 and attempt == 0 and ("brand" in err or "cannot query field" in err):
-                query = ORDER_ITEMS_QUERY_NO_BRAND
-                try:
-                    raw = fetch_paginated(
-                        "findOrderItems",
-                        query,
-                        {"first": PAGE_SIZE, "where": where},
-                        credentials_path=creds,
-                    )
-                    return raw, query
-                except RuntimeError as e2:
-                    last_err = e2
-            delay = min(120, 8 * (2**attempt))
-            print(f"  Chunk {chunk_idx} attempt {attempt + 1}/{retries} failed: {e}; sleep {delay}s", flush=True)
-            time_module.sleep(delay)
+            start = order_item_query_fallbacks.index(first_query)
+            source = order_item_query_fallbacks[start:]
+        except ValueError:
+            source = (first_query, *order_item_query_fallbacks)
+        for q in source:
+            if q in seen:
+                continue
+            seen.add(q)
+            candidates.append(q)
+        return candidates
+
+    def _is_schema_shape_error(err: str) -> bool:
+        e = str(err).lower()
+        return "cannot query field" in e and ("brand" in e or "package" in e)
+
+    query_candidates = _query_candidates(oi_query)
+    for attempt in range(max(1, retries)):
+        retryable_error: RuntimeError | None = None
+        for query in query_candidates:
+            try:
+                raw = fetch_paginated(
+                    "findOrderItems",
+                    query,
+                    {"first": PAGE_SIZE, "where": where},
+                    credentials_path=creds,
+                )
+                return raw, query
+            except RuntimeError as e:
+                last_err = e
+                if _is_schema_shape_error(str(e)):
+                    continue
+                retryable_error = e
+                break
+        delay = min(120, 8 * (2**attempt))
+        shown_err = retryable_error or last_err
+        print(
+            f"  Chunk {chunk_idx} attempt {attempt + 1}/{retries} failed: {shown_err}; sleep {delay}s",
+            flush=True,
+        )
+        time_module.sleep(delay)
     assert last_err is not None
     raise last_err
+
+
+def _iter_unique_order_items_in_local_window(
+    rows: list[dict[str, Any]],
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+):
+    """Yield each in-window order item once; out-of-window duplicates do not poison the seen set."""
+    for n in rows:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        yield n
 
 BUCKET_DISPLAY_ORDER = [
     "Edibles",
@@ -1753,16 +1800,9 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
+        for n in _iter_unique_order_items_in_local_window(
+            raw, seen, tz, report_start_local, report_end_local
+        ):
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)

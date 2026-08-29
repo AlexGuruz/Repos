@@ -133,6 +133,42 @@ query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
 }
 """
 
+# Same as ORDER_ITEMS_QUERY but without Brand or Package (oldest Retail schemas).
+ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE = """
+query OrderItems($first: Int, $after: String, $where: OrderItemsWhereInput) {
+  findOrderItems(first: $first, after: $after, where: $where) {
+    edges {
+      node {
+        id
+        objectId
+        SoldAt
+        GrossPrice
+        NetPrice
+        COG
+        SKU
+        OriginId
+        ProductCategory { Name }
+        Product {
+          objectId
+          Name
+          SKU
+          createdAt
+        }
+        NetWeight
+        NetWeightUOM
+        UnitWeight
+        UnitWeightUOM
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    count
+  }
+}
+"""
+
 # OriginalQty vs CurrentQty: see module docstring and GROWFLOW_RETAIL_SCHEMA_MAP.md.
 PACKAGES_TABLE_QUERY = """
 query Packages($first: Int, $after: String, $where: PackagesWhereInput) {
@@ -463,10 +499,15 @@ def fetch_order_items(
     """
     Paginate findOrderItems with Brand + Package on the line.
 
-    Falls back to ORDER_ITEMS_QUERY_NO_BRAND, then ORDER_ITEMS_QUERY_NO_PACKAGE if the schema
-    rejects those fields.
+    Falls back through no-Brand, no-Package, then no-Brand/no-Package query shapes if the
+    schema rejects those fields.
     """
-    queries = (ORDER_ITEMS_QUERY, ORDER_ITEMS_QUERY_NO_BRAND, ORDER_ITEMS_QUERY_NO_PACKAGE)
+    queries = (
+        ORDER_ITEMS_QUERY,
+        ORDER_ITEMS_QUERY_NO_BRAND,
+        ORDER_ITEMS_QUERY_NO_PACKAGE,
+        ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
+    )
     last_err: RuntimeError | None = None
     for q in queries:
         try:
@@ -475,10 +516,8 @@ def fetch_order_items(
             )
         except RuntimeError as e:
             last_err = e
-            msg = str(e)
-            if q is ORDER_ITEMS_QUERY and "Brand" in msg:
-                continue
-            if q in (ORDER_ITEMS_QUERY, ORDER_ITEMS_QUERY_NO_BRAND) and "Package" in msg:
+            msg = str(e).lower()
+            if "cannot query field" in msg and ("brand" in msg or "package" in msg):
                 continue
             raise
     if last_err:

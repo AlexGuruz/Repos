@@ -156,3 +156,87 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_fetch_chunk_falls_back_when_package_field_missing(monkeypatch):
+    calls = []
+
+    def fake_fetch_paginated(connection_field, query, base_variables, *, credentials_path=None):
+        calls.append(query)
+        if query in (_mod.ORDER_ITEMS_QUERY, _mod.ORDER_ITEMS_QUERY_NO_BRAND):
+            raise RuntimeError('Cannot query field "Package" on type "OrderItems".')
+        assert query == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE
+        return [{"objectId": "ok"}]
+
+    monkeypatch.setattr(_mod, "fetch_paginated", fake_fetch_paginated)
+
+    rows, query_used = _mod._fetch_chunk(
+        oi_query=_mod.ORDER_ITEMS_QUERY,
+        where={},
+        creds=None,
+        chunk_idx=1,
+        retries=1,
+    )
+
+    assert rows == [{"objectId": "ok"}]
+    assert query_used == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE
+    assert calls == [_mod.ORDER_ITEMS_QUERY, _mod.ORDER_ITEMS_QUERY_NO_BRAND, _mod.ORDER_ITEMS_QUERY_NO_PACKAGE]
+
+
+def test_fetch_chunk_falls_back_when_brand_and_package_fields_missing(monkeypatch):
+    calls = []
+
+    def fake_fetch_paginated(connection_field, query, base_variables, *, credentials_path=None):
+        calls.append(query)
+        if query in (_mod.ORDER_ITEMS_QUERY, _mod.ORDER_ITEMS_QUERY_NO_BRAND):
+            raise RuntimeError('Cannot query field "Package" on type "OrderItems".')
+        if query == _mod.ORDER_ITEMS_QUERY_NO_PACKAGE:
+            raise RuntimeError('Cannot query field "Brand" on type "Product".')
+        assert query == _mod.ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE
+        return [{"objectId": "ok"}]
+
+    monkeypatch.setattr(_mod, "fetch_paginated", fake_fetch_paginated)
+
+    rows, query_used = _mod._fetch_chunk(
+        oi_query=_mod.ORDER_ITEMS_QUERY,
+        where={},
+        creds=None,
+        chunk_idx=1,
+        retries=1,
+    )
+
+    assert rows == [{"objectId": "ok"}]
+    assert query_used == _mod.ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE
+    assert calls == [
+        _mod.ORDER_ITEMS_QUERY,
+        _mod.ORDER_ITEMS_QUERY_NO_BRAND,
+        _mod.ORDER_ITEMS_QUERY_NO_PACKAGE,
+        _mod.ORDER_ITEMS_QUERY_NO_BRAND_NO_PACKAGE,
+    ]
+
+
+def test_unique_order_items_dedupes_only_in_window_rows():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("UTC")
+    seen = set()
+    rows = [
+        {"objectId": "same", "SoldAt": "2025-12-31T12:00:00.000Z", "GrossPrice": 100},
+        {"objectId": "same", "SoldAt": "2026-01-02T12:00:00.000Z", "GrossPrice": 200},
+        {"objectId": "same", "SoldAt": "2026-01-03T12:00:00.000Z", "GrossPrice": 300},
+        {"objectId": "other", "SoldAt": "2026-01-03T12:00:00.000Z", "GrossPrice": 400},
+    ]
+
+    kept = list(
+        _mod._iter_unique_order_items_in_local_window(
+            rows,
+            seen,
+            tz,
+            date(2026, 1, 1),
+            date(2026, 1, 31),
+        )
+    )
+
+    assert [r["GrossPrice"] for r in kept] == [200, 400]
+    assert seen == {"objectId:same", "objectId:other"}
