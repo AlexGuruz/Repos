@@ -7,6 +7,7 @@ import sys
 import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+import json
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 _root = Path(__file__).resolve().parent.parent
@@ -41,21 +42,45 @@ def _parse_date(s: str) -> date:
     return date(y, m, d)
 
 
-def _export_for_date(
-    sales_date: date,
-    *,
-    cfg: dict,
-    tz: ZoneInfo,
-    shift_end_local: datetime | None,
-    dry_run: bool,
-) -> None:
-    report = build_daily_close_report(
-        sales_date,
-        credentials_path=cfg.get("credentials_path"),
-        tz=tz,
-        shift_end_local=shift_end_local,
-        register_name=str(cfg.get("register_name") or "Register 1"),
-    )
+def _register_state_key(cfg: dict) -> str:
+    return str(cfg.get("register_name") or cfg.get("register_object_id") or "default")
+
+
+def _tax_report_signature(report) -> str:
+    payload = {
+        "sales_date": report.sales_date.isoformat(),
+        "order_count": report.order_count,
+        "total_collected_cents": report.total_collected_cents,
+        "subtotal_cents": report.subtotal_cents,
+        "discounts_cents": report.discounts_cents,
+        "taxes_cents": report.taxes_cents,
+        "tender_cents": dict(sorted((report.tender_cents or {}).items())),
+        "mj_tax_cents": report.mj_tax_cents,
+        "sales_tax_cents": report.sales_tax_cents,
+    }
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def _record_tax_report_signature(state: dict, cfg: dict, sales_date: date, signature: str) -> None:
+    key = _register_state_key(cfg)
+    all_sigs = dict(state.get("tax_report_signatures") or {})
+    by_register = dict(all_sigs.get(key) or {})
+    by_register[sales_date.isoformat()] = signature
+    all_sigs[key] = by_register
+    state["tax_report_signatures"] = all_sigs
+
+
+def _last_tax_report_signature(state: dict, cfg: dict, sales_date: date) -> str | None:
+    key = _register_state_key(cfg)
+    all_sigs = state.get("tax_report_signatures") or {}
+    by_register = all_sigs.get(key) if isinstance(all_sigs, dict) else {}
+    if not isinstance(by_register, dict):
+        return None
+    val = by_register.get(sales_date.isoformat())
+    return str(val) if val is not None else None
+
+
+def _write_report_to_sheet(report, *, cfg: dict, dry_run: bool) -> None:
     print(format_daily_close_telegram(report), flush=True)
     sheet_cfg = resolve_taxes_sheet_config(cfg)
     update_range = write_taxes_to_sheet(
@@ -71,6 +96,25 @@ def _export_for_date(
         print(f"Updated sheet range {update_range}", flush=True)
 
 
+def _export_for_date(
+    sales_date: date,
+    *,
+    cfg: dict,
+    tz: ZoneInfo,
+    shift_end_local: datetime | None,
+    dry_run: bool,
+) -> str:
+    report = build_daily_close_report(
+        sales_date,
+        credentials_path=cfg.get("credentials_path"),
+        tz=tz,
+        shift_end_local=shift_end_local,
+        register_name=str(cfg.get("register_name") or "Register 1"),
+    )
+    _write_report_to_sheet(report, cfg=cfg, dry_run=dry_run)
+    return _tax_report_signature(report)
+
+
 def _append_log(message: str, cfg: dict) -> None:
     log_path = Path(str(cfg.get("state_path", ""))).parent.parent / "logs" / "register_close_taxes.log"
     try:
@@ -80,6 +124,52 @@ def _append_log(message: str, cfg: dict) -> None:
             f.write(f"[{ts}] {message}\n")
     except OSError:
         pass
+
+
+def _should_recheck_sales_date(sales_date: date, now_local: datetime) -> bool:
+    age_days = (now_local.date() - sales_date).days
+    return 0 <= age_days <= 1
+
+
+def _maybe_reexport_notified_sales_date(
+    state: dict,
+    cfg: dict,
+    tz: ZoneInfo,
+    *,
+    dry_run: bool,
+    now_local: datetime | None = None,
+) -> int:
+    if dry_run:
+        return 0
+    key = _register_state_key(cfg)
+    notified_dates = state.get("notified_sales_dates") or {}
+    sales_date_text = str(notified_dates.get(key) or "").strip() if isinstance(notified_dates, dict) else ""
+    if not sales_date_text:
+        return 0
+    try:
+        sales_date = _parse_date(sales_date_text)
+    except Exception:
+        return 0
+    now_local = now_local or datetime.now(timezone.utc).astimezone(tz)
+    if not _should_recheck_sales_date(sales_date, now_local):
+        return 0
+
+    report = build_daily_close_report(
+        sales_date,
+        credentials_path=cfg.get("credentials_path"),
+        tz=tz,
+        shift_end_local=None,
+        register_name=str(cfg.get("register_name") or "Register 1"),
+    )
+    signature = _tax_report_signature(report)
+    if signature == _last_tax_report_signature(state, cfg, sales_date):
+        return 0
+
+    print(f"Re-exporting Taxes sheet for {sales_date.isoformat()} because totals changed.", flush=True)
+    _write_report_to_sheet(report, cfg=cfg, dry_run=False)
+    _record_tax_report_signature(state, cfg, sales_date, signature)
+    _append_log(f"Re-exported taxes for {sales_date} after totals changed", cfg)
+    return 1
 
 
 def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -> int:
@@ -122,7 +212,7 @@ def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -
             cfg,
         )
         try:
-            _export_for_date(
+            signature = _export_for_date(
                 ev.sales_date, cfg=cfg, tz=tz, shift_end_local=ev.end_time_local, dry_run=dry_run
             )
         except Exception as e:
@@ -131,8 +221,12 @@ def _poll_once(cfg: dict, tz: ZoneInfo, *, dry_run: bool, lookback_hours: int) -
             continue
         if not dry_run:
             mark_notified(state, ev)
+            _record_tax_report_signature(state, cfg, ev.sales_date, signature)
             exported += 1
             _append_log(f"Exported taxes for {ev.sales_date} to Google Sheet", cfg)
+
+    if not dry_run and exported == 0:
+        exported += _maybe_reexport_notified_sales_date(state, cfg, tz, dry_run=dry_run)
 
     state["last_poll_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     if not dry_run:
