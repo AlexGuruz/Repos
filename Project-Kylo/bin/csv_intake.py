@@ -255,6 +255,10 @@ def process_csv_intake(
             
             # 10. Cleanup
             cleanup_temp_data(db_conn)
+
+            # Persist the dedupe, storage, and file-processing records before
+            # reporting success. psycopg2 rolls back uncommitted work on close.
+            db_conn.commit()
             
             # 11. Get final stats
             storage_stats = get_storage_stats(db_conn, batch_id)

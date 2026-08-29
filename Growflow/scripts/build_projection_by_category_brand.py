@@ -283,6 +283,31 @@ def brand_excluded(brand_label: str, excluded_casefold: frozenset[str]) -> bool:
     return brand_label.strip().casefold() in excluded_casefold
 
 
+def _unique_order_items_in_local_window(
+    rows: list[dict[str, Any]],
+    *,
+    tz: Any,
+    report_start_local: date,
+    report_end_local: date,
+    seen: set[str],
+) -> list[dict[str, Any]]:
+    """Return order items in the report window, deduped across API chunks."""
+    out: list[dict[str, Any]] = []
+    for n in rows:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        out.append(n)
+    return out
+
+
 def implied_monthly_cog_throughput_usd(
     units: int,
     cog_cents: int,
@@ -1753,16 +1778,17 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
+        for n in _unique_order_items_in_local_window(
+            raw,
+            tz=tz,
+            report_start_local=report_start_local,
+            report_end_local=report_end_local,
+            seen=seen,
+        ):
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
                 continue
             ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
