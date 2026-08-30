@@ -65,7 +65,7 @@ def main() -> int:
     )
     c = submit(
         {
-            "file_path": "E:/Repos/products/ai-lab/docs/OPERATOR_DESK.md",
+            "file_path": "/mnt/workshop/Repos/products/ai-lab/docs/OPERATOR_DESK.md",
             "action_type": "operator_desk_tool",
             "reason": "always smoke",
             "risk_level": "low",

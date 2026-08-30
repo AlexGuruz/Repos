@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --c-orch: #4338ca;
+  --c-worker: #0f6e56;
+  --c-rag: #185fa5;
+  --c-sup: #5f5e5a;
+  --c-read: #185fa5;
+  --c-write: #b45309;
+  --c-exec: #993c1d;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #0f0f0f;
+  color: #e8e8e6;
+  font-family: system-ui, sans-serif;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+/* Status colours */
+.st-pending  { background: rgba(245,158,11,.15); color: #fcd34d; }
+.st-approved { background: rgba(34,197,94,.12);  color: #86efac; }
+.st-denied   { background: rgba(239,68,68,.12);  color: #fca5a5; }
+.st-running  { background: rgba(99,102,241,.12); color: #a5b4fc; }
+.st-done     { background: rgba(148,163,184,.1); color: #94a3b8; }
+.st-error    { background: rgba(239,68,68,.15);  color: #f87171; }
+
+/* Op chip colours */
+.op-read  { background: rgba(24,95,165,.12);  color: #93c5fd; border-color: rgba(24,95,165,.3); }
+.op-write { background: rgba(180,83,9,.12);   color: #fcd34d; border-color: rgba(180,83,9,.3); }
+.op-exec  { background: rgba(153,60,29,.12);  color: #fca5a5; border-color: rgba(153,60,29,.3); }
+.op-rag   { background: rgba(15,110,86,.12);  color: #6ee7b7; border-color: rgba(15,110,86,.3); }
+.op-sys   { background: rgba(148,163,184,.08); color: #94a3b8; border-color: rgba(148,163,184,.15); }
+
+/* Blink cursor */
+@keyframes blink { 50% { opacity: 0; } }
+.cursor-blink {
+  display: inline-block; width: 7px; height: 13px;
+  background: currentColor; opacity: .7;
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom; margin-left: 2px;
+}
+
+/* Pulse dot */
+@keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+.pulse { animation: pulse-dot 1.4s ease-in-out infinite; }

@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: ./backend/.env
+    environment:
+      AI_LAB_ROOT: /ai-lab
+      AI_LAB_GOVERNANCE_ROOT: /governance
+      AI_LAB_MACHINE: main
+      AI_LAB_ENFORCEMENT: "1"
+      INDEX_POLICY_PATH: /ai-lab/command-center/command-center/config/index_policy.yaml
+      WATCH_PATHS: /ai-lab:/governance
+      NVIDIA_SMI_PATH: /usr/bin/nvidia-smi
+      ACHERON_RETAIL_DISABLED: "1"
+      CC_LIGHT_MODE: "0"
+      OLLAMA_HOST: 127.0.0.1:11434
+    volumes:
+      - ./backend:/app
+      - /mnt/workshop/Repos/products/ai-lab:/ai-lab
+      - /mnt/workshop/Repos/products/ai-lab-governance:/governance:ro
+    restart: unless-stopped
+    # Host net: see worker tunnels on 127.0.0.1:8765/5678/11435
+    network_mode: host
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # Host net so nginx can proxy to 127.0.0.1:8000 (bridge→host:8000 is firewalled here)
+    network_mode: host
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "backend:host-gateway"
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -39,7 +39,7 @@ def main() -> int:
     )
     always_id = submit(
         {
-            "file_path": "E:/Repos/products/ai-lab/docs/OPERATOR_DESK.md",
+            "file_path": "/mnt/workshop/Repos/products/ai-lab/docs/OPERATOR_DESK.md",
             "action_type": "operator_desk_tool",
             "reason": "UI_ALWAYS_MARKER unique always target",
             "risk_level": "low",
