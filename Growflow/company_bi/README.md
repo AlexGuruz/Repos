@@ -4,23 +4,25 @@ Combines **GrowFlow POS** (sales, inventory) and **transaction sheets** (income/
 
 ## Quick run (from Growflow repo root)
 
-```bash
-# CSV output (no Google Sheets write)
-python -m company_bi.run_pipeline --no-sheets --months 6
-
-# Write to Google Sheets (set output_spreadsheet_id in config/sources.yaml)
-python -m company_bi.run_pipeline --months 6
-```
-
-Output with `--no-sheets`: `company_bi/output/*.csv` (dashboard, anomalies, expense_category, margin, reconciliation, labor, inventory_analysis).
-
-**Automated monthly run (Phase 3):**
+`python -m company_bi.run_pipeline` is **retired** (shim exits 2). Use:
 
 ```bash
-python -m company_bi.scripts.monthly_run --months 12
+# Company BI report (facts DB + optional sheets_transactions.db)
+PYTHONPATH=. python scripts/build_company_bi_report.py --months 6
+
+# Load financial Google Sheets into local SQLite
+PYTHONPATH=. python -m company_bi.scripts.build_sheets_transactions_db
 ```
 
-Runs pipeline, archives outputs to `company_bi/archive/YYYY-MM/`, and optionally runs category rule suggestions. Validation runs inside the pipeline; on failure the run stops with a clear error.
+Output: `data/company_bi_report_latest.json`.
+
+**Automated monthly run (legacy wrapper still calls run_pipeline — prefer orchestrator):**
+
+```bash
+PYTHONPATH=. python scripts/build_company_bi_report.py --months 12
+```
+
+See `docs/GROWFLOW_OPS_PLATFORM.md`.
 
 ## Docs
 

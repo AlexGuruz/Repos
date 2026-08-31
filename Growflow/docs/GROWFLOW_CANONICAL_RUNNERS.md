@@ -8,6 +8,10 @@ Canonical runners currently integrated with validation gateway:
 | `scripts/build_transfer_receipts_db.py` | `transfer_receipts` | `transfer_receipts_accepted_v1` | `strict` | blocks DB load when validation fails |
 | `scripts/export_transfer_receipt_units.py` | `transfer_units` | `transfer_units_from_receipts_v1` | `strict` | blocks JSONL write when validation fails |
 | `scripts/rank_mj_brands_profit_velocity_sheet.py` | `brand_profit_velocity` | `order_items_brand_profit_velocity_v1` | `strict` | blocks sheet write when validation fails |
+| `scripts/ingest_growflow_facts.py` | `growflow_fact_ingest` | (registry) | `strict` | fact store upsert |
+| `scripts/build_retail_dashboard.py` | `retail_dashboard` | — | `strict` | blocks when sum validation fails |
+| `scripts/run_platform_orchestrator.py` | `platform` | — | ops | writes `platform_status_latest.json` + events |
+| `scripts/build_company_bi_report.py` | `company_bi` | — | — | `data/company_bi_report_latest.json` |
 
 ## Run Guidance
 

@@ -1,0 +1,19 @@
+﻿{
+    "ok":  true,
+    "source":  "approval_queue",
+    "freshness":  "fresh",
+    "generated_at":  null,
+    "warnings":  [
+
+                 ],
+    "error_code":  null,
+    "degraded":  false,
+    "approval_required":  true,
+    "approval_id":  "approval-125",
+    "tool_name":  "cc_investor_demo_ping",
+    "status":  "pending",
+    "auto_permanent":  false,
+    "permanent_rule_id":  null,
+    "act_id":  null,
+    "execute_queued":  false
+}

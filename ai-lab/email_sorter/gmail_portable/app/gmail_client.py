@@ -545,16 +545,79 @@ def message_has_label(message_id: str, label_name: str) -> bool:
     return label_name in names
 
 
-def add_label_to_message(message_id: str, label_name: str) -> None:
-    service = get_gmail_service()
+def add_label_to_message(
+    message_id: str,
+    label_name: str,
+    *,
+    service: Resource | None = None,
+) -> None:
+    svc = service or get_gmail_service()
     label_id = get_or_create_label_id(label_name)
+    # get_or_create_label_id uses default service cache — ensure labels exist on the
+    # same mailbox by temporarily relying on a prior get_gmail_service(token_file=...).
     body = {"addLabelIds": [label_id], "removeLabelIds": []}
     try:
-        service.users().messages().modify(userId="me", id=message_id, body=body).execute()
+        svc.users().messages().modify(userId="me", id=message_id, body=body).execute()
         LOGGER.info("Added label '%s' to message %s.", label_name, message_id)
     except HttpError as exc:
         raise RuntimeError(
             f"Gmail API error while adding label '{label_name}' to {message_id}: {exc}"
+        ) from exc
+
+
+def archive_message(
+    message_id: str,
+    *,
+    mark_read: bool = True,
+    service: Resource | None = None,
+) -> None:
+    """
+    Remove the system INBOX label (Gmail archive). Never deletes the message.
+
+    Uses the system label id ``INBOX`` directly — do not resolve via user-label cache.
+    """
+    svc = service or get_gmail_service()
+    remove_ids = ["INBOX"]
+    if mark_read:
+        remove_ids.append("UNREAD")
+    body = {"addLabelIds": [], "removeLabelIds": remove_ids}
+    try:
+        svc.users().messages().modify(userId="me", id=message_id, body=body).execute()
+        LOGGER.info("Archived message %s (removed INBOX%s).", message_id, " + UNREAD" if mark_read else "")
+    except HttpError as exc:
+        raise RuntimeError(f"Gmail API error while archiving {message_id}: {exc}") from exc
+
+
+def apply_label_and_archive(
+    message_id: str,
+    label_name: str,
+    *,
+    mark_read: bool = True,
+    token_file: str | Path | None = None,
+    credentials_file: str | Path | None = None,
+) -> None:
+    """Apply a user category label, then archive out of Inbox (never delete)."""
+    # Bind this mailbox before label create/lookup (global label cache).
+    if token_file is not None or credentials_file is not None:
+        clear_gmail_service_cache()
+        _LABEL_NAME_TO_ID.clear()
+        get_gmail_service(token_file=token_file, credentials_file=credentials_file)
+    service = get_gmail_service(token_file=token_file, credentials_file=credentials_file)
+    label_id = get_or_create_label_id(label_name)
+    remove_ids = ["INBOX"]
+    if mark_read:
+        remove_ids.append("UNREAD")
+    body = {"addLabelIds": [label_id], "removeLabelIds": remove_ids}
+    try:
+        service.users().messages().modify(userId="me", id=message_id, body=body).execute()
+        LOGGER.info(
+            "Labeled '%s' and archived message %s (removed INBOX).",
+            label_name,
+            message_id,
+        )
+    except HttpError as exc:
+        raise RuntimeError(
+            f"Gmail API error while labeling/archiving '{label_name}' on {message_id}: {exc}"
         ) from exc
 
 

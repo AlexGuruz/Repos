@@ -1,0 +1,9 @@
+{
+  "http": 200,
+  "body": {
+    "ok": false,
+    "error": "Approval 'approval-104' not found in queue.",
+    "id": "approval-104",
+    "resolution": "approved"
+  }
+}

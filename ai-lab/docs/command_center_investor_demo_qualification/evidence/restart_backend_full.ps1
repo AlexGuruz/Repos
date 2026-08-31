@@ -1,0 +1,6 @@
+$ErrorActionPreference = "Stop"
+$env:PYTHONPATH = "E:\Repos\ai-lab"
+$env:OPERATOR_DESK_ENABLED = "1"
+$env:CC_LIGHT_MODE = "0"
+Set-Location "E:\Repos\ai-lab\command-center\command-center\backend"
+& "E:\Repos\ai-lab\command-center\command-center\.venv\Scripts\python.exe" "E:\Repos\ai-lab\command-center\command-center\scripts\run_uvicorn_once.py"

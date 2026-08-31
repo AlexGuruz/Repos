@@ -1,0 +1,15 @@
+---
+description: Growflow Ops Platform — AI read order and forbidden ask-time actions
+globs: Growflow/**/*,ai-lab/operator_desk/**/*,ai-lab/registry/growflow_read_surfaces/**/*
+alwaysApply: false
+---
+
+# Growflow Ops — agent read protocol
+
+1. Open `ai-lab/registry/growflow_read_surfaces/catalog.json` and pick `surface_id`.
+2. Prefer Operator Desk tools / prepared `growflow_snapshot.json` / `data/*_latest.json`.
+3. HTTP GET only (`:8791` or CC `/api/retail/*`). Never GraphQL at ask-time.
+4. Never `POST /api/retail/refresh` from Operator Desk.
+5. Writes only via approval queue + `ai-lab/registry/scripts.json` (`approval_required: true`).
+6. If `fixture_suspected` or trust not healthy — state that before quoting numbers.
+7. Do not invoke deprecated `growflow_sales_today` or `company_bi.run_pipeline` (use `build_company_bi_report.py`).

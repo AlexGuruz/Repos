@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+*.egg
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# === Secrets / credentials / passkeys / API keys (never commit) ===
+.env
+.env.*
+!.env.example
+!.env*.example
+.secrets/
+secrets/
+**/.secrets/
+**/secrets/
+**/service_account.json
+**/service_account*.json
+**/credentials.json
+**/token.json
+**/token.*.json
+**/client_secret*.json
+*.pem
+*.p12
+*.pfx
+*.key
+!*.key.example
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+*.ppk
+*passkey*
+*Passkey*
+*.passkey.json
+webauthn*.json
+**/.secrets.md
+**/SECRETS.local.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log

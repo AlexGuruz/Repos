@@ -1,0 +1,1 @@
+# Worker assistant FastAPI app

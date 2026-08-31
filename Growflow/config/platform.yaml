@@ -1,0 +1,34 @@
+# Growflow Ops Platform config (SaaS-ready seams; single-org default)
+org_id: nugz
+timezone: America/Chicago
+
+data_dir: data
+
+paths:
+  facts_db: data/growflow_facts.db
+  cache_db: data/retail_dashboard.db
+  retail_dashboard_json: data/retail_dashboard_latest.json
+  capital_json: data/retail_capital_latest.json
+  consignment_json: data/retail_consignment_latest.json
+  reconciliation_json: data/retail_reconciliation_latest.json
+  platform_status_json: data/platform_status_latest.json
+  sales_projection_json: data/sales_projection_latest.json
+  company_bi_json: data/company_bi_report_latest.json
+  transfer_db: data/transfer_receipts.db
+  consignment_db: data/consignment.db
+  layer2_csv: data/projection_by_category_brand_layer2_recovery.csv
+  sheets_transactions_db: company_bi/db/sheets_transactions.db
+
+api:
+  host: 127.0.0.1
+  port: 8791
+
+slo:
+  retail_seconds: 14400      # 4h
+  consignment_seconds: 86400 # 24h
+  capital_seconds: 172800    # 48h
+  projection_seconds: 43200  # 12h
+
+fixture_detector:
+  order_count_max: 3
+  net_sales_max: 100.0

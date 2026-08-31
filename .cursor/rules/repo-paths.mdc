@@ -1,0 +1,29 @@
+---
+description: Canonical repository paths after the July 2026 zoned-layout migration
+alwaysApply: true
+---
+
+# Canonical repository paths
+
+This workspace no longer uses flat product folders under `E:\Repos`.
+
+Use these paths:
+
+- Project Kylo: `E:\Repos\products\project-kylo`
+- Greg Kylo: `E:\Repos\products\greg-kylo`
+- Growflow: `E:\Repos\products\growflow`
+- COG allocation: `E:\Repos\products\cog-allocation`
+- AI Lab: `E:\Repos\products\ai-lab`
+- AI Lab governance: `E:\Repos\products\ai-lab-governance`
+- Kylo site: `E:\Repos\products\kylo-site`
+- GIGATT Geomapper: `E:\Repos\products\gigatt-geomapper`
+- Obsidian Brain: `E:\Repos\internal\obsidian-brain\Obsidian\Brain`
+- Migration helpers: `E:\Repos\tools\migration`
+
+Never generate commands against retired flat paths such as `E:\Repos\Project-Kylo`, `E:\Repos\Growflow`, `E:\Repos\ai-lab`, or `E:\Repos\Ai`.
+
+If another rule or open file cites flat `Growflow/`, `Ai/`, or `E:\Repos\ai-lab`, rewrite via `docs/REPO_PATH_MIGRATION.md` before running commands.
+
+Exception: `C:\Project-Kylo` is an intentional power-1 runtime alias, not the Acheron source checkout.
+
+Before cross-repo edits, read `AGENTS.md` and `docs/REPO_PATH_MIGRATION.md`. Prefer `REPOS_ROOT` and the shared path helpers over hardcoded sibling assumptions.

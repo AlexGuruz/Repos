@@ -1,0 +1,13 @@
+
+Name                                             Length LastWriteTime       
+----                                             ------ -------------       
+api_requests.jsonl                              1210362 7/14/2026 7:06:28 PM
+event_stream_20260714_145601.jsonl.archived 41294184661 7/14/2026 2:56:02 PM
+event_stream.jsonl                              1160622 7/14/2026 3:49:58 PM
+errors.jsonl                                       8219 7/14/2026 7:05:12 PM
+control.jsonl                                     13435 7/14/2026 7:04:36 PM
+ops.jsonl                                         93188 7/14/2026 7:00:44 PM
+chat.jsonl                                          256 7/14/2026 5:11:38 PM
+
+
+

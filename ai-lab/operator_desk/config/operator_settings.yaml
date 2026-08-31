@@ -1,0 +1,9 @@
+schema_version: "1"
+enabled: true
+brain_vault_root: null
+email_digest_cache_ttl_seconds: 60
+growflow_snapshot_stale_seconds: 3600
+growflow_api_url: null
+growflow_http_timeout_seconds: 15.0
+max_job_primer_chars: 12000
+bind_policy: loopback_only

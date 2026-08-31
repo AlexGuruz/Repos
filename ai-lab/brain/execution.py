@@ -70,15 +70,28 @@ def _resolve_path(entry: dict) -> Path | None:
     repo = entry.get("repo")
     if not path:
         return None
+    candidates: list[Path] = []
     if repo:
         # Assume main rig: E:\Repos\<repo>\<path>
         base = Path("E:/Repos") / repo
         if not base.exists():
             base = AI_LAB_ROOT.parent / repo
-        full = (base / path).resolve()
+        candidates.append((base / path))
+        # Legacy registry rows accidentally double-prefix the repo folder.
+        # e.g. repo=Growflow path=Growflow/scripts/... → E:/Repos/Growflow/scripts/...
+        if path.replace("\\", "/").startswith(f"{repo}/"):
+            candidates.append(base / path[len(repo) + 1 :])
+        candidates.append(AI_LAB_ROOT.parent / path)
     else:
-        full = (AI_LAB_ROOT / path).resolve()
-    return full if full.exists() else None
+        candidates.append(AI_LAB_ROOT / path)
+    for full in candidates:
+        try:
+            resolved = full.resolve()
+        except OSError:
+            continue
+        if resolved.exists():
+            return resolved
+    return None
 
 
 def run(
@@ -111,6 +124,17 @@ def run(
             stdout="",
             stderr=f"Tool not in registry: {tool_name}",
             exit_code=1,
+            duration=0.0,
+            success=False,
+        )
+    if entry.get("executable") is False or str(entry.get("status") or "").lower() == "deprecated":
+        return RunResult(
+            stdout="",
+            stderr=(
+                f"Tool {tool_name} is not executable "
+                f"(status={entry.get('status')!r}). Use Operator Desk read tools instead."
+            ),
+            exit_code=3,
             duration=0.0,
             success=False,
         )

@@ -1,0 +1,225 @@
+INFO:     Started server process [61640]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     ('127.0.0.1', 65428) - "WebSocket /ws/chat" [accepted]
+INFO:     ('127.0.0.1', 56918) - "WebSocket /ws/control" [accepted]
+INFO:     connection closed
+INFO:     connection open
+INFO:     ('127.0.0.1', 51257) - "WebSocket /ws/ops" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 65164) - "WebSocket /ws/chat" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 58449) - "WebSocket /ws/control" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59427) - "WebSocket /ws/ops" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 59811) - "WebSocket /ws/chat" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 54886) - "WebSocket /ws/telemetry" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     ('127.0.0.1', 52008) - "WebSocket /ws/telemetry" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 61304) - "WebSocket /ws/telemetry" [accepted]
+INFO:     connection closed
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 240, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 69, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 373, in handle
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 96, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 94, in app
+    await func(session)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\routing.py", line 348, in app
+    await dependant.call(**values)
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 120, in ws_telemetry
+    await _ws_channel(ws, "telemetry")
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 113, in _ws_channel
+    await ws.receive_text()
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\websockets.py", line 134, in receive_text
+    raise RuntimeError(
+RuntimeError: WebSocket is not connected. Need to call "accept" first.
+INFO:     ('127.0.0.1', 64367) - "WebSocket /ws/chat" [accepted]
+INFO:     connection closed
+INFO:     ('127.0.0.1', 56880) - "WebSocket /ws/control" [accepted]
+INFO:     connection closed
+INFO:     ('127.0.0.1', 51299) - "WebSocket /ws/control" [accepted]
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 240, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 69, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 373, in handle
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 96, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 94, in app
+    await func(session)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\routing.py", line 348, in app
+    await dependant.call(**values)
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 125, in ws_control
+    await _ws_channel(ws, "control")
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 113, in _ws_channel
+    await ws.receive_text()
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\websockets.py", line 134, in receive_text
+    raise RuntimeError(
+RuntimeError: WebSocket is not connected. Need to call "accept" first.
+INFO:     connection closed
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 240, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 69, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 373, in handle
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 96, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 94, in app
+    await func(session)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\routing.py", line 348, in app
+    await dependant.call(**values)
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 125, in ws_control
+    await _ws_channel(ws, "control")
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 113, in _ws_channel
+    await ws.receive_text()
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\websockets.py", line 134, in receive_text
+    raise RuntimeError(
+RuntimeError: WebSocket is not connected. Need to call "accept" first.
+INFO:     ('127.0.0.1', 64757) - "WebSocket /ws/control" [accepted]
+INFO:     ('127.0.0.1', 57844) - "WebSocket /ws/control" [accepted]
+INFO:     connection closed
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 240, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 69, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\errors.py", line 151, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\cors.py", line 77, in __call__
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 373, in handle
+    await self.app(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 96, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\routing.py", line 94, in app
+    await func(session)
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\fastapi\routing.py", line 348, in app
+    await dependant.call(**values)
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 125, in ws_control
+    await _ws_channel(ws, "control")
+  File "E:\Repos\ai-lab\command-center\command-center\backend\routers\events.py", line 113, in _ws_channel
+    await ws.receive_text()
+  File "E:\Repos\ai-lab\command-center\command-center\.venv\Lib\site-packages\starlette\websockets.py", line 134, in receive_text
+    raise RuntimeError(
+RuntimeError: WebSocket is not connected. Need to call "accept" first.
+INFO:     connection open
+INFO:     ('127.0.0.1', 65289) - "WebSocket /ws/chat" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 52780) - "WebSocket /ws/ops" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 63812) - "WebSocket /ws/ops" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 49828) - "WebSocket /ws/chat" [accepted]
+INFO:     connection open
+INFO:     ('127.0.0.1', 51255) - "WebSocket /ws/control" [accepted]
+INFO:     connection open

@@ -1,0 +1,18 @@
+{
+  "http": 200,
+  "body": {
+    "ok": true,
+    "rule": {
+      "id": "PAR-9453975B",
+      "action": "operator_desk_tool",
+      "match": {
+        "action_type": "operator_desk_tool",
+        "file_path": "operator_desk",
+        "tool_name": "growflow_sales_today",
+        "reason": "QUAL_ALWAYS_MARKER growflow sales today"
+      },
+      "note": "QUAL_ALWAYS_MARKER investor demo",
+      "source_approval_id": "approval-105"
+    }
+  }
+}

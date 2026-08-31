@@ -75,6 +75,15 @@ _DEFAULT_TOOLS: list[dict[str, Any]] = [
         "output_shape": "sales summary object",
     },
     {
+        "name": "cc_investor_demo_ping",
+        "description": "Safe read-only ping used for Command Center approval→execute demos.",
+        "args": {},
+        "side_effects": "read_only",
+        "approval_required": True,
+        "risk_level": "low",
+        "output_shape": "json ok marker",
+    },
+    {
         "name": "repo_full_rebuild_gate_a",
         "description": "Force full rebuild in worker staging and promote (Gate A).",
         "args": {"repo_id": "string", "gate": "string"},

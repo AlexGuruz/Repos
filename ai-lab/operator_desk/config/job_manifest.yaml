@@ -1,0 +1,49 @@
+version: "1"
+jobs:
+  - job_id: company_email
+    title: Company Email Triage
+    note: job_company_email.md
+    intent_keys:
+      - email_digest
+      - email_draft
+      - email_triage
+    tool_ids:
+      - operator_email_digest
+      - operator_email_create_draft
+  - job_id: growflow_retail
+    title: Growflow Retail Ops
+    note: job_growflow_retail.md
+    intent_keys:
+      - growflow_status
+      - retail_status
+      - growflow_capital
+      - growflow_consignment
+      - growflow_projection
+      - growflow_bi
+      - growflow_catalog
+    tool_ids:
+      - operator_growflow_status
+      - operator_growflow_retail
+      - operator_growflow_capital
+      - operator_growflow_consignment
+      - operator_growflow_projection
+      - operator_growflow_bi_summary
+      - operator_growflow_catalog
+  - job_id: machine_actions
+    title: Machine Actions
+    note: job_machine_actions.md
+    intent_keys:
+      - machine_status
+      - machine_execute
+      - pending_approvals
+    tool_ids:
+      - operator_machine_list_pending
+      - operator_machine_submit_action
+  - job_id: repo_awareness
+    title: Repo Awareness
+    note: job_repo_awareness.md
+    intent_keys:
+      - repo_map
+      - repo_locate
+    tool_ids:
+      - operator_repo_map

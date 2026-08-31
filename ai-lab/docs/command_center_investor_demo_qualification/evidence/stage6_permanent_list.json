@@ -1,0 +1,286 @@
+{
+  "rules": [
+    {
+      "id": "PAR-43504305",
+      "action": "write_docs_update",
+      "match": {
+        "file_path": "E:\\Repos\\activepieces\\README.md",
+        "action_type": "write_docs_update",
+        "reason": "README stale; README policy gaps (missing: setup, configuration, usage, architecture, verification)"
+      },
+      "note": "from approval-11",
+      "source_approval_id": "approval-11"
+    },
+    {
+      "id": "PAR-D5FC529A",
+      "action": "write_docs_update",
+      "match": {
+        "file_path": "E:\\Repos\\activepieces\\README.md",
+        "action_type": "write_docs_update",
+        "reason": "README stale; README policy gaps (missing: setup, configuration, usage, architecture, verification)"
+      },
+      "note": "from approval-10",
+      "source_approval_id": "approval-10"
+    },
+    {
+      "id": "PAR-1925D8C8",
+      "action": "write_docs_update",
+      "match": {
+        "file_path": "E:\\Repos\\activepieces\\README.md",
+        "action_type": "write_docs_update",
+        "reason": "README stale; README policy gaps (missing: setup, configuration, usage, architecture, verification)"
+      },
+      "note": "from approval-11",
+      "source_approval_id": "approval-11"
+    },
+    {
+      "id": "PAR-3E61B690",
+      "action": "write_docs_update",
+      "match": {
+        "file_path": "E:\\Repos\\activepieces\\README.md",
+        "action_type": "write_docs_update",
+        "reason": "README stale; README policy gaps (missing: setup, configuration, usage, architecture, verification)"
+      },
+      "note": "from approval-10",
+      "source_approval_id": "approval-10"
+    },
+    {
+      "id": "PAR-2DC9C673",
+      "action": "write_docs_update",
+      "match": {
+        "action_type": "write_docs_update",
+        "reason": "README stale",
+        "file_path": "E:\\Repos\\BMAD-METHOD/README.md"
+      },
+      "note": "from approval-8",
+      "source_approval_id": "approval-8"
+    },
+    {
+      "id": "PAR-5A9BB016",
+      "action": "write_docs_update",
+      "match": {
+        "action_type": "write_docs_update",
+        "reason": "README stale",
+        "file_path": "E:\\Repos\\BMAD-METHOD/README.md"
+      },
+      "note": "from approval-7",
+      "source_approval_id": "approval-7"
+    },
+    {
+      "id": "PAR-6D6E0DD6",
+      "action": "operator_desk_tool",
+      "match": {
+        "tool_name": "_cc_always_smoke",
+        "action_type": "operator_desk_tool",
+        "reason": "always allow smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-9"
+    },
+    {
+      "id": "PAR-6B9CB193",
+      "action": "operator_desk_tool",
+      "match": {
+        "action_type": "operator_desk_tool",
+        "reason": "always smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "tool_name": "_cc_always_smoke"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-16"
+    },
+    {
+      "id": "PAR-303119CD",
+      "action": "operator_desk_tool",
+      "match": {
+        "action_type": "operator_desk_tool",
+        "reason": "always smoke",
+        "tool_name": "_cc_always_smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-25"
+    },
+    {
+      "id": "PAR-224FC71B",
+      "action": "operator_desk_tool",
+      "match": {
+        "tool_name": "_cc_always_smoke",
+        "action_type": "operator_desk_tool",
+        "reason": "always smoke2",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md"
+      },
+      "note": "x",
+      "source_approval_id": "approval-26"
+    },
+    {
+      "id": "PAR-56124772",
+      "action": "operator_desk_tool",
+      "match": {
+        "tool_name": "_cc_always_smoke",
+        "action_type": "operator_desk_tool",
+        "reason": "always smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-29"
+    },
+    {
+      "id": "PAR-05A055E8",
+      "action": "operator_desk_tool",
+      "match": {
+        "reason": "always smoke",
+        "action_type": "operator_desk_tool",
+        "tool_name": "_cc_always_smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-38"
+    },
+    {
+      "id": "PAR-ADA05108",
+      "action": "operator_desk_tool",
+      "match": {
+        "reason": "always smoke",
+        "tool_name": "_cc_always_smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "action_type": "operator_desk_tool"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-41"
+    },
+    {
+      "id": "PAR-7AB48A93",
+      "action": "operator_desk_tool",
+      "match": {
+        "reason": "always smoke",
+        "tool_name": "_cc_always_smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "action_type": "operator_desk_tool"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-48"
+    },
+    {
+      "id": "PAR-98E45442",
+      "action": "operator_desk_tool",
+      "match": {
+        "reason": "manual always",
+        "tool_name": "_m",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "action_type": "operator_desk_tool"
+      },
+      "note": "manual",
+      "source_approval_id": "approval-51"
+    },
+    {
+      "id": "PAR-C5BEE777",
+      "action": "operator_desk_tool",
+      "match": {
+        "reason": "always smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "action_type": "operator_desk_tool",
+        "tool_name": "_cc_always_smoke"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-54"
+    },
+    {
+      "id": "PAR-561F6811",
+      "action": "operator_desk_tool",
+      "match": {
+        "tool_name": "_cc_always_smoke",
+        "reason": "always smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "action_type": "operator_desk_tool"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-57"
+    },
+    {
+      "id": "PAR-CB2E3CFD",
+      "action": "operator_desk_tool",
+      "match": {
+        "action_type": "operator_desk_tool",
+        "reason": "always smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "tool_name": "_cc_always_smoke"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-60"
+    },
+    {
+      "id": "PAR-48EEEB3C",
+      "action": "operator_desk_tool",
+      "match": {
+        "action_type": "operator_desk_tool",
+        "tool_name": "_cc_always_smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "reason": "always smoke"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-66"
+    },
+    {
+      "id": "PAR-4C5EF0AE",
+      "action": "operator_desk_tool",
+      "match": {
+        "action_type": "operator_desk_tool",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "reason": "always smoke",
+        "tool_name": "_cc_always_smoke"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-69"
+    },
+    {
+      "id": "PAR-02A52338",
+      "action": "operator_desk_tool",
+      "match": {
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "action_type": "operator_desk_tool",
+        "reason": "always smoke",
+        "tool_name": "_cc_always_smoke"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-76"
+    },
+    {
+      "id": "PAR-F4BB64C8",
+      "action": "operator_desk_tool",
+      "match": {
+        "reason": "always smoke",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "tool_name": "_cc_always_smoke",
+        "action_type": "operator_desk_tool"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-84"
+    },
+    {
+      "id": "PAR-DC3D3A63",
+      "action": "operator_desk_tool",
+      "match": {
+        "tool_name": "_cc_always_smoke",
+        "action_type": "operator_desk_tool",
+        "file_path": "E:/Repos/ai-lab/docs/OPERATOR_DESK.md",
+        "reason": "always smoke"
+      },
+      "note": "repair smoke",
+      "source_approval_id": "approval-99"
+    },
+    {
+      "id": "PAR-9453975B",
+      "action": "operator_desk_tool",
+      "match": {
+        "action_type": "operator_desk_tool",
+        "file_path": "operator_desk",
+        "tool_name": "growflow_sales_today",
+        "reason": "QUAL_ALWAYS_MARKER growflow sales today"
+      },
+      "note": "QUAL_ALWAYS_MARKER investor demo",
+      "source_approval_id": "approval-105"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "control_n": 70,
+  "control_ok": 70,
+  "control_p50": 358.52770000929013,
+  "control_p95": 1078.7752000032924,
+  "interactive_ok": 8,
+  "interactive_p95": 2117.1885000076145,
+  "bulkish_ok": 20,
+  "note": "worker index_repo returns 503 while WA started with lifespan=off (read-only path). Fairness shown as control metrics stay healthy while interactive worker calls run.",
+  "tunnel": {
+    "active": 0,
+    "active_bulk": 0,
+    "queue_depths": {
+      "control": 0,
+      "interactive": 0,
+      "bulk": 0
+    },
+    "metrics": {
+      "submitted": 0,
+      "completed": 0,
+      "timeouts": 0,
+      "cancellations": 0,
+      "rejections": 0,
+      "by_lane": {
+        "control": {
+          "submitted": 0,
+          "completed": 0,
+          "timeouts": 0,
+          "rejected": 0
+        },
+        "interactive": {
+          "submitted": 0,
+          "completed": 0,
+          "timeouts": 0,
+          "rejected": 0
+        },
+        "bulk": {
+          "submitted": 0,
+          "completed": 0,
+          "timeouts": 0,
+          "rejected": 0
+        }
+      }
+    }
+  }
+}

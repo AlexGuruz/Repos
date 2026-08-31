@@ -1,0 +1,10 @@
+{
+  "http": 200,
+  "elapsed_ms": 5419.3,
+  "body": {
+    "ok": true,
+    "id": "approval-104",
+    "resolution": "denied",
+    "executed": false
+  }
+}

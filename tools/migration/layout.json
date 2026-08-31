@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "repos_root_markers": ["docs", "tools"],
+  "products_dir": "products",
+  "zones": ["products", "internal", "concepts", "archive", "vendor", "tools"],
+  "moves": [
+    {"from": "Project-Kylo", "to": "products/project-kylo", "id": "project-kylo", "status": "production", "nested_git": true, "host": "power-1"},
+    {"from": "Greg-Kylo", "to": "products/greg-kylo", "id": "greg-kylo", "status": "production", "nested_git": true, "host": "power-1"},
+    {"from": "Growflow", "to": "products/growflow", "id": "growflow", "status": "production", "nested_git": false, "host": "acheron"},
+    {"from": "cog-allocation-system", "to": "products/cog-allocation", "id": "cog-allocation", "status": "production", "nested_git": false, "host": "acheron"},
+    {"from": "ai-lab", "to": "products/ai-lab", "id": "ai-lab", "status": "production", "nested_git": false, "host": "acheron"},
+    {"from": "ai-lab-governance", "to": "products/ai-lab-governance", "id": "ai-lab-governance", "status": "production", "nested_git": false, "host": "acheron"},
+    {"from": "kylo-site", "to": "products/kylo-site", "id": "kylo-site", "status": "production", "nested_git": true, "host": "deploy"},
+    {"from": "geomapper app", "to": "products/gigatt-geomapper", "id": "gigatt-geomapper", "status": "production", "nested_git": true, "host": "deploy"},
+    {"from": "Gigatt Transport LLC", "to": "internal/gigatt-transport", "id": "gigatt-transport", "status": "internal", "nested_git": false},
+    {"from": "Kylo Solutions", "to": "internal/kylo-solutions", "id": "kylo-solutions", "status": "internal", "nested_git": false},
+    {"from": "Home", "to": "internal/home", "id": "home", "status": "internal", "nested_git": false},
+    {"from": "Exzact Stat Ai business", "to": "internal/exzact-stat-assets", "id": "exzact-stat-assets", "status": "assets", "nested_git": false},
+    {"from": "Ai", "to": "internal/obsidian-brain", "id": "obsidian-brain", "status": "internal", "nested_git": false},
+    {"from": "System Templates", "to": "internal/system-templates", "id": "system-templates", "status": "templates", "nested_git": false},
+    {"from": "command-center-ui-concept", "to": "concepts/command-center-ui", "id": "command-center-ui", "status": "concept", "nested_git": true},
+    {"from": "PettyCash_Migration_Package", "to": "archive/pettycash-migration", "id": "pettycash-migration", "status": "archive", "nested_git": false},
+    {"from": "PilotCarMap", "to": "archive/pilot-car-map", "id": "pilot-car-map", "status": "legacy", "nested_git": false},
+    {"from": "Project-Kylo-feature-bank-normalizer-core-pr1", "to": "archive/project-kylo-feature-bank", "id": "project-kylo-feature-bank", "status": "archive", "nested_git": true},
+    {"from": "_tmp_Project-Kylo", "to": "archive/_tmp-project-kylo", "id": "tmp-project-kylo", "status": "tmp", "nested_git": true},
+    {"from": "_tmp_Project-Kylo_integrate", "to": "archive/_tmp-project-kylo-integrate", "id": "tmp-project-kylo-integrate", "status": "tmp", "nested_git": true},
+    {"from": "_archive", "to": "archive/misc/_archive", "id": "misc-archive", "status": "archive", "nested_git": false},
+    {"from": "_rollback", "to": "archive/misc/_rollback", "id": "misc-rollback", "status": "archive", "nested_git": false},
+    {"from": "_downloads", "to": "archive/misc/_downloads", "id": "misc-downloads", "status": "archive", "nested_git": false},
+    {"from": "activepieces", "to": "vendor/activepieces", "id": "activepieces", "status": "vendor", "nested_git": true},
+    {"from": "BMAD-METHOD", "to": "vendor/bmad-method", "id": "bmad-method", "status": "vendor", "nested_git": true},
+    {"from": "awesome-n8n-templates", "to": "vendor/awesome-n8n-templates", "id": "awesome-n8n-templates", "status": "vendor", "nested_git": true},
+    {"from": "WinPython64", "to": "tools/winpython", "id": "winpython", "status": "tooling", "nested_git": false},
+    {"from": "venv", "to": "tools/venv", "id": "venv", "status": "tooling", "nested_git": false},
+    {"from": "Git", "to": "tools/git", "id": "git-portable", "status": "tooling", "nested_git": false},
+    {"from": "_scripts", "to": "tools/scripts/_scripts", "id": "legacy-scripts", "status": "tooling", "nested_git": false},
+    {"from": "scripts", "to": "tools/scripts/root-scripts", "id": "root-scripts", "status": "tooling", "nested_git": false},
+    {"from": "_portable_control", "to": "tools/portable-control", "id": "portable-control", "status": "tooling", "nested_git": false}
+  ],
+  "file_moves": [
+    {"from": "README_MIGRATION.md", "to": "archive/pettycash-migration/README_MIGRATION.md"}
+  ],
+  "power1": {
+    "kylo_junction": "C:\\Project-Kylo",
+    "kylo_target": "C:\\worker\\repos\\products\\project-kylo",
+    "greg_root": "C:\\worker\\repos\\products\\greg-kylo",
+    "repos_mirror": "C:\\worker\\repos"
+  },
+  "vault": {
+    "legacy_rel": "Ai/Obsidian/Brain",
+    "new_rel": "internal/obsidian-brain/Obsidian/Brain"
+  },
+  "edrive": {
+    "personal": "E:\\Personal",
+    "archive": "E:\\_archive_E\\2026-07-28",
+    "moves": [
+      {"from": "E:\\Leighas iphone photos", "to": "E:\\Personal\\Leighas iphone photos", "zone": "personal"},
+      {"from": "E:\\Gigatt DashCam", "to": "E:\\Personal\\Gigatt DashCam", "zone": "personal"},
+      {"from": "E:\\kylo-site", "to": "E:\\_archive_E\\2026-07-28\\duplicates\\kylo-site", "zone": "duplicates"},
+      {"from": "E:\\Ossu Learning This Shit", "to": "E:\\_archive_E\\2026-07-28\\learning\\Ossu Learning This Shit", "zone": "learning"},
+      {"from": "E:\\MoneyPrinter", "to": "E:\\_archive_E\\2026-07-28\\learning\\MoneyPrinter", "zone": "learning"},
+      {"from": "E:\\MLB system", "to": "E:\\_archive_E\\2026-07-28\\learning\\MLB system", "zone": "learning"},
+      {"from": "E:\\Flower Package Labels", "to": "E:\\_archive_E\\2026-07-28\\learning\\Flower Package Labels", "zone": "learning"},
+      {"from": "E:\\Normal", "to": "E:\\_archive_E\\2026-07-28\\learning\\Normal", "zone": "learning"},
+      {"from": "E:\\AppFlowy", "to": "E:\\_archive_E\\2026-07-28\\learning\\AppFlowy", "zone": "learning"},
+      {"from": "E:\\copier", "to": "E:\\_archive_E\\2026-07-28\\vendors\\copier", "zone": "vendors"},
+      {"from": "E:\\focalboard", "to": "E:\\_archive_E\\2026-07-28\\vendors\\focalboard", "zone": "vendors"},
+      {"from": "E:\\pre-commit", "to": "E:\\_archive_E\\2026-07-28\\vendors\\pre-commit", "zone": "vendors"},
+      {"from": "E:\\renovate", "to": "E:\\_archive_E\\2026-07-28\\vendors\\renovate", "zone": "vendors"},
+      {"from": "E:\\msdownld.tmp", "to": "E:\\_archive_E\\2026-07-28\\tmp\\msdownld.tmp", "zone": "tmp"},
+      {"from": "E:\\DumpStack.log.tmp", "to": "E:\\_archive_E\\2026-07-28\\tmp\\DumpStack.log.tmp", "zone": "tmp"}
+    ]
+  },
+  "rewrite_globs": ["*.ps1", "*.py", "*.md", "*.yml", "*.yaml", "*.json", "*.code-workspace", "*.env", "*.mdc", "*.txt"],
+  "rewrite_exclude_dirs": [".git", "node_modules", "WinPython64", "venv", "tools/migration/reports", "_archive", "archive", "vendor", ".pytest_cache", "__pycache__", "dist", "build"],
+  "inventory_patterns": [
+    "Project-Kylo",
+    "Greg-Kylo",
+    "geomapper app",
+    "Gigatt Transport LLC",
+    "PettyCash_Migration_Package",
+    "command-center-ui-concept",
+    "cog-allocation-system",
+    "Exzact Stat Ai business",
+    "E:\\\\Repos\\\\Ai",
+    "E:/Repos/Ai",
+    "parent / \"Growflow\"",
+    "parent / 'Growflow'"
+  ]
+}

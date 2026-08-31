@@ -1,0 +1,15 @@
+﻿{
+    "ok":  true,
+    "rule":  {
+                 "id":  "PAR-B140C959",
+                 "action":  "operator_desk_tool",
+                 "match":  {
+                               "reason":  "DRY_ALWAYS_MARKER ping",
+                               "file_path":  "operator_desk",
+                               "tool_name":  "cc_investor_demo_ping",
+                               "action_type":  "operator_desk_tool"
+                           },
+                 "note":  "DRY RUN investor demo always",
+                 "source_approval_id":  "approval-130"
+             }
+}

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from services.common.config_loader import load_config
-from services.rules.jgdtruth_provider import fetch_rules_from_jgdtruth
+from services.rules.jgdtruth_provider import fetch_rules_by_intake_tab, fetch_rules_from_jgdtruth
 from services.sheets.poster import _extract_spreadsheet_id, _get_service
 from services.state.store import (
     State,
@@ -21,9 +21,15 @@ from services.state.store import (
     load_state,
     save_state,
 )
+from services.posting.projection_matcher import (
+    actuals_from_posting,
+    apply_projection_consumption,
+    projection_match_config,
+)
 from services.common.retry import google_api_execute
 from services.intake.csv_downloader import download_petty_cash_csv
 from services.intake.csv_processor import parse_csv_transactions
+from services.audit.row_model import content_fingerprint
 
 try:
     from services.audit.poster_audit import (
@@ -413,6 +419,199 @@ def apply_source_tab_fill_colors(
     return total
 
 
+def apply_target_cell_notes(
+    service,
+    spreadsheet_id: str,
+    posted_ok_ranges: Set[str],
+    cell_note_lines: Dict[str, List[str]],
+    sheet_title_to_id: Dict[str, int],
+) -> int:
+    """Write per-cell notes to posted target cells using repeatCell.
+
+    Notes are written after value posting succeeds (or after the target value was
+    verified correct), so source sheet posting state is not advanced for failed
+    target writes. Only the ``note`` field is updated (number format untouched).
+    """
+    requests: List[dict] = []
+    for rng in sorted(posted_ok_ranges):
+        note_text = "\n\n".join([line for line in (cell_note_lines.get(rng) or []) if str(line).strip()])
+        if not note_text:
+            continue
+        parsed = _parse_target_cell_a1(rng)
+        if not parsed:
+            continue
+        tab_title, row_1based, col0 = parsed
+        sid = sheet_title_to_id.get(_norm_tab_key_for_fill(tab_title))
+        if sid is None:
+            continue
+        start_row = int(row_1based) - 1
+        start_col = int(col0)
+        requests.append(
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sid,
+                        "startRowIndex": start_row,
+                        "endRowIndex": start_row + 1,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": start_col + 1,
+                    },
+                    "cell": {"note": note_text},
+                    "fields": "note",
+                }
+            }
+        )
+
+    if not requests:
+        return 0
+
+    chunk = 100
+    total = 0
+    for i in range(0, len(requests), chunk):
+        batch = requests[i : i + chunk]
+        google_api_execute(
+            service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body={"requests": batch}),
+            label="target:repeatCell_notes",
+        )
+        total += len(batch)
+    try:
+        print(f"[TARGET NOTES] Applied notes to {total} target cell(s)")
+    except Exception:
+        pass
+    return total
+
+
+def _target_number_format_preserve_enabled(cfg: Any) -> bool:
+    raw = (os.environ.get("KYLO_PRESERVE_TARGET_NUMBER_FORMAT") or "").strip().lower()
+    if raw in ("0", "false", "no", "off"):
+        return False
+    block = _cfg_get(cfg, "posting.target_number_format") or {}
+    if isinstance(block, dict) and "enabled" in block:
+        return bool(block.get("enabled"))
+    return True
+
+
+def _target_number_format_ref_row(cfg: Any) -> int:
+    block = _cfg_get(cfg, "posting.target_number_format") or {}
+    if isinstance(block, dict):
+        try:
+            return max(1, int(block.get("reference_row") or 2))
+        except Exception:
+            pass
+    return 2
+
+
+def _fetch_cell_number_format(service, spreadsheet_id: str, a1: str) -> Optional[Dict[str, object]]:
+    """Read numberFormat from a template cell (userEntered, else effective)."""
+    try:
+        resp = google_api_execute(
+            service.spreadsheets().get(
+                spreadsheetId=spreadsheet_id,
+                ranges=[a1],
+                fields="sheets(data(rowData(values(userEnteredFormat(numberFormat),effectiveFormat(numberFormat))))",
+            ),
+            label="target:read_number_format",
+        )
+        sheets = resp.get("sheets") or []
+        if not sheets:
+            return None
+        data = sheets[0].get("data") or []
+        if not data:
+            return None
+        row_data = data[0].get("rowData") or []
+        if not row_data:
+            return None
+        values = row_data[0].get("values") or []
+        if not values:
+            return None
+        cell = values[0]
+        uef = ((cell.get("userEnteredFormat") or {}).get("numberFormat")) or {}
+        if uef.get("type"):
+            return dict(uef)
+        eff = ((cell.get("effectiveFormat") or {}).get("numberFormat")) or {}
+        if eff.get("type"):
+            return dict(eff)
+    except Exception as e:
+        print(f"[FORMAT] WARN: could not read numberFormat from {a1}: {e}")
+    return None
+
+
+def preserve_target_number_formats(
+    service,
+    spreadsheet_id: str,
+    cfg: Any,
+    written_ranges: Set[str],
+    sheet_title_to_id: Dict[str, int],
+) -> int:
+    """Copy number format from a reference row onto newly written target cells.
+
+    Uses repeatCell with ``fields: userEnteredFormat.numberFormat`` only so font,
+    alignment, and background color are not touched.
+    """
+    if not written_ranges or not _target_number_format_preserve_enabled(cfg):
+        return 0
+
+    ref_row = _target_number_format_ref_row(cfg)
+    by_col: Dict[Tuple[str, int], List[int]] = defaultdict(list)
+    tab_titles: Dict[str, str] = {}
+    for rng in written_ranges:
+        parsed = _parse_target_cell_a1(rng)
+        if not parsed:
+            continue
+        tab_title, row1, col0 = parsed
+        tab_key = _norm_tab_key_for_fill(tab_title)
+        tab_titles[tab_key] = tab_title
+        if row1 == ref_row:
+            continue
+        by_col[(tab_key, col0)].append(row1)
+
+    requests: List[dict] = []
+    for (tab_key, col0), rows in by_col.items():
+        sid = sheet_title_to_id.get(tab_key)
+        tab_title = tab_titles.get(tab_key)
+        if sid is None or not tab_title:
+            continue
+        ref_a1 = f"{_quote_tab_a1(tab_title)}!{_col_to_a1(col0)}{ref_row}"
+        number_format = _fetch_cell_number_format(service, spreadsheet_id, ref_a1)
+        if not number_format:
+            continue
+        for row1 in sorted(set(rows)):
+            start_row = int(row1) - 1
+            requests.append(
+                {
+                    "repeatCell": {
+                        "range": {
+                            "sheetId": sid,
+                            "startRowIndex": start_row,
+                            "endRowIndex": start_row + 1,
+                            "startColumnIndex": col0,
+                            "endColumnIndex": col0 + 1,
+                        },
+                        "cell": {"userEnteredFormat": {"numberFormat": number_format}},
+                        "fields": "userEnteredFormat.numberFormat",
+                    }
+                }
+            )
+
+    if not requests:
+        return 0
+
+    chunk = 100
+    total = 0
+    for i in range(0, len(requests), chunk):
+        batch = requests[i : i + chunk]
+        google_api_execute(
+            service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body={"requests": batch}),
+            label="target:repeatCell_number_format",
+        )
+        total += len(batch)
+    try:
+        print(f"[FORMAT] Preserved accounting/number format on {total} target cell(s)")
+    except Exception:
+        pass
+    return total
+
+
 def _batch_read_headers(service, spreadsheet_id: str, tabs: List[str], header_row: int) -> Dict[str, List[str]]:
     """Read header row for multiple tabs in a single batchGet call.
 
@@ -441,6 +640,36 @@ def _batch_read_headers(service, spreadsheet_id: str, tabs: List[str], header_ro
 def _is_source_txn_posted(txn: dict, *, ignore_posted: bool) -> bool:
     """Return True when an intake row should not receive new posted/notes updates."""
     return (not ignore_posted) and bool(txn.get("posted_flag"))
+
+
+def _dedupe_intake_transactions(txns: List[dict]) -> List[dict]:
+    """Drop duplicate business lines (same date, company, source, amount).
+
+    BANK often contains copy rows that differ only in trailing KEY / rule metadata.
+    Callers should pass txns sorted with TRANSACTIONS before BANK so manual entries win.
+    """
+    seen: Set[str] = set()
+    out: List[dict] = []
+    dropped = 0
+    for t in txns:
+        try:
+            amount_cents = int(t.get("amount_cents") or 0)
+        except (TypeError, ValueError):
+            amount_cents = 0
+        fp = content_fingerprint(
+            str(t.get("posted_date") or ""),
+            str(t.get("company_id") or ""),
+            str(t.get("description") or ""),
+            amount_cents,
+        )
+        if fp in seen:
+            dropped += 1
+            continue
+        seen.add(fp)
+        out.append(t)
+    if dropped:
+        print(f"[INTAKE] Dropped {dropped} duplicate business line(s) (same date/company/source/amount)")
+    return out
 
 
 def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, rules_changed: bool = False):
@@ -565,6 +794,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     
     txns = sorted(csv_txns, key=_sort_key)
     print(f"[INTAKE] Loaded {len(txns)} total transactions from CSV")
+    txns = _dedupe_intake_transactions(txns)
+    print(f"[INTAKE] After business-line dedupe: {len(txns)} transactions")
 
     # If we have an active year filter, ignore transactions outside of it.
     if active_years:
@@ -600,24 +831,38 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         print(f"[INTAKE] Active years filter ({active_years}): kept {len(filtered)}, filtered out {filtered_out} transactions")
         txns = filtered
 
-    # Load rules from JGD tab, filtered by company
-    rules = fetch_rules_from_jgdtruth(company_upper)
-    print(f"[INFO] Loaded {len(rules)} rules from JGD tab (filtered for company: {company_upper})")
-    # Build a trim-only lookup (case-insensitive) to tolerate stray spaces and case differences
-    rules_by_trim: Dict[str, any] = {}
-    rules_by_trim_upper: Dict[str, any] = {}  # Case-insensitive lookup
-    approved_rules = [r for r in rules.values() if r.approved]
-    for r in approved_rules:
-        key = (r.source or "").strip()
-        if key:
-            if key not in rules_by_trim:
-                rules_by_trim[key] = r
-            # Also store case-insensitive version
-            key_upper = key.upper()
-            if key_upper not in rules_by_trim_upper:
-                rules_by_trim_upper[key_upper] = r
-    
-    # Diagnostic: report on approved rules status
+    # Load rules: dual intake tabs when rules.bank_rules_tab_name is configured (sandbox),
+    # otherwise both TRANSACTIONS and BANK share the legacy single-tab rule set.
+    rules_by_intake = fetch_rules_by_intake_tab(company_upper)
+    tx_rules = rules_by_intake.get("TRANSACTIONS") or {}
+    bank_rules = rules_by_intake.get("BANK") or tx_rules
+    print(
+        f"[INFO] Rules by intake: TRANSACTIONS={len(tx_rules)} BANK={len(bank_rules)} "
+        f"(company={company_upper})"
+    )
+
+    def _build_rule_lookups(rules: dict):
+        by_trim: Dict[str, any] = {}
+        by_trim_upper: Dict[str, any] = {}
+        approved = [r for r in rules.values() if r.approved]
+        for r in approved:
+            key = (r.source or "").strip()
+            if key:
+                if key not in by_trim:
+                    by_trim[key] = r
+                key_upper = key.upper()
+                if key_upper not in by_trim_upper:
+                    by_trim_upper[key_upper] = r
+        return approved, by_trim, by_trim_upper
+
+    approved_rules_tx, rules_by_trim_tx, rules_by_trim_upper_tx = _build_rule_lookups(tx_rules)
+    approved_rules_bank, rules_by_trim_bank, rules_by_trim_upper_bank = _build_rule_lookups(bank_rules)
+    # Legacy single-list aliases (used for incomplete-rule diagnostics)
+    approved_rules = list({id(r): r for r in (approved_rules_tx + approved_rules_bank)}.values())
+    rules_by_trim = rules_by_trim_tx
+    rules_by_trim_upper = rules_by_trim_upper_tx
+    rules = tx_rules  # fallback dict for .get(src) in matchers
+
     incomplete_rules = [r for r in approved_rules if not r.target_sheet or not r.target_header]
     if incomplete_rules:
         print(f"[WARN] Found {len(incomplete_rules)} approved rules missing target_sheet or target_header:")
@@ -630,7 +875,10 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             print(f"  - '{r.source[:50]}' missing: {', '.join(missing)}")
         if len(incomplete_rules) > 10:
             print(f"  ... and {len(incomplete_rules) - 10} more")
-    print(f"[INFO] Loaded {len(approved_rules)} approved rules ({len(rules_by_trim)} unique sources)")
+    print(
+        f"[INFO] Approved rules: TX={len(approved_rules_tx)} BANK={len(approved_rules_bank)} "
+        f"unique combined={len(approved_rules)}"
+    )
 
     # Base static dates (M/D/YY) used for the legacy (2025) workbook mapping.
     # IMPORTANT: when routing by year to separate workbooks (2025 vs 2026),
@@ -790,8 +1038,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return str(name)
 
         # All rule-matched transactions (posted + unposted) for full target-cell totals.
-        # Last tuple field: for_marking — True only for rows that still need posted/notes updates.
-        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool]] = []
+        # Last field for_marking — True only for rows that still need posted/notes updates.
+        # Extra fields (posted_date, description, account) feed Google Sheets target-cell notes.
+        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool, str, str, str]] = []
         # NOTE: We store the resolved target A1 range per source row so we only mark
         # rows as posted when their target cell is confirmed written (or already correct).
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
@@ -863,21 +1112,33 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             if not is_posted:
                 processed_txn_uids.add(txn_uid)
 
-            # Matching policy per company
+            # Matching policy per company + intake tab (TRANSACTIONS vs BANK rule sets)
+            intake_key = str(source_tab or "TRANSACTIONS").strip().upper()
+            if intake_key == "BANK":
+                tab_approved = approved_rules_bank
+                tab_by_trim = rules_by_trim_bank
+                tab_by_trim_upper = rules_by_trim_upper_bank
+                tab_rules = bank_rules
+            else:
+                tab_approved = approved_rules_tx
+                tab_by_trim = rules_by_trim_tx
+                tab_by_trim_upper = rules_by_trim_upper_tx
+                tab_rules = tx_rules
+
             rule = None
             if company_upper in relaxed_companies:
                 best = None
                 best_len = -1
-                for r in approved_rules:
+                for r in tab_approved:
                     s = _normalize_text((r.source or "").strip())
                     if not s:
                         continue
                     if s.lower() in _normalize_text(src_trim).lower() and len(s) > best_len:
                         best = r
                         best_len = len(s)
-                rule = best or rules_by_trim.get(src_trim) or rules.get(src)
+                rule = best or tab_by_trim.get(src_trim) or tab_rules.get(src)
             else:
-                rule = rules_by_trim.get(src_trim) or rules_by_trim_upper.get(src_trim.upper()) or rules.get(src)
+                rule = tab_by_trim.get(src_trim) or tab_by_trim_upper.get(src_trim.upper()) or tab_rules.get(src)
 
             if rule and rule.company_id:
                 rule_company_upper = rule.company_id.strip().upper()
@@ -930,6 +1191,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     txn_uid,
                     source_sid,
                     not is_posted,
+                    str(dt or ""),
+                    str(src_trim),
+                    str(t.get("account_number") or ""),
                 )
             )
 
@@ -949,11 +1213,12 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # Resolve writes to exact A1 cells
         data: List[Dict[str, object]] = []
-        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _mark) in matched_writes})
+        unique_tabs = sorted({tab for (tab, *_rest) in matched_writes})
         headers_map = _batch_read_headers(service, target_sid, unique_tabs, header_row)
         cell_totals: Dict[str, int] = {}
         cell_txns: Dict[str, Set[str]] = defaultdict(set)
         cell_source_tabs: Dict[str, Set[str]] = defaultdict(set)
+        cell_note_lines: Dict[str, List[str]] = defaultdict(list)
         cell_meta: Dict[str, Tuple[str, str, str]] = {}
         # Cache of actual date labels in Column A for each tab (normalized m/d/yy -> row)
         date_map_cache: Dict[str, Dict[str, int]] = {}
@@ -1031,16 +1296,37 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return actual
             return static_row
 
-        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid, for_marking) in matched_writes:
+        for (
+            tab,
+            header,
+            date_key,
+            amount_cents,
+            src_tab,
+            row0,
+            txn_uid,
+            source_sid,
+            for_marking,
+            raw_posted_date,
+            raw_description,
+            raw_account,
+        ) in matched_writes:
             headers = headers_map.get(tab) or []
             norm = [str(h).strip().lower() for h in headers]
             wanted = (header or "").strip().lower()
-            col_index = norm.index(wanted) if wanted in norm else -1
-            if col_index < 0 and company_upper in relaxed_companies:
-                for i, h in enumerate(norm):
-                    if wanted and wanted in h:
-                        col_index = i
-                        break
+            # Prefer exact matches; if duplicates exist (cash|bank zones), pick by intake pool:
+            # TRANSACTIONS/cash -> first column; BANK -> last column.
+            matches = [i for i, h in enumerate(norm) if h == wanted]
+            if not matches and company_upper in relaxed_companies and wanted:
+                matches = [i for i, h in enumerate(norm) if wanted in h]
+            src_u = str(src_tab or "").strip().upper()
+            if not matches:
+                col_index = -1
+            elif len(matches) == 1:
+                col_index = matches[0]
+            elif src_u == "BANK":
+                col_index = matches[-1]
+            else:
+                col_index = matches[0]
             if col_index < 0:
                 if for_marking:
                     skipped_header_date += 1
@@ -1064,6 +1350,14 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             else:
                 cell_source_tabs[a1].add("TRANSACTIONS")
             cell_meta[a1] = (tab, header, date_key)
+            note_lines = [
+                f"Date: {str(raw_posted_date)}",
+                f"Description: {str(raw_description)}",
+            ]
+            if str(raw_account).strip():
+                note_lines.append(f"Account: {str(raw_account)}")
+            note_lines.append(f"Amount: {amount_cents / 100.0:.2f}")
+            cell_note_lines[a1].append("\n".join(note_lines))
             tabs_touched.add(tab)
             if for_marking:
                 success_rows.append((source_sid, src_tab, row0, a1))
@@ -1075,8 +1369,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                             source_sid=str(source_sid or ""),
                             source_tab=str(src_tab or "TRANSACTIONS"),
                             company_id=company_upper,
-                            posted_date=str(dt or ""),
-                            description=str(src or ""),
+                            posted_date=str(raw_posted_date or ""),
+                            description=str(raw_description or ""),
                             amount_cents=amount_cents,
                             instance_id=instance_id,
                         )
@@ -1100,11 +1394,57 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     "source_tab": src_tab,
                     "row0": row0,
                     "company_id": company_upper,
-                    "posted_date": str(dt or ""),
-                    "description": str(src or ""),
+                    "posted_date": str(raw_posted_date or ""),
+                    "description": str(raw_description or ""),
                     "amount_cents": amount_cents,
                     "flagged": flagged,
                 }
+
+        # PAYROLL pool helpers (machine-readable EOD): attribute person-column
+        # totals to Payroll Cash Net / Payroll Bank Net by intake source_tab.
+        try:
+            pr_headers = headers_map.get("PAYROLL") or []
+            pr_norm = [str(h).strip().lower() for h in pr_headers]
+            cash_h = "payroll cash net"
+            bank_h = "payroll bank net"
+            if cash_h in pr_norm and bank_h in pr_norm:
+                cash_col = _col_to_a1(pr_norm.index(cash_h))
+                bank_col = _col_to_a1(pr_norm.index(bank_h))
+                by_date_pool: Dict[str, Dict[str, int]] = defaultdict(lambda: {"cash": 0, "bank": 0})
+                for a1_cell, cents in list(cell_totals.items()):
+                    tab_m, header_m, date_m = cell_meta.get(a1_cell, ("", "", ""))
+                    if str(tab_m).strip().upper() != "PAYROLL":
+                        continue
+                    hl = str(header_m).strip().lower()
+                    if hl in (cash_h, bank_h):
+                        continue
+                    tabs_u = {str(t).strip().upper() for t in (cell_source_tabs.get(a1_cell) or set())}
+                    if tabs_u == {"BANK"}:
+                        by_date_pool[str(date_m)]["bank"] += int(cents)
+                    else:
+                        by_date_pool[str(date_m)]["cash"] += int(cents)
+                for date_m, pools in by_date_pool.items():
+                    row_index = _resolve_date_row("PAYROLL", date_m, dates_to_row.get(date_m))
+                    if row_index is None:
+                        continue
+                    for pool_name, col_a1, cents in (
+                        ("cash", cash_col, pools["cash"]),
+                        ("bank", bank_col, pools["bank"]),
+                    ):
+                        # Only write the pool(s) this post batch actually touched.
+                        # Writing 0 for the untouched pool would wipe helpers built
+                        # by the other intake tab / company pass.
+                        if int(cents) == 0:
+                            continue
+                        helper_header = "Payroll Cash Net" if pool_name == "cash" else "Payroll Bank Net"
+                        ha1 = f"{_quote_tab_a1('PAYROLL')}!{col_a1}{row_index}"
+                        # Absolute set for this run's contribution to THIS pool only.
+                        cell_totals[ha1] = int(cents)
+                        cell_meta[ha1] = ("PAYROLL", helper_header, date_m)
+                        cell_source_tabs[ha1] = {"TRANSACTIONS" if pool_name == "cash" else "BANK"}
+                        cell_txns.setdefault(ha1, set())
+        except Exception as e:
+            print(f"[PAYROLL HELPERS] WARN: {e}")
 
         updated_ranges: Set[str] = set()
         update_entries: List[Dict[str, object]] = []
@@ -1384,6 +1724,35 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             )
 
         fills_applied = 0
+        formats_preserved = 0
+        target_notes_applied = 0
+        value_ranges_written = ranges_written | repair_written
+        if (not dry_run) and value_ranges_written and sheet_title_to_id:
+            try:
+                formats_preserved = int(
+                    preserve_target_number_formats(
+                        service,
+                        target_sid,
+                        cfg,
+                        value_ranges_written,
+                        sheet_title_to_id,
+                    )
+                )
+            except Exception as e:
+                print(f"[FORMAT] WARN: could not preserve target number formats: {e}")
+        if (not dry_run) and posted_ok_ranges and sheet_title_to_id:
+            try:
+                target_notes_applied = int(
+                    apply_target_cell_notes(
+                        service,
+                        target_sid,
+                        posted_ok_ranges,
+                        cell_note_lines,
+                        sheet_title_to_id,
+                    )
+                )
+            except Exception as e:
+                print(f"[TARGET NOTES] WARN: could not apply target notes: {e}")
         if (not dry_run) and posted_ok_ranges and sheet_title_to_id:
             try:
                 fills_applied = int(
@@ -1398,6 +1767,26 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 )
             except Exception as e:
                 print(f"[FILL] WARN: could not apply source-tab fills: {e}")
+
+        projection_consumed = 0
+        if (not dry_run) and posted_ok_ranges and service is not None:
+            try:
+                pm_cfg = projection_match_config(cfg)
+                if pm_cfg.get("enabled"):
+                    actual_cells = actuals_from_posting(
+                        cell_totals, cell_meta, cell_txns, posted_ok_ranges
+                    )
+                    pm_result = apply_projection_consumption(
+                        service,
+                        target_sid,
+                        cfg,
+                        company_upper,
+                        state,
+                        actual_cells,
+                    )
+                    projection_consumed = len(pm_result.consumed)
+            except Exception as e:
+                print(f"[PROJECTION] WARN: projection match failed: {e}")
 
         if not dry_run and (update_entries or processed_txn_uids or skipped_txn_uids_no_rule):
             try:
@@ -1552,10 +1941,13 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "cells_written": int(cells_written),
             "rows_marked_true": int(rows_marked_true),
             "fills_applied": int(fills_applied),
+            "formats_preserved": int(formats_preserved),
+            "target_notes_applied": int(target_notes_applied),
             "tabs": sorted(tabs_touched),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
             "skipped_rows": skipped_rows,
+            "projection_consumed": int(projection_consumed),
         }
 
     # Execute per-target posting and aggregate

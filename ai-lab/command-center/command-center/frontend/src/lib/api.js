@@ -170,10 +170,11 @@ export const api = {
   /** Local LLM can be slow — allow 3 minutes before client abort */
   chat: (message, history = []) => post('/api/chat', { message, history }, { timeoutMs: 180000 }),
   chatStream,
-  resolveApproval: (id, resolution) => post('/api/approvals/resolve', { id, resolution }),
+  resolveApproval: (id, resolution) =>
+    post('/api/approvals/resolve', { id, resolution }, { timeoutMs: 45000 }),
   approvals: () => get('/api/approvals'),
   listPermanentApprovals: () => get('/api/approvals/permanent'),
-  addPermanentApproval: (body) => post('/api/approvals/permanent', body),
+  addPermanentApproval: (body) => post('/api/approvals/permanent', body, { timeoutMs: 30000 }),
   deletePermanentApproval: (ruleId) =>
     httpDelete(`/api/approvals/permanent/${encodeURIComponent(ruleId)}`),
   hardware: () => get('/api/hardware/snapshot'),
@@ -210,4 +211,7 @@ export const api = {
     post(`/api/retail/capital/scenario/${encodeURIComponent(approvalId)}/deny`, {}, { timeoutMs: 10000 }),
   retailConsignment: () => get('/api/retail/consignment'),
   retailReconciliation: () => get('/api/retail/reconciliation'),
+  retailProjection: () => get('/api/retail/projection'),
+  retailPlatformHealth: () => get('/api/retail/platform-health'),
+  retailPlatformEventsLatest: () => get('/api/retail/platform-events/latest'),
 }

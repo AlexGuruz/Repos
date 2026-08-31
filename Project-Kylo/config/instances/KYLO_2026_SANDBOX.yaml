@@ -1,0 +1,92 @@
+version: 1
+
+# SANDBOX ONLY — does not affect KYLO_2026 live watchers.
+# Start only when testing: set KYLO_INSTANCE_ID=KYLO_2026_SANDBOX
+# Never point start_watchers_by_year.ps1 at this without intent.
+
+instance:
+  id: KYLO_2026_SANDBOX
+  # All companies still listed in global; year filter isolates 2026 sandbox book.
+
+year_workbooks_active: ["2026"]
+
+# Overlay year workbook URLs to the liquidity sandbox copy.
+year_workbooks:
+  "2026":
+    intake_workbook_url: https://docs.google.com/spreadsheets/d/1Y9tauvFUxrBnfBk5yrfDFs_nNefEfnvp6jzRyNU2FWw/edit
+    output_workbook_url: https://docs.google.com/spreadsheets/d/1Y9tauvFUxrBnfBk5yrfDFs_nNefEfnvp6jzRyNU2FWw/edit
+
+rules:
+  # Dual rule tabs: TRANSACTIONS intake -> TRANSACTIONS RULES; BANK -> BANK RULES
+  rules_tab_name: TRANSACTIONS RULES
+  bank_rules_tab_name: BANK RULES
+
+runtime:
+  # Posting enabled for sandbox dual-rule proof (2026-07-15). Instance is isolated from live.
+  mode: post
+  dry_run: false
+
+posting:
+  sheets:
+    apply: true
+  target_layout:
+    # Physical column order: CASH zone LEFT, BANK zone RIGHT (helpers at each zone end).
+    # Day-net columns for BALANCE G/H: see services/posting/projection_forecast.py
+    PAYROLL: { mode: merged_color, eod: helper_totals, column_order: left_cash_right_bank }
+    JGD: { mode: in_sheet_zones, zones: [CASH, BANK], column_order: left_cash_right_bank }
+    EXPENSES: { mode: twin_tabs, cash_tab: CASH EXPENSES, bank_tab: BANK EXPENSES }
+    INCOME: { mode: in_sheet_zones, zones: [CASH, BANK, TRANSFER], column_order: left_cash_right_bank }
+    NUGZ_COG: { mode: single_pool, pool: CASH }
+    CC_PAYMENTS: { mode: single_pool, pool: BANK }
+  projection_match:
+    enabled: true
+    window_days: 2
+    amount_tolerance: 0.02
+    clear_on_match: true
+    review_on_ambiguous: true
+    log_tab: PROJECTION CONSUMED
+    include_tabs:
+      - CASH EXPENSES
+      - BANK EXPENSES
+      - PAYROLL
+      - NUGZ COG
+      - INCOME
+      - JGD
+      - CC Payments
+      - NON CANNABIS
+      - ALLOCATED
+      - CANNABIS DIST
+
+# One-way live → sandbox intake mirror (does NOT write live; isolated from KYLO_2025/2026).
+# Daemon: scripts/sandbox_live_mirror_daemon.py
+# Start:  .\scripts\active\start_sandbox_live_mirror.ps1
+# Install always-on: .\scripts\active\install_sandbox_live_mirror.ps1
+sandbox_mirror:
+  enabled: true
+  interval_seconds: 120
+  rebuild_balance_on_change: true
+  # Full rows incl. Processed/Approved/NOTES/log columns:
+  #   live TRANSACTIONS → sandbox TRANSACTIONS
+  #   live BANK         → sandbox BANK
+  live_sid: 1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE
+  # sandbox_sid defaults to year_workbooks.2026.intake_workbook_url when omitted
+
+in_transit:
+  # Flag transfer legs (TO BANK/DEPOSIT, FROM BANK/WITHDRAW) that stay in transit
+  # longer than this many days; drift is surfaced on BALANCE and emailed.
+  drift_days: 7
+
+notify:
+  email:
+    enabled: true
+    # Send via the Gmail API using the "stashbox" Google service account
+    # (stashbox@ai-dataframe.iam.gserviceaccount.com) with domain-wide delegation.
+    # 'sender' is the delegated Workspace mailbox the SA sends as.
+    transport: gmail_api
+    service_account_json: E:/secrets/gcp/sa.json
+    sender: alexstonedz@stonedprojects.com
+    recipients:
+      - alexstonedz@stonedprojects.com
+
+google:
+  service_account_json_path: E:/secrets/gcp/sa.json

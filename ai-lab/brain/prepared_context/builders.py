@@ -715,15 +715,61 @@ def build_personal_ops_snapshot() -> PreparedSnapshot:
     )
 
 
+def _read_json_file(path: Path) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _fixture_dashboard_meta(meta: dict[str, Any] | None) -> bool:
+    if not isinstance(meta, dict):
+        return False
+    if meta.get("fixture") is True or meta.get("fixture_suspected") is True:
+        return True
+    try:
+        oc = int(meta.get("order_count")) if meta.get("order_count") is not None else None
+        ns = float(meta.get("store_net_sales")) if meta.get("store_net_sales") is not None else None
+    except (TypeError, ValueError):
+        return False
+    if oc is None or ns is None:
+        return False
+    return oc <= 3 and ns < 100.0
+
+
 def build_growflow_snapshot() -> PreparedSnapshot:
+    """Truthful Growflow snapshot from retail/capital/consign/projection artifacts — never METRICS.md as sales."""
     started = time.monotonic()
     errs: list[str] = []
     root = _repos_root() / "Growflow"
-    src = [str(root / "company_bi" / "METRICS.md"), str(root / "exports"), str(root / "state" / "validation_reports")]
-    metrics = root / "company_bi" / "METRICS.md"
-    exports = root / "exports"
+    data_dir = root / "data"
+    retail_path = data_dir / "retail_dashboard_latest.json"
+    capital_path = data_dir / "retail_capital_latest.json"
+    consign_path = data_dir / "retail_consignment_latest.json"
+    projection_path = data_dir / "sales_projection_latest.json"
+    bi_path = data_dir / "company_bi_report_latest.json"
+    status_path = data_dir / "platform_status_latest.json"
+    metrics_docs = root / "company_bi" / "METRICS.md"
+
+    src = [
+        str(retail_path),
+        str(capital_path),
+        str(consign_path),
+        str(projection_path),
+        str(status_path),
+        str(root / "state" / "validation_reports"),
+    ]
     data: dict[str, Any] = {
         "latest_sales_summary": None,
+        "retail": None,
+        "capital": None,
+        "consignment": None,
+        "projection_eod": None,
+        "company_bi": None,
+        "platform_status": None,
         "inventory_par_health": None,
         "transfer_receipt_status": None,
         "dashboard_export_status": None,
@@ -736,44 +782,127 @@ def build_growflow_snapshot() -> PreparedSnapshot:
         "validation_failures": [],
         "schema_drift_warnings": [],
         "latest_trusted_output_by_metric": {},
+        "formula_docs_path": str(metrics_docs) if metrics_docs.is_file() else None,
     }
     evidence_items: list[dict[str, Any]] = []
-    try:
-        if metrics.exists():
-            text = metrics.read_text(encoding="utf-8", errors="replace")
-            data["latest_sales_summary"] = text[:1200]
-            data["data_freshness_timestamps"]["metrics_mtime"] = metrics.stat().st_mtime
-            evidence_items.append(
-                {
-                    "title": "Growflow metrics",
-                    "source_path_or_tool": str(metrics),
-                    "observed_at": now_iso(),
-                    "summary": "Loaded METRICS.md sales/business summary.",
-                    "confidence": 0.85,
-                }
-            )
-    except Exception as e:
-        errs.append(f"metrics_read: {e}")
-        data["known_blockers"].append(f"metrics_read: {e}")
-    try:
-        if exports.exists():
-            files = sorted([p for p in exports.iterdir() if p.is_file()], key=lambda p: p.stat().st_mtime, reverse=True)
-            if files:
-                data["dashboard_export_status"] = {"latest_file": files[0].name, "mtime": files[0].stat().st_mtime}
-                data["latest_successful_exports"] = [f.name for f in files[:8]]
-                data["transfer_receipt_status"] = "available" if any("transfer" in f.name.lower() for f in files[:20]) else "unknown"
-                evidence_items.append(
-                    {
-                        "title": "Growflow exports",
-                        "source_path_or_tool": str(exports),
-                        "observed_at": now_iso(),
-                        "summary": f"latest_export={files[0].name}",
-                        "confidence": 0.8,
+
+    retail = _read_json_file(retail_path)
+    if retail:
+        meta = retail.get("meta") if isinstance(retail.get("meta"), dict) else {}
+        fixture = _fixture_dashboard_meta(meta)
+        trust = meta.get("trust") if isinstance(meta.get("trust"), dict) else {}
+        bounded = {
+            "built_at": meta.get("built_at"),
+            "period": meta.get("period"),
+            "store_net_sales": meta.get("store_net_sales"),
+            "order_count": meta.get("order_count"),
+            "effective_discount_pct": meta.get("effective_discount_pct"),
+            "run_id": meta.get("run_id"),
+            "validation": meta.get("validation"),
+            "trust": trust,
+            "fixture_suspected": fixture,
+        }
+        data["retail"] = bounded
+        data["latest_sales_summary"] = {
+            "store_net_sales": meta.get("store_net_sales"),
+            "order_count": meta.get("order_count"),
+            "period": meta.get("period"),
+            "built_at": meta.get("built_at"),
+            "freshness": trust.get("freshness") or ("degraded" if fixture else "unknown"),
+            "fixture_suspected": fixture,
+        }
+        data["data_freshness_timestamps"]["retail_dashboard"] = meta.get("built_at") or retail_path.stat().st_mtime
+        evidence_items.append(
+            {
+                "title": "Retail dashboard latest",
+                "source_path_or_tool": str(retail_path),
+                "observed_at": now_iso(),
+                "summary": (
+                    f"net={meta.get('store_net_sales')} orders={meta.get('order_count')} "
+                    f"fixture={fixture}"
+                ),
+                "confidence": 0.4 if fixture else 0.9,
+            }
+        )
+        if fixture:
+            data["known_blockers"].append("retail_dashboard_fixture_suspected")
+    else:
+        data["known_blockers"].append("retail_dashboard_missing")
+
+    for label, path, key in (
+        ("Capital latest", capital_path, "capital"),
+        ("Consignment latest", consign_path, "consignment"),
+        ("EOD projection latest", projection_path, "projection_eod"),
+        ("Company BI latest", bi_path, "company_bi"),
+        ("Platform status", status_path, "platform_status"),
+    ):
+        payload = _read_json_file(path)
+        if not payload:
+            if key in ("capital", "consignment", "platform_status"):
+                data["known_blockers"].append(f"{key}_missing")
+            continue
+        if key == "capital":
+            meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+            data[key] = {
+                "built_at": meta.get("built_at"),
+                "row_count": meta.get("row_count"),
+                "source_exists": meta.get("source_exists"),
+                "validation": meta.get("validation"),
+                "kpi_banner": (payload.get("kpi_banner") or [])[:6],
+            }
+        elif key == "consignment":
+            meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+            data[key] = {
+                "built_at": meta.get("built_at"),
+                "latest_date": meta.get("latest_date"),
+                "kpi_strip": payload.get("kpi_strip"),
+                "validation": meta.get("validation"),
+            }
+        elif key == "projection_eod":
+            data[key] = {
+                "as_of_local": payload.get("as_of_local"),
+                "sales_date": payload.get("sales_date"),
+                "collected_so_far_cents": payload.get("collected_so_far_cents"),
+                "pace_eod_cents": payload.get("pace_eod_cents"),
+                "base_eod_cents": payload.get("base_eod_cents"),
+                "order_count": payload.get("order_count"),
+            }
+        elif key == "company_bi":
+            data[key] = {
+                "built_at": payload.get("built_at") or (payload.get("meta") or {}).get("built_at"),
+                "summary": payload.get("summary"),
+                "ok": payload.get("ok"),
+            }
+        else:
+            data[key] = {
+                "generated_at": payload.get("generated_at"),
+                "overall_ok": payload.get("overall_ok"),
+                "slo_breaches": payload.get("slo_breaches") or [],
+                "domains": {
+                    k: {
+                        "ok": (v or {}).get("ok"),
+                        "freshness": (v or {}).get("freshness"),
+                        "reason": (v or {}).get("reason"),
                     }
-                )
-    except Exception as e:
-        errs.append(f"exports_scan: {e}")
-        data["known_blockers"].append(f"exports_scan: {e}")
+                    for k, v in (payload.get("domains") or {}).items()
+                    if isinstance(v, dict)
+                },
+            }
+            for breach in payload.get("slo_breaches") or []:
+                if isinstance(breach, dict):
+                    data["known_blockers"].append(
+                        f"slo:{breach.get('domain')}:{breach.get('reason')}"
+                    )
+        evidence_items.append(
+            {
+                "title": label,
+                "source_path_or_tool": str(path),
+                "observed_at": now_iso(),
+                "summary": f"loaded {path.name}",
+                "confidence": 0.85,
+            }
+        )
+
     try:
         vr = root / "state" / "validation_reports"
         to = root / "state" / "trusted_outputs"
@@ -842,36 +971,56 @@ def build_growflow_snapshot() -> PreparedSnapshot:
                         metric_status["last_trusted_output_timestamp"] = ts
                         data["latest_trusted_output_by_metric"][metric_id] = str(trust_files[0])
                 data["validation_status_by_metric"][metric_id] = metric_status
-                if not metric_status["ok"]:
+                if not metric_status["ok"] and metric_id != "schema_discovery":
                     data["validation_failures"].append({"metric_id": metric_id, "report_path": str(latest)})
                 for warn in metric_status["warnings"] or []:
                     w = str(warn)
                     if "schema" in w.lower() or "root" in w.lower() or "field" in w.lower():
                         data["schema_drift_warnings"].append({"metric_id": metric_id, "warning": w})
+        if "transfer_receipts" in data["validation_status_by_metric"]:
+            tr = data["validation_status_by_metric"]["transfer_receipts"]
+            data["transfer_receipt_status"] = "ok" if tr.get("ok") else "failed"
     except Exception as e:
         errs.append(f"validation_scan: {e}")
         data["known_blockers"].append(f"validation_scan: {e}")
+
     data["par_inventory_pipeline_status"] = "likely_available" if (root / "scripts").exists() else "unknown"
     if not data.get("latest_sales_summary"):
         data["known_blockers"].append("latest_sales_summary_missing")
     if data.get("validation_failures"):
         data["known_blockers"].append("latest_validation_failed")
+
+    summary_sales = data.get("latest_sales_summary") if isinstance(data.get("latest_sales_summary"), dict) else {}
     freshness = 3600
+    healthy = bool(summary_sales) and not summary_sales.get("fixture_suspected") and not data["known_blockers"]
     return PreparedSnapshot(
         snapshot_type="growflow_snapshot",
         generated_at=now_iso(),
         freshness_seconds=freshness,
         source_files_or_tools=src,
-        confidence=_confidence_from_evidence(evidence_items, base=0.8 if data.get("latest_sales_summary") else 0.45, errors=errs),
+        confidence=_confidence_from_evidence(
+            evidence_items,
+            base=0.85 if healthy else (0.55 if summary_sales else 0.35),
+            errors=errs,
+        ),
         stale=_is_stale(started, freshness),
         errors=errs,
         data=data,
-        summary_short="Growflow/business snapshot from local metrics and export artifacts.",
-        summary_detailed="Business automation health snapshot with sales summary availability, export freshness, and data timestamp signals.",
+        summary_short=(
+            f"Growflow retail net={summary_sales.get('store_net_sales')} "
+            f"orders={summary_sales.get('order_count')} "
+            f"blockers={len(data['known_blockers'])}"
+            if summary_sales
+            else "Growflow snapshot — retail dashboard missing or unusable."
+        ),
+        summary_detailed=(
+            "Platform snapshot from retail/capital/consignment/projection JSON artifacts "
+            "plus validation reports. Formula docs are not used as sales figures."
+        ),
         suggested_questions=[
             "what is Growflow status?",
             "is business data fresh?",
-            "what is the dashboard export status?",
+            "what are SLO breaches?",
         ],
         evidence_items=evidence_items,
     )

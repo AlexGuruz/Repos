@@ -1,0 +1,20 @@
+
+> ai-lab-command-center@0.1.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 15034 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://169.254.83.107:5173/
+  ➜  Network: http://10.1.30.159:5173/
+9:32:47 AM [vite] hmr update /src/App.jsx, /src/index.css
+9:32:47 AM [vite] hmr update /src/components/ChatPanel.jsx, /src/index.css
+9:32:47 AM [vite] page reload src/hooks/useWebSocket.test.jsx
+9:32:47 AM [vite] page reload src/components/ChatPanel.test.jsx
+9:32:47 AM [vite] hmr update /src/App.jsx, /src/index.css
+9:32:47 AM [vite] page reload src/hooks/useWebSocket.test.jsx
+9:32:47 AM [vite] page reload src/components/ChatPanel.test.jsx
+9:32:47 AM [vite] hmr update /src/components/ChatPanel.jsx, /src/index.css
+9:32:47 AM [vite] page reload src/hooks/useWebSocket.test.jsx
+9:32:47 AM [vite] page reload src/components/ChatPanel.test.jsx

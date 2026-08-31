@@ -19,7 +19,7 @@ def _get_worker_health(worker_name: str = "worker-rig-01"):
         from core.ai_lab import ensure_ai_lab_root_on_path
         ensure_ai_lab_root_on_path()
         from brain.worker_health import get_worker_health_snapshot, worker_health_snapshot_to_dict
-        snap = get_worker_health_snapshot(worker_name, timeout_budget_ms=2000, interactive=True)
+        snap = get_worker_health_snapshot(worker_name, timeout_budget_ms=5000, interactive=True)
         data = worker_health_snapshot_to_dict(snap)
         data["last_checked"] = snap.checked_at or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         return data

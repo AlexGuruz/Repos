@@ -1,0 +1,40 @@
+# Google Sheets → SQLite transaction database sources
+# One workbook per calendar year (2022–2026). Pulled via stashbox SA (E:/secrets/gcp/sa.json).
+
+default_db_path: "company_bi/db/sheets_transactions.db"
+
+sources:
+  year_2022:
+    year: 2022
+    spreadsheet_id: "1X9txVtgoAoNyA88HjeFgclrDqpQOwW9XmQ7Wz7SX9I0"
+    tab: "Sheet1"
+    layout: money_log
+    header_row: 4
+    data_start_row: 5
+
+  year_2023:
+    year: 2023
+    spreadsheet_id: "1q21aOK0HPhGWfKc5EU44jsEAW9UWdKqNXhVtTDyKLKU"
+    tab: "Sheet1"
+    layout: money_log
+    header_row: 4
+    data_start_row: 5
+
+  year_2024:
+    year: 2024
+    spreadsheet_id: "16yRXmHXCJPNovTABakD5ovFQQB7r8N3cHzLS3M3OwxA"
+    tab: "Sheet1"
+    layout: transactions
+    # Header on row 3; data from row 4 (1-based).
+
+  year_2025:
+    year: 2025
+    spreadsheet_id: "1MZqpmK6TO7Y9HkMSWPHTIwS3bIZ407sPxSy6R8bZUnE"
+    tab: "Transactions"
+    layout: transactions
+
+  year_2026:
+    year: 2026
+    spreadsheet_id: "1oNVc-C03ePqLNE76sRUldzpLYsJWb2fo92rkM0_fqNE"
+    tab: "Transactions"
+    layout: transactions

@@ -1,0 +1,42 @@
+# Allowlists — repos, folders, actions, scripts that get T3 autonomy
+# Only listed scopes can run without explicit approval per action
+# Ref: GLOBAL_POLICY.md §2; AI_LAB_GOAL_AND_PHILOSOPHY.md §5.3
+
+# Repos or paths where certain actions are allowlisted (relative to lab root or absolute)
+repos:
+  # Example: docs-only repo — edits and creates allowlisted
+  # - path: "E:/Repos/docs-internal"
+  #   actions: [file_edit, file_create]
+  #   tier: T3
+  # Example: internal tooling
+  # - path: "E:/Repos/products/ai-lab/tools"
+  #   actions: [script_execution]
+  #   allowed_scripts: [growflow_query.py, summarize_log.py]
+  #   tier: T3
+
+# Folders (glob or path suffix) that are safe for autonomous writes
+folders:
+  # - suffix: "/docs/"
+  #   actions: [file_edit, file_create]
+  # - suffix: "/logs/actions"
+  #   actions: []  # logger only; no general write
+
+# Scripts/tools that may run without per-run approval when invoked in allowlisted context
+scripts: []
+  # - name: growflow_query.py
+  #   scope: read_only  # no state change
+  # - name: summarize_log.py
+  #   scope: read_only
+
+# Escalations: actions that never get allowlisted (must always go through approval)
+no_allowlist:
+  - service_restart
+  - dependency_install
+  - trust_change
+  - registry_update
+  - memory_promotion
+  - scheduled_task_change
+  - ssh_config_edit
+  - firewall_change
+  - secret_file_read
+  - secret_file_write

@@ -1,0 +1,26 @@
+# Copy to config/personal_ops.yaml (gitignored path recommended) and edit paths.
+# Used by scripts/personal_ops_repo_pulse.py and personal_ops_daily_digest.py
+
+stale_warning_days: 7
+
+# For a monorepo (single .git at E:/Repos), use the same root path and distinct git_path scopes:
+repos:
+  - path: E:/Repos
+    git_path: ai-lab
+    label: AI-Lab
+  - path: E:/Repos
+    git_path: products/project-kylo
+    label: Project Kylo
+  # Separate git repos can omit git_path:
+  # - path: D:/Greg-Kylo
+  #   label: Greg Kylo
+
+# Optional: JSON heartbeat files written by Kylo watchers / workers (paths must exist).
+kylo_heartbeats: []
+  # - path: E:/Repos/products/project-kylo/.kylo/instances/hub-1/health/heartbeat.json
+
+calendar:
+  primary: true
+  # calendar_id: "your_group_calendar@group.calendar.google.com"
+  # After running personal_ops_calendar_snapshot.py, paste a standing "log" event ID:
+  # progress_event_id: "abc123fromgoogle"
