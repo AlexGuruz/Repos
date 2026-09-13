@@ -1453,6 +1453,30 @@ def _usd(cents: int) -> str:
     return f"${cents / 100:,.2f}"
 
 
+def _unique_order_items_in_local_window(
+    rows: list[dict[str, Any]],
+    *,
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> list[tuple[dict[str, Any], date]]:
+    out: list[tuple[dict[str, Any], date]] = []
+    for n in rows:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        out.append((n, ld))
+    return out
+
+
 def _parse_min_units_overrides(raw_values: list[str]) -> dict[tuple[str, str], int]:
     """
     Parse repeated --min-units-override "Brand|Category|Units" args.
@@ -1753,16 +1777,13 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
+        for n, ld in _unique_order_items_in_local_window(
+            raw,
+            seen=seen,
+            tz=tz,
+            report_start_local=report_start_local,
+            report_end_local=report_end_local,
+        ):
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
