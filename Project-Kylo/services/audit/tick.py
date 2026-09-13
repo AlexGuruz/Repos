@@ -135,6 +135,11 @@ def run_audit_tick(
                 rec.kylo_posted_amount_cents = prev.kylo_posted_amount_cents
             current[rec.row_key] = rec
 
+    if previous and not current:
+        summary["error"] = "intake_load_empty: refusing to overwrite non-empty audit registry"
+        print("[AUDIT] ERROR empty intake load; preserving existing audit registry")
+        return summary
+
     current_list = list(current.values())
     current_bl = build_business_line_registry(current_list)
     late_days = int(audit_block.get("late_arrival_min_posted_days", 14) or 14)
