@@ -31,11 +31,19 @@ def test_get_worker_rig_01_has_service_definitions():
 
 
 def test_get_worker_service_worker_assistant():
-    svc = get_worker_service("worker-rig-01", "worker_assistant")
+    svc = get_worker_service("worker-rig-02", "worker_assistant")
     assert svc is not None
     assert svc.get("remote_port") == 8765
     assert svc.get("env_var") == "WORKER_ASSISTANT_URL"
     assert svc.get("health_path") == "/health"
+
+
+def test_get_secondary_worker_service_worker_assistant():
+    svc = get_worker_service("worker-rig-01", "worker_assistant")
+    assert svc is not None
+    assert svc.get("local_tunnel_port") == 8766
+    assert svc.get("env_var") == "WORKER_ASSISTANT_URL_SECONDARY"
+    assert svc.get("base_url") == "http://127.0.0.1:8766"
 
 
 def test_list_worker_services():

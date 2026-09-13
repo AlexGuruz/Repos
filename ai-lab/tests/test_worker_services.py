@@ -17,20 +17,36 @@ from brain.worker_services import (
 def test_get_worker_assistant_url_from_registry_when_env_unset():
     # With env unset, should fall back to registry base_url
     env_val = os.environ.pop("WORKER_ASSISTANT_URL", None)
+    env_secondary = os.environ.pop("WORKER_ASSISTANT_URL_SECONDARY", None)
     try:
         url = get_worker_assistant_url("worker-rig-01")
         assert url is None or url.startswith("http")
         if url:
-            assert "8765" in url
+            assert "8766" in url
     finally:
         if env_val is not None:
             os.environ["WORKER_ASSISTANT_URL"] = env_val
+        if env_secondary is not None:
+            os.environ["WORKER_ASSISTANT_URL_SECONDARY"] = env_secondary
 
 
 def test_get_worker_assistant_url_env_override(monkeypatch):
     monkeypatch.setenv("WORKER_ASSISTANT_URL", "http://127.0.0.1:8765")
-    url = get_worker_assistant_url("worker-rig-01")
+    url = get_worker_assistant_url("worker-rig-02")
     assert url == "http://127.0.0.1:8765"
+
+
+def test_secondary_worker_does_not_use_primary_legacy_env(monkeypatch):
+    monkeypatch.setenv("WORKER_ASSISTANT_URL", "http://127.0.0.1:8765")
+    monkeypatch.delenv("WORKER_ASSISTANT_URL_SECONDARY", raising=False)
+    monkeypatch.setenv("WORKER_N8N_URL", "http://127.0.0.1:5678")
+    monkeypatch.delenv("WORKER_N8N_URL_SECONDARY", raising=False)
+    monkeypatch.setenv("OLLAMA_HOST", "127.0.0.1:11434")
+    monkeypatch.delenv("OLLAMA_HOST_SECONDARY", raising=False)
+
+    assert get_worker_assistant_url("worker-rig-01") == "http://127.0.0.1:8766"
+    assert get_worker_n8n_url("worker-rig-01") == "http://127.0.0.1:5679"
+    assert get_worker_ollama_base_url("worker-rig-01") == "http://127.0.0.1:11435"
 
 
 def test_get_service_url_generic():
