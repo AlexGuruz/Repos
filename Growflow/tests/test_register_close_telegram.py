@@ -259,6 +259,19 @@ def test_notified_sales_date_reexports_when_tax_totals_change(monkeypatch):
     assert any("Re-exported taxes" in msg for msg in logs)
 
 
+def test_register_close_task_scripts_do_not_reference_missing_helpers():
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[1]
+    install_script = (repo / "scripts" / "install_register_close_scheduled_task.ps1").read_text(encoding="utf-8")
+    task_script = (repo / "scripts" / "run_register_close_watch_task.ps1").read_text(encoding="utf-8")
+
+    combined = install_script + "\n" + task_script
+    assert "scheduled_task_pythonw.ps1" not in combined
+    assert "invoke_python_hidden.ps1" not in combined
+    assert "register_close_taxes_sheet.py" in combined
+
+
 def test_poll_window_sunday_starts_at_8pm():
     tz = ZoneInfo("America/Chicago")
     w = PollWindowSchedule(sunday_start=20, mon_sat_start=22, window_hours=4)
