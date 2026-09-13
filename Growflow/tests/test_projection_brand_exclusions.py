@@ -156,3 +156,39 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_unique_order_items_marks_seen_and_dedupes_within_window():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    rows = [
+        {
+            "objectId": "dup-1",
+            "SoldAt": "2026-04-03T16:00:00Z",
+            "GrossPrice": 1000,
+            "COG": 400,
+            "ProductCategory": {"Name": "Flower"},
+            "Product": {"objectId": "prod-1", "Name": "Test Flower", "Brand": {"Name": "Brand A"}},
+        },
+        {
+            "objectId": "dup-1",
+            "SoldAt": "2026-04-03T16:00:00Z",
+            "GrossPrice": 1000,
+            "COG": 400,
+            "ProductCategory": {"Name": "Flower"},
+            "Product": {"objectId": "prod-1", "Name": "Test Flower", "Brand": {"Name": "Brand A"}},
+        },
+    ]
+    seen: set[str] = set()
+
+    kept = _mod._unique_order_items_in_local_window(
+        rows,
+        seen=seen,
+        tz=ZoneInfo("America/Chicago"),
+        report_start_local=date(2026, 4, 3),
+        report_end_local=date(2026, 4, 3),
+    )
+
+    assert [row["objectId"] for row, _local_day in kept] == ["dup-1"]
+    assert "objectId:dup-1" in seen
