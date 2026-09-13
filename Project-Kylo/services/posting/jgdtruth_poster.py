@@ -516,10 +516,15 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         year_intake_urls = []
     if not year_intake_urls:
         intake_url = cfg.get("intake.workbook_url") or comp.get("workbook_url")
-        year_intake_urls = [str(intake_url)]
+        if intake_url and str(intake_url).strip():
+            year_intake_urls = [str(intake_url)]
+    if not year_intake_urls:
+        raise RuntimeError(f"No configured intake workbook URL for {company_upper}")
     intake_sids = [_extract_spreadsheet_id(u) for u in year_intake_urls if str(u).strip()]
     print(f"[INTAKE] CSV download sources for {company_upper} (active_years={active_years}): {year_intake_urls}")
     print(f"[INTAKE] Spreadsheet IDs: {intake_sids}")
+    if not intake_sids:
+        raise RuntimeError(f"No valid intake spreadsheet ID for {company_upper}")
 
     # Merge intake from TRANSACTIONS, BANK, and any configured extra tabs, tagging source_tab + source_spreadsheet_id
     csv_txns: List[dict] = []
@@ -529,6 +534,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     except Exception:
         extra_tabs = []
     tabs_to_pull = tuple(["TRANSACTIONS", "BANK"]) + tuple(extra_tabs)
+    intake_load_errors: List[str] = []
     for sid in intake_sids:
         for tab in tabs_to_pull:
             try:
@@ -547,9 +553,11 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                 csv_txns.extend(part)
-            except Exception:
-                # If a tab is missing, continue with the other
-                continue
+            except Exception as exc:
+                intake_load_errors.append(f"{sid}:{tab}: {exc}")
+    if intake_load_errors:
+        joined = "; ".join(intake_load_errors)
+        raise RuntimeError(f"Incomplete intake load for {company_upper}; aborting posting before target writes: {joined}")
     
     # Sort transactions to ensure consistent processing order:
     # 1. By posted_date (chronological)
@@ -1556,6 +1564,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
             "skipped_rows": skipped_rows,
+            "failed_ranges_count": int(len(failed_ranges)),
+            "failed_ranges": sorted(failed_ranges)[:20],
+            "posting_complete": not bool(failed_ranges),
         }
 
     # Execute per-target posting and aggregate
@@ -1566,6 +1577,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
     skipped_rows_all: List[Tuple[str, str, int, str]] = []
+    failed_ranges_total = 0
+    failed_ranges_all: List[str] = []
 
     for target_sid, txns_for_target in txns_by_target_sid.items():
         result = _process_target(target_sid, txns_for_target, ignore_posted=ignore_posted_flag)
@@ -1576,6 +1589,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
         skipped_rows_all.extend(list(result.get("skipped_rows", [])))
+        failed_ranges_total += int(result.get("failed_ranges_count", 0) or 0)
+        failed_ranges_all.extend([str(x) for x in (result.get("failed_ranges") or [])])
 
     # Basic diagnostics for skipped items (printed once per run)
     if skipped_tab_not_found_all:
@@ -1638,6 +1653,10 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "write_plan_count": int(len(write_plan)),
         "postable_source_rows_by_tab": postable_rows_counts,
         "target_writes_by_source_tab": write_counts_by_tab,
+        "failed_ranges_count": int(failed_ranges_total),
+        "failed_ranges": sorted(set(failed_ranges_all))[:20],
+        "posting_complete": failed_ranges_total == 0,
+        "error": failed_ranges_total > 0,
     }
 
 
