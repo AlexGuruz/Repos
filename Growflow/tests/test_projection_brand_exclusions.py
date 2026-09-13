@@ -64,6 +64,43 @@ def test_default_exclude_includes_consignment_casefold():
     assert _mod.brand_excluded("Doc Ferguson", ex)
 
 
+def test_unique_order_items_in_local_window_dedupes_across_calls():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("America/Chicago")
+    seen: set[str] = set()
+    duplicate = {
+        "objectId": "order-item-1",
+        "SoldAt": "2026-04-03T18:00:00.000Z",
+        "GrossPrice": 1000,
+    }
+    second = {
+        "objectId": "order-item-2",
+        "SoldAt": "2026-04-03T19:00:00.000Z",
+        "GrossPrice": 2000,
+    }
+
+    first_batch = _mod.unique_order_items_in_local_window(
+        [duplicate, dict(duplicate), second],
+        seen,
+        tz,
+        date(2026, 4, 3),
+        date(2026, 4, 3),
+    )
+    second_batch = _mod.unique_order_items_in_local_window(
+        [dict(duplicate), dict(second)],
+        seen,
+        tz,
+        date(2026, 4, 3),
+        date(2026, 4, 3),
+    )
+
+    assert [row["objectId"] for row, _ in first_batch] == ["order-item-1", "order-item-2"]
+    assert second_batch == []
+    assert seen == {"objectId:order-item-1", "objectId:order-item-2"}
+
+
 def test_implied_monthly_cog_throughput_usd():
     # 10 units, $50 COG over ~30.44 day month-equivalent in 365d window → aum and acu positive
     t = _mod.implied_monthly_cog_throughput_usd(100, 10_000, 365)

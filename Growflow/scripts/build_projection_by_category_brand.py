@@ -1478,6 +1478,30 @@ def _parse_min_units_overrides(raw_values: list[str]) -> dict[tuple[str, str], i
     return out
 
 
+def unique_order_items_in_local_window(
+    raw: list[dict[str, Any]],
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> list[tuple[dict[str, Any], date]]:
+    """Filter raw order items to unique rows in the store-local reporting window."""
+    out: list[tuple[dict[str, Any], date]] = []
+    for n in raw:
+        k = order_item_key(n)
+        if k in seen:
+            continue
+        sold = parse_iso_utc(n.get("SoldAt"))
+        if sold is None:
+            continue
+        ld = sold.astimezone(tz).date()
+        if ld < report_start_local or ld > report_end_local:
+            continue
+        seen.add(k)
+        out.append((n, ld))
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Category x brand projection markdown (Growflow API)")
     ap.add_argument(
@@ -1753,16 +1777,7 @@ def main() -> int:
             retries=args.chunk_retries,
         )
 
-        for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
-                continue
+        for n, ld in unique_order_items_in_local_window(raw, seen, tz, report_start_local, report_end_local):
             validation_rows.append(n)
 
             bucket = order_line_format_bucket(n)
