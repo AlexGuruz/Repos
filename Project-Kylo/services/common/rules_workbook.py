@@ -44,6 +44,14 @@ def get_rules_management_spreadsheet_id(cfg: Any | None = None) -> str:
         if sid:
             return sid
 
+    if cfg is None:
+        try:
+            from services.common.config_loader import load_config
+
+            cfg = load_config()
+        except Exception:
+            cfg = None
+
     sid = _extract_spreadsheet_id(_cfg_get(cfg, "rules.management_spreadsheet_id"))
     if sid:
         return sid
