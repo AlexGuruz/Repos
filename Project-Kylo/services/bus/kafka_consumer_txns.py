@@ -72,21 +72,7 @@ async def process_message(msg: TxnsBatchMessage):
     triage_company_batch(dsn_rw, msg.company_id, msg.batch_id)
 
     # 3) Build pending batchUpdate; idempotent post
-    service = poster._get_service()
-    # Ensure tabs/headers/theme exist (idempotent; no-ops if already present)
-    ensure_ops = poster.ensure_company_tabs(msg.routing.spreadsheet_id, [msg.company_id])
-    if ensure_ops.get("requests"):
-        service.spreadsheets().batchUpdate(
-            spreadsheetId=msg.routing.spreadsheet_id,
-            body=ensure_ops
-        ).execute()
-
-    # Resolve sheetId for the "{CID} Pending" tab
-    titles_to_ids, _ = poster._fetch_meta(service, msg.routing.spreadsheet_id)
     pending_title = poster.build_tab_name(msg.company_id, "Pending")
-    sheet_id = titles_to_ids.get(pending_title)
-    if sheet_id is None:
-        raise RuntimeError(f"Pending tab not found after ensure: {pending_title}")
 
     # Pull current batch pending items
     with psycopg2.connect(dsn_rw) as conn:
@@ -96,7 +82,6 @@ async def process_message(msg: TxnsBatchMessage):
         return
 
     rows = _build_pending_rows(items, msg.company_id)
-    batch = poster.build_pending_batch_update(sheet_id, rows)
 
     # Signature is based on txn_uids present in this batch
     sig = _compute_signature(msg.company_id, pending_title, [i["txn_uid"] for i in items])
@@ -107,11 +92,32 @@ async def process_message(msg: TxnsBatchMessage):
                         (msg.company_id, sig))
             seen = cur.fetchone() is not None
 
-        if not seen and DO_POST:
+        if seen:
+            return
+        if not DO_POST:
+            print(f"[SHADOW txns] DO_POST disabled; not writing Sheets or recording sheet_posts for {msg.company_id}")
+            return
+
+        service = poster._get_service()
+        # Ensure tabs/headers/theme exist (idempotent; no-ops if already present)
+        ensure_ops = poster.ensure_company_tabs(msg.routing.spreadsheet_id, [msg.company_id])
+        if ensure_ops.get("requests"):
             service.spreadsheets().batchUpdate(
                 spreadsheetId=msg.routing.spreadsheet_id,
-                body=batch
+                body=ensure_ops
             ).execute()
+
+        # Resolve sheetId for the "{CID} Pending" tab only when posting is enabled.
+        titles_to_ids, _ = poster._fetch_meta(service, msg.routing.spreadsheet_id)
+        sheet_id = titles_to_ids.get(pending_title)
+        if sheet_id is None:
+            raise RuntimeError(f"Pending tab not found after ensure: {pending_title}")
+
+        batch = poster.build_pending_batch_update(sheet_id, rows)
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=msg.routing.spreadsheet_id,
+            body=batch
+        ).execute()
 
         with conn.cursor() as cur:
             cur.execute("""
