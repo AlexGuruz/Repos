@@ -9,6 +9,7 @@ from services.bus.schema import PromoteRequestMessage
 from services.rules_promoter.service import promote as rules_promote
 from services.replay.worker import replay_after_promotion
 from services.sheets import poster
+from services.common.config_loader import load_config
 from services.common.rules_workbook import get_rules_management_spreadsheet_id
 
 BROKERS = os.getenv("KAFKA_BROKERS","localhost:9092").split(',')
@@ -72,52 +73,13 @@ async def process_message(msg: PromoteRequestMessage):
     # 2) Replay pending txns now satisfied by new rules
     replay_after_promotion(dsn_rw, msg.company_id)
 
-    # 3) Build Active batchUpdate; idempotent post (rules management workbook only)
-    rules_management_spreadsheet_id = get_rules_management_spreadsheet_id(_cfg)
-    if not rules_management_spreadsheet_id:
-        print(
-            "[WARN] Rules management spreadsheet not configured "
-            "(rules.management_workbook_url / rules.management_spreadsheet_id / KYLO_RULES_MANAGEMENT_SPREADSHEET_ID); "
-            "skipping Active tab sync",
-            file=sys.stderr,
-        )
-        return
-
-    service = poster._get_service()
-    ensure_ops = poster.ensure_company_tabs(rules_management_spreadsheet_id, [msg.company_id])
-    if ensure_ops.get("requests"):
-        service.spreadsheets().batchUpdate(spreadsheetId=rules_management_spreadsheet_id, body=ensure_ops).execute()
-
-    titles_to_ids, _ = poster._fetch_meta(service, rules_management_spreadsheet_id)
     active_title = poster.build_tab_name(msg.company_id, "Active")
-    sheet_id = titles_to_ids.get(active_title)
-    if sheet_id is None:
-        raise RuntimeError(f"Active tab not found after ensure: {active_title}")
 
     # Pull active rules and construct rows
     with psycopg2.connect(dsn_rw) as conn:
         rules = _fetch_active_rules(conn)
 
     rows = _build_active_rows(msg.company_id, rules)
-    # Clear rows 2..end and append (batchUpdate only)
-    # Determine current rowCount to delete extra rows
-    meta = service.spreadsheets().get(spreadsheetId=rules_management_spreadsheet_id).execute()
-    row_count = 1000
-    for sh in meta.get("sheets", []):
-        if int(sh["properties"]["sheetId"]) == sheet_id:
-            row_count = int(sh["properties"]["gridProperties"].get("rowCount", 1000))
-            break
-
-    ops = []
-    # delete rows index [1, row_count) (0-based; keep header at row 0)
-    ops.append({
-      "deleteDimension": {
-        "range": {"sheetId": sheet_id, "dimension": "ROWS", "startIndex": 1, "endIndex": row_count}
-      }
-    })
-    if rows:
-        ops.append({"appendCells": {"sheetId": sheet_id, "rows": rows, "fields": "userEnteredValue"}})
-
     sig = _compute_active_signature(msg.company_id, active_title, rules)
 
     with psycopg2.connect(dsn_rw) as conn:
@@ -126,11 +88,56 @@ async def process_message(msg: PromoteRequestMessage):
                         (msg.company_id, sig))
             seen = cur.fetchone() is not None
 
-        if not seen and DO_POST:
-            service.spreadsheets().batchUpdate(
-                spreadsheetId=rules_management_spreadsheet_id,
-                body={"requests": ops}
-            ).execute()
+        if seen:
+            return
+        if not DO_POST:
+            print(f"[SHADOW promote] DO_POST disabled; not writing Sheets or recording sheet_posts for {msg.company_id}")
+            return
+
+        # 3) Build Active batchUpdate; idempotent post (rules management workbook only)
+        rules_management_spreadsheet_id = get_rules_management_spreadsheet_id(_cfg)
+        if not rules_management_spreadsheet_id:
+            print(
+                "[WARN] Rules management spreadsheet not configured "
+                "(rules.management_workbook_url / rules.management_spreadsheet_id / KYLO_RULES_MANAGEMENT_SPREADSHEET_ID); "
+                "skipping Active tab sync",
+                file=sys.stderr,
+            )
+            return
+
+        service = poster._get_service()
+        ensure_ops = poster.ensure_company_tabs(rules_management_spreadsheet_id, [msg.company_id])
+        if ensure_ops.get("requests"):
+            service.spreadsheets().batchUpdate(spreadsheetId=rules_management_spreadsheet_id, body=ensure_ops).execute()
+
+        titles_to_ids, _ = poster._fetch_meta(service, rules_management_spreadsheet_id)
+        sheet_id = titles_to_ids.get(active_title)
+        if sheet_id is None:
+            raise RuntimeError(f"Active tab not found after ensure: {active_title}")
+
+        # Clear rows 2..end and append (batchUpdate only)
+        # Determine current rowCount to delete extra rows
+        meta = service.spreadsheets().get(spreadsheetId=rules_management_spreadsheet_id).execute()
+        row_count = 1000
+        for sh in meta.get("sheets", []):
+            if int(sh["properties"]["sheetId"]) == sheet_id:
+                row_count = int(sh["properties"]["gridProperties"].get("rowCount", 1000))
+                break
+
+        ops = []
+        # delete rows index [1, row_count) (0-based; keep header at row 0)
+        ops.append({
+          "deleteDimension": {
+            "range": {"sheetId": sheet_id, "dimension": "ROWS", "startIndex": 1, "endIndex": row_count}
+          }
+        })
+        if rows:
+            ops.append({"appendCells": {"sheetId": sheet_id, "rows": rows, "fields": "userEnteredValue"}})
+
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=rules_management_spreadsheet_id,
+            body={"requests": ops}
+        ).execute()
 
         with conn.cursor() as cur:
             cur.execute("""
