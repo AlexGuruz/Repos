@@ -791,13 +791,12 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # All rule-matched transactions (posted + unposted) for full target-cell totals.
         # Last tuple field: for_marking — True only for rows that still need posted/notes updates.
-        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool]] = []
+        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool, str, str]] = []
         # NOTE: We store the resolved target A1 range per source row so we only mark
         # rows as posted when their target cell is confirmed written (or already correct).
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
-        success_notes: List[Tuple[str, str, int, str, str]] = []  # (source_sid, src_tab, row_idx0, note, target_a1)
+        success_notes: List[Tuple[str, str, int, str, str, Dict[str, Any]]] = []  # (source_sid, src_tab, row_idx0, note, target_a1, audit_meta)
         flagged_target_ranges: Set[str] = set()
-        post_meta_by_a1: Dict[str, Dict[str, Any]] = {}
         skipped_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, reason)
         skipped_tab_not_found: List[str] = []
         skipped_header_date: int = 0
@@ -930,6 +929,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     txn_uid,
                     source_sid,
                     not is_posted,
+                    str(dt or ""),
+                    str(src or ""),
                 )
             )
 
@@ -949,7 +950,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # Resolve writes to exact A1 cells
         data: List[Dict[str, object]] = []
-        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _mark) in matched_writes})
+        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _mark, _posted_date, _desc) in matched_writes})
         headers_map = _batch_read_headers(service, target_sid, unique_tabs, header_row)
         cell_totals: Dict[str, int] = {}
         cell_txns: Dict[str, Set[str]] = defaultdict(set)
@@ -1031,7 +1032,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return actual
             return static_row
 
-        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid, for_marking) in matched_writes:
+        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid, for_marking, posted_date, description) in matched_writes:
             headers = headers_map.get(tab) or []
             norm = [str(h).strip().lower() for h in headers]
             wanted = (header or "").strip().lower()
@@ -1075,8 +1076,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                             source_sid=str(source_sid or ""),
                             source_tab=str(src_tab or "TRANSACTIONS"),
                             company_id=company_upper,
-                            posted_date=str(dt or ""),
-                            description=str(src or ""),
+                            posted_date=str(posted_date or ""),
+                            description=str(description or ""),
                             amount_cents=amount_cents,
                             instance_id=instance_id,
                         )
@@ -1093,18 +1094,18 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                         note_msg = f"Posted {amount_cents / 100.0:.2f} -> {tab}/{header} {date_key}"
                     except Exception:
                         note_msg = "Posted"
-                success_notes.append((source_sid, src_tab, row0, note_msg, a1))
-                post_meta_by_a1[a1] = {
+                post_meta = {
                     "txn_uid": txn_uid,
                     "source_sid": source_sid,
                     "source_tab": src_tab,
                     "row0": row0,
                     "company_id": company_upper,
-                    "posted_date": str(dt or ""),
-                    "description": str(src or ""),
+                    "posted_date": str(posted_date or ""),
+                    "description": str(description or ""),
                     "amount_cents": amount_cents,
                     "flagged": flagged,
                 }
+                success_notes.append((source_sid, src_tab, row0, note_msg, a1, post_meta))
 
         updated_ranges: Set[str] = set()
         update_entries: List[Dict[str, object]] = []
@@ -1205,6 +1206,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         cells_written = 0
         rows_marked_true = 0
+        source_mark_failed = False
         # Track which target ranges were actually written this run (to avoid falsely marking source rows as posted).
         ranges_attempted: Set[str] = set()
         ranges_written: Set[str] = set()
@@ -1455,7 +1457,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     mark_by_sid[source_sid].append({"range": f"{a1_tab}!{pcol}{sheet_row}", "values": [[True]]})
                 except Exception:
                     continue
-            for (source_sid, src_tab, row0, msg, target_a1) in success_notes:
+            for (source_sid, src_tab, row0, msg, target_a1, _meta) in success_notes:
                 if target_a1 not in posted_ok_ranges:
                     continue
                 try:
@@ -1496,8 +1498,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     )
                     rows_marked_true += len(mark_data)
                     print(f"[MARK] Successfully marked {len(mark_data)} rows as posted")
-                except HttpError:
-                    pass
+                except Exception as e:
+                    source_mark_failed = True
+                    print(f"[MARK] ERROR: failed to mark {len(mark_data)} rows as posted in spreadsheet {sid[:20]}: {e}")
             for sid, note_data in note_by_sid.items():
                 if not sid or not note_data:
                     continue
@@ -1511,15 +1514,14 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                         label="source:notes_batch",
                     )
                     print(f"[NOTES] Successfully wrote {len(note_data)} notes")
-                except HttpError:
-                    pass
+                except Exception as e:
+                    print(f"[NOTES] WARN: failed to write {len(note_data)} notes to spreadsheet {sid[:20]}: {e}")
 
             instance_id = (os.environ.get("KYLO_INSTANCE_ID") or "").strip()
             if record_successful_post and instance_id:
-                for (source_sid, src_tab, row0, msg, target_a1) in success_notes:
+                for (source_sid, src_tab, row0, msg, target_a1, meta) in success_notes:
                     if target_a1 not in posted_ok_ranges:
                         continue
-                    meta = post_meta_by_a1.get(target_a1) or {}
                     try:
                         record_successful_post(
                             instance_id=instance_id,
@@ -1556,12 +1558,15 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
             "skipped_rows": skipped_rows,
+            "source_mark_failed": bool(source_mark_failed),
+            "error": bool(source_mark_failed),
         }
 
     # Execute per-target posting and aggregate
     total_cells_written = 0
     total_rows_marked_true = 0
     total_fills_applied = 0
+    source_mark_failed_any = False
     tabs_all: Set[str] = set()
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
@@ -1576,6 +1581,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
         skipped_rows_all.extend(list(result.get("skipped_rows", [])))
+        source_mark_failed_any = source_mark_failed_any or bool(result.get("source_mark_failed"))
 
     # Basic diagnostics for skipped items (printed once per run)
     if skipped_tab_not_found_all:
@@ -1638,6 +1644,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "write_plan_count": int(len(write_plan)),
         "postable_source_rows_by_tab": postable_rows_counts,
         "target_writes_by_source_tab": write_counts_by_tab,
+        "source_mark_failed": bool(source_mark_failed_any),
+        "error": bool(source_mark_failed_any),
     }
 
 
