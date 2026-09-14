@@ -124,6 +124,10 @@ def run_audit_tick(
         summary["error"] = f"intake_load_failed: {e}"
         print(f"[AUDIT] ERROR loading intake: {e}")
         return summary
+    if not txns and (previous or previous_bl):
+        summary["error"] = "intake_load_empty: refusing to overwrite non-empty audit registry"
+        print(f"[AUDIT] ERROR {summary['error']}")
+        return summary
 
     current: Dict[str, RowRecord] = {}
     for txn in txns:
