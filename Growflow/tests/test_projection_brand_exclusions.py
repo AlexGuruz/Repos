@@ -156,3 +156,40 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_unique_order_items_in_local_window_dedupes_across_chunks():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    seen: set[str] = set()
+    tz = ZoneInfo("America/Chicago")
+    first = {
+        "objectId": "order-line-1",
+        "SoldAt": "2026-04-02T16:00:00.000Z",
+        "GrossPrice": 1000,
+    }
+    duplicate = dict(first)
+
+    accepted_first = list(
+        _mod._unique_order_items_in_local_window(
+            [first],
+            seen=seen,
+            tz=tz,
+            report_start_local=date(2026, 4, 1),
+            report_end_local=date(2026, 4, 3),
+        )
+    )
+    accepted_second = list(
+        _mod._unique_order_items_in_local_window(
+            [duplicate],
+            seen=seen,
+            tz=tz,
+            report_start_local=date(2026, 4, 1),
+            report_end_local=date(2026, 4, 3),
+        )
+    )
+
+    assert accepted_first == [(first, date(2026, 4, 2))]
+    assert accepted_second == []
+    assert seen == {"objectId:order-line-1"}
