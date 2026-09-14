@@ -170,8 +170,6 @@ def run_audit_tick(
 
     merged = merge_registry(previous, current, ts=ts)
     merged_bl = merge_business_line_registry(previous_bl, current_bl, ts=ts)
-    save_row_registry(reg_path, merged)
-    save_row_registry(bl_path, merged_bl)
 
     log_path = audit_log_path(instance_id)
     jsonl_path = audit_jsonl_path(instance_id)
@@ -180,6 +178,11 @@ def run_audit_tick(
         append_audit_jsonl(jsonl_path, events, instance_id=instance_id)
         for ev in events:
             print(f"[AUDIT] {ev.human_line(instance_id)}")
+
+    save_row_registry(reg_path, merged)
+    save_row_registry(bl_path, merged_bl)
+
+    if events:
         summary["alerts_sent"] = emit_audit_alerts(events, instance_id=instance_id, cfg=cfg)
 
     iid = instance_id
