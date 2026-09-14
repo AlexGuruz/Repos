@@ -838,7 +838,10 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
                 fnum(r.get("allocation_efficiency")),
             ]
         )
-    append_section("GP_TOP (sorted by projected_gross_profit_usd)", h2, d2)
+    s_gp = append_section("GP_TOP (sorted by projected_gross_profit_usd)", h2, d2)
+    meta["gp_header_row"] = s_gp + 1
+    meta["gp_data_start"] = s_gp + 2
+    meta["gp_data_end"] = s_gp + 1 + len(d2)
 
     h3 = list(h1)
     d3 = []
@@ -878,9 +881,12 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
                 fnum(r.get("allocation_efficiency")),
             ]
         )
-    append_section(
+    s_weak = append_section(
         f"WORST_RECOVERY_MEANINGFUL (allocated_cog_usd >= {MEANINGFUL_USD:g})", h4, d4
     )
+    meta["weak_margin_header_row"] = s_weak + 1
+    meta["weak_margin_data_start"] = s_weak + 2
+    meta["weak_margin_data_end"] = s_weak + 1 + len(d4)
 
     h_cat = [
         "category",
