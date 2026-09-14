@@ -32,6 +32,33 @@ def test_utc_bounds_for_store_local_days():
     assert lo < hi
 
 
+def test_projection_order_items_dedupe_across_chunks_after_local_window_filter():
+    from datetime import date
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("America/Chicago")
+    report_day = date(2026, 4, 3)
+    seen: set[str] = set()
+
+    chunk_one = [
+        {"objectId": "outside-first", "SoldAt": "2026-04-02T04:00:00.000Z", "GrossPrice": 100},
+        {"objectId": "dup", "SoldAt": "2026-04-03T16:00:00.000Z", "GrossPrice": 200},
+        {"objectId": "dup", "SoldAt": "2026-04-03T16:00:00.000Z", "GrossPrice": 200},
+    ]
+    out_one = _mod._unique_order_items_in_local_window(chunk_one, seen, tz, report_day, report_day)
+
+    chunk_two = [
+        {"objectId": "outside-first", "SoldAt": "2026-04-03T18:00:00.000Z", "GrossPrice": 100},
+        {"objectId": "dup", "SoldAt": "2026-04-03T20:00:00.000Z", "GrossPrice": 200},
+        {"objectId": "fresh", "SoldAt": "2026-04-03T21:00:00.000Z", "GrossPrice": 300},
+    ]
+    out_two = _mod._unique_order_items_in_local_window(chunk_two, seen, tz, report_day, report_day)
+
+    assert [n["objectId"] for n in out_one] == ["dup"]
+    assert [n["objectId"] for n in out_two] == ["outside-first", "fresh"]
+    assert seen == {"objectId:outside-first", "objectId:dup", "objectId:fresh"}
+
+
 def test_num_biweek_periods_and_range():
     from datetime import date
 
