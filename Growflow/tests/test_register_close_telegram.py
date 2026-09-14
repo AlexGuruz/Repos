@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from lib.daily_close_report import DailyCloseReport, format_daily_close_telegram
@@ -165,6 +166,109 @@ def test_resolve_transaction_poll_since_not_last_poll_only():
     )
     assert since <= now_utc - timedelta(hours=35)
     assert since < datetime.fromisoformat(last_poll.replace("Z", "+00:00"))
+
+
+def test_tax_report_signature_changes_when_totals_change():
+    from scripts import register_close_taxes_sheet as taxes
+
+    base = DailyCloseReport(
+        sales_date=date(2026, 6, 1),
+        timezone_label="America/Chicago",
+        order_count=1,
+        total_collected_cents=1000,
+        subtotal_cents=900,
+        discounts_cents=0,
+        taxes_cents=100,
+        tender_cents={"CASH": 1000},
+        mj_tax_cents=40,
+        sales_tax_cents=60,
+    )
+    changed = DailyCloseReport(
+        sales_date=date(2026, 6, 1),
+        timezone_label="America/Chicago",
+        order_count=2,
+        total_collected_cents=1500,
+        subtotal_cents=1350,
+        discounts_cents=0,
+        taxes_cents=150,
+        tender_cents={"CASH": 1000, "CARD": 500},
+        mj_tax_cents=60,
+        sales_tax_cents=90,
+    )
+
+    assert taxes._tax_report_signature(base) != taxes._tax_report_signature(changed)
+
+
+def test_notified_sales_date_reexports_when_tax_totals_change(monkeypatch):
+    from scripts import register_close_taxes_sheet as taxes
+
+    tz = ZoneInfo("America/Chicago")
+    cfg = {
+        "register_name": "Register 1",
+        "state_path": "state/register_close/state.json",
+        "credentials_path": None,
+    }
+    previous = DailyCloseReport(
+        sales_date=date(2026, 6, 1),
+        timezone_label="America/Chicago",
+        order_count=1,
+        total_collected_cents=1000,
+        subtotal_cents=900,
+        discounts_cents=0,
+        taxes_cents=100,
+        tender_cents={"CASH": 1000},
+        mj_tax_cents=40,
+        sales_tax_cents=60,
+    )
+    updated = DailyCloseReport(
+        sales_date=date(2026, 6, 1),
+        timezone_label="America/Chicago",
+        order_count=2,
+        total_collected_cents=1500,
+        subtotal_cents=1350,
+        discounts_cents=0,
+        taxes_cents=150,
+        tender_cents={"CASH": 1000, "CARD": 500},
+        mj_tax_cents=60,
+        sales_tax_cents=90,
+    )
+    state = {
+        "notified_shift_ids": ["shift-r1"],
+        "notified_sales_dates": {"Register 1": "2026-06-01"},
+        "tax_report_signatures": {
+            "Register 1": {"2026-06-01": taxes._tax_report_signature(previous)}
+        },
+    }
+    writes = []
+    logs = []
+
+    monkeypatch.setattr(taxes, "build_daily_close_report", lambda *args, **kwargs: updated)
+    monkeypatch.setattr(taxes, "_write_report_to_sheet", lambda report, *, cfg, dry_run: writes.append(report))
+    monkeypatch.setattr(taxes, "_append_log", lambda message, cfg: logs.append(message))
+
+    count = taxes._maybe_reexport_notified_sales_date(
+        state,
+        cfg,
+        tz,
+        dry_run=False,
+        now_local=datetime(2026, 6, 1, 23, 30, tzinfo=tz),
+    )
+
+    assert count == 1
+    assert writes == [updated]
+    assert state["tax_report_signatures"]["Register 1"]["2026-06-01"] == taxes._tax_report_signature(updated)
+    assert any("Re-exported taxes" in msg for msg in logs)
+
+
+def test_register_close_task_scripts_do_not_reference_missing_helpers():
+    repo = Path(__file__).resolve().parents[1]
+    install_script = (repo / "scripts" / "install_register_close_scheduled_task.ps1").read_text(encoding="utf-8")
+    task_script = (repo / "scripts" / "run_register_close_watch_task.ps1").read_text(encoding="utf-8")
+
+    combined = install_script + "\n" + task_script
+    assert "scheduled_task_pythonw.ps1" not in combined
+    assert "invoke_python_hidden.ps1" not in combined
+    assert "register_close_taxes_sheet.py" in combined
 
 
 def test_poll_window_sunday_starts_at_8pm():
