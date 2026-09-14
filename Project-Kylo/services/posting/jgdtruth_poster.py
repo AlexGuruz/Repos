@@ -67,6 +67,15 @@ def _quote_tab_a1(name: str) -> str:
     return s
 
 
+def _post_meta_key(source_sid: str, source_tab: str, row0: int, target_a1: str) -> Tuple[str, str, int, str]:
+    return (
+        str(source_sid or ""),
+        str(source_tab or "TRANSACTIONS"),
+        int(row0),
+        str(target_a1 or ""),
+    )
+
+
 def _build_date_row_map(dates: List[str], header_row: int, first_row: int) -> Dict[str, int]:
     # Date format is as provided by user; exact string match
     return {d: (first_row + i) for i, d in enumerate(dates)}
@@ -797,7 +806,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
         success_notes: List[Tuple[str, str, int, str, str]] = []  # (source_sid, src_tab, row_idx0, note, target_a1)
         flagged_target_ranges: Set[str] = set()
-        post_meta_by_a1: Dict[str, Dict[str, Any]] = {}
+        post_meta_by_source_row: Dict[Tuple[str, str, int, str], Dict[str, Any]] = {}
         skipped_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, reason)
         skipped_tab_not_found: List[str] = []
         skipped_header_date: int = 0
@@ -1094,7 +1103,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     except Exception:
                         note_msg = "Posted"
                 success_notes.append((source_sid, src_tab, row0, note_msg, a1))
-                post_meta_by_a1[a1] = {
+                post_meta_by_source_row[_post_meta_key(source_sid, src_tab, row0, a1)] = {
                     "txn_uid": txn_uid,
                     "source_sid": source_sid,
                     "source_tab": src_tab,
@@ -1519,7 +1528,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 for (source_sid, src_tab, row0, msg, target_a1) in success_notes:
                     if target_a1 not in posted_ok_ranges:
                         continue
-                    meta = post_meta_by_a1.get(target_a1) or {}
+                    meta = post_meta_by_source_row.get(_post_meta_key(source_sid, src_tab, row0, target_a1)) or {}
                     try:
                         record_successful_post(
                             instance_id=instance_id,
