@@ -80,7 +80,22 @@ def test_buy_plan_fast_table_reads_velocity_column() -> None:
 
     grid, _layout_meta = build_dashboard_value_grid(
         meta=meta,
-        kpis={"recovery_uses_days": True},
+        kpis={
+            "recovery_uses_days": True,
+            "is_buy_plan": True,
+            "total_pool": 100.0,
+            "total_rev": 300.0,
+            "total_gp": 120.0,
+            "total_units_buy": 10.0,
+            "w_avg_weeks": 1.0,
+            "w_avg_cash_days": 14.0,
+            "largest_txt": "Fast Velocity / Pre Roll",
+            "fastest_major_txt": "Fast Velocity / Pre Roll",
+            "high_gp_txt": "Fast Velocity / Pre Roll",
+            "slow_dollars": 0.0,
+            "hi_eff_txt": "Fast Velocity / Pre Roll",
+            "lo_eff_txt": "Fast Velocity / Pre Roll",
+        },
         kpi_col_letter="AC",
         kpi_start_row_1based=1,
         insight_bullets=[],
