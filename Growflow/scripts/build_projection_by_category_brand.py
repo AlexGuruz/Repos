@@ -1478,6 +1478,27 @@ def _parse_min_units_overrides(raw_values: list[str]) -> dict[tuple[str, str], i
     return out
 
 
+def _accepted_order_line_date(
+    node: dict[str, Any],
+    seen: set[str],
+    tz: ZoneInfo,
+    report_start_local: date,
+    report_end_local: date,
+) -> date | None:
+    """Return the local sold date for one in-window, not-yet-counted order line."""
+    key = order_item_key(node)
+    if key in seen:
+        return None
+    sold = parse_iso_utc(node.get("SoldAt"))
+    if sold is None:
+        return None
+    local_date = sold.astimezone(tz).date()
+    if local_date < report_start_local or local_date > report_end_local:
+        return None
+    seen.add(key)
+    return local_date
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Category x brand projection markdown (Growflow API)")
     ap.add_argument(
@@ -1754,14 +1775,8 @@ def main() -> int:
         )
 
         for n in raw:
-            k = order_item_key(n)
-            if k in seen:
-                continue
-            sold = parse_iso_utc(n.get("SoldAt"))
-            if sold is None:
-                continue
-            ld = sold.astimezone(tz).date()
-            if ld < report_start_local or ld > report_end_local:
+            ld = _accepted_order_line_date(n, seen, tz, report_start_local, report_end_local)
+            if ld is None:
                 continue
             validation_rows.append(n)
 

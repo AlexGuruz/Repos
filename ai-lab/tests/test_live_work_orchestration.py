@@ -72,6 +72,34 @@ def test_daily_plan_preview_sections(monkeypatch: pytest.MonkeyPatch, tmp_path: 
         assert key in prev and isinstance(prev[key], str)
 
 
+def test_bills_ingestion_summary_classifies_manual_rows(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    from brain.live_work_orchestration.ingestion.bills import (
+        build_bills_snapshot,
+        summarize_bills_for_planning,
+    )
+
+    monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path / "live_work")
+    source = tmp_path / "manual_bills.json"
+    source.write_text(
+        json.dumps(
+            {
+                "bills": [
+                    {"name": "Past due invoice", "due_date": "2026-01-01", "amount": 100},
+                    {"name": "No date bill", "amount": 50},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    snapshot = build_bills_snapshot(source)
+    summary = summarize_bills_for_planning(snapshot)
+
+    assert [row["name"] for row in summary["overdue"]] == ["Past due invoice"]
+    assert summary["warnings"]
+    assert summary["clarifications"]
+
+
 def test_compiler_has_no_automatic_external_side_effects(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr("brain.live_work_orchestration.builders.live_work_dir", lambda: tmp_path)
     build_all_live_work_snapshots()
