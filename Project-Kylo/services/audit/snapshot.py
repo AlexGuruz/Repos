@@ -29,6 +29,7 @@ def save_tick_snapshot(
     meta: Dict[str, Any],
     watch_state_path: Optional[Path] = None,
     posting_state_path: Optional[Path] = None,
+    max_snapshots: Optional[int] = None,
 ) -> Path:
     """Persist a timestamped snapshot directory and update snapshots_latest symlink/file."""
     stamp = _utc_stamp()
@@ -59,7 +60,45 @@ def save_tick_snapshot(
     write_diff_json(snap_dir / "meta.json", {"ts": diff_payload["ts"], **meta})
 
     _update_latest_pointer(instance_id, snap_dir)
+    _prune_old_tick_snapshots(instance_id, max_snapshots=max_snapshots, keep=snap_dir)
     return snap_dir
+
+
+def _is_tick_snapshot_dir(path: Path) -> bool:
+    if not path.is_dir():
+        return False
+    try:
+        datetime.strptime(path.name, "%Y-%m-%dT%H-%M-%SZ")
+        return True
+    except ValueError:
+        return False
+
+
+def _prune_old_tick_snapshots(instance_id: str, *, max_snapshots: Optional[int], keep: Path) -> None:
+    if max_snapshots is None:
+        return
+    try:
+        limit = int(max_snapshots)
+    except (TypeError, ValueError):
+        return
+    if limit < 1:
+        return
+
+    root = snapshots_root(instance_id)
+    try:
+        tick_snapshots = sorted((p for p in root.iterdir() if _is_tick_snapshot_dir(p)), key=lambda p: p.name)
+    except OSError as exc:
+        print(f"[AUDIT] WARN: unable to list snapshot retention candidates: {exc}")
+        return
+
+    keep_resolved = keep.resolve()
+    for stale in tick_snapshots[:-limit]:
+        try:
+            if stale.resolve() == keep_resolved:
+                continue
+            shutil.rmtree(stale)
+        except OSError as exc:
+            print(f"[AUDIT] WARN: unable to prune old snapshot {stale}: {exc}")
 
 
 def _update_latest_pointer(instance_id: str, snap_dir: Path) -> None:

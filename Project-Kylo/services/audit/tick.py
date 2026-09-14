@@ -48,6 +48,16 @@ def _cfg_get(cfg: Any, dotted: str, default: Any = None) -> Any:
     return default
 
 
+def _cfg_int(block: Dict[str, Any], key: str, default: int, *, env_name: str | None = None) -> int:
+    raw = os.environ.get(env_name, "") if env_name else ""
+    value = raw.strip() if raw.strip() else block.get(key, default)
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed >= 1 else default
+
+
 def _sheets_writes_blocked() -> bool:
     return os.environ.get("KYLO_SHEETS_DRY_RUN", "").strip().lower() in ("1", "true", "yes", "y") or os.environ.get(
         "KYLO_READ_ONLY", ""
@@ -185,6 +195,12 @@ def run_audit_tick(
     iid = instance_id
     w_path = Path(watch_state_path) if watch_state_path else default_watch_state_path(iid)
     p_path = Path(posting_state_path) if posting_state_path else default_posting_state_path(iid)
+    snapshot_retention_count = _cfg_int(
+        audit_block,
+        "snapshot_retention_count",
+        288,
+        env_name="KYLO_AUDIT_SNAPSHOT_RETENTION",
+    )
 
     snap_dir = save_tick_snapshot(
         instance_id,
@@ -197,9 +213,11 @@ def run_audit_tick(
             "business_line_count": len(current_bl),
             "csv_tabs": sorted(csv_by_key.keys()),
             "baseline": summary["baseline"],
+            "snapshot_retention_count": snapshot_retention_count,
         },
         watch_state_path=w_path if w_path.exists() else None,
         posting_state_path=p_path if p_path.exists() else None,
+        max_snapshots=snapshot_retention_count,
     )
     summary["snapshot_dir"] = str(snap_dir)
     summary["events"] = len(events)
