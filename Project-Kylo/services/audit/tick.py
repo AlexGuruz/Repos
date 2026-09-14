@@ -78,10 +78,9 @@ def audit_enabled(cfg) -> bool:
 
 
 def is_audit_mode(cfg) -> bool:
-    if os.environ.get("KYLO_ALLOW_POST", "").strip().lower() in ("1", "true", "yes", "y"):
-        return False
     mode = (os.environ.get("KYLO_RUNTIME_MODE") or _cfg_get(cfg, "runtime.mode", "audit") or "audit").strip().lower()
-    return mode != "post"
+    allow_post = os.environ.get("KYLO_ALLOW_POST", "").strip().lower() in ("1", "true", "yes", "y")
+    return not (mode == "post" and allow_post)
 
 
 def run_audit_tick(
