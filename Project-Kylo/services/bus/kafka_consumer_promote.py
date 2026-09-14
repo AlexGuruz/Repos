@@ -9,6 +9,7 @@ from services.bus.schema import PromoteRequestMessage
 from services.rules_promoter.service import promote as rules_promote
 from services.replay.worker import replay_after_promotion
 from services.sheets import poster
+from services.common.config_loader import load_config
 from services.common.rules_workbook import get_rules_management_spreadsheet_id
 
 BROKERS = os.getenv("KAFKA_BROKERS","localhost:9092").split(',')
