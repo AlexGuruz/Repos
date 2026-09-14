@@ -58,12 +58,33 @@ def _dedupe_events(events: List[ChangeEvent]) -> List[ChangeEvent]:
     seen: Set[tuple] = set()
     out: List[ChangeEvent] = []
     for ev in events:
-        sig = (ev.row_key, ev.event, ev.changed_field, ev.before, ev.after, tuple(ev.anomalies))
+        sig = _event_identity(ev)
         if sig in seen:
             continue
         seen.add(sig)
         out.append(ev)
     return out
+
+
+def _event_identity(ev: ChangeEvent) -> tuple:
+    return (ev.row_key, ev.event, ev.changed_field, ev.before, ev.after, tuple(ev.anomalies))
+
+
+def _only_new_detector_events(
+    previous_rows: List[RowRecord],
+    current_events: List[ChangeEvent],
+    *,
+    max_pair_distance: int,
+) -> List[ChangeEvent]:
+    if not previous_rows or not current_events:
+        return current_events
+    previous_events: List[ChangeEvent] = []
+    previous_events.extend(
+        detect_from_bank_payroll_pairs(previous_rows, ts="previous", max_pair_distance=max_pair_distance)
+    )
+    previous_events.extend(detect_kylo_posted_amount_variance(previous_rows, ts="previous"))
+    previous_seen = {_event_identity(ev) for ev in previous_events}
+    return [ev for ev in current_events if _event_identity(ev) not in previous_seen]
 
 
 def audit_enabled(cfg) -> bool:
@@ -154,11 +175,14 @@ def run_audit_tick(
         events.extend(diff_business_line_registries(previous_bl, current_bl, ts=ts))
 
     pair_block = audit_block.get("pair_rules") or {}
+    detector_events: List[ChangeEvent] = []
+    max_dist = 3
     if not isinstance(pair_block, dict) or pair_block.get("enabled", True):
         max_dist = int(pair_block.get("max_pair_distance_rows", 3) or 3) if isinstance(pair_block, dict) else 3
-        events.extend(detect_from_bank_payroll_pairs(current_list, ts=ts, max_pair_distance=max_dist))
+        detector_events.extend(detect_from_bank_payroll_pairs(current_list, ts=ts, max_pair_distance=max_dist))
 
-    events.extend(detect_kylo_posted_amount_variance(current_list, ts=ts))
+    detector_events.extend(detect_kylo_posted_amount_variance(current_list, ts=ts))
+    events.extend(_only_new_detector_events(list(previous.values()), detector_events, max_pair_distance=max_dist))
 
     rev_block = audit_block.get("revision_poll") or {}
     if isinstance(rev_block, dict) and rev_block.get("enabled", False):
