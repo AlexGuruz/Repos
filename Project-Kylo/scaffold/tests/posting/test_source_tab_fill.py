@@ -9,6 +9,7 @@ import pytest
 from services.posting.jgdtruth_poster import (
     _build_sheet_title_to_id,
     _color_for_source_tabs,
+    _post_meta_key,
     _parse_target_cell_a1,
     _rgb_triple_from_cfg,
     apply_source_tab_fill_colors,
@@ -30,6 +31,12 @@ def test_parse_target_cell_a1_simple_tab():
 def test_parse_target_cell_a1_invalid():
     assert _parse_target_cell_a1("") is None
     assert _parse_target_cell_a1("norange") is None
+
+
+def test_post_meta_key_distinguishes_same_target_different_source_rows():
+    target = "'JGD EXPENSES'!B20"
+
+    assert _post_meta_key("sid", "TRANSACTIONS", 2, target) != _post_meta_key("sid", "TRANSACTIONS", 3, target)
 
 
 def test_color_for_source_tabs():
