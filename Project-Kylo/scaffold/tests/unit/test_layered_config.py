@@ -154,3 +154,13 @@ posting:
     cfg = load_config()
     assert cfg.get("posting.sheets.apply") is False
 
+
+def test_rules_workbook_resolves_env_and_config_url(monkeypatch):
+    from services.common.rules_workbook import get_rules_management_spreadsheet_id
+
+    monkeypatch.setenv("KYLO_RULES_MANAGEMENT_WORKBOOK_URL", "https://docs.google.com/spreadsheets/d/envSheetId1234567890/edit")
+    assert get_rules_management_spreadsheet_id({}) == "envSheetId1234567890"
+
+    monkeypatch.delenv("KYLO_RULES_MANAGEMENT_WORKBOOK_URL")
+    cfg = {"rules": {"management_workbook_url": "https://docs.google.com/spreadsheets/d/configSheetId1234567890/edit"}}
+    assert get_rules_management_spreadsheet_id(cfg) == "configSheetId1234567890"

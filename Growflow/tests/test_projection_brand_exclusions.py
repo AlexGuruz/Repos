@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from datetime import datetime, time, timezone
 
 REPO = Path(__file__).resolve().parents[1]
 if str(REPO) not in sys.path:
@@ -156,3 +157,57 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_main_dedupes_duplicate_order_items(monkeypatch, tmp_path):
+    tz = _mod._store_tz()
+    sold_local = datetime.combine(datetime.now(tz).date(), time(12, 0), tzinfo=tz)
+    sold_at = sold_local.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    duplicate_order_item = {
+        "objectId": "order-item-1",
+        "SoldAt": sold_at,
+        "GrossPrice": 10_000,
+        "COG": 4_000,
+        "Product": {
+            "Name": "Test Gummies",
+            "SKU": "TG-1",
+            "Brand": {"Name": "Test Brand"},
+        },
+        "ProductCategory": {"Name": "Edibles"},
+    }
+
+    def fake_fetch_chunk(**_kwargs):
+        return [duplicate_order_item, dict(duplicate_order_item)], _mod.ORDER_ITEMS_QUERY
+
+    monkeypatch.setattr(_mod, "_fetch_chunk", fake_fetch_chunk)
+    monkeypatch.setattr(
+        _mod,
+        "validate_and_normalize",
+        lambda **_kwargs: {"ok": True, "report_path": str(tmp_path / "validation.json")},
+    )
+    out_path = tmp_path / "projection.md"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "1",
+            "--chunk-days",
+            "1",
+            "--pool",
+            "100",
+            "--allocation-mode",
+            "gross-share",
+            "--no-layer2",
+            "--exclude-brands",
+            "",
+            "--out",
+            str(out_path),
+        ],
+    )
+
+    assert _mod.main() == 0
+    report = out_path.read_text(encoding="utf-8")
+    assert "**Unique order lines counted:** 1" in report
+    assert "**Sales in focus categories (pool-eligible):** $100.00 gross" in report
