@@ -838,7 +838,10 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
                 fnum(r.get("allocation_efficiency")),
             ]
         )
-    append_section("GP_TOP (sorted by projected_gross_profit_usd)", h2, d2)
+    s_gp = append_section("GP_TOP (sorted by projected_gross_profit_usd)", h2, d2)
+    meta["gp_header_row"] = s_gp + 1
+    meta["gp_data_start"] = s_gp + 2
+    meta["gp_data_end"] = s_gp + 1 + len(d2)
 
     h3 = list(h1)
     d3 = []
@@ -878,9 +881,12 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
                 fnum(r.get("allocation_efficiency")),
             ]
         )
-    append_section(
+    s_weak = append_section(
         f"WORST_RECOVERY_MEANINGFUL (allocated_cog_usd >= {MEANINGFUL_USD:g})", h4, d4
     )
+    meta["weak_margin_header_row"] = s_weak + 1
+    meta["weak_margin_data_start"] = s_weak + 2
+    meta["weak_margin_data_end"] = s_weak + 1 + len(d4)
 
     h_cat = [
         "category",
@@ -991,19 +997,42 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
     meta["scatter_data_start"] = s_sc + 2
     meta["scatter_data_end"] = s_sc + 1 + len(d_sc)
 
-    # Fastest-recovery column chart: meaningful $ rows with a defined recovery metric only (matches dashboard table)
-    meaningful_with_recovery = [r for r in meaningful if recovery_metric(r) is not None]
-    fr_rows = sorted(
-        meaningful_with_recovery,
-        key=lambda r: (
-            recovery_metric(r) or 1e9,
-            -(fnum(r.get("allocated_cog_usd")) or 0),
-        ),
-    )[:CHART_TOP_N]
+    # Fastest-recovery / buy-plan velocity column chart (matches dashboard table).
+    if use_days:
+        fr_rows = sorted(
+            [r for r in meaningful if fnum(r.get("avg_units_per_day")) is not None],
+            key=lambda r: (
+                -(fnum(r.get("avg_units_per_day")) or 0),
+                -(fnum(r.get("allocated_cog_usd")) or 0),
+            ),
+        )[:CHART_TOP_N]
+        fr_header = [
+            "label",
+            "brand",
+            "category",
+            "allocated_cog_usd",
+            "projected_revenue_from_allocated_units_usd",
+            "projected_gross_profit_usd",
+            "avg_units_per_day",
+            "allocation_efficiency",
+        ]
+        fr_title = f"FAST_VELOCITY_TOP_{CHART_TOP_N}_FOR_CHART (meaningful alloc>={MEANINGFUL_USD:g}, fastest units/day first)"
+    else:
+        meaningful_with_recovery = [r for r in meaningful if recovery_metric(r) is not None]
+        fr_rows = sorted(
+            meaningful_with_recovery,
+            key=lambda r: (
+                recovery_metric(r) or 1e9,
+                -(fnum(r.get("allocated_cog_usd")) or 0),
+            ),
+        )[:CHART_TOP_N]
+        fr_header = list(h1)
+        fr_title = f"FAST_RECOVERY_TOP_{CHART_TOP_N}_FOR_CHART (meaningful alloc>={MEANINGFUL_USD:g}, fastest first)"
     d_fr: list[list[Any]] = []
     for r in fr_rows:
         b = r.get("brand", "")
         c = r.get("category", "")
+        ranking_metric = fnum(r.get("avg_units_per_day")) if use_days else recovery_metric(r)
         d_fr.append(
             [
                 f"{b[:18]} / {c[:14]}",
@@ -1012,15 +1041,11 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
                 fnum(r.get("allocated_cog_usd")),
                 fnum(r.get("projected_revenue_from_allocated_units_usd")),
                 fnum(r.get("projected_gross_profit_usd")),
-                recovery_metric(r),
+                ranking_metric,
                 fnum(r.get("allocation_efficiency")),
             ]
         )
-    s_fr = append_section(
-        f"FAST_RECOVERY_TOP_{CHART_TOP_N}_FOR_CHART (meaningful alloc>={MEANINGFUL_USD:g}, fastest first)",
-        list(h1),
-        d_fr,
-    )
+    s_fr = append_section(fr_title, fr_header, d_fr)
     meta["fast_recovery_header_row"] = s_fr + 1
     meta["fast_recovery_data_start"] = s_fr + 2
     meta["fast_recovery_data_end"] = s_fr + 1 + len(d_fr)
