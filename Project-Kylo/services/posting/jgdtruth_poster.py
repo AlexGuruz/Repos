@@ -791,7 +791,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # All rule-matched transactions (posted + unposted) for full target-cell totals.
         # Last tuple field: for_marking — True only for rows that still need posted/notes updates.
-        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, bool]] = []
+        matched_writes: List[Tuple[str, str, str, int, str, int, str, str, str, str, bool]] = []
         # NOTE: We store the resolved target A1 range per source row so we only mark
         # rows as posted when their target cell is confirmed written (or already correct).
         success_rows: List[Tuple[str, str, int, str]] = []  # (source_sid, src_tab, row_idx0, target_a1)
@@ -929,12 +929,14 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     int(t.get("row_index_0based") or 0),
                     txn_uid,
                     source_sid,
+                    str(dt or ""),
+                    str(src or ""),
                     not is_posted,
                 )
             )
 
         # Print diagnostic summary
-        pending_writes = [w for w in matched_writes if w[8]]
+        pending_writes = [w for w in matched_writes if w[10]]
         print(f"[DIAG] Total transactions: {total_txns}")
         print(f"[DIAG] Skipped (already posted): {skipped_posted}")
         print(f"[DIAG] Skipped (wrong company): {skipped_wrong_company}")
@@ -949,7 +951,7 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
 
         # Resolve writes to exact A1 cells
         data: List[Dict[str, object]] = []
-        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _mark) in matched_writes})
+        unique_tabs = sorted({tab for (tab, _header, _date, _amt, _src_tab, _row0, _txn, _sid, _posted_date, _desc, _mark) in matched_writes})
         headers_map = _batch_read_headers(service, target_sid, unique_tabs, header_row)
         cell_totals: Dict[str, int] = {}
         cell_txns: Dict[str, Set[str]] = defaultdict(set)
@@ -1031,7 +1033,19 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                 return actual
             return static_row
 
-        for (tab, header, date_key, amount_cents, src_tab, row0, txn_uid, source_sid, for_marking) in matched_writes:
+        for (
+            tab,
+            header,
+            date_key,
+            amount_cents,
+            src_tab,
+            row0,
+            txn_uid,
+            source_sid,
+            posted_date,
+            description,
+            for_marking,
+        ) in matched_writes:
             headers = headers_map.get(tab) or []
             norm = [str(h).strip().lower() for h in headers]
             wanted = (header or "").strip().lower()
@@ -1075,8 +1089,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                             source_sid=str(source_sid or ""),
                             source_tab=str(src_tab or "TRANSACTIONS"),
                             company_id=company_upper,
-                            posted_date=str(dt or ""),
-                            description=str(src or ""),
+                            posted_date=str(posted_date or ""),
+                            description=str(description or ""),
                             amount_cents=amount_cents,
                             instance_id=instance_id,
                         )
@@ -1100,8 +1114,8 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
                     "source_tab": src_tab,
                     "row0": row0,
                     "company_id": company_upper,
-                    "posted_date": str(dt or ""),
-                    "description": str(src or ""),
+                    "posted_date": str(posted_date or ""),
+                    "description": str(description or ""),
                     "amount_cents": amount_cents,
                     "flagged": flagged,
                 }
@@ -1552,30 +1566,40 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
             "cells_written": int(cells_written),
             "rows_marked_true": int(rows_marked_true),
             "fills_applied": int(fills_applied),
+            "failed_range_count": int(len(failed_ranges)),
+            "failed_ranges": sorted(failed_ranges),
+            "error": bool(failed_ranges),
             "tabs": sorted(tabs_touched),
             "skipped_tab_not_found": skipped_tab_not_found,
             "skipped_header_date": int(skipped_header_date),
             "skipped_rows": skipped_rows,
+            "success_rows": success_rows,
         }
 
     # Execute per-target posting and aggregate
     total_cells_written = 0
     total_rows_marked_true = 0
     total_fills_applied = 0
+    total_failed_ranges = 0
     tabs_all: Set[str] = set()
     skipped_tab_not_found_all: List[str] = []
     skipped_header_date_total = 0
     skipped_rows_all: List[Tuple[str, str, int, str]] = []
+    failed_ranges_all: List[str] = []
+    success_rows_all: List[Tuple[str, str, int, str]] = []
 
     for target_sid, txns_for_target in txns_by_target_sid.items():
         result = _process_target(target_sid, txns_for_target, ignore_posted=ignore_posted_flag)
         total_cells_written += int(result.get("cells_written", 0))
         total_rows_marked_true += int(result.get("rows_marked_true", 0))
         total_fills_applied += int(result.get("fills_applied", 0))
+        total_failed_ranges += int(result.get("failed_range_count", 0) or 0)
         tabs_all |= set(result.get("tabs", []))
         skipped_tab_not_found_all.extend(list(result.get("skipped_tab_not_found", [])))
         skipped_header_date_total += int(result.get("skipped_header_date", 0))
         skipped_rows_all.extend(list(result.get("skipped_rows", [])))
+        failed_ranges_all.extend([str(x) for x in (result.get("failed_ranges", []) or [])])
+        success_rows_all.extend(list(result.get("success_rows", [])))
 
     # Basic diagnostics for skipped items (printed once per run)
     if skipped_tab_not_found_all:
@@ -1633,6 +1657,9 @@ def run(company: str, *, baseline: bool = False, verify: Optional[bool] = None, 
         "cells_written": int(total_cells_written),
         "rows_marked_true": int(total_rows_marked_true),
         "fills_applied": int(total_fills_applied),
+        "failed_range_count": int(total_failed_ranges),
+        "failed_ranges": sorted(set(failed_ranges_all)),
+        "error": bool(total_failed_ranges),
         "tabs": sorted(tabs_all),
         "write_plan_path": wp_out,
         "write_plan_count": int(len(write_plan)),

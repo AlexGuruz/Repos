@@ -9,8 +9,12 @@ $logFile = Join-Path $logDir "register_close_taxes.log"
 $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 try {
-    & (Join-Path $PSScriptRoot "invoke_python_hidden.ps1") `
-        "scripts\register_close_taxes_sheet.py" --once
+    Set-Location $root
+    $env:PYTHONPATH = $root.Path
+    $python = "python"
+    $cmd = Get-Command "python.exe" -ErrorAction SilentlyContinue
+    if ($cmd -and $cmd.Source) { $python = $cmd.Source }
+    & $python "scripts\register_close_taxes_sheet.py" --once @args >> $logFile 2>&1
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
         "[$ts] poll exit code $exitCode" | Add-Content -Path $logFile -Encoding utf8
