@@ -12,6 +12,8 @@ runtime:
 
 audit:
   enabled: true
+  # Keep one day of 5-minute forensic tick snapshots by default.
+  snapshot_retention_count: 288
   apply_highlights: true
   write_notes: true
   note_column: G
