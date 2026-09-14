@@ -8,6 +8,14 @@ from services.intake.csv_processor import PettyCashCSVProcessor
 from services.sheets.poster import _extract_spreadsheet_id
 
 
+class IntakeLoadError(RuntimeError):
+    """Raised when audit intake cannot load every configured source tab."""
+
+    def __init__(self, errors: List[str]):
+        self.errors = list(errors)
+        super().__init__("; ".join(self.errors))
+
+
 def _active_years(cfg) -> Optional[List[int]]:
     import os
 
@@ -86,6 +94,7 @@ def load_intake_for_company(
 
     txns: List[dict] = []
     csv_by_key: Dict[str, str] = {}
+    errors: List[str] = []
     for url in intake_urls_for_company(cfg, company):
         sid = _extract_spreadsheet_id(str(url))
         if not sid:
@@ -108,8 +117,10 @@ def load_intake_for_company(
                     it["source_tab"] = tab
                     it["source_spreadsheet_id"] = sid
                     txns.append(it)
-            except Exception:
-                continue
+            except Exception as exc:
+                errors.append(f"{company}:{sid}:{tab}: {exc}")
+    if errors:
+        raise IntakeLoadError(errors)
     return txns, csv_by_key
 
 
@@ -121,11 +132,18 @@ def load_all_intake(
 ) -> Tuple[List[dict], Dict[str, str]]:
     all_txns: List[dict] = []
     all_csv: Dict[str, str] = {}
+    errors: List[str] = []
     for cid in companies:
-        txns, csv_map = load_intake_for_company(cfg, cid, service_account=service_account)
+        try:
+            txns, csv_map = load_intake_for_company(cfg, cid, service_account=service_account)
+        except IntakeLoadError as exc:
+            errors.extend(exc.errors)
+            continue
         all_txns.extend(txns)
         all_csv.update(csv_map)
+    if errors:
+        raise IntakeLoadError(errors)
     return all_txns, all_csv
 
 
-__all__ = ["intake_urls_for_company", "load_all_intake", "load_intake_for_company"]
+__all__ = ["IntakeLoadError", "intake_urls_for_company", "load_all_intake", "load_intake_for_company"]

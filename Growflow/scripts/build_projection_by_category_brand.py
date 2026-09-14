@@ -65,6 +65,7 @@ from lib.data_validation_gateway import validate_and_normalize
 from lib.growflow_queries import (
     ORDER_ITEMS_QUERY,
     ORDER_ITEMS_QUERY_NO_BRAND,
+    ORDER_ITEMS_QUERY_NO_PACKAGE,
     PAGE_SIZE,
     date_range_to_where,
     fetch_paginated,
@@ -227,6 +228,15 @@ def _fetch_chunk(
     """Returns (nodes, query_used). Retries on transient network/HTML errors."""
     last_err: Exception | None = None
     query = oi_query
+
+    def _fallback_query(current: str, message: str) -> str | None:
+        msg = message.lower()
+        if "package" in msg and current != ORDER_ITEMS_QUERY_NO_PACKAGE:
+            return ORDER_ITEMS_QUERY_NO_PACKAGE
+        if "brand" in msg and current != ORDER_ITEMS_QUERY_NO_BRAND:
+            return ORDER_ITEMS_QUERY_NO_BRAND
+        return None
+
     for attempt in range(max(1, retries)):
         try:
             raw = fetch_paginated(
@@ -239,8 +249,9 @@ def _fetch_chunk(
         except RuntimeError as e:
             last_err = e
             err = str(e).lower()
-            if chunk_idx == 1 and attempt == 0 and ("brand" in err or "cannot query field" in err):
-                query = ORDER_ITEMS_QUERY_NO_BRAND
+            fallback = _fallback_query(query, err)
+            if chunk_idx == 1 and attempt == 0 and fallback:
+                query = fallback
                 try:
                     raw = fetch_paginated(
                         "findOrderItems",

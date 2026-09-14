@@ -71,7 +71,7 @@ DASH_CATEGORY_VISIBLE_ROWS = 35
 DASH_VELOCITY_VISIBLE_ROWS = 40
 DASH_LEDGER_VISIBLE_ROWS = 220
 SCATTER_MAX_MONTHS = 36.0  # hide extreme noise in scatter (e.g. micro topical)
-SCATTER_MAX_DAYS = 120.0  # buy-plan scatter: cash_recovery_days cap
+SCATTER_MAX_DAYS = 120.0  # buy-plan scatter: GP-payback-day cap
 
 # Line-count chart order when using cash_cycle_status (buy-plan)
 _CASH_STATUS_BUCKET_ORDER = ("SAFE", "WARNING", "CAPITAL RISK")
@@ -148,7 +148,7 @@ def _configure_stdio_utf8() -> None:
 
 
 def _use_cash_recovery_days_axis(rows: list[dict[str, str]]) -> bool:
-    """Buy-plan + CSV has cash_recovery_days → charts/tables use days, not months_to_recover_cog."""
+    """Buy-plan + CSV has cash_recovery_days, so dashboard recovery displays use days."""
     if not rows or (rows[0].get("allocation_mode") or "").strip() != "buy-plan":
         return False
     return any(fnum(r.get("cash_recovery_days")) is not None for r in rows)
@@ -161,6 +161,17 @@ def fnum(x: str | None) -> float | None:
         return float(x)
     except ValueError:
         return None
+
+
+def _buy_plan_gp_payback_days(r: dict[str, str]) -> float | None:
+    allocated = fnum(r.get("allocated_cog_usd"))
+    cash_days = fnum(r.get("cash_recovery_days"))
+    gross_profit = fnum(r.get("projected_gross_profit_usd"))
+    if allocated is None or cash_days is None or gross_profit is None:
+        return None
+    if allocated <= 0 or gross_profit <= 0:
+        return None
+    return allocated * cash_days / gross_profit
 
 
 def _sheet_title_key(name: str) -> str:
@@ -678,7 +689,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
         return fnum(r.get("allocated_cog_usd")) or 0.0
 
     def recovery_metric(r: dict) -> float | None:
-        return fnum(r.get("cash_recovery_days")) if use_days else fnum(r.get("months_to_recover_cog"))
+        return _buy_plan_gp_payback_days(r) if use_days else fnum(r.get("months_to_recover_cog"))
 
     top_alloc = sorted(rows, key=sort_key_alloc, reverse=True)[:TABLE_TOP_N]
     top_gp = sorted(
@@ -713,7 +724,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
         cat_gp[c] += fnum(r.get("projected_gross_profit_usd")) or 0
         cat_cnt[c] += 1
         if a >= MEANINGFUL_USD:
-            mo = fnum(r.get("cash_recovery_days")) if use_days else fnum(r.get("months_to_recover_cog"))
+            mo = recovery_metric(r)
             ef = fnum(r.get("allocation_efficiency"))
             if mo is not None:
                 cat_mo_w[c] += mo * a
@@ -735,7 +746,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
         b_alloc[b] += a
         b_gp[b] += fnum(r.get("projected_gross_profit_usd")) or 0
         if a >= MEANINGFUL_USD:
-            mo = fnum(r.get("cash_recovery_days")) if use_days else fnum(r.get("months_to_recover_cog"))
+            mo = recovery_metric(r)
             ef = fnum(r.get("allocation_efficiency"))
             if mo is not None:
                 b_mo_w[b] += mo * a
@@ -761,7 +772,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
     # Scatter: meaningful, capped axis (days or months)
     scat: list[dict] = []
     for r in meaningful:
-        x = fnum(r.get("cash_recovery_days")) if use_days else fnum(r.get("months_to_recover_cog"))
+        x = recovery_metric(r)
         ef = fnum(r.get("allocation_efficiency"))
         if x is None or ef is None:
             continue
@@ -788,7 +799,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
         return start
 
     # --- alloc top 20 for table; chart uses first 15
-    rec_col = "cash_recovery_days" if use_days else "months_to_recover_cog"
+    rec_col = "cog_payback_via_gp_days" if use_days else "months_to_recover_cog"
     h1 = [
         "label",
         "brand",
@@ -885,7 +896,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
     h_cat = [
         "category",
         "total_allocated_usd",
-        "wavg_cash_recovery_days_meaningful" if use_days else "wavg_months_recover_meaningful",
+        "wavg_cog_payback_via_gp_days_meaningful" if use_days else "wavg_months_recover_meaningful",
         "wavg_efficiency_meaningful",
         "projected_revenue_usd",
         "projected_gross_profit_usd",
@@ -915,7 +926,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
         "brand",
         "total_allocated_usd",
         "projected_gross_profit_usd",
-        "wavg_cash_recovery_days_meaningful" if use_days else "wavg_months_recover_meaningful",
+        "wavg_cog_payback_via_gp_days_meaningful" if use_days else "wavg_months_recover_meaningful",
         "wavg_efficiency_meaningful",
     ]
     d_br = []
@@ -962,7 +973,7 @@ def build_dashboard_data_values(rows: list[dict[str, str]]) -> tuple[list[list[A
     meta["bucket_data_end"] = s_bk + 1 + len(d_bk)
 
     h_sc = [
-        "cash_recovery_days" if use_days else "months_to_recover_cog",
+        "cog_payback_via_gp_days" if use_days else "months_to_recover_cog",
         "allocation_efficiency",
         "allocated_cog_usd",
         "brand",
@@ -1474,7 +1485,11 @@ def build_executive_dashboard_values(
         kpi_defs.extend(
             [
                 (
-                    "Average cash recovery time (weighted by $)",
+                    (
+                        "Average COG payback via GP (weighted by $)"
+                        if kpis.get("is_buy_plan")
+                        else "Average cash recovery time (weighted by $)"
+                    ),
                     round(kpis["w_avg_cash_days"], 2) if kpis.get("w_avg_cash_days") else "",
                     "d",
                 ),
@@ -1577,12 +1592,12 @@ def build_executive_dashboard_values(
     big_h = ["Brand", "Category", "Allocated COG", payback_hdr, "Projected gross profit", "Revenue per $1 of COG"]
 
     add_fixed_ranking_table("Biggest allocation rows", big_h, "biggest", "alloc")
-    add_fixed_ranking_table(
-        f"Fastest cash recovery (Allocated COG ≥ ${MEANINGFUL_USD:g}; rows with payback data only)",
-        big_h,
-        "fastest",
-        "fast_recovery",
+    fastest_title = (
+        f"Fastest GP payback (Allocated COG ≥ ${MEANINGFUL_USD:g}; rows with payback data only)"
+        if rec_uses_d
+        else f"Fastest cash recovery (Allocated COG ≥ ${MEANINGFUL_USD:g}; rows with payback data only)"
     )
+    add_fixed_ranking_table(fastest_title, big_h, "fastest", "fast_recovery")
     add_fixed_ranking_table("Highest projected gross profit (meaningful $)", big_h, "highest_gp", "gp")
     add_fixed_ranking_table(
         f"High-dollar rows with weaker efficiency (Allocated COG ≥ ${HIGH_DOLLAR_USD:g})",
@@ -1739,7 +1754,7 @@ def build_notes(
             [
                 "Scatter filter",
                 (
-                    f"Scatter: buy-plan uses cash_recovery_days (capped at {SCATTER_MAX_DAYS:g}); "
+                    f"Scatter: buy-plan uses GP-payback days (capped at {SCATTER_MAX_DAYS:g}); "
                     f"other modes use months_to_recover_cog (cap {SCATTER_MAX_MONTHS:g})."
                 ),
             ],
@@ -2639,7 +2654,7 @@ def add_charts(
     pool_phrase = (
         f"${float(pool_amt):,.0f}" if isinstance(pool_amt, (int, float)) else "the pool"
     )
-    payback_axis_lbl = "Cash recovery (days)" if axis_days else "Payback (months)"
+    payback_axis_lbl = "COG payback via GP (days)" if axis_days else "Payback (months)"
     cr = _dashboard_chart_layout_rows(dash_layout)
 
     def chart_pos(row: int, col: int, w: int, h: int) -> dict[str, Any]:
@@ -2876,10 +2891,10 @@ def add_charts(
                     "spec": {
                         **_chart_visual_envelope(
                             title=(
-                                f"Fastest cash recovery — payback time ({'days' if axis_days else 'months'})"
+                                f"Fastest {'GP payback' if axis_days else 'cash recovery'} — payback time ({'days' if axis_days else 'months'})"
                             ),
                             subtitle=(
-                                "Lower is faster · Same rows as Fastest cash recovery table above"
+                                "Lower is faster · Same rows as the fastest payback table above"
                             ),
                             alt_text=(
                                 f"Column chart of {payback_axis_lbl} for the fastest-recovering meaningful allocation lines."
@@ -3044,7 +3059,7 @@ def add_charts(
     )
 
     cat_rec_title = (
-        "Recovery speed by category (avg cash recovery, meaningful $ only)"
+        "Recovery speed by category (avg GP payback, meaningful $ only)"
         if axis_days
         else "Recovery speed by category (avg payback, meaningful $ only)"
     )
@@ -3526,7 +3541,7 @@ def main() -> int:
         f"  Full velocity table (brand→category): rows {meta['velocity_data_start']}-{meta['velocity_data_end']}"
     )
     scat_x = (
-        "cash recovery days"
+        "GP payback days"
         if meta.get("recovery_axis_days")
         else "payback months"
     )
