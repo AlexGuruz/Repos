@@ -154,3 +154,32 @@ posting:
     cfg = load_config()
     assert cfg.get("posting.sheets.apply") is False
 
+
+def test_rules_workbook_resolves_config_url(monkeypatch):
+    monkeypatch.delenv("KYLO_RULES_MANAGEMENT_SPREADSHEET_ID", raising=False)
+    monkeypatch.delenv("KYLO_RULES_MANAGEMENT_WORKBOOK_URL", raising=False)
+
+    from services.common.rules_workbook import get_rules_management_spreadsheet_id
+
+    class Config:
+        def get(self, key: str, default=None):
+            if key == "rules.management_workbook_url":
+                return "https://docs.google.com/spreadsheets/d/abc123DEF_456/edit#gid=0"
+            return default
+
+    assert get_rules_management_spreadsheet_id(Config()) == "abc123DEF_456"
+
+
+def test_rules_workbook_env_id_overrides_config(monkeypatch):
+    monkeypatch.setenv("KYLO_RULES_MANAGEMENT_SPREADSHEET_ID", "envSpreadsheetId1234567890")
+
+    from services.common.rules_workbook import get_rules_management_spreadsheet_id
+
+    class Config:
+        def get(self, key: str, default=None):
+            if key == "rules.management_workbook_url":
+                return "https://docs.google.com/spreadsheets/d/configSpreadsheetId1234567890/edit"
+            return default
+
+    assert get_rules_management_spreadsheet_id(Config()) == "envSpreadsheetId1234567890"
+
