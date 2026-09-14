@@ -1,7 +1,10 @@
 """Tests for register close Telegram report helpers."""
 from __future__ import annotations
 
+import importlib.util
+import sys
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from lib.daily_close_report import DailyCloseReport, format_daily_close_telegram
@@ -15,6 +18,19 @@ from lib.register_shift_watch import (
     poll_window_schedule_from_config,
     resolve_transaction_poll_since,
 )
+
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+def _load_register_close_script():
+    name = "register_close_taxes_sheet_for_test"
+    spec = importlib.util.spec_from_file_location(name, REPO / "scripts" / "register_close_taxes_sheet.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def test_format_daily_close_telegram_includes_totals():
@@ -172,3 +188,62 @@ def test_poll_window_sunday_starts_at_8pm():
     w = PollWindowSchedule(sunday_start=20, mon_sat_start=22, window_hours=4)
     assert not w.in_window(datetime(2026, 6, 7, 19, 30, tzinfo=tz))
     assert w.in_window(datetime(2026, 6, 7, 20, 0, tzinfo=tz))
+
+
+def test_notified_sales_date_reexports_when_tax_signature_changes(monkeypatch, tmp_path):
+    mod = _load_register_close_script()
+    sales_date = date(2026, 6, 1)
+    cfg = {"register_name": "Register 1", "state_path": str(tmp_path / "state" / "register_close.json")}
+    original = DailyCloseReport(
+        sales_date=sales_date,
+        timezone_label="America/Chicago",
+        order_count=10,
+        total_collected_cents=10_000,
+        subtotal_cents=9_000,
+        discounts_cents=0,
+        taxes_cents=1_000,
+        tender_cents={"CASH": 10_000},
+        mj_tax_cents=400,
+        sales_tax_cents=600,
+        register_name="Register 1",
+    )
+    corrected = DailyCloseReport(
+        sales_date=sales_date,
+        timezone_label="America/Chicago",
+        order_count=11,
+        total_collected_cents=11_000,
+        subtotal_cents=9_800,
+        discounts_cents=0,
+        taxes_cents=1_200,
+        tender_cents={"CASH": 11_000},
+        mj_tax_cents=500,
+        sales_tax_cents=700,
+        register_name="Register 1",
+    )
+    state = {"notified_sales_dates": {"Register 1": sales_date.isoformat()}}
+    mod._record_tax_report_signature(state, cfg, sales_date, mod._tax_report_signature(original))
+    writes = []
+
+    monkeypatch.setattr(mod, "build_daily_close_report", lambda *args, **kwargs: corrected)
+    monkeypatch.setattr(mod, "_write_report_to_sheet", lambda report, **kwargs: writes.append(report))
+    monkeypatch.setattr(mod, "_append_log", lambda *args, **kwargs: None)
+
+    tz = ZoneInfo("America/Chicago")
+    assert mod._maybe_reexport_notified_sales_date(
+        state,
+        cfg,
+        tz,
+        dry_run=False,
+        now_local=datetime(2026, 6, 2, 1, 0, tzinfo=tz),
+    ) == 1
+    assert writes == [corrected]
+    assert mod._last_tax_report_signature(state, cfg, sales_date) == mod._tax_report_signature(corrected)
+
+    assert mod._maybe_reexport_notified_sales_date(
+        state,
+        cfg,
+        tz,
+        dry_run=False,
+        now_local=datetime(2026, 6, 2, 1, 5, tzinfo=tz),
+    ) == 0
+    assert writes == [corrected]
