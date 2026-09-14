@@ -1,6 +1,7 @@
 """Tests for brand exclusion parsing in projection script."""
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 import sys
 from pathlib import Path
 
@@ -156,3 +157,59 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_projection_main_dedupes_duplicate_order_items(monkeypatch, tmp_path):
+    out = tmp_path / "projection.md"
+    sold_at = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat().replace("+00:00", "Z")
+    node = {
+        "objectId": "order-item-1",
+        "SoldAt": sold_at,
+        "GrossPrice": 1000,
+        "COG": 500,
+        "ProductCategory": {"Name": "Edibles"},
+        "Product": {
+            "Name": "Gummy",
+            "Brand": {"Name": "Acme"},
+        },
+    }
+    captured: dict[str, int] = {}
+
+    def fake_fetch_chunk(**_kwargs):
+        return [dict(node), dict(node)], _mod.ORDER_ITEMS_QUERY
+
+    def fake_validate_and_normalize(**kwargs):
+        edges = kwargs["raw_json"]["data"]["findOrderItems"]["edges"]
+        captured["validated_rows"] = len(edges)
+        return {"ok": True, "report_path": str(tmp_path / "validation.json")}
+
+    monkeypatch.setattr(_mod, "_load_config_flags", lambda: None)
+    monkeypatch.setattr(_mod, "_store_tz", lambda: timezone.utc)
+    monkeypatch.setattr(_mod, "_fetch_chunk", fake_fetch_chunk)
+    monkeypatch.setattr(_mod, "validate_and_normalize", fake_validate_and_normalize)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_projection_by_category_brand.py",
+            "--days",
+            "3",
+            "--chunk-days",
+            "3",
+            "--pool",
+            "100",
+            "--allocation-mode",
+            "gross-share",
+            "--no-layer2",
+            "--exclude-brands",
+            "",
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert _mod.main() == 0
+    assert captured["validated_rows"] == 1
+    text = out.read_text(encoding="utf-8")
+    assert "**Unique order lines counted:** 1" in text
+    assert "**Sales in focus categories (pool-eligible):** $10.00 gross" in text
