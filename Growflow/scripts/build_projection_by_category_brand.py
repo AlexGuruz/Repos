@@ -1757,6 +1757,7 @@ def main() -> int:
             k = order_item_key(n)
             if k in seen:
                 continue
+            seen.add(k)
             sold = parse_iso_utc(n.get("SoldAt"))
             if sold is None:
                 continue
