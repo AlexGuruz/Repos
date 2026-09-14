@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from lib.daily_close_report import DailyCloseReport, format_daily_close_telegram
@@ -172,3 +173,15 @@ def test_poll_window_sunday_starts_at_8pm():
     w = PollWindowSchedule(sunday_start=20, mon_sat_start=22, window_hours=4)
     assert not w.in_window(datetime(2026, 6, 7, 19, 30, tzinfo=tz))
     assert w.in_window(datetime(2026, 6, 7, 20, 0, tzinfo=tz))
+
+
+def test_register_close_scheduled_task_scripts_are_self_contained():
+    scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
+
+    installer = (scripts_dir / "install_register_close_scheduled_task.ps1").read_text(encoding="utf-8")
+    runner = (scripts_dir / "run_register_close_watch_task.ps1").read_text(encoding="utf-8")
+
+    assert "scheduled_task_pythonw.ps1" not in installer
+    assert "invoke_python_hidden.ps1" not in runner
+    assert "run_register_close_watch_task.ps1" in installer
+    assert "register_close_taxes_sheet.py" in runner
