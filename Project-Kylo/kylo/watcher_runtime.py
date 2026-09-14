@@ -191,6 +191,19 @@ def intake_checksum(cfg, company: str) -> str:
     return _md5("|".join(parts))
 
 
+def _posting_failed(summary: Any) -> bool:
+    if not isinstance(summary, dict):
+        return True
+    if summary.get("error"):
+        return True
+    if summary.get("posting_complete") is False:
+        return True
+    try:
+        return int(summary.get("failed_ranges_count") or 0) > 0
+    except Exception:
+        return True
+
+
 def tick_once(companies: List[str]) -> Dict[str, Any]:
     cfg = load_config()
     instance_id = (os.environ.get("KYLO_INSTANCE_ID") or "").strip()
@@ -356,7 +369,7 @@ def tick_once(companies: List[str]) -> Dict[str, Any]:
                 print(f"[ERROR] Failed to process {cid}: {e}")
                 summaries[cid] = {"error": True}
 
-        any_error = any(isinstance(s, dict) and s.get("error") for s in summaries.values())
+        any_error = any(_posting_failed(s) for s in summaries.values())
         if any_error:
             consecutive_failures = consecutive_failures + 1
             if consecutive_failures >= cb_max:
