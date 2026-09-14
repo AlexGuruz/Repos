@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from lib.daily_close_report import DailyCloseReport, format_daily_close_telegram
@@ -257,6 +258,18 @@ def test_notified_sales_date_reexports_when_tax_totals_change(monkeypatch):
     assert writes == [updated]
     assert state["tax_report_signatures"]["Register 1"]["2026-06-01"] == taxes._tax_report_signature(updated)
     assert any("Re-exported taxes" in msg for msg in logs)
+
+
+def test_register_close_task_helper_scripts_are_committed():
+    root = Path(__file__).resolve().parents[1]
+    scripts = root / "scripts"
+
+    assert (scripts / "invoke_python_hidden.ps1").is_file()
+    assert (scripts / "scheduled_task_pythonw.ps1").is_file()
+    assert "invoke_python_hidden.ps1" in (scripts / "run_register_close_watch_task.ps1").read_text(encoding="utf-8")
+    assert "scheduled_task_pythonw.ps1" in (
+        scripts / "install_register_close_scheduled_task.ps1"
+    ).read_text(encoding="utf-8")
 
 
 def test_poll_window_sunday_starts_at_8pm():
