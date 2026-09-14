@@ -244,7 +244,11 @@ def layer2_row_buy_plan(
             row["units_needed_7d"] = ad * 7.0
             row["units_needed_14d"] = ad * 14.0
             row["units_needed_21d"] = ad * 21.0
-            row["max_cog_allowed_usd"] = float(ad) * float(cash_cycle_days) * float(acu)
+            if cog_bearing_units is not None and recent_units_sold > 0:
+                cog_units_per_day = float(ad) * (float(cog_u) / float(recent_units_sold))
+            else:
+                cog_units_per_day = float(ad)
+            row["max_cog_allowed_usd"] = float(cog_units_per_day) * float(cash_cycle_days) * float(acu)
         else:
             row["max_cog_allowed_usd"] = None
     if upw is not None and upw > 0 and row["units_from_allocation"] is not None:

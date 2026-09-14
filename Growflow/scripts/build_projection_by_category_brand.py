@@ -78,10 +78,10 @@ from lib.growflow_planner_metadata import (
 )
 from lib.projection_exec_kpis import compute_kpis as compute_exec_kpis_for_csv
 from lib.projection_layer2_recovery import (
-    avg_monthly_units_sold,
     fmt_money,
     layer2_row,
     layer2_row_buy_plan,
+    months_in_window_span,
     usable_cog_cents,
 )
 from lib.projection_sku_reorder import build_sku_pre_scale_buy
@@ -299,13 +299,10 @@ def implied_monthly_cog_throughput_usd(
     cog_u = cog_bearing_units if cog_bearing_units is not None else units
     if cog_u <= 0:
         return None
-    aum = avg_monthly_units_sold(units, span_inclusive_days)
-    if aum is None or aum <= 0:
+    months = months_in_window_span(span_inclusive_days)
+    if months <= 0:
         return None
-    acu_usd = (cog_cents / 100.0) / cog_u
-    if acu_usd <= 0:
-        return None
-    return float(aum * acu_usd)
+    return float((cog_cents / 100.0) / months)
 
 
 def allocate_pool_top_n_by_recovery_throughput(
@@ -417,7 +414,7 @@ def allocate_buy_plan_pool(
     """
     **Cash-cycle allocator:** rank by score; among top ``max_funded_rows`` qualifiers, walk in priority
     order and assign ``min(max_cog_cents, remaining_pool)`` where
-    ``max_cog = avg_units_per_day × cash_cycle_days × avg_cog_per_unit`` (14-day recovery cap by default).
+    ``max_cog = COG-bearing avg_units_per_day × cash_cycle_days × avg_cog_per_unit`` (14-day recovery cap by default).
     **No** second pass that deploys beyond that cap; **pool may be left unallocated**.
 
     ``min_allocated_cents`` is **ignored** here (merging small lines can violate the cash cap).
@@ -458,7 +455,11 @@ def allocate_buy_plan_pool(
         if avg_cog <= 0:
             continue
         eff = avg_ret / avg_cog
-        weekly_cog_usd = upw * avg_cog
+        if pair_units_per_day_recent and k in pair_units_per_day_recent:
+            cog_units_per_day = float(pair_units_per_day_recent[k]) * (float(cog_u) / float(u))
+        else:
+            cog_units_per_day = float(cog_u) / float(max(1, velocity_span_days))
+        weekly_cog_usd = cog_units_per_day * 7.0 * avg_cog
         raw.append((k, float(upw), float(weekly_cog_usd), float(eff)))
 
     if not raw:
@@ -510,10 +511,9 @@ def allocate_buy_plan_pool(
                 max_cents_by_k[k] = int(round(target_units * avg_cog * 100.0))
             continue
         if pair_units_per_day_recent and k in pair_units_per_day_recent:
-            avg_units_per_day = float(pair_units_per_day_recent[k])
+            avg_units_per_day = float(pair_units_per_day_recent[k]) * (float(cog_u) / float(u))
         else:
-            upw = u / velocity_weeks
-            avg_units_per_day = float(upw) / 7.0
+            avg_units_per_day = float(cog_u) / float(max(1, velocity_span_days))
         max_units = avg_units_per_day * float(cash_cycle_days)
         max_cents_by_k[k] = int(round(max_units * avg_cog * 100.0))
 

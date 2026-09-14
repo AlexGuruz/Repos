@@ -6,6 +6,7 @@ import unittest
 from lib.projection_layer2_recovery import (
     avg_monthly_units_sold,
     layer2_row,
+    layer2_row_buy_plan,
     months_in_window_span,
     recovery_bucket,
     usable_cog_cents,
@@ -82,6 +83,23 @@ class TestLayer2Row(unittest.TestCase):
         self.assertAlmostEqual(mom, r["units_from_allocation"] / aum)
         self.assertAlmostEqual(r["projected_revenue_from_allocated_units_usd"], 200.0)
         self.assertAlmostEqual(r["projected_gross_profit_usd"], 150.0)
+
+
+class TestLayer2BuyPlanRow(unittest.TestCase):
+    def test_partial_cog_coverage_uses_cog_velocity_for_cash_cap(self) -> None:
+        r = layer2_row_buy_plan(
+            allocated_cog_usd=140.0,
+            recent_units_sold=140,
+            recent_gross_cents=280_000,
+            recent_cog_cents=14_000,
+            velocity_span_inclusive_days=14,
+            cash_cycle_days=14.0,
+            cog_bearing_units=14,
+        )
+        self.assertAlmostEqual(r["avg_units_per_day"], 10.0)
+        self.assertAlmostEqual(r["units_needed_14d"], 140.0)
+        self.assertAlmostEqual(r["avg_cog_per_unit"], 10.0)
+        self.assertAlmostEqual(r["max_cog_allowed_usd"], 140.0)
 
 
 class TestRecoveryBucket(unittest.TestCase):

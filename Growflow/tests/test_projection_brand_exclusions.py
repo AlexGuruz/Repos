@@ -71,6 +71,20 @@ def test_implied_monthly_cog_throughput_usd():
     assert t is not None and t > 0
 
 
+def test_implied_monthly_cog_throughput_partial_cog_coverage():
+    # 140 lines in 14 days, but COG exists on 14 lines only. The monthly COG
+    # pace is the observed $140 COG over the 14-day window, not 140 all-lines
+    # multiplied by the $10 average from the sparse COG-bearing sample.
+    t = _mod.implied_monthly_cog_throughput_usd(
+        140,
+        14_000,
+        14,
+        cog_bearing_units=14,
+    )
+    assert t is not None
+    assert abs(t - (140.0 / (14 * 12.0 / 365.25))) < 1e-6
+
+
 def test_cash_cycle_and_cover_status():
     from lib.projection_layer2_recovery import cash_cycle_status_from_recovery_days, cover_status_from_days_of_cover
 
@@ -157,6 +171,30 @@ def test_allocate_pool_top_n_by_recovery_throughput():
     funded = [k for k, v in out.items() if v > 0]
     assert len(funded) <= 2
     assert all(out[k] == 0 for k in keys if k not in funded)
+
+
+def test_allocate_buy_plan_partial_cog_cap_uses_cog_velocity():
+    key = ("Edibles", "Acme")
+    pair_units_recent = {key: 140}
+    pair_gross_recent = {key: 280_000}
+    pair_cog_recent = {key: 14_000}
+    pair_units_with_cog_recent = {key: 14}
+
+    out, _scores = _mod.allocate_buy_plan_pool(
+        200_000,
+        [key],
+        pair_units_recent,
+        pair_gross_recent,
+        pair_cog_recent,
+        14,
+        pair_units_with_cog_recent=pair_units_with_cog_recent,
+        min_units_per_week=0.01,
+        max_funded_rows=1,
+        min_allocated_cents=0,
+        cash_cycle_days=14.0,
+    )
+
+    assert out[key] == 14_000
 
 
 def test_projection_main_dedupes_duplicate_order_items(monkeypatch, tmp_path):
