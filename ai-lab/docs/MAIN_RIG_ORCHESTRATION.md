@@ -110,4 +110,4 @@ You can also ask in chat: *“Is the worker up?”* or *“Check worker health�
 ## 5. Registry reference
 
 - **Worker and ports:** `ops/registry/workers.yaml` (worker-rig-01, service_definitions with `local_tunnel_port` and `base_url`).
-- **URL resolution:** Env vars `WORKER_ASSISTANT_URL`, `WORKER_N8N_URL`, `OLLAMA_HOST` override registry; otherwise `brain.worker_services` uses the registry `base_url`.
+- **URL resolution:** Each service first checks its per-worker `env_var`, then that worker's registry `base_url`. The legacy env vars `WORKER_ASSISTANT_URL`, `WORKER_N8N_URL`, and `OLLAMA_HOST` only apply to workers whose registry entries explicitly use those names.
